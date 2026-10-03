@@ -218,10 +218,10 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 			}
 
 			for (i = 0; i < joints.size(); i++) {
-				if (joints[i].locked && !spinny && findLengthfast(&joints[i].velocity) > 320.f) {
+				if (joints[i].locked && !spinny && magnitudeSquared(&joints[i].velocity) > 320.f) {
 					joints[i].locked = 0;
 				}
-				if (spinny && findLengthfast(&joints[i].velocity) > 600.f) {
+				if (spinny && magnitudeSquared(&joints[i].velocity) > 600.f) {
 					joints[i].locked = 0;
 				}
 				if (joints[i].delay > 0) {
@@ -271,9 +271,9 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 					ReflectVector(&joints[i].velocity, &terrainnormal);
 					bounceness = terrainnormal * findLength(&joints[i].velocity) * (abs(normaldotproduct(joints[i].velocity, terrainnormal)));
 					if (!joints[i].locked) {
-						damage += findLengthfast(&bounceness) / 4000;
+						damage += magnitudeSquared(&bounceness) / 4000;
 					}
-					if (findLengthfast(&joints[i].velocity) < findLengthfast(&bounceness)) {
+					if (magnitudeSquared(&joints[i].velocity) < magnitudeSquared(&bounceness)) {
 						bounceness = 0;
 					}
 					frictionness = abs(normaldotproduct(joints[i].velocity, terrainnormal));
@@ -286,7 +286,7 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 					}
 
 					if (!tutorialActive || id == 0) {
-						if (findLengthfast(&bounceness) > 8000 && breaking) {
+						if (magnitudeSquared(&bounceness) > 8000 && breaking) {
 							// FIXME: this crashes because k is not initialized!
 							// to reproduce, type 'wolfie' in console and play a while
 							// I'll just comment it out for now
@@ -301,41 +301,41 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 						}
 					}
 
-					if (findLengthfast(&bounceness) > 2500) {
+					if (magnitudeSquared(&bounceness) > 2500) {
 						Normalise(&bounceness);
 						bounceness = bounceness * 50;
 					}
 
 					joints[i].velocity += bounceness * elasticity;
 
-					if (findLengthfast(&joints[i].velocity) > findLengthfast(&joints[i].oldvelocity)) {
+					if (magnitudeSquared(&joints[i].velocity) > magnitudeSquared(&joints[i].oldvelocity)) {
 						bounceness = 0;
 						joints[i].velocity = joints[i].oldvelocity;
 					}
 
 					if (joints[i].locked == 0) {
-						if (findLengthfast(&joints[i].velocity) < 1) {
+						if (magnitudeSquared(&joints[i].velocity) < 1) {
 							joints[i].locked = 1;
 						}
 					}
 
-					if (environment == snowyenvironment && findLengthfast(&bounceness) > 500 && terrain.getOpacity(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) < .2f) {
+					if (environment == snowyenvironment && magnitudeSquared(&bounceness) > 500 && terrain.getOpacity(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) < .2f) {
 						terrainlight = terrain.getLighting(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z);
 						Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, terrainlight.x, terrainlight.y, terrainlight.z, .5f, .7f, bloodtoggle);
 						if (detail == 2) {
 							terrain.MakeDecal(bodyprintdecal, joints[i].position * (*scale) + *coords, .4f, .4f, 0, environment);
 						}
 					}
-					else if (environment == desertenvironment && findLengthfast(&bounceness) > 500 && terrain.getOpacity(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) < .2f) {
+					else if (environment == desertenvironment && magnitudeSquared(&bounceness) > 500 && terrain.getOpacity(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) < .2f) {
 						terrainlight = terrain.getLighting(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z);
 						Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, terrainlight.x * 190 / 255, terrainlight.y * 170 / 255, terrainlight.z * 108 / 255, .5f, .7f, bloodtoggle);
 					}
 
-					else if (environment == grassyenvironment && findLengthfast(&bounceness) > 500 && terrain.getOpacity(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) < .2f) {
+					else if (environment == grassyenvironment && magnitudeSquared(&bounceness) > 500 && terrain.getOpacity(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) < .2f) {
 						terrainlight = terrain.getLighting(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z);
 						Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, terrainlight.x * 90 / 255, terrainlight.y * 70 / 255, terrainlight.z * 8 / 255, .5f, .5f, bloodtoggle);
 					}
-					else if (findLengthfast(&bounceness) > 500) {
+					else if (magnitudeSquared(&bounceness) > 500) {
 						Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, terrainlight.x, terrainlight.y, terrainlight.z, .5f, .2f, bloodtoggle);
 					}
 
@@ -375,12 +375,12 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 									freefall = 0;
 								}
 								bounceness = terrainnormal * findLength(&joints[i].velocity) * (abs(normaldotproduct(joints[i].velocity, terrainnormal)));
-								if (findLengthfast(&joints[i].velocity) > findLengthfast(&joints[i].oldvelocity)) {
+								if (magnitudeSquared(&joints[i].velocity) > magnitudeSquared(&joints[i].oldvelocity)) {
 									bounceness = 0;
 									joints[i].velocity = joints[i].oldvelocity;
 								}
 								if (!tutorialActive || id == 0) {
-									if (findLengthfast(&bounceness) > 4000 && breaking) {
+									if (magnitudeSquared(&bounceness) > 4000 && breaking) {
 										Object::objects[k]->model.MakeDecal(breakdecal, DoRotation(temp - Object::objects[k]->position, 0, -Object::objects[k]->yaw, 0), .4f, .5f, (float)(rand() % 360));
 										Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, 1, 1, 1, 4, .2f, bloodtoggle);
 										breaking = false;
@@ -398,7 +398,7 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 									Object::objects[k + 1]->roty += joints[i].velocity.z * multiplier * .4f;
 								}
 								if (!joints[i].locked) {
-									damage += findLengthfast(&bounceness) / 2500;
+									damage += magnitudeSquared(&bounceness) / 2500;
 								}
 								ReflectVector(&joints[i].velocity, &terrainnormal);
 								frictionness = abs(normaldotproduct(joints[i].velocity, terrainnormal));
@@ -409,18 +409,18 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 								else {
 									joints[i].velocity = 0;
 								}
-								if (findLengthfast(&bounceness) > 2500) {
+								if (magnitudeSquared(&bounceness) > 2500) {
 									Normalise(&bounceness);
 									bounceness = bounceness * 50;
 								}
 								joints[i].velocity += bounceness * elasticity;
 
 								if (!joints[i].locked) {
-									if (findLengthfast(&joints[i].velocity) < 1) {
+									if (magnitudeSquared(&joints[i].velocity) < 1) {
 										joints[i].locked = 1;
 									}
 								}
-								if (findLengthfast(&bounceness) > 500) {
+								if (magnitudeSquared(&bounceness) > 500) {
 									Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, 1, 1, 1, .5f, .2f, bloodtoggle);
 								}
 								joints[i].position = (temp - *coords) / (*scale) + terrainnormal * .005f;

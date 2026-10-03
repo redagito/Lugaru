@@ -529,7 +529,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 						position += terrainnormal * .002;
 
 						bounceness = terrainnormal * findLength(&velocity) * (abs(normaldotproduct(velocity, terrainnormal)));
-						if (findLengthfast(&velocity) < findLengthfast(&bounceness)) {
+						if (magnitudeSquared(&velocity) < magnitudeSquared(&bounceness)) {
 							bounceness = 0;
 						}
 						frictionness = abs(normaldotproduct(velocity, terrainnormal));
@@ -542,7 +542,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 						}
 						velocity += bounceness * elasticity;
 
-						if (findLengthfast(&bounceness) > 1) {
+						if (magnitudeSquared(&bounceness) > 1) {
 							int whichsound;
 							if (type == staff) {
 								whichsound = footstepsound3 + abs(rand() % 2);
@@ -550,7 +550,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 							else {
 								whichsound = clank1sound + abs(rand() % 4);
 							}
-							emit_sound_at(whichsound, position, 128 * findLengthfast(&bounceness));
+							emit_sound_at(whichsound, position, 128 * magnitudeSquared(&bounceness));
 						}
 					}
 					start = oldtippoint;
@@ -564,7 +564,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 						tippoint += terrainnormal * .002;
 
 						bounceness = terrainnormal * findLength(&tipvelocity) * (abs(normaldotproduct(tipvelocity, terrainnormal)));
-						if (findLengthfast(&tipvelocity) < findLengthfast(&bounceness)) {
+						if (magnitudeSquared(&tipvelocity) < magnitudeSquared(&bounceness)) {
 							bounceness = 0;
 						}
 						frictionness = abs(normaldotproduct(tipvelocity, terrainnormal));
@@ -577,7 +577,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 						}
 						tipvelocity += bounceness * elasticity;
 
-						if (findLengthfast(&bounceness) > 1) {
+						if (magnitudeSquared(&bounceness) > 1) {
 							int whichsound;
 							if (type == staff) {
 								whichsound = footstepsound3 + abs(rand() % 2);
@@ -585,7 +585,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 							else {
 								whichsound = clank1sound + abs(rand() % 4);
 							}
-							emit_sound_at(whichsound, position, 128 * findLengthfast(&bounceness));
+							emit_sound_at(whichsound, position, 128 * magnitudeSquared(&bounceness));
 						}
 					}
 
@@ -605,7 +605,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 								ReflectVector(&velocity, &terrainnormal);
 
 								bounceness = terrainnormal * findLength(&velocity) * (abs(normaldotproduct(velocity, terrainnormal)));
-								if (findLengthfast(&velocity) < findLengthfast(&bounceness)) {
+								if (magnitudeSquared(&velocity) < magnitudeSquared(&bounceness)) {
 									bounceness = 0;
 								}
 								frictionness = abs(normaldotproduct(velocity, terrainnormal));
@@ -618,7 +618,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 								}
 								velocity += bounceness * elasticity;
 
-								if (findLengthfast(&bounceness) > 1) {
+								if (magnitudeSquared(&bounceness) > 1) {
 									int whichsound;
 									if (type == staff) {
 										whichsound = footstepsound3 + abs(rand() % 2);
@@ -626,7 +626,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 									else {
 										whichsound = clank1sound + abs(rand() % 4);
 									}
-									emit_sound_at(whichsound, mid, 128 * findLengthfast(&bounceness));
+									emit_sound_at(whichsound, mid, 128 * magnitudeSquared(&bounceness));
 								}
 								position += (mid - oldmid2) * (20 / (1 + (float)m * 10));
 							}
@@ -645,7 +645,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 								ReflectVector(&tipvelocity, &terrainnormal);
 
 								bounceness = terrainnormal * findLength(&tipvelocity) * (abs(normaldotproduct(tipvelocity, terrainnormal)));
-								if (findLengthfast(&tipvelocity) < findLengthfast(&bounceness)) {
+								if (magnitudeSquared(&tipvelocity) < magnitudeSquared(&bounceness)) {
 									bounceness = 0;
 								}
 								frictionness = abs(normaldotproduct(tipvelocity, terrainnormal));
@@ -658,7 +658,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 								}
 								tipvelocity += bounceness * elasticity;
 
-								if (findLengthfast(&bounceness) > 1) {
+								if (magnitudeSquared(&bounceness) > 1) {
 									int whichsound;
 									if (type == staff) {
 										whichsound = footstepsound3 + abs(rand() % 2);
@@ -666,7 +666,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 									else {
 										whichsound = clank1sound + abs(rand() % 4);
 									}
-									emit_sound_at(whichsound, mid, 128 * findLengthfast(&bounceness));
+									emit_sound_at(whichsound, mid, 128 * magnitudeSquared(&bounceness));
 								}
 								tippoint += (mid - oldmid2) * (20 / (1 + (float)m * 10));
 							}
@@ -729,7 +729,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 				ReflectVector(&velocity, &terrainnormal);
 				position += terrainnormal * .002;
 				bounceness = terrainnormal * findLength(&velocity) * (abs(normaldotproduct(velocity, terrainnormal)));
-				if (findLengthfast(&velocity) < findLengthfast(&bounceness)) {
+				if (magnitudeSquared(&velocity) < magnitudeSquared(&bounceness)) {
 					bounceness = 0;
 				}
 				frictionness = abs(normaldotproduct(velocity, terrainnormal));
@@ -747,7 +747,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 					velocity += bounceness * elasticity;
 				}
 
-				if (findLengthfast(&bounceness) > 1) {
+				if (magnitudeSquared(&bounceness) > 1) {
 					int whichsound;
 					if (terrain.getOpacity(position.x, position.z) > .2) {
 						if (type == staff) {
@@ -761,7 +761,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 						whichsound = footstepsound + abs(rand() % 2);
 					}
 					emit_sound_at(whichsound, position,
-						findLengthfast(&bounceness) * (terrain.getOpacity(position.x, position.z) > .2 ? 128. : 32.));
+						magnitudeSquared(&bounceness) * (terrain.getOpacity(position.x, position.z) > .2 ? 128. : 32.));
 
 					if (terrain.getOpacity(position.x, position.z) < .2) {
 						Vector3 terrainlight;
@@ -797,7 +797,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 				ReflectVector(&tipvelocity, &terrainnormal);
 				tippoint += terrainnormal * .002;
 				bounceness = terrainnormal * findLength(&tipvelocity) * (abs(normaldotproduct(tipvelocity, terrainnormal)));
-				if (findLengthfast(&tipvelocity) < findLengthfast(&bounceness)) {
+				if (magnitudeSquared(&tipvelocity) < magnitudeSquared(&bounceness)) {
 					bounceness = 0;
 				}
 				frictionness = abs(normaldotproduct(tipvelocity, terrainnormal));
@@ -815,7 +815,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 					tipvelocity += bounceness * elasticity;
 				}
 
-				if (findLengthfast(&bounceness) > 1) {
+				if (magnitudeSquared(&bounceness) > 1) {
 					int whichsound;
 					if (terrain.getOpacity(tippoint.x, tippoint.z) > .2) {
 						if (type == staff) {
@@ -829,7 +829,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 						whichsound = footstepsound + abs(rand() % 2);
 					}
 					emit_sound_at(whichsound, tippoint,
-						findLengthfast(&bounceness) * (terrain.getOpacity(tippoint.x, tippoint.z) > .2 ? 128. : 32.));
+						magnitudeSquared(&bounceness) * (terrain.getOpacity(tippoint.x, tippoint.z) > .2 ? 128. : 32.));
 
 					if (terrain.getOpacity(tippoint.x, tippoint.z) < .2) {
 						Vector3 terrainlight;
@@ -866,7 +866,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 				ReflectVector(&velocity, &terrainnormal);
 				//mid+=terrainnormal*.002;
 				bounceness = terrainnormal * findLength(&velocity) * (abs(normaldotproduct(velocity, terrainnormal)));
-				if (findLengthfast(&velocity) < findLengthfast(&bounceness)) {
+				if (magnitudeSquared(&velocity) < magnitudeSquared(&bounceness)) {
 					bounceness = 0;
 				}
 				frictionness = abs(normaldotproduct(velocity, terrainnormal));
@@ -884,7 +884,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 					velocity += bounceness * elasticity;
 				}
 
-				if (findLengthfast(&bounceness) > 1) {
+				if (magnitudeSquared(&bounceness) > 1) {
 					int whichsound;
 					if (terrain.getOpacity(mid.x, mid.z) > .2) {
 						if (type == staff) {
@@ -898,7 +898,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 						whichsound = footstepsound + abs(rand() % 2);
 					}
 					emit_sound_at(whichsound, mid,
-						findLengthfast(&bounceness) * (terrain.getOpacity(position.x, position.z) > .2
+						magnitudeSquared(&bounceness) * (terrain.getOpacity(position.x, position.z) > .2
 							? 128.
 							: 32.));
 				}
@@ -917,7 +917,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 				ReflectVector(&tipvelocity, &terrainnormal);
 				//mid+=terrainnormal*.002;
 				bounceness = terrainnormal * findLength(&tipvelocity) * (abs(normaldotproduct(tipvelocity, terrainnormal)));
-				if (findLengthfast(&tipvelocity) < findLengthfast(&bounceness)) {
+				if (magnitudeSquared(&tipvelocity) < magnitudeSquared(&bounceness)) {
 					bounceness = 0;
 				}
 				frictionness = abs(normaldotproduct(tipvelocity, terrainnormal));
@@ -935,7 +935,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 					tipvelocity += bounceness * elasticity;
 				}
 
-				if (findLengthfast(&bounceness) > 1) {
+				if (magnitudeSquared(&bounceness) > 1) {
 					int whichsound;
 					if (terrain.getOpacity(mid.x, mid.z) > .2) {
 						if (type == staff) {
@@ -949,7 +949,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 						whichsound = footstepsound + abs(rand() % 2);
 					}
 					emit_sound_at(whichsound, mid,
-						findLengthfast(&bounceness) * (terrain.getOpacity(position.x, position.z) > .2
+						magnitudeSquared(&bounceness) * (terrain.getOpacity(position.x, position.z) > .2
 							? 128.
 							: 32.));
 				}
@@ -983,7 +983,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 			}
 
 			//Stop moving
-			if (findLengthfast(&velocity) < .3 && findLengthfast(&tipvelocity) < .3 && hitsomething) {
+			if (magnitudeSquared(&velocity) < .3 && magnitudeSquared(&tipvelocity) < .3 && hitsomething) {
 				freetime += multiplier;
 			}
 

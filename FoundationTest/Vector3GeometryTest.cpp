@@ -24,14 +24,14 @@ TEST_CASE("Vector3 length and distance", "[vector3]")
 		REQUIRE(std::fabs(findLength(&v) - 5.0f) < kEpsilon);
 	}
 
-	SECTION("findLengthfast returns the SQUARED magnitude, despite its name")
+	SECTION("magnitudeSquared returns the squared magnitude")
 	{
-		// The name is misleading: every caller treats the result as a squared
-		// magnitude (for example GameTick.cpp compares it against
-		// multiplier * multiplier * 400). Pinned here so the behaviour is not
-		// "fixed" by accident.
+		// Every threshold in the engine is calibrated against the squared value
+		// (GameTick.cpp compares it against multiplier * multiplier * 400), so
+		// this must not gain a sqrt. Pinned here to catch an accidental "fix".
 		const Vector3 v(3.0f, 4.0f, 0.0f);
-		REQUIRE(findLengthfast(&v) == 25.0f);
+		REQUIRE(magnitudeSquared(&v) == 25.0f);
+		REQUIRE(findLength(&v) == 5.0f);
 	}
 
 	SECTION("findDistance measures point to point")
@@ -204,21 +204,55 @@ TEST_CASE("LineFacet", "[vector3]")
 		REQUIRE_FALSE(LineFacet(from, to, a, b, c, &hit));
 	}
 
-	SECTION("LineFacetd reports the same result as LineFacet")
+	SECTION("LineFacetHit agrees with LineFacet and returns a hit flag")
 	{
-		// Despite the name, LineFacetd returns 1.0 for a hit and 0.0 otherwise;
-		// it is a copy of LineFacet that yields a float rather than a bool.
-		const Vector3 from(1.0f, 5.0f, 1.0f);
-		const Vector3 to(1.0f, -5.0f, 1.0f);
+		// LineFacetHit is the pointer overload the engine actually calls (Terrain,
+		// Models, Person). It returns 1.0 on a hit and 0.0 otherwise. It takes
+		// non-const pointers, so work on mutable copies of the facet corners.
+		Vector3 from(1.0f, 5.0f, 1.0f);
+		Vector3 to(1.0f, -5.0f, 1.0f);
+		Vector3 va = a;
+		Vector3 vb = b;
+		Vector3 vc = c;
 		Vector3 hit;
-		const float result = LineFacetd(from, to, a, b, c, &hit);
-		REQUIRE(result == 1.0f);
+		REQUIRE(LineFacetHit(&from, &to, &va, &vb, &vc, &hit) == 1.0f);
 		REQUIRE(std::fabs(hit.y) < kEpsilon);
+		REQUIRE(LineFacet(from, to, a, b, c, &hit));
 
 		Vector3 miss;
-		const Vector3 fromMiss(100.0f, 5.0f, 100.0f);
-		const Vector3 toMiss(100.0f, -5.0f, 100.0f);
-		REQUIRE(LineFacetd(fromMiss, toMiss, a, b, c, &miss) == 0.0f);
+		Vector3 fromMiss(100.0f, 5.0f, 100.0f);
+		Vector3 toMiss(100.0f, -5.0f, 100.0f);
+		REQUIRE(LineFacetHit(&fromMiss, &toMiss, &va, &vb, &vc, &miss) == 0.0f);
+		REQUIRE_FALSE(LineFacet(fromMiss, toMiss, a, b, c, &miss));
+	}
+
+	SECTION("LineFacetHit honours a supplied face normal")
+	{
+		// The seven argument overload takes a precomputed normal instead of
+		// deriving one, and skips normalising. It must still agree with the six
+		// argument form for the same facet.
+		Vector3 from(1.0f, 5.0f, 1.0f);
+		Vector3 to(1.0f, -5.0f, 1.0f);
+		Vector3 va = a;
+		Vector3 vb = b;
+		Vector3 vc = c;
+		Vector3 normal(0.0f, 1.0f, 0.0f);
+		Vector3 hit;
+		REQUIRE(LineFacetHit(&from, &to, &va, &vb, &vc, &normal, &hit) == 1.0f);
+		REQUIRE(std::fabs(hit.y) < kEpsilon);
+
+		// A miss is still rejected with an explicit normal.
+		Vector3 miss;
+		Vector3 fromMiss(100.0f, 5.0f, 100.0f);
+		Vector3 toMiss(100.0f, -5.0f, 100.0f);
+		REQUIRE(LineFacetHit(&fromMiss, &toMiss, &va, &vb, &vc, &normal, &miss) == 0.0f);
+
+		// The normal's sign is irrelevant: PointInTriangle projects onto the
+		// dominant axis using absolute component values.
+		Vector3 flipped(0.0f, -1.0f, 0.0f);
+		Vector3 hitFlipped;
+		REQUIRE(LineFacetHit(&from, &to, &va, &vb, &vc, &flipped, &hitFlipped) == 1.0f);
+		REQUIRE(std::fabs(hitFlipped.y) < kEpsilon);
 	}
 }
 

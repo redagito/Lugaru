@@ -135,67 +135,8 @@ bool LineFacet(Vector3 p1, Vector3 p2, Vector3 pa, Vector3 pb, Vector3 pc, Vecto
     return 1;
 }
 
-float LineFacetd(Vector3 p1, Vector3 p2, Vector3 pa, Vector3 pb, Vector3 pc, Vector3* p)
-{
-    static float d;
-    static float denom, mu;
-    static Vector3 n;
 
-    //Calculate the parameters for the plane
-    n.x = (pb.y - pa.y) * (pc.z - pa.z) - (pb.z - pa.z) * (pc.y - pa.y);
-    n.y = (pb.z - pa.z) * (pc.x - pa.x) - (pb.x - pa.x) * (pc.z - pa.z);
-    n.z = (pb.x - pa.x) * (pc.y - pa.y) - (pb.y - pa.y) * (pc.x - pa.x);
-    Normalise(&n);
-    d = -n.x * pa.x - n.y * pa.y - n.z * pa.z;
-
-    //Calculate the position on the line that intersects the plane
-    denom = n.x * (p2.x - p1.x) + n.y * (p2.y - p1.y) + n.z * (p2.z - p1.z);
-    if (fabs(denom) < 0.0000001) { // Line and plane don't intersect
-        return 0;
-    }
-    mu = -(d + n.x * p1.x + n.y * p1.y + n.z * p1.z) / denom;
-    p->x = p1.x + mu * (p2.x - p1.x);
-    p->y = p1.y + mu * (p2.y - p1.y);
-    p->z = p1.z + mu * (p2.z - p1.z);
-    if (mu < 0 || mu > 1) { // Intersection not along line segment
-        return 0;
-    }
-
-    if (!PointInTriangle(p, n, &pa, &pb, &pc)) {
-        return 0;
-    }
-
-    return 1;
-}
-
-float LineFacetd(Vector3 p1, Vector3 p2, Vector3 pa, Vector3 pb, Vector3 pc, Vector3 n, Vector3* p)
-{
-    static float d;
-    static float denom, mu;
-
-    //Calculate the parameters for the plane
-    d = -n.x * pa.x - n.y * pa.y - n.z * pa.z;
-
-    //Calculate the position on the line that intersects the plane
-    denom = n.x * (p2.x - p1.x) + n.y * (p2.y - p1.y) + n.z * (p2.z - p1.z);
-    if (fabs(denom) < 0.0000001) { // Line and plane don't intersect
-        return 0;
-    }
-    mu = -(d + n.x * p1.x + n.y * p1.y + n.z * p1.z) / denom;
-    p->x = p1.x + mu * (p2.x - p1.x);
-    p->y = p1.y + mu * (p2.y - p1.y);
-    p->z = p1.z + mu * (p2.z - p1.z);
-    if (mu < 0 || mu > 1) { // Intersection not along line segment
-        return 0;
-    }
-
-    if (!PointInTriangle(p, n, &pa, &pb, &pc)) {
-        return 0;
-    }
-    return 1;
-}
-
-float LineFacetd(Vector3* p1, Vector3* p2, Vector3* pa, Vector3* pb, Vector3* pc, Vector3* p)
+float LineFacetHit(Vector3* p1, Vector3* p2, Vector3* pa, Vector3* pb, Vector3* pc, Vector3* p)
 {
     static float d;
     static float denom, mu;
@@ -227,7 +168,7 @@ float LineFacetd(Vector3* p1, Vector3* p2, Vector3* pa, Vector3* pb, Vector3* pc
     return 1;
 }
 
-float LineFacetd(Vector3* p1, Vector3* p2, Vector3* pa, Vector3* pb, Vector3* pc, Vector3* n, Vector3* p)
+float LineFacetHit(Vector3* p1, Vector3* p2, Vector3* pa, Vector3* pb, Vector3* pc, Vector3* n, Vector3* p)
 {
     static float d;
     static float denom, mu;

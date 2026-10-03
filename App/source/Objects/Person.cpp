@@ -5623,7 +5623,7 @@ void Person::DoStuff(Terrain& terrain, bool tutorialActive, bool inDialog, float
 	}
 
 	if (aitype != passivetype || skeleton.free == 1) {
-		if (findLengthfast(&velocity) > .1) {
+		if (magnitudeSquared(&velocity) > .1) {
 			for (unsigned int i = 0; i < Object::objects.size(); i++) {
 				if (Object::objects[i]->type == firetype) {
 					if (distsqflat(&coords, &Object::objects[i]->position) < Object::objects[i]->scale * Object::objects[i]->scale * 12 && distsq(&coords, &Object::objects[i]->position) < Object::objects[i]->scale * Object::objects[i]->scale * 49) {
@@ -7214,7 +7214,7 @@ int Person::SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, fl
 						start = *p1;
 						end = *p1;
 						end.y -= radius;
-						if (LineFacetd(&start, &end, &model->vertex[model->Triangles[j].vertex[0]], &model->vertex[model->Triangles[j].vertex[1]], &model->vertex[model->Triangles[j].vertex[2]], &model->Triangles[j].facenormal, &point)) {
+						if (LineFacetHit(&start, &end, &model->vertex[model->Triangles[j].vertex[0]], &model->vertex[model->Triangles[j].vertex[1]], &model->vertex[model->Triangles[j].vertex[2]], &model->Triangles[j].facenormal, &point)) {
 							p1->y = point.y + radius;
 							if ((animTarget == jumpdownanim || isFlip())) {
 								if (isFlip() && (frameTarget < 5 || targetFrame().label == 7 || targetFrame().label == 4)) {
@@ -7284,7 +7284,7 @@ int Person::SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, fl
 						if ((animTarget == jumpdownanim || animTarget == jumpupanim || isFlip())) {
 							start = velocity;
 							velocity -= DoRotation(model->Triangles[j].facenormal, 0, *rotate, 0) * findLength(&velocity) * abs(normaldotproduct(velocity, DoRotation(model->Triangles[j].facenormal, 0, *rotate, 0))); //(distance-radius*.5)/multiplier;
-							if (findLengthfast(&start) < findLengthfast(&velocity)) {
+							if (magnitudeSquared(&start) < magnitudeSquared(&velocity)) {
 								velocity = start;
 							}
 						}

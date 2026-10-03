@@ -122,9 +122,9 @@ int Game::DrawGLScene(StereoSide side)
 
 		int olddrawmode = drawmode;
 		if (ismotionblur && !loading) {
-			if ((findLengthfast(&Person::players[0]->velocity) > 200) && velocityblur && !cameramode) {
+			if ((magnitudeSquared(&Person::players[0]->velocity) > 200) && velocityblur && !cameramode) {
 				drawmode = motionblurmode;
-				motionbluramount = 200 / (findLengthfast(&Person::players[0]->velocity));
+				motionbluramount = 200 / (magnitudeSquared(&Person::players[0]->velocity));
 				changed = 1;
 			}
 			if (Person::players[0]->damage - Person::players[0]->superpermanentdamage > (Person::players[0]->damagetolerance - Person::players[0]->superpermanentdamage) * 1 / 2 && damageeffects && !cameramode) {

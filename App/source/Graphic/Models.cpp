@@ -44,7 +44,7 @@ int Model::LineCheck(Vector3* p1, Vector3* p2, Vector3* p, Vector3* move, float*
 	}
 
 	for (unsigned int j = 0; j < Triangles.size(); j++) {
-		intersecting = LineFacetd(p1, p2, &vertex[Triangles[j].vertex[0]], &vertex[Triangles[j].vertex[1]], &vertex[Triangles[j].vertex[2]], &Triangles[j].facenormal, &point);
+		intersecting = LineFacetHit(p1, p2, &vertex[Triangles[j].vertex[0]], &vertex[Triangles[j].vertex[1]], &vertex[Triangles[j].vertex[2]], &Triangles[j].facenormal, &point);
 		distance = (point.x - p1->x) * (point.x - p1->x) + (point.y - p1->y) * (point.y - p1->y) + (point.z - p1->z) * (point.z - p1->z);
 		if ((distance < olddistance || firstintersecting == -1) && intersecting) {
 			olddistance = distance;
@@ -82,7 +82,7 @@ int Model::LineCheckPossible(Vector3* p1, Vector3* p2, Vector3* p, Vector3* move
 	for (unsigned int j = 0; j < possible.size(); j++) {
 		if (possible[j] >= Triangles.size()) continue;
 
-		intersecting = LineFacetd(p1, p2, &vertex[Triangles[possible[j]].vertex[0]], &vertex[Triangles[possible[j]].vertex[1]], &vertex[Triangles[possible[j]].vertex[2]], &Triangles[possible[j]].facenormal, &point);
+		intersecting = LineFacetHit(p1, p2, &vertex[Triangles[possible[j]].vertex[0]], &vertex[Triangles[possible[j]].vertex[1]], &vertex[Triangles[possible[j]].vertex[2]], &Triangles[possible[j]].facenormal, &point);
 		distance = (point.x - p1->x) * (point.x - p1->x) + (point.y - p1->y) * (point.y - p1->y) + (point.z - p1->z) * (point.z - p1->z);
 		if ((distance < olddistance || firstintersecting == -1) && intersecting) {
 			olddistance = distance;
@@ -121,7 +121,7 @@ int Model::LineCheckSlidePossible(Vector3* p1, Vector3* p2, Vector3* move, float
 
 	for (unsigned int j = 0; j < possible.size(); j++) {
 		if (possible[j] < Triangles.size()) {
-			intersecting = LineFacetd(p1, p2, &vertex[Triangles[possible[j]].vertex[0]], &vertex[Triangles[possible[j]].vertex[1]], &vertex[Triangles[possible[j]].vertex[2]], &Triangles[possible[j]].facenormal, &point);
+			intersecting = LineFacetHit(p1, p2, &vertex[Triangles[possible[j]].vertex[0]], &vertex[Triangles[possible[j]].vertex[1]], &vertex[Triangles[possible[j]].vertex[2]], &Triangles[possible[j]].facenormal, &point);
 			distance = (point.x - p1->x) * (point.x - p1->x) + (point.y - p1->y) * (point.y - p1->y) + (point.z - p1->z) * (point.z - p1->z);
 			if ((distance < olddistance || firstintersecting == -1) && intersecting) {
 				olddistance = distance;

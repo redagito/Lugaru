@@ -63,10 +63,9 @@ inline float normaldotproduct(Vector3 point1, Vector3 point2);
 bool PointInTriangle(Vector3* p, Vector3 normal, Vector3* p1, Vector3* p2, Vector3* p3);
 
 bool LineFacet(Vector3 p1, Vector3 p2, Vector3 pa, Vector3 pb, Vector3 pc, Vector3* p);
-float LineFacetd(Vector3 p1, Vector3 p2, Vector3 pa, Vector3 pb, Vector3 pc, Vector3* p);
-float LineFacetd(Vector3 p1, Vector3 p2, Vector3 pa, Vector3 pb, Vector3 pc, Vector3 n, Vector3* p);
-float LineFacetd(Vector3* p1, Vector3* p2, Vector3* pa, Vector3* pb, Vector3* pc, Vector3* n, Vector3* p);
-float LineFacetd(Vector3* p1, Vector3* p2, Vector3* pa, Vector3* pb, Vector3* pc, Vector3* p);
+/** Hit test against a facet. Returns 1.0 on a hit, 0.0 otherwise; not a distance. */
+float LineFacetHit(Vector3* p1, Vector3* p2, Vector3* pa, Vector3* pb, Vector3* pc, Vector3* n, Vector3* p);
+float LineFacetHit(Vector3* p1, Vector3* p2, Vector3* pa, Vector3* pb, Vector3* pc, Vector3* p);
 
 inline void ReflectVector(Vector3* vel, const Vector3* n);
 inline void ReflectVector(Vector3* vel, const Vector3& n);
@@ -75,7 +74,8 @@ inline Vector3 DoRotationRadian(Vector3 thePoint, float xang, float yang, float 
 
 inline float findDistance(const Vector3* point1, const Vector3* point2);
 inline float findLength(const Vector3* point1);
-inline float findLengthfast(const Vector3* point1);
+/** Squared magnitude (no sqrt). Every threshold in the engine is calibrated against this, so do not change the return value. */
+inline float magnitudeSquared(const Vector3* point1);
 
 inline float distsq(const Vector3* point1, const Vector3* point2);
 inline float distsq(const Vector3& point1, const Vector3& point2);
@@ -264,7 +264,7 @@ inline float findLength(const Vector3* point1)
 	return (sqrt((point1->x) * (point1->x) + (point1->y) * (point1->y) + (point1->z) * (point1->z)));
 }
 
-inline float findLengthfast(const Vector3* point1)
+inline float magnitudeSquared(const Vector3* point1)
 {
 	return ((point1->x) * (point1->x) + (point1->y) * (point1->y) + (point1->z) * (point1->z));
 }

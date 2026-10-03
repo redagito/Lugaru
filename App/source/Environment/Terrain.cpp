@@ -870,7 +870,7 @@ float Terrain::getHeight(float pointx, float pointz) const
 	triangle[2].z = tiley + 1;
 	triangle[2].y = heightmap[tilex][tiley + 1];
 
-	if (!LineFacetd(&startpoint, &endpoint, &triangle[0], &triangle[1], &triangle[2], &intersect)) {
+	if (!LineFacetHit(&startpoint, &endpoint, &triangle[0], &triangle[1], &triangle[2], &intersect)) {
 		triangle[0].x = tilex + 1;
 		triangle[0].z = tiley;
 		triangle[0].y = heightmap[tilex + 1][tiley];
@@ -882,7 +882,7 @@ float Terrain::getHeight(float pointx, float pointz) const
 		triangle[2].x = tilex;
 		triangle[2].z = tiley + 1;
 		triangle[2].y = heightmap[tilex][tiley + 1];
-		LineFacetd(&startpoint, &endpoint, &triangle[0], &triangle[1], &triangle[2], &intersect);
+		LineFacetHit(&startpoint, &endpoint, &triangle[0], &triangle[1], &triangle[2], &intersect);
 	}
 	return intersect.y * scale + getOpacity(pointx * scale, pointz * scale) / 8;
 }

@@ -3047,16 +3047,16 @@ void doPlayerCollisions()
 																	}
 																}
 
-																if ((Person::players[i]->skeleton.oldfree == 1 && findLengthfast(&Person::players[i]->velocity) > 1) ||
-																	(Person::players[k]->skeleton.oldfree == 1 && findLengthfast(&Person::players[k]->velocity) > 1) ||
+																if ((Person::players[i]->skeleton.oldfree == 1 && magnitudeSquared(&Person::players[i]->velocity) > 1) ||
+																	(Person::players[k]->skeleton.oldfree == 1 && magnitudeSquared(&Person::players[k]->velocity) > 1) ||
 																	(Person::players[i]->skeleton.oldfree == 0 && Person::players[k]->skeleton.oldfree == 0)) {
 																	rotatetarget = Person::players[k]->velocity - Person::players[i]->velocity;
 																	if ((Person::players[i]->animTarget != getupfrombackanim && Person::players[i]->animTarget != getupfromfrontanim ||
 																		Person::players[i]->skeleton.free) &&
 																		(Person::players[k]->animTarget != getupfrombackanim && Person::players[k]->animTarget != getupfromfrontanim ||
 																			Person::players[k]->skeleton.free)) {
-																		if ((((k != 0 && findLengthfast(&rotatetarget) > 150 ||
-																			k == 0 && findLengthfast(&rotatetarget) > 50 && Person::players[0]->rabbitkickragdoll) &&
+																		if ((((k != 0 && magnitudeSquared(&rotatetarget) > 150 ||
+																			k == 0 && magnitudeSquared(&rotatetarget) > 50 && Person::players[0]->rabbitkickragdoll) &&
 																			normaldotproduct(rotatetarget, Person::players[k]->coords - Person::players[i]->coords) > 0) &&
 																			(k == 0 ||
 																				k != 0 && Person::players[i]->skeleton.oldfree == 1 && Animation::animations[Person::players[k]->animCurrent].attack == neutral ||
@@ -3074,15 +3074,15 @@ void doPlayerCollisions()
 																				}
 
 																				Person::players[i]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
-																				if (Person::players[i]->damage > Person::players[i]->damagetolerance - findLengthfast(&rotatetarget) / 4 && !Person::players[i]->dead) {
+																				if (Person::players[i]->damage > Person::players[i]->damagetolerance - magnitudeSquared(&rotatetarget) / 4 && !Person::players[i]->dead) {
 																					award_bonus(0, aimbonus);
 																				}
-																				Person::players[i]->DoDamage(findLengthfast(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+																				Person::players[i]->DoDamage(magnitudeSquared(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
 																				Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
-																				if (Person::players[k]->damage > Person::players[k]->damagetolerance - findLengthfast(&rotatetarget) / 4 && !Person::players[k]->dead) {
+																				if (Person::players[k]->damage > Person::players[k]->damagetolerance - magnitudeSquared(&rotatetarget) / 4 && !Person::players[k]->dead) {
 																					award_bonus(0, aimbonus); // Huh, again?
 																				}
-																				Person::players[k]->DoDamage(findLengthfast(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+																				Person::players[k]->DoDamage(magnitudeSquared(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
 
 																				for (unsigned j = 0; j < Person::players[i]->skeleton.joints.size(); j++) {
 																					Person::players[i]->skeleton.joints[j].velocity = Person::players[i]->skeleton.joints[j].velocity / 5 + Person::players[k]->velocity;
@@ -5107,14 +5107,14 @@ void Game::TickOnceAfter()
 		}
 		if (Person::players[0]->skeleton.free != 2) {
 			cameraspeed = 20;
-			if (findLengthfast(&Person::players[0]->velocity) > 400) {
+			if (magnitudeSquared(&Person::players[0]->velocity) > 400) {
 				cameraspeed = 20 + (findLength(&Person::players[0]->velocity) - 20) * .96;
 			}
 			if (Person::players[0]->skeleton.free == 0 && Person::players[0]->animTarget != hanganim && Person::players[0]->animTarget != climbanim) {
 				target.y += 1.4;
 			}
 			coltarget = target - cameraloc;
-			if (findLengthfast(&coltarget) < multiplier * multiplier * 400) {
+			if (magnitudeSquared(&coltarget) < multiplier * multiplier * 400) {
 				cameraloc = target;
 			}
 			else {
