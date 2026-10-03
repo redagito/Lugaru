@@ -37,6 +37,33 @@ struct GameState
 	// timing
 	float slomospeed = 0;
 	float fps = 0;
+
+	// campaign choice
+	int whichchoice = 0;
+
+	// time scale
+	float gamespeed = 0;
+	float oldgamespeed = 0;
+
+	// level loading
+	int loading = 0;
+	bool stillloading = false;
+	bool visibleloading = false;
+
+	// level switching
+	float changedelay = 0;
+
+	// level clock
+	float loadtime = 0;
+	float leveltime = 0;
+	float wonleveltime = 0;
+
+	// freeze
+	bool freeze = false;
+	bool winfreeze = false;
+
+	// tutorial gating
+	bool cananger = false;
 };
 
 // TEMPORARY SEAM. state() exists so the migration away from globals is a small,

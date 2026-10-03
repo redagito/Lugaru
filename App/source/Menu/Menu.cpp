@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Game.hpp"
 #include "GameGlobals.h"
+#include "GameState.hpp"
 #include "Globals.h"
 
 #include "Audio/openal_wrapper.hpp"
@@ -44,7 +45,6 @@ using namespace Game;
 extern std::vector<CampaignLevel> campaignlevels;
 extern float musicvolume[4];
 extern float oldmusicvolume[4];
-extern int whichchoice;
 extern int leveltheme;
 
 int entername = 0;
@@ -525,8 +525,8 @@ void Menu::startChallengeLevel(int selected)
 
     startbonustotal = 0;
 
-    loading = 2;
-    loadtime = 0;
+    state().loading = 2;
+    state().loadtime = 0;
     targetlevel = selected;
     if (firstLoadDone) {
         TickOnceAfter();
@@ -758,18 +758,18 @@ void Menu::Tick()
                 if ((selected - NB_CAMPAIGN_MENU_ITEM >= Account::active().getCampaignChoicesMade())) {
                     startbonustotal = 0;
 
-                    loading = 2;
-                    loadtime = 0;
+                    state().loading = 2;
+                    state().loadtime = 0;
                     targetlevel = 7;
                     if (firstLoadDone) {
                         TickOnceAfter();
                     } else {
                         LoadStuff();
                     }
-                    whichchoice = selected - NB_CAMPAIGN_MENU_ITEM - Account::active().getCampaignChoicesMade();
-                    actuallevel = (Account::active().getCampaignChoicesMade() > 0 ? campaignlevels[Account::active().getCampaignChoicesMade() - 1].nextlevel[whichchoice] : 0);
-                    visibleloading = true;
-                    stillloading = 1;
+                    state().whichchoice = selected - NB_CAMPAIGN_MENU_ITEM - Account::active().getCampaignChoicesMade();
+                    actuallevel = (Account::active().getCampaignChoicesMade() > 0 ? campaignlevels[Account::active().getCampaignChoicesMade() - 1].nextlevel[state().whichchoice] : 0);
+                    state().visibleloading = true;
+                    state().stillloading = 1;
                     LoadLevel(campaignlevels[actuallevel].mapname.c_str());
                     campaign = 1;
                     mainmenu = 0;
@@ -780,8 +780,8 @@ void Menu::Tick()
                     case 1:
                         startbonustotal = 0;
 
-                        loading = 2;
-                        loadtime = 0;
+                        state().loading = 2;
+                        state().loadtime = 0;
                         targetlevel = -1;
                         if (firstLoadDone) {
                             TickOnceAfter();

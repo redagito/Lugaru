@@ -31,8 +31,6 @@ GameState& state()
 	return instance;
 }
 
-bool visibleloading = false;
-
 float volume = 0;
 bool ismotionblur = false;
 float usermousesensitivity = 0;
@@ -46,8 +44,6 @@ float blurness = 0;
 float targetblurness = 0;
 float windvar = 0;
 float precipdelay = 0;
-float gamespeed = 0;
-float oldgamespeed = 0;
 int difficulty = 0;
 float multiplier = 0;
 float realmultiplier = 0;
@@ -84,12 +80,9 @@ bool trilinear;
 Weapons weapons;
 bool damageeffects = false;
 bool ambientsound = false;
-bool freeze = false;
-bool winfreeze = false;
 float flashamount = 0, flashr = 0, flashg = 0, flashb = 0;
 int flashdelay = 0;
 float motionbluramount = 0;
-bool stillloading = false;
 bool showpoints = false;
 bool showdamagebar = false;
 bool alwaysblur = false;
@@ -107,7 +100,6 @@ float damagedealt = 0;
 int maptype = 0;
 
 bool reversaltrain = false;
-bool cananger = false;
 bool canattack = false;
 
 bool skyboxtexture = false;

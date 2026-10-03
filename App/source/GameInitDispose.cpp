@@ -24,6 +24,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Animation/Animation.hpp"
 #include "Audio/openal_wrapper.hpp"
 #include "CommandLine.hpp"
+#include "GameState.hpp"
 #include "Graphic/Texture.hpp"
 #include "Menu/Menu.hpp"
 #include "Utils/Folders.hpp"
@@ -141,7 +142,7 @@ GLvoid Game::ReSizeGLScene(float fov, float pnear)
 
 void Game::LoadingScreen()
 {
-	if (!visibleloading) {
+	if (!state().visibleloading) {
 		return;
 	}
 
@@ -175,9 +176,9 @@ void Game::LoadingScreen()
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	loadtime += multiplier * 4;
+	state().loadtime += multiplier * 4;
 
-	loadprogress = loadtime;
+	loadprogress = state().loadtime;
 	if (loadprogress > 100) {
 		loadprogress = 100;
 	}
@@ -506,7 +507,7 @@ void Game::InitGame()
 
 	FadeLoadingScreen(0);
 
-	stillloading = 1;
+	state().stillloading = 1;
 
 	int temptexdetail = texdetail;
 	texdetail = 1;
@@ -563,7 +564,7 @@ void Game::InitGame()
 	gameon = 0;
 	mainmenu = 1;
 
-	stillloading = 0;
+	state().stillloading = 0;
 	firstLoadDone = false;
 
 	newdetail = detail;
@@ -604,13 +605,13 @@ void Game::LoadStuff()
 	float viewdistdetail;
 	float megascale = 1;
 
-	loadtime = 0;
+	state().loadtime = 0;
 
-	stillloading = 1;
+	state().stillloading = 1;
 
-	visibleloading = false; //don't use loadscreentexture yet
+	state().visibleloading = false; //don't use loadscreentexture yet
 	loadscreentexture.load("Textures/Fire.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
-	visibleloading = true;
+	state().visibleloading = true;
 
 	temptexdetail = texdetail;
 	texdetail = 1;
@@ -787,10 +788,10 @@ void Game::LoadStuff()
 		emit_sound_at(fireendsound);
 	}
 
-	stillloading = 0;
-	loading = 0;
-	changedelay = 1;
+	state().stillloading = 0;
+	state().loading = 0;
+	state().changedelay = 1;
 
-	visibleloading = false;
+	state().visibleloading = false;
 	firstLoadDone = true;
 }

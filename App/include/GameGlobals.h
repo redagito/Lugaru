@@ -35,10 +35,6 @@ namespace Game
 	extern bool cameramode;
 	extern bool firstLoadDone;
 
-	extern float leveltime;
-	extern float wonleveltime;
-	extern float loadtime;
-
 	extern Model hawk;
 	extern Texture hawktexture;
 	extern Vector3 hawkcoords;
@@ -49,7 +45,6 @@ namespace Game
 	extern Model iris;
 
 	extern bool stealthloading;
-	extern int loading;
 
 	extern int musictype;
 
@@ -82,7 +77,6 @@ namespace Game
 
 	extern int oldenvironment;
 	extern int targetlevel;
-	extern float changedelay;
 
 	extern bool waiting;
 

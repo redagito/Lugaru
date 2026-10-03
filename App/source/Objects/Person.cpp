@@ -24,6 +24,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Game.hpp"
 #include "GameGlobals.h"
+#include "GameState.hpp"
 #include "Globals.h"
 
 #include "Level/Awards.hpp"
@@ -1183,7 +1184,7 @@ bool Person::DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutor
  */
 void Person::Reverse(bool tutorialActive)
 {
-	if (!((victim->isPlayerControlled() || hostiletime > 1 || staggerdelay <= 0) && victim->animTarget != jumpupanim && victim->animTarget != jumpdownanim && (!tutorialActive || cananger) && hostile)) {
+	if (!((victim->isPlayerControlled() || hostiletime > 1 || staggerdelay <= 0) && victim->animTarget != jumpupanim && victim->animTarget != jumpdownanim && (!tutorialActive || state().cananger) && hostile)) {
 		return;
 	}
 
@@ -1542,7 +1543,7 @@ void Person::DoDamage(float howmuch, Terrain& terrain, bool tutorialActive, bool
 	}
 
 	// cancel attack?
-	if (aitype == passivetype && damage < damagetolerance && ((!tutorialActive || cananger) && hostile)) {
+	if (aitype == passivetype && damage < damagetolerance && ((!tutorialActive || state().cananger) && hostile)) {
 		aitype = attacktypecutoff;
 	}
 	if (!tutorialActive && !isPlayerControlled() && damage < damagetolerance && damage > damagetolerance * 2 / 3 && creature == rabbittype) {
@@ -1630,7 +1631,7 @@ void Person::DoHead(float multiplier)
 	static Vector3 facing;
 	static float lookspeed = 500;
 
-	if (!freeze && !winfreeze) {
+	if (!state().freeze && !state().winfreeze) {
 
 		//head facing
 		targetheadyaw = (float)((int)((0 - yaw - targetheadyaw + 180) * 100) % 36000) / 100;
@@ -1810,12 +1811,12 @@ void Person::RagDoll(bool checkcollision, Terrain& terrain, bool tutorialActive,
 			skeleton.joints[i].velocity = 0;
 			skeleton.joints[i].velchange = 0;
 		}
-		skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, freeze, detail, whichjointstartarray);
+		skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, state().freeze, detail, whichjointstartarray);
 		if (Animation::animations[animCurrent].height == lowheight || Animation::animations[animTarget].height == lowheight) {
-			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, freeze, detail, whichjointstartarray);
-			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, freeze, detail, whichjointstartarray);
-			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, freeze, detail, whichjointstartarray);
-			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, freeze, detail, whichjointstartarray);
+			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, state().freeze, detail, whichjointstartarray);
+			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, state().freeze, detail, whichjointstartarray);
+			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, state().freeze, detail, whichjointstartarray);
+			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, state().freeze, detail, whichjointstartarray);
 		}
 
 		speed = targetFrame().speed * 2;
@@ -5289,7 +5290,7 @@ void Person::DoStuff(Terrain& terrain, bool tutorialActive, bool inDialog, float
 
 		skeleton.DoGravity(&scale, multiplier, gravity);
 		float damageamount;
-		damageamount = skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, freeze, detail, whichjointstartarray) * 5;
+		damageamount = skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, state().freeze, detail, whichjointstartarray) * 5;
 		if (damage > damagetolerance - damageamount && !dead && (bonus != spinecrusher || bonustime > 1) && (bonus != style || bonustime > 1) && (bonus != cannon || bonustime > 1)) {
 			award_bonus(id, deepimpact);
 		}
@@ -6369,7 +6370,7 @@ static void IKHelper(Person* p, float interp, Terrain& terrain, bool tutorialAct
 	p->jointPos(rightknee) = (p->jointPos(rightfoot) + change2) / 2 + (p->jointPos(rightknee)) / 2;
 
 	// fix up skeleton now that we've moved body parts?
-	p->skeleton.DoConstraints(&p->coords, &p->scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, freeze, detail, whichjointstartarray);
+	p->skeleton.DoConstraints(&p->coords, &p->scale, tutorialActive, bloodtoggle, multiplier, terrain, environment, camerashake, state().freeze, detail, whichjointstartarray);
 }
 
 /* EFFECT
@@ -6782,7 +6783,7 @@ int Person::DrawSkeleton(Terrain& terrain, bool tutorialActive, float multiplier
 				glDepthMask(0);
 				glEnable(GL_LIGHTING);
 				glEnable(GL_BLEND);
-				if (canattack && cananger) {
+				if (canattack && state().cananger) {
 					if (Animation::animations[animTarget].attack == normalattack || Animation::animations[animTarget].attack == reversed) {
 						glDisable(GL_TEXTURE_2D);
 						glColor4f(1, 0, 0, 0.8);
@@ -6821,7 +6822,7 @@ int Person::DrawSkeleton(Terrain& terrain, bool tutorialActive, float multiplier
 					glDepthMask(0);
 					glEnable(GL_LIGHTING);
 					glEnable(GL_BLEND);
-					if (canattack && cananger) {
+					if (canattack && state().cananger) {
 						if (Animation::animations[animTarget].attack == normalattack || Animation::animations[animTarget].attack == reversed) {
 							glDisable(GL_TEXTURE_2D);
 							glColor4f(1, 0, 0, 0.8);
@@ -7580,7 +7581,7 @@ void Person::doAI(const Terrain& terrain, bool tutorialActive, bool inDialog, fl
 				jumpkeydown = 1;
 			}
 
-			if ((!tutorialActive || cananger) &&
+			if ((!tutorialActive || state().cananger) &&
 				hostile &&
 				!Person::players[0]->dead &&
 				distsq(&coords, &Person::players[0]->coords) < 400 &&
@@ -7629,7 +7630,7 @@ void Person::doAI(const Terrain& terrain, bool tutorialActive, bool inDialog, fl
 			}
 		}
 
-		if (aitype != passivetype && Game::leveltime > .5) {
+		if (aitype != passivetype && state().leveltime > .5) {
 			howactive = typeactive;
 		}
 
@@ -7702,7 +7703,7 @@ void Person::doAI(const Terrain& terrain, bool tutorialActive, bool inDialog, fl
 			//hearing sounds
 			if (!Game::editorenabled) {
 				if (howactive <= typesleeping) {
-					if (numenvsounds > 0 && (!tutorialActive || cananger) && hostile) {
+					if (numenvsounds > 0 && (!tutorialActive || state().cananger) && hostile) {
 						for (int j = 0; j < numenvsounds; j++) {
 							float vol = howactive == typesleeping ? envsoundvol[j] - 14 : envsoundvol[j];
 							if (vol > 0 && distsq(&coords, &envsound[j]) < 2 * (vol + vol * (creature == rabbittype) * 3)) {
@@ -7721,7 +7722,7 @@ void Person::doAI(const Terrain& terrain, bool tutorialActive, bool inDialog, fl
 			}
 
 			if (howactive < typesleeping &&
-				((!tutorialActive || cananger) && hostile) &&
+				((!tutorialActive || state().cananger) && hostile) &&
 				!Person::players[0]->dead &&
 				distsq(&coords, &Person::players[0]->coords) < 400 &&
 				occluded < 25) {
@@ -7904,7 +7905,7 @@ void Person::doAI(const Terrain& terrain, bool tutorialActive, bool inDialog, fl
 				jumpkeydown = 1;
 			}
 
-			if (numenvsounds > 0 && ((!tutorialActive || cananger) && hostile)) {
+			if (numenvsounds > 0 && ((!tutorialActive || state().cananger) && hostile)) {
 				for (int k = 0; k < numenvsounds; k++) {
 					if (distsq(&coords, &envsound[k]) < 2 * (envsoundvol[k] + envsoundvol[k] * (creature == rabbittype) * 3)) {
 						aitype = attacktypecutoff;
@@ -7916,7 +7917,7 @@ void Person::doAI(const Terrain& terrain, bool tutorialActive, bool inDialog, fl
 				losupdatedelay < 0 &&
 				!Game::editorenabled &&
 				occluded < 2 &&
-				((!tutorialActive || cananger) && hostile)) {
+				((!tutorialActive || state().cananger) && hostile)) {
 				losupdatedelay = .2;
 				if (distsq(&coords, &Person::players[0]->coords) < 4 && Animation::animations[animTarget].height != lowheight) {
 					aitype = attacktypecutoff;
@@ -8102,7 +8103,7 @@ void Person::doAI(const Terrain& terrain, bool tutorialActive, bool inDialog, fl
 
 				lastseentime = 12;
 
-				if (!Person::players[0]->dead && ((!tutorialActive || cananger) && hostile)) {
+				if (!Person::players[0]->dead && ((!tutorialActive || state().cananger) && hostile)) {
 					if (ally < 0 || hasWeapon() || lastchecktime <= 0) {
 						aitype = attacktypecutoff;
 						lastseentime = 1;

@@ -31,10 +31,6 @@ namespace Game
 	bool cameramode = 0;
 	bool firstLoadDone = false;
 
-	float leveltime = 0;
-	float wonleveltime = 0;
-	float loadtime = 0;
-
 	Model hawk;
 	Texture hawktexture;
 	Vector3 hawkcoords;
@@ -78,11 +74,8 @@ namespace Game
 	unsigned short crouchkey = 0, jumpkey = 0, forwardkey = 0, backkey = 0, leftkey = 0, rightkey = 0, drawkey = 0, throwkey = 0, attackkey = 0;
 	unsigned short consolekey = 0;
 
-	int loading = 0;
-
 	int oldenvironment = 0;
 	int targetlevel = 0;
-	float changedelay = 0;
 
 	bool waiting = false;
 }

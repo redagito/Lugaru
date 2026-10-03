@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Objects/Weapons.hpp"
 #include "Objects/Person.hpp"
 #include "Objects/Object.hpp"
+#include "GameState.hpp"
 #include "Globals.h"
 
 #include "Animation/Animation.hpp"
@@ -447,7 +448,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 			Normalise(&vel);
 			newpoint1 = midp - vel * length * (tipmass / (mass + tipmass));
 			newpoint2 = midp + vel * length * (mass / (mass + tipmass));
-			if (!freeze) {
+			if (!state().freeze) {
 				if (freetime > .04) {
 					velocity = velocity + (newpoint1 - position) / multiplier;
 					tipvelocity = tipvelocity + (newpoint2 - tippoint) / multiplier;

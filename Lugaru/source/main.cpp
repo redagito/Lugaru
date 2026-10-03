@@ -336,7 +336,7 @@ void DoUpdate()
 	}
 
 	realmultiplier = multiplier;
-	multiplier *= gamespeed;
+	multiplier *= state().gamespeed;
 	if (difficulty == 1) {
 		multiplier *= .9;
 	}
@@ -344,7 +344,7 @@ void DoUpdate()
 		multiplier *= .8;
 	}
 
-	if (loading == 4) {
+	if (state().loading == 4) {
 		multiplier *= .00001;
 	}
 	if (slomo && !mainmenu) {

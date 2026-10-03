@@ -44,7 +44,7 @@ void DefaultSettings()
 	foliage = 1;
 	musictoggle = 1;
 	trilinear = 1;
-	gamespeed = 1;
+	state().gamespeed = 1;
 	damageeffects = 0;
 	texttoggle = 1;
 	alwaysblur = 0;
@@ -123,10 +123,10 @@ void SaveSettings()
 	opstream << "\nInvert mouse:\n";
 	opstream << invertmouse;
 	opstream << "\nGamespeed:\n";
-	if (oldgamespeed == 0) {
-		oldgamespeed = 1;
+	if (state().oldgamespeed == 0) {
+		state().oldgamespeed = 1;
 	}
-	opstream << oldgamespeed;
+	opstream << state().oldgamespeed;
 	opstream << "\nDamage effects(blackout, doublevision):\n";
 	opstream << damageeffects;
 	opstream << "\nText:\n";
@@ -256,11 +256,11 @@ bool LoadSettings()
 			ipstream >> invertmouse;
 		}
 		else if (!strncmp(setting, "Gamespeed", 9)) {
-			ipstream >> gamespeed;
-			oldgamespeed = gamespeed;
-			if (oldgamespeed == 0) {
-				gamespeed = 1;
-				oldgamespeed = 1;
+			ipstream >> state().gamespeed;
+			state().oldgamespeed = state().gamespeed;
+			if (state().oldgamespeed == 0) {
+				state().gamespeed = 1;
+				state().oldgamespeed = 1;
 			}
 		}
 		else if (!strncmp(setting, "Damage effects", 14)) {

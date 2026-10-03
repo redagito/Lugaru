@@ -6,7 +6,6 @@
 
 #include <SDL.h>
 
-extern bool visibleloading;
 extern float volume;
 extern bool ismotionblur;
 extern float usermousesensitivity;
@@ -20,8 +19,6 @@ extern float blurness;
 extern float targetblurness;
 extern float windvar;
 extern float precipdelay;
-extern float gamespeed;
-extern float oldgamespeed;
 extern int difficulty;
 extern float multiplier;
 extern float realmultiplier;
@@ -58,15 +55,12 @@ extern bool trilinear;
 extern Weapons weapons;
 extern bool damageeffects;
 extern bool ambientsound;
-extern bool freeze;
-extern bool winfreeze;
 extern float flashamount;
 extern float flashr;
 extern float flashg;
 extern float flashb;
 extern int flashdelay;
 extern float motionbluramount;
-extern bool stillloading;
 extern bool showpoints;
 extern bool showdamagebar;
 extern bool alwaysblur;
@@ -80,7 +74,6 @@ extern float smoketex;
 extern float damagedealt;
 extern int maptype;
 extern bool reversaltrain;
-extern bool cananger;
 extern bool canattack;
 extern bool skyboxtexture;
 extern float skyboxr;

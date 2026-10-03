@@ -110,3 +110,135 @@ TEST_CASE("a freshly constructed GameState is unaffected by another instance", "
 		REQUIRE(std::is_trivially_copyable<GameState>::value);
 	}
 }
+
+TEST_CASE("GameState tranche 2 members start at their historical global defaults", "[gamestate]")
+{
+	GameState s;
+
+	SECTION("campaign choice")
+	{
+		REQUIRE(s.whichchoice == 0);
+	}
+
+	SECTION("time scale")
+	{
+		REQUIRE(s.gamespeed == 0.0f);
+		REQUIRE(s.oldgamespeed == 0.0f);
+	}
+
+	SECTION("level loading")
+	{
+		REQUIRE(s.loading == 0);
+		REQUIRE(s.stillloading == false);
+		REQUIRE(s.visibleloading == false);
+	}
+
+	SECTION("level switching")
+	{
+		REQUIRE(s.changedelay == 0.0f);
+	}
+
+	SECTION("level clock")
+	{
+		REQUIRE(s.loadtime == 0.0f);
+		REQUIRE(s.leveltime == 0.0f);
+		REQUIRE(s.wonleveltime == 0.0f);
+	}
+
+	SECTION("freeze")
+	{
+		REQUIRE(s.freeze == false);
+		REQUIRE(s.winfreeze == false);
+	}
+
+	SECTION("tutorial gating")
+	{
+		REQUIRE(s.cananger == false);
+	}
+}
+
+TEST_CASE("tranche 2 GameState members are per instance", "[gamestate]")
+{
+	GameState a;
+	GameState b;
+
+	SECTION("writing one instance leaves the other at its defaults")
+	{
+		a.whichchoice = 3;
+		a.gamespeed = 0.5f;
+		a.oldgamespeed = 0.25f;
+		a.loading = 4;
+		a.stillloading = true;
+		a.visibleloading = true;
+		a.changedelay = -999.0f;
+		a.loadtime = 12.5f;
+		a.leveltime = 42.0f;
+		a.wonleveltime = 41.5f;
+		a.freeze = true;
+		a.winfreeze = true;
+		a.cananger = true;
+
+		REQUIRE(b.whichchoice == 0);
+		REQUIRE(b.gamespeed == 0.0f);
+		REQUIRE(b.oldgamespeed == 0.0f);
+		REQUIRE(b.loading == 0);
+		REQUIRE(b.stillloading == false);
+		REQUIRE(b.visibleloading == false);
+		REQUIRE(b.changedelay == 0.0f);
+		REQUIRE(b.loadtime == 0.0f);
+		REQUIRE(b.leveltime == 0.0f);
+		REQUIRE(b.wonleveltime == 0.0f);
+		REQUIRE(b.freeze == false);
+		REQUIRE(b.winfreeze == false);
+		REQUIRE(b.cananger == false);
+	}
+
+	SECTION("a third instance also starts clean")
+	{
+		a.whichchoice = 2;
+		a.gamespeed = 0.1f;
+		a.oldgamespeed = 0.1f;
+		a.loading = 3;
+		a.stillloading = true;
+		a.visibleloading = true;
+		a.changedelay = 0.1f;
+		a.loadtime = 1.0f;
+		a.leveltime = 2.0f;
+		a.wonleveltime = 3.0f;
+		a.freeze = true;
+		a.winfreeze = true;
+		a.cananger = true;
+
+		GameState c;
+		REQUIRE(c.whichchoice == 0);
+		REQUIRE(c.gamespeed == 0.0f);
+		REQUIRE(c.oldgamespeed == 0.0f);
+		REQUIRE(c.loading == 0);
+		REQUIRE(c.stillloading == false);
+		REQUIRE(c.visibleloading == false);
+		REQUIRE(c.changedelay == 0.0f);
+		REQUIRE(c.loadtime == 0.0f);
+		REQUIRE(c.leveltime == 0.0f);
+		REQUIRE(c.wonleveltime == 0.0f);
+		REQUIRE(c.freeze == false);
+		REQUIRE(c.winfreeze == false);
+		REQUIRE(c.cananger == false);
+	}
+
+	SECTION("declared types are preserved from the migrated globals")
+	{
+		REQUIRE(std::is_same<decltype(a.whichchoice), int>::value);
+		REQUIRE(std::is_same<decltype(a.gamespeed), float>::value);
+		REQUIRE(std::is_same<decltype(a.oldgamespeed), float>::value);
+		REQUIRE(std::is_same<decltype(a.loading), int>::value);
+		REQUIRE(std::is_same<decltype(a.stillloading), bool>::value);
+		REQUIRE(std::is_same<decltype(a.visibleloading), bool>::value);
+		REQUIRE(std::is_same<decltype(a.changedelay), float>::value);
+		REQUIRE(std::is_same<decltype(a.loadtime), float>::value);
+		REQUIRE(std::is_same<decltype(a.leveltime), float>::value);
+		REQUIRE(std::is_same<decltype(a.wonleveltime), float>::value);
+		REQUIRE(std::is_same<decltype(a.freeze), bool>::value);
+		REQUIRE(std::is_same<decltype(a.winfreeze), bool>::value);
+		REQUIRE(std::is_same<decltype(a.cananger), bool>::value);
+	}
+}

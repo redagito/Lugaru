@@ -70,7 +70,6 @@ using namespace Game;
 int leveltheme;
 
 bool won = false;
-int whichchoice = 0;
 bool winhotspot = false;
 bool windialogue = false;
 bool realthreat = 0;
@@ -423,8 +422,8 @@ void Game::ResetBeforeLevelLoad(bool tutorial)
 	skyboxg = 1;
 	skyboxb = 1;
 
-	freeze = 0;
-	winfreeze = 0;
+	state().freeze = 0;
+	state().winfreeze = 0;
 
 	for (unsigned char i = 0; i < 100; i++) {
 		bonusnum[i] = 0;
@@ -450,7 +449,7 @@ void Game::ResetBeforeLevelLoad(bool tutorial)
 	bonustotal = startbonustotal;
 	bonus = 0;
 	gameon = 1;
-	changedelay = 0;
+	state().changedelay = 0;
 }
 
 bool Game::LoadLevel(const std::string& name, bool tutorial)
@@ -470,13 +469,13 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 	float lamefloat;
 
 	if (!gameon) {
-		visibleloading = true;
+		state().visibleloading = true;
 	}
 	if (stealthloading) {
-		visibleloading = false;
+		state().visibleloading = false;
 	}
-	if (!stillloading) {
-		loadtime = 0;
+	if (!state().stillloading) {
+		state().loadtime = 0;
 	}
 	gamestarted = 1;
 
@@ -494,7 +493,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 
 	if (console) {
 		emit_sound_np(consolesuccesssound);
-		freeze = 0;
+		state().freeze = 0;
 		console = false;
 	}
 
@@ -841,9 +840,9 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 	oldmusicvolume[2] = 0;
 	oldmusicvolume[3] = 0;
 
-	leveltime = 0;
-	wonleveltime = 0;
-	visibleloading = false;
+	state().leveltime = 0;
+	state().wonleveltime = 0;
+	state().visibleloading = false;
 
 	return true;
 }
@@ -857,13 +856,13 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 	}
 
 	if (!gameon) {
-		visibleloading = true;
+		state().visibleloading = true;
 	}
 	if (stealthloading) {
-		visibleloading = false;
+		state().visibleloading = false;
 	}
-	if (!stillloading) {
-		loadtime = 0;
+	if (!state().stillloading) {
+		state().loadtime = 0;
 	}
 	gamestarted = 1;
 
@@ -883,7 +882,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 
 	if (console) {
 		emit_sound_np(consolesuccesssound);
-		freeze = 0;
+		state().freeze = 0;
 		console = false;
 	}
 
@@ -1063,9 +1062,9 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 	oldmusicvolume[2] = 0;
 	oldmusicvolume[3] = 0;
 
-	leveltime = 0;
-	wonleveltime = 0;
-	visibleloading = false;
+	state().leveltime = 0;
+	state().wonleveltime = 0;
+	state().visibleloading = false;
 
 	return true;
 }
@@ -1083,7 +1082,7 @@ void Game::ProcessInput()
 	if (Input::isKeyPressed(SDL_SCANCODE_ESCAPE) &&
 		(gameon || mainmenu == 0)) {
 		selected = -1;
-		if (mainmenu == 0 && !winfreeze) {
+		if (mainmenu == 0 && !state().winfreeze) {
 			mainmenu = 2; // Pause
 		}
 		else if (mainmenu == 1 || mainmenu == 2) {
@@ -1105,17 +1104,17 @@ void Game::ProcessInput()
 	/* Challenge mode */
 	if (!campaign && !mainmenu) {
 		if ((Input::isKeyPressed(jumpkey) || Input::isKeyPressed(SDL_SCANCODE_SPACE))) {
-			if (winfreeze) {
-				winfreeze = 0;
+			if (state().winfreeze) {
+				state().winfreeze = 0;
 			}
 		}
 
 		if ((Input::isKeyDown(SDL_SCANCODE_ESCAPE)) && gameon) {
 			if (console) {
 				console = false;
-				freeze = 0;
+				state().freeze = 0;
 			}
-			else if (winfreeze) {
+			else if (state().winfreeze) {
 				mainmenu = 9;
 				gameon = 0;
 			}
@@ -1179,7 +1178,7 @@ void Game::ProcessInput()
 				OPENAL_SetFrequency(OPENAL_ALL);
 			}
 			else {
-				freeze = 0;
+				state().freeze = 0;
 				waiting = false;
 			}
 		}
@@ -1242,8 +1241,8 @@ void Game::ProcessDevInput()
 
 		/* Freeze */
 		if (Input::isKeyPressed(SDL_SCANCODE_V)) {
-			freeze = !freeze;
-			if (freeze) {
+			state().freeze = !state().freeze;
+			if (state().freeze) {
 				OPENAL_SetFrequency(OPENAL_ALL);
 			}
 		}
@@ -1527,8 +1526,8 @@ void Game::ProcessDevInput()
 		if (targetlevel > numchallengelevels - 1) {
 			targetlevel = 0;
 		}
-		loading = 1;
-		leveltime = 5;
+		state().loading = 1;
+		state().leveltime = 5;
 	}
 
 	/* Editor mode keys */
@@ -3144,10 +3143,10 @@ void Game::Tick()
 			mainmenu = 10;
 		}
 		//go to level select after completing a campaign level
-		if (campaign && winfreeze && mainmenu == 0 && campaignlevels[actuallevel].choosenext == 1) {
+		if (campaign && state().winfreeze && mainmenu == 0 && campaignlevels[actuallevel].choosenext == 1) {
 			mainmenu = 5;
 			gameon = 0;
-			winfreeze = 0;
+			state().winfreeze = 0;
 			fireSound();
 			flash();
 			if (musictoggle) {
@@ -3170,12 +3169,12 @@ void Game::Tick()
 		else {
 			hostiletime = 0;
 		}
-		if (!winfreeze) {
-			leveltime += multiplier;
+		if (!state().winfreeze) {
+			state().leveltime += multiplier;
 		}
 
 		if (console) {
-			freeze = 1;
+			state().freeze = 1;
 
 			inputText(consoletext[0], &consoleselected);
 			if (!waiting) {
@@ -3197,18 +3196,18 @@ void Game::Tick()
 		}
 
 		static int oldwinfreeze;
-		if (winfreeze && !oldwinfreeze) {
+		if (state().winfreeze && !oldwinfreeze) {
 			OPENAL_SetFrequency(OPENAL_ALL);
 			emit_sound_np(consolesuccesssound);
 		}
-		if (winfreeze == 0) {
-			oldwinfreeze = winfreeze;
+		if (state().winfreeze == 0) {
+			oldwinfreeze = state().winfreeze;
 		}
 		else {
 			oldwinfreeze++;
 		}
 
-		if (!freeze && !winfreeze && !(mainmenu && gameon) && (gameon || !gamestarted)) {
+		if (!state().freeze && !state().winfreeze && !(mainmenu && gameon) && (gameon || !gamestarted)) {
 
 			//dialogues
 			static float talkdelay = 0;
@@ -3607,8 +3606,8 @@ void Game::Tick()
 						!oldattackkey &&
 						Person::players[0]->dead))) {
 				targetlevel = whichlevel;
-				loading = 1;
-				leveltime = 5;
+				state().loading = 1;
+				state().leveltime = 5;
 			}
 			respawnkeydown = Input::isKeyDown(jumpkey);
 
@@ -3684,7 +3683,7 @@ void Game::Tick()
 						Person::players[i]->targetheadpitch = pitchOf(Dialog::currentScene().participantfacing[i]);
 					}
 
-					if (leveltime < .5) {
+					if (state().leveltime < .5) {
 						numenvsounds = 0;
 					}
 
@@ -4714,7 +4713,7 @@ void Game::TickOnceAfter()
 			}
 		}
 
-		if (loading == 2) {
+		if (state().loading == 2) {
 			musictype = stream_menutheme;
 			musicvolume[2] = 512;
 			musicvolume[0] = 0;
@@ -4757,7 +4756,7 @@ void Game::TickOnceAfter()
 			}
 		}
 
-		if (musicvolume[2] > 128 && !loading && !mainmenu) {
+		if (musicvolume[2] > 128 && !state().loading && !mainmenu) {
 			musicvolume[2] = 128;
 		}
 
@@ -4840,7 +4839,7 @@ void Game::TickOnceAfter()
 			maxalarmed = numalarmed;
 		}
 
-		if (changedelay <= 0 && !loading && !editorenabled && gameon && !Tutorial::active && changedelay != -999 && !won) {
+		if (changedelay <= 0 && !state().loading && !editorenabled && gameon && !Tutorial::active && changedelay != -999 && !won) {
 			if (Person::players[0]->dead) {
 				changedelay = 1;
 				targetlevel = whichlevel;
@@ -4879,22 +4878,22 @@ void Game::TickOnceAfter()
 			if (changedelay > 0 && !Person::players[0]->dead && !won) {
 				//high scores, awards, win
 				if (campaign) {
-					Account::active().winCampaignLevel(whichchoice, bonustotal, leveltime);
+					Account::active().winCampaignLevel(state().whichchoice, bonustotal, state().leveltime);
 					state().scoreadded = 1;
 				}
 				else {
-					wonleveltime = leveltime;
-					Account::active().winLevel(whichlevel, bonustotal - startbonustotal, leveltime, devtools);
+					state().wonleveltime = state().leveltime;
+					Account::active().winLevel(whichlevel, bonustotal - startbonustotal, state().leveltime, devtools);
 				}
 				won = 1;
 				Account::saveFile(Folders::getUserSavePath());
 			}
 		}
 
-		if (!winfreeze) {
+		if (!state().winfreeze) {
 
-			if (leveltime < 1) {
-				loading = 0;
+			if (state().leveltime < 1) {
+				state().loading = 0;
 				changedelay = .1;
 				alldead = false;
 				winhotspot = false;
@@ -4908,7 +4907,7 @@ void Game::TickOnceAfter()
 				if (Person::players[0]->dead) {
 					targetlevel = whichlevel;
 				}
-				if (loading == 2 && !campaign) {
+				if (state().loading == 2 && !campaign) {
 					flash();
 
 					fireSound(firestartsound);
@@ -4920,11 +4919,11 @@ void Game::TickOnceAfter()
 					LoadLevel(targetlevel);
 					fireSound();
 
-					loading = 3;
+					state().loading = 3;
 				}
-				if (loading == 2 && targetlevel == whichlevel) {
+				if (state().loading == 2 && targetlevel == whichlevel) {
 					flash();
-					loadtime = 0;
+					state().loadtime = 0;
 
 					fireSound(firestartsound);
 
@@ -4932,16 +4931,16 @@ void Game::TickOnceAfter()
 
 					fireSound();
 
-					loading = 3;
+					state().loading = 3;
 				}
 				if (changedelay <= -999 &&
 					whichlevel != -2 &&
-					!loading &&
+					!state().loading &&
 					(Person::players[0]->dead ||
 						(alldead && maptype == mapkilleveryone) ||
 						(winhotspot) ||
 						(Hotspot::killhotspot))) {
-					loading = 1;
+					state().loading = 1;
 				}
 				if ((Person::players[0]->dead ||
 					(alldead && maptype == mapkilleveryone) ||
@@ -4949,12 +4948,12 @@ void Game::TickOnceAfter()
 					(windialogue) ||
 					(Hotspot::killhotspot)) &&
 					changedelay <= 0) {
-					if (whichlevel != -2 && !loading && !Person::players[0]->dead) {
-						winfreeze = true;
+					if (whichlevel != -2 && !state().loading && !Person::players[0]->dead) {
+						state().winfreeze = true;
 						changedelay = -999;
 					}
 					if (Person::players[0]->dead) {
-						loading = 1;
+						state().loading = 1;
 					}
 				}
 			}
@@ -4964,12 +4963,12 @@ void Game::TickOnceAfter()
 				// 0 = load next level
 				// 1 = go back to level select screen
 				// 2 = stealthload next level
-				if (mainmenu == 0 && winfreeze && (campaignlevels[actuallevel].choosenext) == 1) {
+				if (mainmenu == 0 && state().winfreeze && (campaignlevels[actuallevel].choosenext) == 1) {
 					if (campaignlevels[actuallevel].nextlevel.empty()) {
 						endgame = 1;
 					}
 				}
-				else if (mainmenu == 0 && winfreeze) {
+				else if (mainmenu == 0 && state().winfreeze) {
 					stealthloading = (campaignlevels[actuallevel].choosenext == 2);
 
 					if (!stealthloading) {
@@ -4982,16 +4981,16 @@ void Game::TickOnceAfter()
 
 					LoadCampaign();
 
-					loading = 2;
-					loadtime = 0;
+					state().loading = 2;
+					state().loadtime = 0;
 					targetlevel = 7;
 					if (!firstLoadDone) {
 						LoadStuff();
 					}
-					whichchoice = 0;
+					state().whichchoice = 0;
 					actuallevel = campaignlevels[actuallevel].nextlevel.front();
-					visibleloading = true;
-					stillloading = 1;
+					state().visibleloading = true;
+					state().stillloading = 1;
 					LoadLevel(campaignlevels[actuallevel].mapname.c_str());
 					campaign = 1;
 					mainmenu = 0;
@@ -5002,8 +5001,8 @@ void Game::TickOnceAfter()
 				}
 			}
 
-			if (loading == 3) {
-				loading = 0;
+			if (state().loading == 3) {
+				state().loading = 0;
 			}
 		}
 
