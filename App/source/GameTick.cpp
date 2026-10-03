@@ -1097,17 +1097,10 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 
 	Person::players[0]->aitype = playercontrolled;
 
-	if (difficulty == 1) {
-		Person::players[0]->power = 10 / .9;
-		Person::players[0]->damagetolerance = 2500;
-	}
-	else if (difficulty == 0) {
-		Person::players[0]->power = 10 / .8;
-		Person::players[0]->damagetolerance = 3000;
-		Person::players[0]->armorhead *= 1.5;
-		Person::players[0]->armorhigh *= 1.5;
-		Person::players[0]->armorlow *= 1.5;
-	}
+	// Player power and damagetolerance are set by Setenvironment(), which this
+	// function calls above. Do not re-assign them here: a leftover block doing
+	// so used to overwrite the intended values with 10x testing values (and
+	// applied the difficulty 0 armor bonus a second time).
 
 	cameraloc = Person::players[0]->coords;
 	cameraloc.y += 5;
