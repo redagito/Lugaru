@@ -93,7 +93,7 @@ inline bool DistancePointLine(Vector3* Point, Vector3* LineStart, Vector3* LineE
 
 inline void Normalise(Vector3* vectory)
 {
-	static float d;
+	float d;
 	d = sqrt(vectory->x * vectory->x + vectory->y * vectory->y + vectory->z * vectory->z);
 	if (d == 0) {
 		return;
@@ -143,7 +143,7 @@ inline Vector3 Vector3::operator*(const Vector3& add) const
 
 inline Vector3 Vector3::operator/(float add) const
 {
-	static Vector3 ne;
+	Vector3 ne;
 	ne.x = x / add;
 	ne.y = y / add;
 	ne.z = z / add;
@@ -215,7 +215,7 @@ inline void CrossProduct(Vector3 P, Vector3 Q, Vector3* V)
 
 inline float normaldotproduct(Vector3 point1, Vector3 point2)
 {
-	static float returnvalue;
+	float returnvalue;
 	Normalise(&point1);
 	Normalise(&point2);
 	returnvalue = (point1.x * point2.x + point1.y * point2.y + point1.z * point2.z);
@@ -229,9 +229,9 @@ inline void ReflectVector(Vector3* vel, const Vector3* n)
 
 inline void ReflectVector(Vector3* vel, const Vector3& n)
 {
-	static Vector3 vn;
-	static Vector3 vt;
-	static float dotprod;
+	Vector3 vn;
+	Vector3 vt;
+	float dotprod;
 
 	dotprod = dotproduct(&n, vel);
 	vn.x = n.x * dotprod;
@@ -249,7 +249,7 @@ inline void ReflectVector(Vector3* vel, const Vector3& n)
 
 inline float dotproduct(const Vector3* point1, const Vector3* point2)
 {
-	static float returnvalue;
+	float returnvalue;
 	returnvalue = (point1->x * point2->x + point1->y * point2->y + point1->z * point2->z);
 	return returnvalue;
 }
@@ -286,7 +286,7 @@ inline float distsqflat(const Vector3* point1, const Vector3* point2)
 
 inline Vector3 DoRotation(Vector3 thePoint, float xang, float yang, float zang)
 {
-	static Vector3 newpoint;
+	Vector3 newpoint;
 	if (xang) {
 		xang *= 6.283185f;
 		xang /= 360;
@@ -344,7 +344,7 @@ inline bool sphere_line_intersection(
 	// the number of intersection point, followed by coordinate pairs.
 
 	//~ static float x , y , z;
-	static float a, b, c, /*mu,*/ i;
+	float a, b, c, /*mu,*/ i;
 
 	if (x1 > x3 + r && x2 > x3 + r)
 		return (0);
@@ -386,7 +386,7 @@ inline bool sphere_line_intersection(
 	// the number of intersection point, followed by coordinate pairs.
 
 	//~ static float x , y , z;
-	static float a, b, c, /*mu,*/ i;
+	float a, b, c, /*mu,*/ i;
 
 	if (p1->x > p3->x + *r && p2->x > p3->x + *r)
 		return (0);
@@ -417,8 +417,8 @@ inline bool sphere_line_intersection(
 
 inline Vector3 DoRotationRadian(Vector3 thePoint, float xang, float yang, float zang)
 {
-	static Vector3 newpoint;
-	static Vector3 oldpoint;
+	Vector3 newpoint;
+	Vector3 oldpoint;
 
 	oldpoint = thePoint;
 
