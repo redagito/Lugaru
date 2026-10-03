@@ -20,6 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Game.hpp"
 #include "GameGlobals.h"
+#include "GameState.hpp"
 #include "Globals.h"
 
 #include "Audio/AudioState.hpp"
@@ -110,7 +111,7 @@ bool SetUp()
 {
 	cellophane = 0;
 	texdetail = 4;
-	slomospeed = 0.25;
+	state().slomospeed = 0.25;
 	slomofreq = 8012;
 
 	DefaultSettings();
@@ -327,7 +328,7 @@ void DoUpdate()
 		multiplier = .6;
 	}
 
-	fps = 1 / multiplier;
+	state().fps = 1 / multiplier;
 
 	count = multiplier * sps;
 	if (count < 2) {
@@ -347,7 +348,7 @@ void DoUpdate()
 		multiplier *= .00001;
 	}
 	if (slomo && !mainmenu) {
-		multiplier *= slomospeed;
+		multiplier *= state().slomospeed;
 	}
 	oldmult = multiplier;
 	multiplier /= (float)count;

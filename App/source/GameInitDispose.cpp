@@ -24,6 +24,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Animation/Animation.hpp"
 #include "Audio/openal_wrapper.hpp"
 #include "CommandLine.hpp"
+#include "GameState.hpp"
 #include "Graphic/Texture.hpp"
 #include "Menu/Menu.hpp"
 #include "Utils/Folders.hpp"

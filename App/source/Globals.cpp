@@ -18,9 +18,20 @@ You should have received a copy of the GNU General Public License
 along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "GameState.hpp"
 #include "Globals.h"
 
 // TODO GET RID OF ALL OF THESE!
+
+namespace
+{
+	GameState gameStateInstance;
+}
+
+GameState& state()
+{
+	return gameStateInstance;
+}
 
 bool visibleloading = false;
 
@@ -44,7 +55,6 @@ float multiplier = 0;
 float realmultiplier = 0;
 float screenwidth = 0, screenheight = 0;
 float minscreenwidth = 640, minscreenheight = 480;
-float maxscreenwidth = 3000, maxscreenheight = 3000;
 bool fullscreen = 0;
 float viewdistance = 0;
 Vector3 viewer;
@@ -76,7 +86,6 @@ bool trilinear;
 Weapons weapons;
 bool damageeffects = false;
 bool ambientsound = false;
-bool mousejump = false;
 bool freeze = false;
 bool winfreeze = false;
 float flashamount = 0, flashr = 0, flashg = 0, flashb = 0;
@@ -95,16 +104,9 @@ int whichjointendarray[26] = { 0 };
 
 float smoketex = 0;
 
-float slomospeed = 0;
-
-bool againbonus = false;
-
 float damagedealt = 0;
 
 int maptype = 0;
-
-int editoractive = 0;
-int editorpathtype = 0;
 
 bool reversaltrain = false;
 bool cananger = false;

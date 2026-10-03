@@ -5,9 +5,9 @@ namespace Game
 	Texture terraintexture;
 	Texture terraintexture2;
 	Texture loadscreentexture;
+	Texture Mapcircletexture;
 	Texture Maparrowtexture;
 	Texture Mapboxtexture;
-	Texture Mapcircletexture;
 	Texture cursortexture;
 	GLuint screentexture = 0;
 	GLuint screentexture2 = 0;
@@ -26,28 +26,24 @@ namespace Game
 	int mousecoordh = 0;
 	int mousecoordv = 0;
 	int oldmousecoordh = 0;
-	int oldmousecoordv = 0;
 	float yaw = 0;
 	float pitch = 0;
 	SkyBox* skybox = NULL;
 	bool cameramode = 0;
 	bool firstLoadDone = false;
 
-	Texture hawktexture;
-	float hawkyaw = 0;
-	float hawkcalldelay = 0;
-
 	float leveltime = 0;
 	float wonleveltime = 0;
 	float loadtime = 0;
 
 	Model hawk;
+	Texture hawktexture;
 	Vector3 hawkcoords;
 	Vector3 realhawkcoords;
 
 	Model eye;
-	Model iris;
 	Model cornea;
+	Model iris;
 
 	bool stealthloading = 0;
 
@@ -58,7 +54,6 @@ namespace Game
 
 	Text* text = NULL;
 	Text* textmono = NULL;
-	float fps = 0;
 
 	bool editorenabled = 0;
 	int editortype = 0;
@@ -75,13 +70,10 @@ namespace Game
 	int pathpointselected = 0;
 
 	int endgame = 0;
-	bool scoreadded = 0;
 	int numchallengelevels = 0;
 
 	bool console = false;
 	std::string consoletext[15] = {};
-	float consoleblinkdelay = 0;
-	bool consoleblink = 0;
 	unsigned consoleselected = 0;
 
 	unsigned short crouchkey = 0, jumpkey = 0, forwardkey = 0, backkey = 0, leftkey = 0, rightkey = 0, drawkey = 0, throwkey = 0, attackkey = 0;

@@ -21,6 +21,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "User/Settings.hpp"
 
 #include "GameGlobals.h"
+#include "GameState.hpp"
 #include "Globals.h"
 #include "Graphic/Stereo.hpp"
 #include "Utils/Folders.hpp"
@@ -77,10 +78,10 @@ void SaveSettings()
 	if (Game::newdetail > 2) {
 		Game::newdetail = 2;
 	}
-	if (Game::newscreenwidth < minscreenwidth || Game::newscreenwidth > maxscreenwidth) {
+	if (Game::newscreenwidth < minscreenwidth || Game::newscreenwidth > state().maxscreenwidth) {
 		Game::newscreenwidth = screenwidth;
 	}
-	if (Game::newscreenheight < minscreenheight || Game::newscreenheight > maxscreenheight) {
+	if (Game::newscreenheight < minscreenheight || Game::newscreenheight > state().maxscreenheight) {
 		Game::newscreenheight = screenheight;
 	}
 	errno = 0;
@@ -104,7 +105,7 @@ void SaveSettings()
 	opstream << "\nFloating jump:\n";
 	opstream << floatjump;
 	opstream << "\nMouse jump:\n";
-	opstream << mousejump;
+	opstream << state().mousejump;
 	opstream << "\nAmbient sound:\n";
 	opstream << ambientsound;
 	opstream << "\nBlood (0,1,2):\n";
@@ -202,13 +203,13 @@ bool LoadSettings()
 
 		if (!strncmp(setting, "Screenwidth", 11)) {
 			ipstream >> kContextWidth;
-			if (kContextWidth < (int)minscreenwidth || kContextWidth >(int)maxscreenwidth) {
+			if (kContextWidth < (int)minscreenwidth || kContextWidth >(int)state().maxscreenwidth) {
 				kContextWidth = (int)minscreenwidth;
 			}
 		}
 		else if (!strncmp(setting, "Screenheight", 12)) {
 			ipstream >> kContextHeight;
-			if (kContextHeight < (int)minscreenheight || kContextHeight >(int)maxscreenheight) {
+			if (kContextHeight < (int)minscreenheight || kContextHeight >(int)state().maxscreenheight) {
 				kContextHeight = (int)minscreenheight;
 			}
 		}
@@ -228,7 +229,7 @@ bool LoadSettings()
 			ipstream >> floatjump;
 		}
 		else if (!strncmp(setting, "Mouse jump", 10)) {
-			ipstream >> mousejump;
+			ipstream >> state().mousejump;
 		}
 		else if (!strncmp(setting, "Ambient sound", 13)) {
 			ipstream >> ambientsound;
@@ -356,10 +357,10 @@ bool LoadSettings()
 	if (detail < 0) {
 		detail = 0;
 	}
-	if (screenwidth < minscreenwidth || screenwidth > maxscreenwidth) {
+	if (screenwidth < minscreenwidth || screenwidth > state().maxscreenwidth) {
 		screenwidth = 1024;
 	}
-	if (screenheight < minscreenheight || screenheight > maxscreenheight) {
+	if (screenheight < minscreenheight || screenheight > state().maxscreenheight) {
 		screenheight = 768;
 	}
 

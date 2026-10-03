@@ -29,6 +29,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Audio/AudioState.hpp"
 #include "Audio/openal_wrapper.hpp"
 #include "Devtools/ConsoleCmds.hpp"
+#include "GameState.hpp"
 #include "Level/Awards.hpp"
 #include "Level/Campaign.hpp"
 #include "Level/Dialog.hpp"
@@ -399,7 +400,7 @@ void Game::ResetBeforeLevelLoad(bool tutorial)
 		Tutorial::maxtime = 1;
 	}
 
-	scoreadded = 0;
+	state().scoreadded = 0;
 	windialogue = false;
 	hostiletime = 0;
 	won = 0;
@@ -1588,7 +1589,7 @@ void Game::ProcessDevInput()
 
 			Person::players.back()->scale = Person::players[0]->scale;
 			Person::players.back()->creature = rabbittype;
-			Person::players.back()->howactive = editoractive;
+			Person::players.back()->howactive = state().editoractive;
 			Person::players.back()->whichskin = (int)(abs(rand() % 3));
 
 			Person::players.back()->skeletonLoad(Tutorial::active);
@@ -1637,7 +1638,7 @@ void Game::ProcessDevInput()
 		if (Input::isKeyPressed(SDL_SCANCODE_P) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
 			if (Person::players.back()->numwaypoints < 90) {
 				Person::players.back()->waypoints[Person::players.back()->numwaypoints] = Person::players[0]->coords;
-				Person::players.back()->waypointtype[Person::players.back()->numwaypoints] = editorpathtype;
+				Person::players.back()->waypointtype[Person::players.back()->numwaypoints] = state().editorpathtype;
 				Person::players.back()->numwaypoints++;
 			}
 			else {
@@ -3191,10 +3192,10 @@ void Game::Tick()
 				}
 			}
 
-			consoleblinkdelay -= multiplier;
-			if (consoleblinkdelay <= 0) {
-				consoleblinkdelay = .3;
-				consoleblink = !consoleblink;
+			state().consoleblinkdelay -= multiplier;
+			if (state().consoleblinkdelay <= 0) {
+				state().consoleblinkdelay = .3;
+				state().consoleblink = !state().consoleblink;
 			}
 		}
 
@@ -3565,16 +3566,16 @@ void Game::Tick()
 			}
 
 			Dialog::dialoguetime += multiplier;
-			hawkyaw += multiplier * 25;
+			state().hawkyaw += multiplier * 25;
 			realhawkcoords = 0;
 			realhawkcoords.x = 25;
-			realhawkcoords = DoRotation(realhawkcoords, 0, hawkyaw, 0) + hawkcoords;
-			hawkcalldelay -= multiplier / 2;
+			realhawkcoords = DoRotation(realhawkcoords, 0, state().hawkyaw, 0) + hawkcoords;
+			state().hawkcalldelay -= multiplier / 2;
 
-			if (hawkcalldelay <= 0) {
+			if (state().hawkcalldelay <= 0) {
 				emit_sound_at(hawksound, realhawkcoords);
 
-				hawkcalldelay = 16 + abs(rand() % 8);
+				state().hawkcalldelay = 16 + abs(rand() % 8);
 			}
 
 			doAttacks();
@@ -4455,7 +4456,7 @@ void Game::Tick()
 									Person::players[i]->velocity.y = 5;
 								}
 
-								if (mousejump && i == 0 && devtools) {
+								if (state().mousejump && i == 0 && devtools) {
 									if (!Person::players[i]->isLanding()) {
 										Person::players[i]->tempdeltav = deltav;
 									}
@@ -4882,7 +4883,7 @@ void Game::TickOnceAfter()
 				//high scores, awards, win
 				if (campaign) {
 					Account::active().winCampaignLevel(whichchoice, bonustotal, leveltime);
-					scoreadded = 1;
+					state().scoreadded = 1;
 				}
 				else {
 					wonleveltime = leveltime;

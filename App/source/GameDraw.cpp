@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "GameGlobals.h"
 
 #include "Audio/openal_wrapper.hpp"
+#include "GameState.hpp"
 #include "Level/Awards.hpp"
 #include "Level/Dialog.hpp"
 #include "Level/Hotspot.hpp"
@@ -142,7 +143,7 @@ int Game::DrawGLScene(StereoSide side)
 		}
 		if ((!changed && !slomo) || loading) {
 			drawmode = normalmode;
-			if (ismotionblur && (/*fps>100||*/ alwaysblur)) {
+			if (ismotionblur && (/*state().fps>100||*/ alwaysblur)) {
 				if (olddrawmode != realmotionblurmode) {
 					change = 1;
 				}
@@ -449,7 +450,7 @@ int Game::DrawGLScene(StereoSide side)
 			glDisable(GL_LIGHTING);
 			glEnable(GL_BLEND);
 			glTranslatef(hawkcoords.x, hawkcoords.y, hawkcoords.z);
-			glRotatef(hawkyaw, 0, 1, 0);
+			glRotatef(state().hawkyaw, 0, 1, 0);
 			glTranslatef(25, 0, 0);
 			distance = distsq(&viewer, &realhawkcoords) * 1.2;
 			glColor4f(light.color[0], light.color[1], light.color[2], (viewdistance * viewdistance - (distance - (viewdistance * viewdistance * fadestart)) * (1 / (1 - fadestart))) / viewdistance / viewdistance);
@@ -735,7 +736,7 @@ int Game::DrawGLScene(StereoSide side)
 
 			if (!Tutorial::active && !winfreeze && !Dialog::inDialog() && !mainmenu) {
 				if (campaign) {
-					if (scoreadded) {
+					if (state().scoreadded) {
 						string = "Score: " + std::to_string(int(Account::active().getCampaignScore()));
 					}
 					else {
@@ -832,7 +833,7 @@ int Game::DrawGLScene(StereoSide side)
 			glColor4f(.5, .5, .5, 1);
 
 			if ((texttoggle || editorenabled) && devtools && !mainmenu) {
-				string = "The framespersecond is " + std::to_string(int(fps));
+				string = "The framespersecond is " + std::to_string(int(state().fps));
 				text->glPrint(10, 30, string, 0, .8, 1024, 768);
 
 				if (editorenabled) {
@@ -1575,7 +1576,7 @@ int Game::DrawGLScene(StereoSide side)
 				offset = consoleselected - 60;
 			}
 			textmono->glPrint(10, 30, " ]", 0, 1, 1024, 768);
-			if (consoleblink) {
+			if (state().consoleblink) {
 				textmono->glPrint(30 + (float)consoleselected * 10 - offset * 10, 30, "_", 0, 1, 1024, 768);
 			}
 			for (unsigned i = 0; i < 15; i++) {

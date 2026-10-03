@@ -12,9 +12,9 @@ namespace Game
 	extern Texture terraintexture;
 	extern Texture terraintexture2;
 	extern Texture loadscreentexture;
+	extern Texture Mapcircletexture;
 	extern Texture Maparrowtexture;
 	extern Texture Mapboxtexture;
-	extern Texture Mapcircletexture;
 	extern Texture cursortexture;
 	extern GLuint screentexture;
 	extern GLuint screentexture2;
@@ -30,7 +30,7 @@ namespace Game
 	extern bool gameon;
 	extern float deltah, deltav;
 	extern int mousecoordh, mousecoordv;
-	extern int oldmousecoordh, oldmousecoordv;
+	extern int oldmousecoordh;
 	extern float yaw, pitch;
 	extern SkyBox* skybox;
 	extern bool cameramode;
@@ -41,15 +41,13 @@ namespace Game
 	extern float loadtime;
 
 	extern Model hawk;
+	extern Texture hawktexture;
 	extern Vector3 hawkcoords;
 	extern Vector3 realhawkcoords;
-	extern Texture hawktexture;
-	extern float hawkyaw;
-	extern float hawkcalldelay;
 
 	extern Model eye;
-	extern Model iris;
 	extern Model cornea;
+	extern Model iris;
 
 	extern bool stealthloading;
 	extern int loading;
@@ -61,7 +59,6 @@ namespace Game
 
 	extern Text* text;
 	extern Text* textmono;
-	extern float fps;
 
 	extern bool editorenabled;
 	extern int editortype;
@@ -78,13 +75,10 @@ namespace Game
 	extern int pathpointselected;
 
 	extern int endgame;
-	extern bool scoreadded;
 	extern int numchallengelevels;
 
 	extern bool console;
 	extern std::string consoletext[15];
-	extern float consoleblinkdelay;
-	extern bool consoleblink;
 	extern unsigned consoleselected;
 
 	extern int oldenvironment;

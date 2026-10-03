@@ -27,6 +27,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 // Game
 #include "Game.hpp"
 #include "GameGlobals.h"
+#include "GameState.hpp"
 #include "Globals.h"
 #include "Level/Awards.hpp"
 #include "Objects/Person.hpp"
@@ -128,10 +129,10 @@ void Tutorial::Do(float multiplier, bool bloodtoggle)
 			maxtime = 500;
 			if (bonus == cannon) {
 				bonus = Slicebonus;
-				againbonus = 1;
+				state().againbonus = 1;
 			}
 			else {
-				againbonus = 0;
+				state().againbonus = 0;
 			}
 			break;
 		case 27:
@@ -643,7 +644,7 @@ void Tutorial::DrawTextInfo()
 	case 21:
 		string1 = "This attack is devastating if timed correctly.";
 		string2 = "Even if timed incorrectly, it will knock the enemy over.";
-		if (againbonus) {
+		if (state().againbonus) {
 			string3 = "Try rabbit-kicking the imaginary enemy again.";
 		}
 		else {

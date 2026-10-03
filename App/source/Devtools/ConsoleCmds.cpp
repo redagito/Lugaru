@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Audio/AudioState.hpp"
 #include "Game.hpp"
+#include "GameState.hpp"
 #include "Level/Dialog.hpp"
 #include "Level/Hotspot.hpp"
 #include "Tutorial.hpp"
@@ -588,7 +589,7 @@ void ch_type(const char* args)
 	int n = sizeof(editortypenames) / sizeof(editortypenames[0]);
 	for (int i = 0; i < n; i++) {
 		if (stripfx(args, editortypenames[i])) {
-			editoractive = i;
+			state().editoractive = i;
 			break;
 		}
 	}
@@ -599,7 +600,7 @@ void ch_path(const char* args)
 	unsigned int n = sizeof(pathtypenames) / sizeof(pathtypenames[0]);
 	for (unsigned int i = 0; i < n; i++) {
 		if (stripfx(args, pathtypenames[i])) {
-			editorpathtype = i;
+			state().editorpathtype = i;
 			break;
 		}
 	}
@@ -728,7 +729,7 @@ void ch_default(const char*)
 		PersonType::types[Person::players[0]->creature].skins[Person::players[0]->whichskin], 1,
 		&Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, trilinear, []() {Game::LoadingScreen(); });
 
-	editoractive = typeactive;
+	state().editoractive = typeactive;
 	Person::players[0]->immobile = 0;
 }
 
@@ -777,7 +778,7 @@ void ch_fadestart(const char* args)
 
 void ch_slomo(const char* args)
 {
-	slomospeed = atof(args);
+	state().slomospeed = atof(args);
 	slomo = !slomo;
 	slomodelay = 1000;
 }
