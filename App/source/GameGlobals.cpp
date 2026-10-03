@@ -25,7 +25,6 @@ namespace Game
 	float deltav = 0;
 	int mousecoordh = 0;
 	int mousecoordv = 0;
-	int oldmousecoordh = 0;
 	float yaw = 0;
 	float pitch = 0;
 	SkyBox* skybox = NULL;

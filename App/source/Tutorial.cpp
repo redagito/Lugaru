@@ -35,8 +35,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 // Foundation
 #include "Utils/Input.hpp"
 
-extern int bonus;
-
 bool Tutorial::active = false;
 int Tutorial::stage = 0;
 float Tutorial::stagetime = 0;

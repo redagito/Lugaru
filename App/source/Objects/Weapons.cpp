@@ -42,9 +42,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <Animation/Joint.hpp>
 #include <Graphic/DecalType.h>
 #include <Graphic/Texture.hpp>
-//#include "Level/Awards.hpp"
-
-extern int numthrowkill;
+#include "Level/Awards.hpp"
 
 Model Weapon::throwingknifemodel;
 Texture Weapon::knifetextureptr;

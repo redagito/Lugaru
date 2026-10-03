@@ -26,7 +26,6 @@ TEST_CASE("GameState members start at their historical global defaults", "[games
 
 	SECTION("cursor")
 	{
-		REQUIRE(s.oldmousecoordv == 0);
 		REQUIRE(s.mousejump == false);
 	}
 
@@ -66,7 +65,6 @@ TEST_CASE("a freshly constructed GameState is unaffected by another instance", "
 		a.editorpathtype = 1;
 		a.hawkyaw = 2.5f;
 		a.hawkcalldelay = 7.0f;
-		a.oldmousecoordv = 12;
 		a.mousejump = true;
 		a.consoleblink = true;
 		a.consoleblinkdelay = 0.3f;
@@ -81,7 +79,6 @@ TEST_CASE("a freshly constructed GameState is unaffected by another instance", "
 		REQUIRE(b.editorpathtype == 0);
 		REQUIRE(b.hawkyaw == 0.0f);
 		REQUIRE(b.hawkcalldelay == 0.0f);
-		REQUIRE(b.oldmousecoordv == 0);
 		REQUIRE(b.mousejump == false);
 		REQUIRE(b.consoleblink == false);
 		REQUIRE(b.consoleblinkdelay == 0.0f);
@@ -95,7 +92,6 @@ TEST_CASE("a freshly constructed GameState is unaffected by another instance", "
 		GameState c;
 		REQUIRE(c.editoractive == 0);
 		REQUIRE(c.hawkyaw == 0.0f);
-		REQUIRE(c.oldmousecoordv == 0);
 		REQUIRE(c.mousejump == false);
 		REQUIRE(c.consoleblink == false);
 		REQUIRE(c.slomospeed == 0.0f);

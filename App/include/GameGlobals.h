@@ -30,7 +30,6 @@ namespace Game
 	extern bool gameon;
 	extern float deltah, deltav;
 	extern int mousecoordh, mousecoordv;
-	extern int oldmousecoordh;
 	extern float yaw, pitch;
 	extern SkyBox* skybox;
 	extern bool cameramode;

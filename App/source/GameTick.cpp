@@ -68,9 +68,6 @@ using namespace Game;
 #endif
 
 int leveltheme;
-extern int oldmainmenu;
-
-extern bool campaign;
 
 bool won = false;
 int whichchoice = 0;

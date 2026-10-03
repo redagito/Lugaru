@@ -23,14 +23,12 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 // TODO GET RID OF ALL OF THESE!
 
-namespace
-{
-	GameState gameStateInstance;
-}
-
 GameState& state()
 {
-	return gameStateInstance;
+	// Function-local static, not a namespace-scope global: it is constructed on
+	// first call, so no other translation unit can read it before construction.
+	static GameState instance;
+	return instance;
 }
 
 bool visibleloading = false;

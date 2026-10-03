@@ -26,9 +26,9 @@ bool PointInTriangle(Vector3* p, Vector3 normal, Vector3* p1, Vector3* p2, Vecto
     float v0, v1, v2;
     float a, b;
     float max;
-    // A finite normal always makes at least one of the three max comparisons
-    // below match, so i and j are assigned before use. They are seeded to 0 to
-    // match the old zero-initialised statics, since a NaN normal matches none.
+    // Seeded to 0 to match the old statics on the first call. On later calls the
+    // old statics kept stale axis indices from the previous call; the old warm-call
+    // behaviour was history-dependent, so this is strictly more deterministic.
     int i = 0, j = 0;
     bool bInter = 0;
     float pointv[3];
