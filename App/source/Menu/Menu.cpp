@@ -41,16 +41,11 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace Game;
 
-extern float multiplier;
-extern int mainmenu;
 extern std::vector<CampaignLevel> campaignlevels;
 extern float musicvolume[4];
 extern float oldmusicvolume[4];
-extern bool stillloading;
-extern bool visibleloading;
 extern int whichchoice;
 extern int leveltheme;
-extern bool fullscreen;
 
 int entername = 0;
 std::string newusername = "";

@@ -66,71 +66,8 @@ using namespace Game;
 #define snprintf(buf, size, format, ...) _sprintf_p(buf, size, format)
 #endif
 
-extern float multiplier;
-extern Vector3 viewer;
-extern int environment;
-extern Terrain terrain;
-extern float screenwidth, screenheight;
-extern float gravity;
-extern int detail;
-extern float texdetail;
-extern int slomo;
-extern float slomodelay;
-extern bool floatjump;
-extern float volume;
-extern Light light;
-extern float camerashake;
-extern float woozy;
-extern float blackout;
-extern bool cellophane;
-extern bool musictoggle;
-extern int difficulty;
-extern int bloodtoggle;
-extern bool invertmouse;
-extern float windvar;
-extern float precipdelay;
-extern Vector3 viewerfacing;
-extern bool ambientsound;
-extern bool mousejump;
-extern float viewdistance;
-extern bool freeze;
-extern Vector3 windvector;
-extern bool devtools;
 int leveltheme;
-extern int mainmenu;
 extern int oldmainmenu;
-extern bool visibleloading;
-extern float usermousesensitivity;
-extern bool ismotionblur;
-extern bool showdamagebar; // (des)activate the damage bar
-extern bool decalstoggle;
-extern bool skyboxtexture;
-extern float skyboxr;
-extern float skyboxg;
-extern float skyboxb;
-extern float skyboxlightr;
-extern float skyboxlightg;
-extern float skyboxlightb;
-extern float fadestart;
-extern float slomospeed;
-extern float smoketex;
-extern bool againbonus;
-extern bool reversaltrain;
-extern bool canattack;
-extern bool cananger;
-extern float damagedealt;
-extern int maptype;
-extern int editoractive;
-extern int editorpathtype;
-
-extern float hostiletime;
-
-extern bool gamestarted;
-
-extern int hostile;
-
-extern bool stillloading;
-extern bool winfreeze;
 
 extern bool campaign;
 

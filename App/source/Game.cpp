@@ -20,14 +20,13 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Game.hpp"
 #include "GameGlobals.h"
+#include "Globals.h"
 
 #include "Audio/openal_wrapper.hpp"
 #include "Level/Dialog.hpp"
 #include "WindowContext.hpp"
 
 #include <SDL_thread.h>
-
-extern int mainmenu;
 
 const char* pathtypenames[] = { "keepwalking", "pause" };
 const char* editortypenames[] = {

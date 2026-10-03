@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Objects/Weapons.hpp"
 #include "Objects/Person.hpp"
 #include "Objects/Object.hpp"
+#include "Globals.h"
 
 #include "Animation/Animation.hpp"
 #include <gl/GL.h>
@@ -43,25 +44,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <Graphic/Texture.hpp>
 //#include "Level/Awards.hpp"
 
-extern float multiplier;
-extern Terrain terrain;
-extern float gravity;
-extern int environment;
-extern int detail;
-extern Frustum frustum;
-extern Vector3 viewer;
-extern float realmultiplier;
-extern int slomo;
-extern float slomodelay;
-extern bool cellophane;
-extern float texdetail;
-extern int bloodtoggle;
-extern bool autoslomo;
-extern float camerashake;
-extern float woozy;
-extern float viewdistance;
-extern float blackout;
-extern bool freeze;
 extern int numthrowkill;
 
 Model Weapon::throwingknifemodel;

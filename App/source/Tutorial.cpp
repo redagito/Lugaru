@@ -27,20 +27,14 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 // Game
 #include "Game.hpp"
 #include "GameGlobals.h"
+#include "Globals.h"
 #include "Level/Awards.hpp"
 #include "Objects/Person.hpp"
 
 // Foundation
 #include "Utils/Input.hpp"
 
-extern bool reversaltrain;
-extern bool canattack;
-extern bool cananger;
 extern int bonus;
-extern float damagedealt;
-extern bool againbonus;
-extern float screenwidth, screenheight;
-extern int mainmenu;
 
 bool Tutorial::active = false;
 int Tutorial::stage = 0;

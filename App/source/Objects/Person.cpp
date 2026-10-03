@@ -24,6 +24,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Game.hpp"
 #include "GameGlobals.h"
+#include "Globals.h"
 
 #include "Level/Awards.hpp"
 
@@ -34,44 +35,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Utils/Folders.hpp"
 #include "Math/Math.h"
-
-//extern float multiplier;
-extern float gravity;
-extern int environment;
-extern int detail;
-extern Frustum frustum;
-extern Vector3 viewer;
-extern float realmultiplier;
-extern int slomo;
-extern float slomodelay;
-extern bool cellophane;
-extern float texdetail;
-extern float realtexdetail;
-extern int bloodtoggle;
-extern bool autoslomo;
-extern float camerashake;
-extern float woozy;
-extern float viewdistance;
-extern float blackout;
-extern int difficulty;
-extern bool decalstoggle;
-extern float fadestart;
-extern bool freeze;
-extern bool winfreeze;
-extern bool showpoints;
-extern bool immediate;
-extern float smoketex;
-extern bool reversaltrain;
-extern bool canattack;
-extern bool cananger;
-extern float damagedealt;
-extern int hostile;
-extern float hostiletime;
-extern bool trilinear;
-
-extern bool gamestarted;
-
-extern Vector3 windvector;
 
 std::vector<std::shared_ptr<Person>> Person::players;
 

@@ -56,26 +56,6 @@ using namespace Game;
 /* globals */
 
 extern bool campaign;
-extern bool cellophane;
-extern int editoractive;
-extern int editorpathtype;
-extern int environment;
-extern float fadestart;
-extern float slomospeed;
-extern int hostile;
-extern int maptype;
-extern int slomo;
-extern float slomodelay;
-extern bool skyboxtexture;
-extern float skyboxr;
-extern float skyboxg;
-extern float skyboxb;
-extern float skyboxlightr;
-extern float skyboxlightg;
-extern float skyboxlightb;
-extern Terrain terrain;
-extern float viewdistance;
-extern bool trilinear;
 
 /* defined in GameTick.cpp */
 

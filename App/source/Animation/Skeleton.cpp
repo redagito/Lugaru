@@ -20,6 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Animation/Skeleton.hpp"
 #include "Environment/Terrain.hpp"
+#include "Globals.h"
 
 #include "Objects/Object.hpp"
 #include "Graphic/Sprite.hpp"
@@ -30,8 +31,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Audio/Sounds.hpp"
 // Foundation
 #include "Utils/Folders.hpp"
-
-extern int whichjointendarray[26];
 
 Skeleton::Skeleton()
 	: selected(0)

@@ -31,13 +31,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Globals.h"
 
 extern bool campaign;
-extern bool winfreeze;
 
 extern bool gamestart;
-
-extern bool gamestarted;
-
-extern bool showdamagebar;
 
 int drawtoggle = 0;
 int numboundaries = 0;

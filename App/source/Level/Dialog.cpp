@@ -22,13 +22,12 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Game.hpp"
 #include "GameGlobals.h"
+#include "Globals.h"
 #include "Objects/Person.hpp"
 
 #include "Utils/Folders.hpp"
 #include "Utils/Input.hpp"
 #include "Utils/binio.h"
-
-extern int hostile;
 
 int Dialog::indialogue;
 int Dialog::whichdialogue;
