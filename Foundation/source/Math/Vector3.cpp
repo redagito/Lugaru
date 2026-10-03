@@ -22,17 +22,20 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 bool PointInTriangle(Vector3* p, Vector3 normal, Vector3* p1, Vector3* p2, Vector3* p3)
 {
-    static float u0, u1, u2;
-    static float v0, v1, v2;
-    static float a, b;
-    static float max;
-    static int i, j;
-    static bool bInter = 0;
-    static float pointv[3];
-    static float p1v[3];
-    static float p2v[3];
-    static float p3v[3];
-    static float normalv[3];
+    float u0, u1, u2;
+    float v0, v1, v2;
+    float a, b;
+    float max;
+    // A finite normal always makes at least one of the three max comparisons
+    // below match, so i and j are assigned before use. They are seeded to 0 to
+    // match the old zero-initialised statics, since a NaN normal matches none.
+    int i = 0, j = 0;
+    bool bInter = 0;
+    float pointv[3];
+    float p1v[3];
+    float p2v[3];
+    float p3v[3];
+    float normalv[3];
 
     bInter = 0;
 
@@ -104,9 +107,9 @@ bool PointInTriangle(Vector3* p, Vector3 normal, Vector3* p1, Vector3* p2, Vecto
 
 bool LineFacet(Vector3 p1, Vector3 p2, Vector3 pa, Vector3 pb, Vector3 pc, Vector3* p)
 {
-    static float d;
-    static float denom, mu;
-    static Vector3 n;
+    float d;
+    float denom, mu;
+    Vector3 n;
 
     //Calculate the parameters for the plane
     n.x = (pb.y - pa.y) * (pc.z - pa.z) - (pb.z - pa.z) * (pc.y - pa.y);
@@ -138,9 +141,9 @@ bool LineFacet(Vector3 p1, Vector3 p2, Vector3 pa, Vector3 pb, Vector3 pc, Vecto
 
 float LineFacetHit(Vector3* p1, Vector3* p2, Vector3* pa, Vector3* pb, Vector3* pc, Vector3* p)
 {
-    static float d;
-    static float denom, mu;
-    static Vector3 n;
+    float d;
+    float denom, mu;
+    Vector3 n;
 
     //Calculate the parameters for the plane
     n.x = (pb->y - pa->y) * (pc->z - pa->z) - (pb->z - pa->z) * (pc->y - pa->y);
@@ -170,8 +173,8 @@ float LineFacetHit(Vector3* p1, Vector3* p2, Vector3* pa, Vector3* pb, Vector3* 
 
 float LineFacetHit(Vector3* p1, Vector3* p2, Vector3* pa, Vector3* pb, Vector3* pc, Vector3* n, Vector3* p)
 {
-    static float d;
-    static float denom, mu;
+    float d;
+    float denom, mu;
 
     //Calculate the parameters for the plane
     d = -n->x * pa->x - n->y * pa->y - n->z * pa->z;
