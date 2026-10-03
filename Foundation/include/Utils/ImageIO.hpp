@@ -36,12 +36,28 @@ public:
 	unsigned int sizeX = 0;
 	unsigned int sizeY = 0;
 
+	/** Number of bytes currently allocated for `data`. */
+	size_t capacity() const
+	{
+		return capacity_;
+	}
+
+	/**
+	 * Ensures `data` can hold at least `bytes` bytes, reallocating if needed.
+	 * Loaders must call this with the size implied by the decoded image
+	 * dimensions before writing any pixels. Returns false if allocation fails.
+	 */
+	bool ensureCapacity(size_t bytes);
+
 	ImageRec();
 	~ImageRec();
 
 private:
+	size_t capacity_ = 0;
+
 	/* Make sure this class cannot be copied to avoid memory problems */
-	ImageRec(ImageRec const&);
+	ImageRec(ImageRec const&) = delete;
+	ImageRec& operator=(ImageRec const&) = delete;
 };
 
 bool load_image(const char* fname, ImageRec& tex, ProgressCallback callback);

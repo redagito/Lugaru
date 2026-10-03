@@ -59,6 +59,14 @@ bool load_jpg(const char* file_name, ImageRec& tex)
 	tex.sizeY = cinfo.output_height;
 	tex.bpp = 24;
 
+	// Size the destination from the real image dimensions. The buffer used to be
+	// a fixed 4 MiB, so any image larger than 1024x1024 overflowed it.
+	if (!tex.ensureCapacity((size_t)cinfo.output_width * (size_t)cinfo.output_height * row_stride)) {
+		jpeg_destroy_decompress(&cinfo);
+		fclose(infile);
+		return false;
+	}
+
 	while (cinfo.output_scanline < cinfo.output_height) {
 		buffer[0] = (JSAMPROW)(char*)tex.data +
 			((cinfo.output_height - 1) - cinfo.output_scanline) * row_stride;

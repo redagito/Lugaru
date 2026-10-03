@@ -19,15 +19,18 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Audio/Sounds.hpp"
 
+#include "Audio/AudioState.hpp"
 #include "Audio/openal_wrapper.hpp"
 #include "Utils/Folders.hpp"
 
 struct OPENAL_SAMPLE* samp[sounds_count];
 
-extern Vector3 envsound[30];
-extern float envsoundvol[30];
-extern int numenvsounds;
-extern float envsoundlife[30];
+Vector3 envsound[max_env_sounds];
+float envsoundvol[max_env_sounds] = { 0 };
+float envsoundlife[max_env_sounds] = { 0 };
+int numenvsounds;
+
+float slomofreq = 0;
 
 int footstepsound, footstepsound2, footstepsound3, footstepsound4;
 
@@ -77,6 +80,12 @@ void loadAllSounds()
 
 void addEnvSound(Vector3 coords, float vol, float life)
 {
+    if (numenvsounds >= max_env_sounds)
+    {
+        // The pool is full. Dropping the oldest entry keeps the most recent
+        // sounds audible instead of writing past the end of the arrays.
+        numenvsounds = max_env_sounds - 1;
+    }
     envsound[numenvsounds] = coords;
     envsoundvol[numenvsounds] = vol;
     envsoundlife[numenvsounds] = life;

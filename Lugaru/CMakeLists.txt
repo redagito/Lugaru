@@ -15,9 +15,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES})
 
 add_executable (${PROJECT_NAME} ${SOURCE_FILES})
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-	CXX_STANDARD 17
-)
 
 target_link_libraries (${PROJECT_NAME}
 	PRIVATE AppLib
@@ -38,5 +35,23 @@ target_compile_options(${PROJECT_NAME}
 	# -Wextra -Wpedantic 
 )
 
-file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/Data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/Dist DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# The game resolves DATA_DIR ("Data") relative to the current working directory
+# and only chdirs to the executable's own folder on non-Windows platforms, so
+# the data has to sit next to the binary. Copy it per configuration after the
+# build rather than at configure time: a multi-config generator puts Debug and
+# Release in separate folders, and copy_directory_if_different avoids recopying
+# ~38 MB of assets on every incremental build.
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+		"${CMAKE_CURRENT_SOURCE_DIR}/Data"
+		"$<TARGET_FILE_DIR:${PROJECT_NAME}>/Data"
+	COMMENT "Copying game data next to Lugaru.exe"
+)
+
+# Linux packaging bits (metainfo, man page, desktop file). Not used by the
+# Windows build, but kept alongside for parity with the previous layout.
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+		"${CMAKE_CURRENT_SOURCE_DIR}/Dist"
+		"$<TARGET_FILE_DIR:${PROJECT_NAME}>/Dist"
+)

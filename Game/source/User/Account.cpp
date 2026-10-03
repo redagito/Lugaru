@@ -242,17 +242,26 @@ void Account::loadFile(std::string filename)
     FILE* tfile;
     int numaccounts;
     int iactive;
-    errno = 0;
+errno = 0;
 
     tfile = fopen(filename.c_str(), "rb");
 
     if (tfile) {
-        funpackf(tfile, "Bi", &numaccounts);
-        funpackf(tfile, "Bi", &iactive);
-        printf("Loading %d accounts\n", numaccounts);
-        for (int i = 0; i < numaccounts; i++) {
-            printf("Loading account %d/%d\n", i, numaccounts);
-            accounts.emplace_back(tfile);
+        accounts.clear();
+        try {
+            funpackf(tfile, "Bi", &numaccounts);
+            funpackf(tfile, "Bi", &iactive);
+            for (int i = 0; i < numaccounts; i++) {
+                accounts.emplace_back(tfile);
+            }
+        }
+        catch (...) {
+            // A corrupt or truncated save must not leave a half populated
+            // account list or a dangling file handle behind.
+            fclose(tfile);
+            accounts.clear();
+            i_active = -1;
+            throw;
         }
 
         fclose(tfile);

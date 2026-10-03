@@ -2,13 +2,15 @@
 
 #include "Math/Vector3.hpp"
 
+#include <numbers>
+
 // utility functions
 
 // TODO: this is slightly incorrect
 inline float roughDirection(Vector3 vec)
 {
 	Normalise(&vec);
-	float angle = -asin(-vec.x) * 180 / M_PI;
+	float angle = -asin(-vec.x) * 180 / std::numbers::pi_v<float>;
 	if (vec.z < 0) {
 		angle = 180 - angle;
 	}
@@ -23,7 +25,7 @@ inline float roughDirectionTo(Vector3 start, Vector3 end)
 inline float pitchOf(Vector3 vec)
 {
 	Normalise(&vec);
-	return -asin(vec.y) * 180 / M_PI;
+	return -asin(vec.y) * 180 / std::numbers::pi_v<float>;
 }
 
 inline float pitchTo(Vector3 start, Vector3 end)

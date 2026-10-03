@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Audio/openal_wrapper.hpp"
 #include "Level/Dialog.hpp"
+#include "WindowContext.hpp"
 
 #include <SDL_thread.h>
 

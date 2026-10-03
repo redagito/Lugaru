@@ -30,6 +30,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "User/Settings.hpp"
 #include "Utils/Input.hpp"
 #include "Version.hpp"
+#include "WindowContext.hpp"
 
 // Should not be needed, Menu should call methods from other classes to launch maps and challenges and so on
 #include "Level/Awards.hpp"
@@ -41,7 +42,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 using namespace Game;
 
 extern float multiplier;
-extern std::set<std::pair<int, int>> resolutions;
 extern int mainmenu;
 extern std::vector<CampaignLevel> campaignlevels;
 extern float musicvolume[4];
@@ -50,11 +50,7 @@ extern bool stillloading;
 extern bool visibleloading;
 extern int whichchoice;
 extern int leveltheme;
-extern int kContextWidth;
-extern int kContextHeight;
 extern bool fullscreen;
-
-extern void toggleFullscreen();
 
 int entername = 0;
 std::string newusername = "";

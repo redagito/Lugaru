@@ -96,7 +96,6 @@ int whichjointendarray[26] = { 0 };
 float smoketex = 0;
 
 float slomospeed = 0;
-float slomofreq = 0;
 
 bool againbonus = false;
 
@@ -121,11 +120,6 @@ float skyboxlightb = 0;
 
 int hostile = 0;
 float hostiletime = 0;
-
-Vector3 envsound[30];
-float envsoundvol[30] = { 0 };
-float envsoundlife[30] = { 0 };
-int numenvsounds;
 
 bool devtools = false;
 

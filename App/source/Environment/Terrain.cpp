@@ -23,6 +23,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Objects/Object.hpp"
 #include "Utils/Folders.hpp"
 
+#include <iostream>
+
 int Terrain::lineTerrain(Vector3 p1, Vector3 p2, Vector3* p) const
 {
 	int i = 0, j = 0, k = 0;
@@ -411,6 +413,19 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 	}
 	texture.bpp = 24;
 	callback();
+
+	// The heightmap and patch arrays are sized for max_terrain_size, and the
+	// loops below assume a square image, so reject anything that does not fit
+	// rather than writing past the end of them.
+	if (texture.sizeX != texture.sizeY) {
+		std::cerr << "Terrain heightmap must be square, got " << texture.sizeX << "x" << texture.sizeY << std::endl;
+		return false;
+	}
+	if (texture.sizeX == 0 || texture.sizeX > max_terrain_size) {
+		std::cerr << "Terrain heightmap must be between 1 and " << max_terrain_size
+				  << " pixels, got " << texture.sizeX << std::endl;
+		return false;
+	}
 
 	size = texture.sizeX;
 

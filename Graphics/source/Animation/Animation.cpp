@@ -123,11 +123,17 @@ Animation::Animation(const std::string& filename, anim_height_type aheight, anim
         frames[i].loadLabel(tfile);
     }
     // read unused weapontargetnum
-    int weapontargetnum;
-    funpackf(tfile, "Bi", &weapontargetnum);
-    // read weapontarget positions for each frame
-    for (i = 0; i < frames.size(); i++) {
-        frames[i].loadWeaponTarget(tfile);
+    // The trailing weapontarget block is optional: animation files written
+    // before that feature was added simply end after the labels. Read it
+    // leniently and fall back to the default (zeroed) weapon targets.
+    int weapontargetnum = 0;
+    if (tryfunpackf(tfile, "Bi", &weapontargetnum)) {
+        // read weapontarget positions for each frame
+        for (i = 0; i < frames.size(); i++) {
+            if (!tryfunpackf(tfile, "Bf Bf Bf", &frames[i].weapontarget.x, &frames[i].weapontarget.y, &frames[i].weapontarget.z)) {
+                break;
+            }
+        }
     }
 
     fclose(tfile);

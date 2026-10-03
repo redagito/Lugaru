@@ -21,6 +21,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Devtools/ConsoleCmds.hpp"
 #include "GameGlobals.h"
 
+#include "Audio/AudioState.hpp"
 #include "Game.hpp"
 #include "Level/Dialog.hpp"
 #include "Level/Hotspot.hpp"
@@ -61,7 +62,6 @@ extern int editorpathtype;
 extern int environment;
 extern float fadestart;
 extern float slomospeed;
-extern float slomofreq;
 extern int hostile;
 extern int maptype;
 extern int slomo;

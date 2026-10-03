@@ -20,18 +20,21 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Utils/Folders.hpp"
 
+#include "Platform/Platform.hpp"
+
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
-//#include <unistd.h>
+#include <cstdio>
 
-#if PLATFORM_UNIX
+#ifdef LUGARU_PLATFORM_UNIX
 #include <pwd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 #endif
 
-#if _WIN32
+#ifdef LUGARU_PLATFORM_WINDOWS
 #include <shlobj.h> // to get paths related functions
 #include <windows.h>
 #endif
@@ -48,7 +51,7 @@ std::string Folders::getScreenshotDir()
 std::string Folders::getUserDataPath()
 {
     std::string userDataPath;
-#ifdef _WIN32
+#ifdef LUGARU_PLATFORM_WINDOWS
     char path[MAX_PATH];
     // %APPDATA% (%USERPROFILE%\Application Data)
     if (SUCCEEDED(SHGetFolderPathA(nullptr, CSIDL_APPDATA, nullptr, 0, path))) {
@@ -56,7 +59,7 @@ std::string Folders::getUserDataPath()
     } else {
         return dataDir;
     }
-#elif (defined(__APPLE__) && defined(__MACH__))
+#elif defined(LUGARU_PLATFORM_MACOS)
     const char* homePath = getHomeDirectory();
     if (homePath == NULL) {
         userDataPath = ".";
@@ -73,7 +76,7 @@ std::string Folders::getUserDataPath()
 std::string Folders::getConfigFilePath()
 {
     std::string configFolder;
-#if defined(_WIN32) || (defined(__APPLE__) && defined(__MACH__))
+#if defined(LUGARU_PLATFORM_WINDOWS) || defined(LUGARU_PLATFORM_MACOS)
     configFolder = getUserDataPath();
 #else // Linux
     configFolder = getGenericDirectory("XDG_CONFIG_HOME", ".config");
@@ -82,7 +85,7 @@ std::string Folders::getConfigFilePath()
     return configFolder + "/config.txt";
 }
 
-#if PLATFORM_LINUX
+#ifdef LUGARU_PLATFORM_UNIX
 /* Generic code for XDG ENVVAR test and fallback */
 std::string Folders::getGenericDirectory(const char* ENVVAR, const std::string& fallback)
 {
@@ -102,7 +105,7 @@ std::string Folders::getGenericDirectory(const char* ENVVAR, const std::string& 
 }
 #endif
 
-#if PLATFORM_UNIX
+#ifdef LUGARU_PLATFORM_UNIX
 const char* Folders::getHomeDirectory()
 {
     const char* homedir = getenv("HOME");
@@ -119,7 +122,7 @@ const char* Folders::getHomeDirectory()
 
 bool Folders::makeDirectory(const std::string& path)
 {
-#ifdef _WIN32
+#ifdef LUGARU_PLATFORM_WINDOWS
     int status = CreateDirectory(path.c_str(), NULL);
     return ((status != 0) || (GetLastError() == ERROR_ALREADY_EXISTS));
 #else

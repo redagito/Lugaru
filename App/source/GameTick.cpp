@@ -26,6 +26,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Globals.h"
 
 #include "Animation/Animation.hpp"
+#include "Audio/AudioState.hpp"
 #include "Audio/openal_wrapper.hpp"
 #include "Devtools/ConsoleCmds.hpp"
 #include "Level/Awards.hpp"
@@ -33,14 +34,16 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Level/Dialog.hpp"
 #include "Level/Hotspot.hpp"
 #include "Menu/Menu.hpp"
+#include "Platform/Platform.hpp"
 #include "Tutorial.hpp"
 #include "User/Settings.hpp"
 #include "Utils/Folders.hpp"
 #include "Utils/Input.hpp"
 #include "Utils/dirent.h"
 #include "Math/Math.h"
+#include "WindowContext.hpp"
 
-#if PLATFORM_UNIX
+#ifdef LUGARU_PLATFORM_UNIX
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -97,10 +100,6 @@ int leveltheme;
 extern int mainmenu;
 extern int oldmainmenu;
 extern bool visibleloading;
-extern Vector3 envsound[30];
-extern float envsoundvol[30];
-extern int numenvsounds;
-extern float envsoundlife[30];
 extern float usermousesensitivity;
 extern bool ismotionblur;
 extern bool showdamagebar; // (des)activate the damage bar
@@ -114,7 +113,6 @@ extern float skyboxlightg;
 extern float skyboxlightb;
 extern float fadestart;
 extern float slomospeed;
-extern float slomofreq;
 extern float smoketex;
 extern bool againbonus;
 extern bool reversaltrain;
@@ -135,8 +133,6 @@ extern bool stillloading;
 extern bool winfreeze;
 
 extern bool campaign;
-
-extern void toggleFullscreen();
 
 bool won = false;
 int whichchoice = 0;

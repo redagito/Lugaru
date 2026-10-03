@@ -74,6 +74,11 @@ Duration AbsoluteDeltaToDuration(AbsoluteTime& a, AbsoluteTime& b)
     Duration time;
 
     if (value == 0) {
+        // Sub-second delta. The sign encodes the unit for the caller: a
+        // NEGATIVE result means microseconds, a non-negative one means
+        // milliseconds. Do not "fix" the sign -- every caller (main.cpp
+        // DoFrameRate, GameInitDispose.cpp LoadingScreen) selects its divisor
+        // from it, and flipping it makes the game run 1000x too fast.
         frac *= -1000000;
         frac /= g_appTime.counterRate;
         time = (Duration)frac;

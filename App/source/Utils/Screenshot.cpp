@@ -11,10 +11,7 @@
 
 #include "Utils/Folders.hpp"
 #include "Platform/Platform.hpp"
-
-/* These two are needed for screenshot */
-extern int kContextWidth;
-extern int kContextHeight;
+#include "WindowContext.hpp"
 
 bool save_screenshot(const char* file_name)
 {

@@ -22,10 +22,13 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "GameGlobals.h"
 #include "Globals.h"
 
+#include "Audio/AudioState.hpp"
 #include "Audio/openal_wrapper.hpp"
+#include "CommandLine.hpp"
 #include "Graphic/gamegl.hpp"
 #include "Platform/Platform.hpp"
 #include "User/Settings.hpp"
+#include "WindowContext.hpp"
 #include "Menu/Menu.hpp"
 #include "Version.hpp"
 
@@ -39,7 +42,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace Game;
 
-#ifdef WIN32
+#ifdef LUGARU_PLATFORM_WINDOWS
 #include <shellapi.h>
 #include <windows.h>
 #else
@@ -48,18 +51,7 @@ using namespace Game;
 
 using namespace std;
 
-set<pair<int, int>> resolutions;
-
-// statics/globals (internal only) ------------------------------------------
-
-// Menu defs
-
-int kContextWidth = 0;
-int kContextHeight = 0;
-
-//-----------------------------------------------------------------------------------------------------------------------
-
-// OpenGL Drawing
+// --------------------------------------------------------------------------
 
 void initGL()
 {
@@ -108,54 +100,6 @@ void initGL()
 		fprintf(stderr, "Failed to initialize stereo, disabling.\n");
 		stereomode = stereoNone;
 	}
-}
-
-void toggleFullscreen()
-{
-	fullscreen = !fullscreen;
-	Uint32 flags = SDL_GetWindowFlags(sdlwindow);
-	if (flags & SDL_WINDOW_FULLSCREEN) {
-		flags &= ~SDL_WINDOW_FULLSCREEN;
-	}
-	else {
-		flags |= SDL_WINDOW_FULLSCREEN;
-	}
-	SDL_SetWindowFullscreen(sdlwindow, flags);
-}
-
-SDL_bool sdlEventProc(const SDL_Event& e)
-{
-	switch (e.type) {
-	case SDL_QUIT:
-		return SDL_FALSE;
-
-	case SDL_WINDOWEVENT:
-		if (e.window.event == SDL_WINDOWEVENT_CLOSE) {
-			return SDL_FALSE;
-		}
-		break;
-
-	case SDL_MOUSEMOTION:
-		deltah += e.motion.xrel;
-		deltav += e.motion.yrel;
-		break;
-
-	case SDL_KEYDOWN:
-		if ((e.key.keysym.scancode == SDL_SCANCODE_G) &&
-			(e.key.keysym.mod & KMOD_CTRL)) {
-			SDL_bool mode = SDL_TRUE;
-			if ((SDL_GetWindowFlags(sdlwindow) & SDL_WINDOW_FULLSCREEN) == 0) {
-				mode = (SDL_GetWindowGrab(sdlwindow) ? SDL_FALSE : SDL_TRUE);
-			}
-			SDL_SetWindowGrab(sdlwindow, mode);
-			SDL_SetRelativeMouseMode(mode);
-		}
-		else if ((e.key.keysym.scancode == SDL_SCANCODE_RETURN) && (e.key.keysym.mod & KMOD_ALT)) {
-			toggleFullscreen();
-		}
-		break;
-	}
-	return SDL_TRUE;
 }
 
 // --------------------------------------------------------------------------
@@ -443,7 +387,7 @@ static bool IsFocused()
 	return ((SDL_GetWindowFlags(sdlwindow) & SDL_WINDOW_INPUT_FOCUS) != 0);
 }
 
-#ifndef WIN32
+#ifndef LUGARU_PLATFORM_WINDOWS
 // (code lifted from physfs: http://icculus.org/physfs/ ... zlib license.)
 static char* findBinaryInPath(const char* bin, char* envr)
 {
@@ -546,27 +490,6 @@ static inline void chdirToAppPath(const char* argv0)
 }
 #endif
 
-const option::Descriptor usage[] =
-{
-  { UNKNOWN, 0, "", "", option::Arg::None, "USAGE: lugaru [options]\n\n"
-										   "Options:" },
-  { VERSION, 0, "v", "version", option::Arg::None, " -v, --version     Print version and exit." },
-  { HELP, 0, "h", "help", option::Arg::None, " -h, --help        Print usage and exit." },
-  { FULLSCREEN, 1, "f", "fullscreen", option::Arg::None, " -f, --fullscreen  Start the game in fullscreen mode." },
-  { FULLSCREEN, 0, "w", "windowed", option::Arg::None, " -w, --windowed    Start the game in windowed mode (default)." },
-  { NOMOUSEGRAB, 1, "", "nomousegrab", option::Arg::None, " --nomousegrab     Disable mousegrab." },
-  { NOMOUSEGRAB, 0, "", "mousegrab", option::Arg::None, " --mousegrab       Enable mousegrab (default)." },
-  { SOUND, 1, "", "nosound", option::Arg::None, " --nosound         Disable sound." },
-  { OPENALINFO, 0, "", "openal-info", option::Arg::None, " --openal-info     Print info about OpenAL at launch." },
-  { SHOWRESOLUTIONS, 0, "", "showresolutions", option::Arg::None, " --showresolutions List the resolutions found by SDL at launch." },
-  { DEVTOOLS, 0, "d", "devtools", option::Arg::None, " -d, --devtools    Enable dev tools: console, level editor and debug info." },
-  { CMD, 0, "c", "command", option::Arg::Optional, " -c, --command    Run this command at game start. May be used to load a map." },
-  { 0, 0, 0, 0, 0, 0 }
-};
-
-option::Option commandLineOptions[commandLineOptionsNumber];
-option::Option* commandLineOptionsBuffer;
-
 int main(int argc, char** argv)
 {
 	argc -= (argc > 0);
@@ -615,7 +538,7 @@ int main(int argc, char** argv)
 	}
 
 	// !!! FIXME: we could use a Win32 API for this.  --ryan.
-#ifndef WIN32
+#ifndef LUGARU_PLATFORM_WINDOWS
 	chdirToAppPath(argv[0]);
 #endif
 
@@ -697,7 +620,7 @@ int main(int argc, char** argv)
 		std::string e = "Caught std::exception: ";
 		e += error.what();
 
-		LOG(e);
+		std::cerr << e << std::endl;
 
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Exception caught", error.what(), NULL);
 

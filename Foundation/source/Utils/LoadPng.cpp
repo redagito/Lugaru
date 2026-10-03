@@ -4,12 +4,10 @@
 #include <string>
 #include <iostream>
 
-extern int kContextWidth;
-extern int kContextHeight;
-
 #include "Utils/ImageIO.hpp"
+#include "Platform/Platform.hpp"
 
-#ifdef WIN32
+#ifdef LUGARU_PLATFORM_WINDOWS
 #define WIN32_LEAN_AND_MEAN
 #define Polygon WinPolygon
 #include <windows.h>
@@ -73,6 +71,12 @@ bool load_png(const char* file_name, ImageRec& tex)
 	hasalpha = ((color_type & PNG_COLOR_MASK_ALPHA) != 0);
 	row_pointers = png_get_rows(png_ptr, info_ptr);
 	if (!row_pointers) {
+		goto png_done;
+	}
+
+	// Size the destination from the real image dimensions. The buffer used to be
+	// a fixed 4 MiB, so any image larger than 1024x1024 overflowed it.
+	if (!tex.ensureCapacity((size_t)width * (size_t)height * 4)) {
 		goto png_done;
 	}
 

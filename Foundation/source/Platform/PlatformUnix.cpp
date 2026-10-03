@@ -18,9 +18,9 @@ You should have received a copy of the GNU General Public License
 along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef PLATFORM_UNIX
-
 #include "Platform/Platform.hpp"
+
+#ifdef LUGARU_PLATFORM_UNIX
 
 #include <assert.h>
 #include <cerrno>
@@ -99,6 +99,11 @@ Duration AbsoluteDeltaToDuration(AbsoluteTime& a, AbsoluteTime& b)
     Duration time;
 
     if (value == 0) {
+        // Sub-second delta. The sign encodes the unit for the caller: a
+        // NEGATIVE result means microseconds, a non-negative one means
+        // milliseconds. Do not "fix" the sign -- every caller (main.cpp
+        // DoFrameRate, GameInitDispose.cpp LoadingScreen) selects its divisor
+        // from it, and flipping it makes the game run 1000x too fast.
         frac *= -1000000;
         frac /= g_appTime.counterRate;
         time = (Duration)frac;
@@ -113,4 +118,4 @@ Duration AbsoluteDeltaToDuration(AbsoluteTime& a, AbsoluteTime& b)
     return time;
 }
 
-#endif // PLATFORM_UNIX
+#endif // LUGARU_PLATFORM_UNIX

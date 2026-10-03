@@ -66,28 +66,40 @@ extern "C" {
     N network byte order
     */
 
-#ifndef ALREADY_DID_BINIO_STDINT
-#define ALREADY_DID_BINIO_STDINT
-#if defined(BinIO_STDINT_HEADER)
-    #include BinIO_STDINT_HEADER
-        typedef float              float32_t;
-        typedef double             float64_t;
-    #else
-    #ifdef WIN32
-    #else
-    #endif
-        typedef float              float32_t;
-        typedef double             float64_t;
-    #endif
-#endif
+// Fixed-width integer types are standard in C++. float32_t/float64_t are
+// optional in <cstdint>, so spell the float widths out explicitly.
+#include <cstdint>
+
+#include <exception>
+#include <string>
+
+/**
+ * Thrown by the file-based readers when the stream ends before the requested
+ * record has been read. Previously these reads were unchecked, so truncated or
+ * corrupt files silently filled caller variables with uninitialised heap.
+ */
+struct TruncatedFileException : public std::exception
+{
+    std::string errorText;
+
+    explicit TruncatedFileException(const std::string& what)
+        : errorText(what)
+    {
+    }
+
+    const char* what() const noexcept override
+    {
+        return errorText.c_str();
+    }
+};
 
     typedef struct {
-        float64_t d;
-        uint64_t  l;
-        int  i;
-        float32_t f;
-        uint16_t  s;
-        uint8_t   b;
+        double   d;
+        uint64_t l;
+        int      i;
+        float    f;
+        uint16_t s;
+        uint8_t  b;
     }
     test_data;
 
@@ -102,6 +114,14 @@ extern "C" {
     extern void funpackf (FILE       *file,   const char *format, ...);
     extern void vsunpackf(const void *buffer, const char *format, va_list args);
     extern void vfunpackf(FILE       *file,   const char *format, va_list args);
+
+    /*
+     * Like funpackf(), but returns false instead of throwing when the stream
+     * ends before the record has been read. Use for optional trailing data in
+     * older files; the caller supplies its own defaults.
+     */
+    extern bool tryfunpackf (FILE       *file,   const char *format, ...);
+    extern bool vtryfunpackf(FILE       *file,   const char *format, va_list args);
 
 #ifdef _MSC_VER
 #ifndef va_copy

@@ -21,12 +21,35 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _PLATFORM_HPP_
 #define _PLATFORM_HPP_
 
+// Single source of truth for platform detection.
+//
+// Historically the code branched on PLATFORM_UNIX / PLATFORM_LINUX / WIN32,
+// none of which were ever defined by the build system, so every non-Windows
+// code path silently compiled out. Prefer the compiler-provided macros
+// normalised here.
+#if defined(_WIN32)
+	#define LUGARU_PLATFORM_WINDOWS 1
+#elif defined(__APPLE__)
+	#define LUGARU_PLATFORM_MACOS 1
+	#define LUGARU_PLATFORM_UNIX 1
+#elif defined(__unix__)
+	#define LUGARU_PLATFORM_UNIX 1
+	#if defined(__linux__)
+		#define LUGARU_PLATFORM_LINUX 1
+	#endif
+#else
+	#error "Unsupported platform: could not identify the target OS."
+#endif
+
 #include <cfloat>
 #include <cmath>
 #include <cstdio>
 
-#if defined(WIN32) && !defined(strcasecmp)
-#define strcasecmp(a, b) stricmp(a, b)
+#ifdef LUGARU_PLATFORM_WINDOWS
+	#include <cstring>
+	#ifndef strcasecmp
+		#define strcasecmp(a, b) _stricmp(a, b)
+	#endif
 #endif
 
 struct Point
@@ -34,9 +57,6 @@ struct Point
     short v = 0;
     short h = 0;
 };
-
-typedef signed char SInt8;
-typedef unsigned int UInt32;
 
 typedef struct AbsoluteTime
 {

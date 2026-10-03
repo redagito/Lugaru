@@ -21,7 +21,9 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Utils/binio.h"
 #include "Utils/private.h"
 
-#include <stdlib.h>
+#include <cstdlib>
+#include <new>
+#include <string>
 
 struct BinIOUnpackContext {
     const uint8_t *data;
@@ -90,6 +92,15 @@ void funpackf(FILE *file, const char *format, ...)
     va_end(args);
 }
 
+bool tryfunpackf(FILE *file, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    bool ok = vtryfunpackf(file, format, args);
+    va_end(args);
+    return ok;
+}
+
 void vsunpackf(const void *buffer, const char *format, va_list args)
 {
     struct BinIOFormatCursor cursor;
@@ -107,11 +118,34 @@ void vsunpackf(const void *buffer, const char *format, va_list args)
 
 void vfunpackf(FILE *file, const char *format, va_list args)
 {
+    if (!vtryfunpackf(file, format, args)) {
+        size_t n_bytes = BinIOFormatByteCount(format);
+        throw TruncatedFileException("unexpected end of file while reading " +
+                                     std::to_string(n_bytes) + " bytes for format \"" + format + "\"");
+    }
+}
+
+bool vtryfunpackf(FILE *file, const char *format, va_list args)
+{
     size_t n_bytes = BinIOFormatByteCount(format);
-    void* buffer = malloc(n_bytes);
-    fread(buffer, n_bytes, 1, file);
+
+    void* buffer = NULL;
+    if (n_bytes > 0) {
+        buffer = malloc(n_bytes);
+        if (buffer == NULL) {
+            throw std::bad_alloc();
+        }
+
+        // A short read means the file is truncated or corrupt. Report it rather
+        // than unpacking whatever happened to be in the heap.
+        if (fread(buffer, n_bytes, 1, file) != 1) {
+            free(buffer);
+            return false;
+        }
+    }
 
     vsunpackf(buffer, format, args);
 
     free(buffer);
+    return true;
 }

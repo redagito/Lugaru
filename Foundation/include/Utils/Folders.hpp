@@ -21,6 +21,10 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _FOLDERS_HPP_
 #define _FOLDERS_HPP_
 
+#include "Platform/Platform.hpp"
+
+#include <cstdio>
+#include <exception>
 #include <string>
 
 #ifndef DATA_DIR

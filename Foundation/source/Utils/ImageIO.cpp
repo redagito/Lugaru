@@ -27,15 +27,39 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdio>
 #include <iostream>
 
+namespace
+{
+// Generous enough for the largest shipped texture, but no longer a fixed cap:
+// loaders call ensureCapacity() with the real decoded size and grow as needed.
+constexpr size_t kDefaultImageCapacity = 1024 * 1024 * 4;
+} // namespace
+
 ImageRec::ImageRec()
 {
-	data = (uint8_t*)malloc(1024 * 1024 * 4);
+	data = (uint8_t*)malloc(kDefaultImageCapacity);
+	capacity_ = (data != nullptr) ? kDefaultImageCapacity : 0;
 }
 
 ImageRec::~ImageRec()
 {
 	free(data);
 	data = NULL;
+	capacity_ = 0;
+}
+
+bool ImageRec::ensureCapacity(size_t bytes)
+{
+	if (bytes <= capacity_) {
+		return true;
+	}
+
+	uint8_t* resized = (uint8_t*)realloc(data, bytes);
+	if (resized == nullptr) {
+		return false;
+	}
+	data = resized;
+	capacity_ = bytes;
+	return true;
 }
 
 bool load_image(const char* file_name, ImageRec& tex, ProgressCallback callback)

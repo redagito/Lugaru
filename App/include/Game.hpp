@@ -126,27 +126,4 @@ enum editortypes
 
 extern const char* editortypenames[8];
 
-SDL_bool sdlEventProc(const SDL_Event& e);
-
-enum optionIndex
-{
-	UNKNOWN,
-	VERSION,
-	HELP,
-	FULLSCREEN,
-	NOMOUSEGRAB,
-	SOUND,
-	OPENALINFO,
-	SHOWRESOLUTIONS,
-	DEVTOOLS,
-	CMD
-};
-/* Number of options + 1 */
-const int commandLineOptionsNumber = 11;
-
-extern const option::Descriptor usage[];
-
-extern option::Option commandLineOptions[commandLineOptionsNumber];
-extern option::Option* commandLineOptionsBuffer;
-
 #endif

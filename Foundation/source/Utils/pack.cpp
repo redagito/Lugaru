@@ -62,13 +62,13 @@ static void BinIOPack(void *context, int type, int byte_order, int count)
         }
         break;
         case BinIO_TYPE_FLOAT32: {
-            float32_t value = (float32_t)va_arg(ctx->args, double);
+            float value = (float)va_arg(ctx->args, double);
             BinIOConvert4(BinIO_HOST_BYTE_ORDER, byte_order, (const uint8_t *)&value, ctx->buffer, 1);
             ctx->buffer += 4;
         }
         break;
         case BinIO_TYPE_FLOAT64: {
-            float64_t value = va_arg(ctx->args, float64_t);
+            double value = va_arg(ctx->args, double);
             BinIOConvert8(BinIO_HOST_BYTE_ORDER, byte_order, (const uint8_t *)&value, ctx->buffer, 1);
             ctx->buffer += 8;
         }

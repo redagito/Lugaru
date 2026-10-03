@@ -24,8 +24,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Graphic/Stereo.hpp"
 #include "Utils/Folders.hpp"
 #include "Utils/Input.hpp"
-
-//using namespace Game;
+#include "WindowContext.hpp"
 
 // TODO Get rid of gLobals
 extern float usermousesensitivity;
@@ -52,8 +51,6 @@ extern bool immediate;
 extern bool velocityblur;
 extern float volume;
 extern int detail;
-extern int kContextWidth;
-extern int kContextHeight;
 extern float screenwidth, screenheight;
 extern bool fullscreen;
 extern float minscreenwidth, minscreenheight;

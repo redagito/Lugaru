@@ -24,6 +24,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdarg.h>
 #include <stddef.h>
 
+#include "Platform/Platform.hpp"
+
 #define BinIO_TYPE_IGNORE_BYTE         'x'
 #define BinIO_TYPE_BYTE                'b'
 #define BinIO_TYPE_INT16               's'
@@ -37,25 +39,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #define BinIO_HOST_BYTE_ORDER          'H'
 #define BinIO_NETWORK_BYTE_ORDER       'N'
 
-#ifndef ALREADY_DID_BINIO_STDINT
-#define ALREADY_DID_BINIO_STDINT
-#if defined(BinIO_STDINT_HEADER)
-#include BinIO_STDINT_HEADER
-typedef float              float32_t;
-typedef double             float64_t;
-#else
-typedef unsigned char      uint8_t;
-typedef unsigned short     uint16_t;
-typedef unsigned long      uint32_t;
-#ifdef WIN32
-typedef unsigned __int64   uint64_t;
-#else
-typedef unsigned long long uint64_t;
-#endif
-typedef float              float32_t;
-typedef double             float64_t;
-#endif
-#endif
+// Fixed-width integer types are standard in C++.
+#include <cstdint>
 
 #ifndef BinIO_BYTE_ORDER
 #if defined(__ppc__) || defined(__POWERPC__)

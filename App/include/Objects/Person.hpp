@@ -55,6 +55,29 @@ struct InvalidPersonException : public std::exception
     }
 };
 
+/**
+ * Limits on the fixed-size arrays inside Person. Loaders must reject any record
+ * that exceeds these before writing, otherwise they run off the end of
+ * weaponids[], waypoints[] or waypointtype[].
+ */
+namespace PersonLimits
+{
+// weaponids[] holds 4 entries, indexed 0..3.
+inline constexpr int max_weapons = 4;
+// waypoints[] and waypointtype[] hold 90 entries.
+inline constexpr int max_waypoints = 90;
+
+inline bool weaponCountIsValid(long long count)
+{
+    return count >= 0 && count <= max_weapons;
+}
+
+inline bool waypointCountIsValid(long long count)
+{
+    return count >= 0 && count <= max_waypoints;
+}
+} // namespace PersonLimits
+
 class Person : public std::enable_shared_from_this<Person>
 {
 private:
@@ -267,7 +290,7 @@ public:
     int playerdetail;
 
     int num_weapons;
-    int weaponids[4];
+    int weaponids[PersonLimits::max_weapons];
     /* Key of weaponids which is the weapon in hand, if any. -1 otherwise.
      * Always 0 or -1 as activeweapon is moved to position 0 when taken */
     int weaponactive;
@@ -276,8 +299,8 @@ public:
     int weaponstuckwhere;
 
     int numwaypoints;
-    Vector3 waypoints[90];
-    int waypointtype[90];
+    Vector3 waypoints[PersonLimits::max_waypoints];
+    int waypointtype[PersonLimits::max_waypoints];
     float pausetime;
 
     Vector3 headtarget;

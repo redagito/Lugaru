@@ -28,6 +28,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Level/Awards.hpp"
 
 #include "Animation/Animation.hpp"
+#include "Audio/AudioState.hpp"
 #include "Audio/Sounds.hpp"
 #include "Audio/openal_wrapper.hpp"
 
@@ -69,11 +70,6 @@ extern float hostiletime;
 extern bool trilinear;
 
 extern bool gamestarted;
-
-extern Vector3 envsound[30];
-extern float envsoundvol[30];
-extern int numenvsounds;
-extern float envsoundlife[30];
 
 extern Vector3 windvector;
 
@@ -381,10 +377,10 @@ Person::Person(FILE* tfile, int mapvers, unsigned i)
 		yaw = 0;
 	}
 	targetyaw = yaw;
-	if (num_weapons < 0 || num_weapons > 5) {
+	if (!PersonLimits::weaponCountIsValid(num_weapons)) {
 		throw InvalidPersonException();
 	}
-	if (num_weapons > 0 && num_weapons < 5) {
+	if (num_weapons > 0) {
 		for (int j = 0; j < num_weapons; j++) {
 			weaponids[j] =  weapons.weapons.size();
 			int type;
@@ -393,6 +389,9 @@ Person::Person(FILE* tfile, int mapvers, unsigned i)
 		}
 	}
 	funpackf(tfile, "Bi", &numwaypoints);
+	if (!PersonLimits::waypointCountIsValid(numwaypoints)) {
+		throw InvalidPersonException();
+	}
 	for (int j = 0; j < numwaypoints; j++) {
 		funpackf(tfile, "Bf", &waypoints[j].x);
 		funpackf(tfile, "Bf", &waypoints[j].y);
@@ -8583,6 +8582,13 @@ Person::Person(Json::Value value, int /*mapvers*/, unsigned i)
 	numwaypoints = value["waypoints"].size();
 	num_weapons = value["weapons"].size();
 
+	if (!PersonLimits::weaponCountIsValid(value["weapons"].size())) {
+		throw InvalidPersonException();
+	}
+	if (!PersonLimits::waypointCountIsValid(value["waypoints"].size())) {
+		throw InvalidPersonException();
+	}
+
 	if (id == 0) {
 		targetyaw = value["targetyaw"].asFloat();
 	}
@@ -8590,21 +8596,13 @@ Person::Person(Json::Value value, int /*mapvers*/, unsigned i)
 		targetyaw = yaw;
 		howactive = value["howactive"].asInt();
 		immobile = value["immobile"].asBool();
-		if (value["waypoints"].size() < 30) {
-			for (unsigned k = 0; k < value["waypoints"].size(); k++) {
-				waypointtype[k] = value["waypoints"][k]["type"].asInt();
-				waypoints[k] = value["waypoints"][k]["pos"];
-			}
-			waypoint = value["waypoint"].asInt();
-			if (waypoint > int(value["waypoints"].size())) {
-				waypoint = 0;
-			}
+		for (unsigned k = 0; k < value["waypoints"].size(); k++) {
+			waypointtype[k] = value["waypoints"][k]["type"].asInt();
+			waypoints[k] = value["waypoints"][k]["pos"];
 		}
-		else {
-			// TODO output an error?
-			//~ numwaypoints = 0;
-			//~ waypoint = 0;
-			//~ fpackf(tfile, "Bi Bi Bi", numwaypoints, waypoint, waypoint);
+		waypoint = value["waypoint"].asInt();
+		if (waypoint > int(value["waypoints"].size())) {
+			waypoint = 0;
 		}
 
 		// Not sure why scale and proportion are not saved for main player
@@ -8614,9 +8612,6 @@ Person::Person(Json::Value value, int /*mapvers*/, unsigned i)
 		}
 	}
 
-	if (value["weapons"].size() > 5) {
-		throw InvalidPersonException();
-	}
 	for (unsigned j = 0; j < value["weapons"].size(); j++) {
 		weaponids[j] =  weapons.weapons.size();
 		weapons.weapons.push_back(Weapon(value["weapons"][j].asInt(), id));

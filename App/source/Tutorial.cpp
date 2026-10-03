@@ -673,7 +673,7 @@ void Tutorial::DrawTextInfo()
 		break;
 	case 25:
 		string1 = "Dodge by pressing back and attack. Dodging is essential";
-		string2 = "against enemies with swords or other long  weapons.weapons.";
+		string2 = "against enemies with swords or other long weapons.";
 		break;
 	case 26:
 		string1 = "REVERSALS AND COUNTER-REVERSALS";

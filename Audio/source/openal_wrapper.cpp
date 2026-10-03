@@ -23,11 +23,11 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Audio/Sounds.hpp"
 #include "Math/Vector3.hpp"
 
+#include "Audio/AudioState.hpp"
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-
-extern float slomofreq;
 
 // NOTE:
 // FMOD uses a Left Handed Coordinate system, OpenAL uses a Right Handed
