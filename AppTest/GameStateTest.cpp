@@ -282,7 +282,6 @@ TEST_CASE("GameState tranche 3 members start at their historical global defaults
 	{
 		REQUIRE(s.velocityblur == false);
 		REQUIRE(s.texttoggle == false);
-		REQUIRE(s.damagedealt == 0.0f);
 		REQUIRE(s.alwaysblur == false);
 		REQUIRE(s.immediate == false);
 		REQUIRE(s.floatjump == false);
@@ -324,6 +323,11 @@ TEST_CASE("GameState tranche 3 members start at their historical global defaults
 		REQUIRE(s.stereoreverse == false);
 		REQUIRE(s.mousecoordh == 0);
 		REQUIRE(s.mousecoordv == 0);
+	}
+
+	SECTION("scoring")
+	{
+		REQUIRE(s.damagedealt == 0.0f);
 	}
 }
 
