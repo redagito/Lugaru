@@ -43,9 +43,9 @@ void Game::inputText(std::string& str, unsigned* charselected, GameState& gamest
 {
     SDL_Event evenement;
 
-    if (!waiting) {
+    if (!gamestate.waiting) {
         SDL_StartTextInput();
-        waiting = true;
+        gamestate.waiting = true;
     }
 
     while (SDL_PollEvent(&evenement)) {
@@ -65,7 +65,7 @@ void Game::inputText(std::string& str, unsigned* charselected, GameState& gamest
                 if (evenement.key.keysym.sym == SDLK_ESCAPE) {
                     str.clear();
                     *charselected = 0;
-                    waiting = false;
+                    gamestate.waiting = false;
                 } else if (evenement.key.keysym.sym == SDLK_BACKSPACE) {
                     if ((*charselected) > 0) {
                         (*charselected)--;
@@ -88,13 +88,13 @@ void Game::inputText(std::string& str, unsigned* charselected, GameState& gamest
                         (*charselected)++;
                     }
                 } else if (evenement.key.keysym.sym == SDLK_RETURN) {
-                    waiting = false;
+                    gamestate.waiting = false;
                 }
                 break;
         }
     }
 
-    if (!waiting) {
+    if (!gamestate.waiting) {
         SDL_StopTextInput();
     }
 }

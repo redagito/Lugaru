@@ -403,7 +403,7 @@ Vector3 temppoint1, temppoint2;
 			}
 		}
 		if (velocity.x != 0 || velocity.z != 0 || velocity.y != 0) {
-			velocity.y += gravity * multiplier;
+			velocity.y += gamestate.gravity * multiplier;
 
 			Vector3 temppoint1, temppoint2;
 			float rotationdistance;
@@ -937,8 +937,8 @@ Vector3 temppoint1, temppoint2;
 				tippoint += (mid - oldmid) * 20;
 			}
 			//Gravity
-			velocity.y += gravity * multiplier;
-			tipvelocity.y += gravity * multiplier;
+			velocity.y += gamestate.gravity * multiplier;
+			tipvelocity.y += gamestate.gravity * multiplier;
 
 			//Rotation
 			Vector3 temppoint1, temppoint2;

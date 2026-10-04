@@ -15,6 +15,11 @@ struct GameState
 	int editoractive = 0;
 	int editorpathtype = 0;
 	float editorsize = 0;
+	bool editorenabled = false;
+	int editortype = 0;
+
+	// which path point the editor is currently working on; -1 means none
+	int pathpointselected = 0;
 
 	// hawk
 	float hawkyaw = 0;
@@ -25,6 +30,7 @@ struct GameState
 	bool consoleblink = false;
 	unsigned consoleselected = 0;
 	unsigned short consolekey = 0;
+	bool console = false;
 
 	// screen limits
 	float maxscreenwidth = 3000;
@@ -59,15 +65,24 @@ struct GameState
 	float slomodelay = 0;
 	bool autoslomo = false;
 
+	// whether the whole simulation is currently running slowed down
+	int slomo = 0;
+
 	// level loading
 	int loading = 0;
 	bool stillloading = false;
 	bool visibleloading = false;
 	bool firstLoadDone = false;
 
+	// whether the next level loads without showing the loading screen
+	bool stealthloading = false;
+
 	// level switching
 	float changedelay = 0;
 	int oldenvironment = 0;
+
+	// which level to switch to once the current one finishes
+	int targetlevel = 0;
 
 	// level clock
 	float loadtime = 0;
@@ -91,6 +106,32 @@ struct GameState
 	bool showdamagebar = false;
 	bool damageeffects = false;
 	bool immediate = false;
+	bool decalstoggle = false;
+
+	// devtools: console, level editor and debug info
+	bool devtools = false;
+
+	// the LOD bias actually applied to textures, easing towards targetblurness
+	float blurness = 0;
+
+	// wind animation phase
+	float windvar = 0;
+
+	// world gravity, and the scale the terrain texture is tiled at
+	float gravity = 0;
+	float texscale = 0;
+
+	// screen darkening, driven by blood loss and damage
+	float blackout = 0;
+
+	// whether the level pits the player against hostile characters
+	int hostile = 0;
+
+	// whether the skybox is drawn textured rather than as a flat colour
+	bool skyboxtexture = false;
+
+	// texture detail the blood and decal code addresses the skin texture with
+	float realtexdetail = 0;
 
 	// motion blur
 	bool alwaysblur = false;
@@ -106,6 +147,7 @@ struct GameState
 	float flashg = 0;
 	float flashb = 0;
 	int flashdelay = 0;
+	float flashamount = 0;
 
 	// stereo
 	bool stereoreverse = false;
@@ -127,14 +169,25 @@ struct GameState
 	unsigned short throwkey = 0;
 	unsigned short attackkey = 0;
 
+	// which keybind row the controls menu is waiting for a key on; -1 means none
+	int keyselect = 0;
+
 	// audio
 	float volume = 0;
 	bool musictoggle = false;
 	bool ambientsound = false;
 
+	// which music stream is playing
+	int musictype = 0;
+
 	// texture budget: the square edge length of the screentexture copy, chosen
 	// by the detail setting in Game::LoadStuff
 	int kTextureSize = 0;
+
+	// resolution and detail picked in the options menu, applied on restart
+	int newdetail = 0;
+	int newscreenwidth = 0;
+	int newscreenheight = 0;
 
 	// skybox tint, and the light it contributes
 	float skyboxr = 0;
@@ -174,4 +227,13 @@ struct GameState
 	// session control
 	int tryquit = 0;
 	int endgame = 0;
+
+	// whether a game is in progress rather than sitting in the menus
+	bool gameon = false;
+
+	// whether the camera is detached from the player and free-flying
+	bool cameramode = false;
+
+	// whether text input has been requested and is still collecting characters
+	bool waiting = false;
 };

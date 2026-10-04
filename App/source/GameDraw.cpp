@@ -55,7 +55,7 @@ void Game::flash(GameState& gamestate, float amount, int delay) // shouldn't be 
 	gamestate.flashr = 1;
 	gamestate.flashg = 0;
 	gamestate.flashb = 0;
-	flashamount = amount;
+	gamestate.flashamount = amount;
 	gamestate.flashdelay = delay;
 }
 
@@ -93,13 +93,13 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		}
 	}
 
-	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestate.gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
 		tempmult = multiplier;
 		multiplier = 0;
 	}
 
 	if (!mainmenu) {
-		if (editorenabled) {
+		if (gamestate.editorenabled) {
 			numboundaries = gamestate.mapradius * 2;
 			if (numboundaries > 360) {
 				numboundaries = 360;
@@ -118,30 +118,30 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 		int olddrawmode = drawmode;
 		if (gamestate.ismotionblur && !gamestate.loading) {
-			if ((magnitudeSquared(&Person::players[0]->velocity) > 200) && gamestate.velocityblur && !cameramode) {
+			if ((magnitudeSquared(&Person::players[0]->velocity) > 200) && gamestate.velocityblur && !gamestate.cameramode) {
 				drawmode = motionblurmode;
 				gamestate.motionbluramount = 200 / (magnitudeSquared(&Person::players[0]->velocity));
 				changed = 1;
 			}
-			if (Person::players[0]->damage - Person::players[0]->superpermanentdamage > (Person::players[0]->damagetolerance - Person::players[0]->superpermanentdamage) * 1 / 2 && gamestate.damageeffects && !cameramode) {
+			if (Person::players[0]->damage - Person::players[0]->superpermanentdamage > (Person::players[0]->damagetolerance - Person::players[0]->superpermanentdamage) * 1 / 2 && gamestate.damageeffects && !gamestate.cameramode) {
 				drawmode = doublevisionmode;
 				changed = 1;
 			}
 		}
 
-		if (slomo && !gamestate.loading) {
+		if (gamestate.slomo && !gamestate.loading) {
 			if (gamestate.ismotionblur) {
 				drawmode = motionblurmode;
 			}
 			gamestate.motionbluramount = .2;
 			gamestate.slomodelay -= multiplier;
 			if (gamestate.slomodelay < 0) {
-				slomo = 0;
+				gamestate.slomo = 0;
 			}
 			camerashake = 0;
 			changed = 1;
 		}
-		if ((!changed && !slomo) || gamestate.loading) {
+		if ((!changed && !gamestate.slomo) || gamestate.loading) {
 			drawmode = normalmode;
 			if (gamestate.ismotionblur && gamestate.alwaysblur) {
 				if (olddrawmode != realmotionblurmode) {
@@ -160,7 +160,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			}
 		}
 
-		if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestate.gamestarted)) {
+		if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
 			drawmode = normalmode;
 		}
 		if ((gamestate.freeze || gamestate.winfreeze) && gamestate.ismotionblur && !mainmenu) {
@@ -223,14 +223,14 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		glTranslatef((gamestate.stereoseparation / 2) * static_cast<float>(side) * (gamestate.stereoreverse ? -1 : 1), 0, 0);
 
 		//camera effects
-		if (!cameramode && !gamestate.freeze && !gamestate.winfreeze) {
+		if (!gamestate.cameramode && !gamestate.freeze && !gamestate.winfreeze) {
 			//shake
 			glRotatef(float(rand() % 100) / 10 * camerashake /*+(gamestate.woozy*gamestate.woozy)/10*/, 0, 0, 1);
 			//sway
 			glRotatef(pitch + sin(gamestate.woozy / 2) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 1, 0, 0);
 			glRotatef(yaw + sin(gamestate.woozy) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 0, 1, 0);
 		}
-		if (cameramode || gamestate.freeze || gamestate.winfreeze) {
+		if (gamestate.cameramode || gamestate.freeze || gamestate.winfreeze) {
 			glRotatef(pitch, 1, 0, 0);
 			glRotatef(yaw, 0, 1, 0);
 		}
@@ -243,26 +243,26 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		glPushMatrix();
 
 		//heat blur effect in desert
-		if (abs(blurness - gamestate.targetblurness) < multiplier * 10 || abs(blurness - gamestate.targetblurness) > 2) {
-			blurness = gamestate.targetblurness;
+		if (abs(gamestate.blurness - gamestate.targetblurness) < multiplier * 10 || abs(gamestate.blurness - gamestate.targetblurness) > 2) {
+			gamestate.blurness = gamestate.targetblurness;
 			gamestate.targetblurness = (float)(abs(rand() % 100)) / 40;
 		}
-		if (blurness < gamestate.targetblurness) {
-			blurness += multiplier * 5;
+		if (gamestate.blurness < gamestate.targetblurness) {
+			gamestate.blurness += multiplier * 5;
 		}
 		else {
-			blurness -= multiplier * 5;
+			gamestate.blurness -= multiplier * 5;
 		}
 
 		if (environment == desertenvironment) {
 			if (detail == 2) {
-				glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, blurness + .4);
+				glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, gamestate.blurness + .4);
 			}
 			glRotatef((float)(abs(rand() % 100)) / 1000, 1, 0, 0);
 			glRotatef((float)(abs(rand() % 100)) / 1000, 0, 1, 0);
 		}
 
-		skybox->draw(environment == desertenvironment, viewdistance, blurness, skyboxtexture, Vector3{ gamestate.skyboxr, gamestate.skyboxg, gamestate.skyboxb });
+		skybox->draw(environment == desertenvironment, viewdistance, gamestate.blurness, gamestate.skyboxtexture, Vector3{ gamestate.skyboxr, gamestate.skyboxg, gamestate.skyboxb });
 		glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, 0);
 		glPopMatrix();
 		glTranslatef(-viewer.x, -viewer.y, -viewer.z);
@@ -371,11 +371,11 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		terraintexture.bind();
-		terrain.draw(0, viewer, viewdistance, fadestart, environment, frustum, blurness);
+		terrain.draw(0, viewer, viewdistance, fadestart, environment, frustum, gamestate.blurness);
 		terraintexture2.bind();
-		terrain.draw(1, viewer, viewdistance, fadestart, environment, frustum, blurness);
+		terrain.draw(1, viewer, viewdistance, fadestart, environment, frustum, gamestate.blurness);
 
-		if (decalstoggle)
+		if (gamestate.decalstoggle)
 		{
 			terrain.drawdecals(viewer, viewdistance, fadestart, multiplier);
 		}
@@ -430,7 +430,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			}
 		}
 
-		if (!cameramode && musictype == stream_fighttheme) {
+		if (!gamestate.cameramode && gamestate.musictype == stream_fighttheme) {
 			gamestate.playerdist = distsqflat(&Person::players[0]->coords, &viewer);
 		}
 		else {
@@ -439,7 +439,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		glPushMatrix();
 		glCullFace(GL_BACK);
 		glEnable(GL_TEXTURE_2D);
-		Object::Draw(decalstoggle, multiplier, viewer, viewdistance, fadestart, environment, light, frustum, terrain, detail, blurness, windvar, gamestate.playerdist);
+		Object::Draw(gamestate.decalstoggle, multiplier, viewer, viewdistance, fadestart, environment, light, frustum, terrain, detail, gamestate.blurness, gamestate.windvar, gamestate.playerdist);
 		glPopMatrix();
 
 		//draw hawk
@@ -516,10 +516,10 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 		glDepthMask(0);
 
-		Sprite::Draw(viewer, viewdistance, fadestart, environment, light, multiplier, gravity, terrain, detail, viewerfacing, bloodtoggle, windvector, Tutorial::active);
+		Sprite::Draw(viewer, viewdistance, fadestart, environment, light, multiplier, gamestate.gravity, terrain, detail, viewerfacing, bloodtoggle, windvector, Tutorial::active, gamestate);
 
 		//waypoints, pathpoints in editor
-		if (editorenabled) {
+		if (gamestate.editorenabled) {
 			glEnable(GL_BLEND);
 			glDisable(GL_LIGHTING);
 			glDisable(GL_TEXTURE_2D);
@@ -551,7 +551,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				glColor4f(1, 1, 1, 1);
 				glPointSize(4);
 				glBegin(GL_POINTS);
-				glVertex3f(pathpoint[pathpointselected].x, pathpoint[pathpointselected].y + .5, pathpoint[pathpointselected].z);
+				glVertex3f(pathpoint[gamestate.pathpointselected].x, pathpoint[gamestate.pathpointselected].y + .5, pathpoint[gamestate.pathpointselected].z);
 				glEnd();
 			}
 		}
@@ -560,7 +560,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 		glEnable(GL_TEXTURE_2D);
 		glColor4f(.5, .5, .5, 1);
-		if (!console) {
+		if (!gamestate.console) {
 			if (!Tutorial::active) {
 				if (bonus > 0 && bonustime < 1 && !gamestate.winfreeze && !Dialog::inDialog()) {
 					const char* bonus_name;
@@ -833,18 +833,18 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 			glColor4f(.5, .5, .5, 1);
 
-			if ((gamestate.texttoggle || editorenabled) && devtools && !mainmenu) {
+			if ((gamestate.texttoggle || gamestate.editorenabled) && gamestate.devtools && !mainmenu) {
 				string = "The framespersecond is " + std::to_string(int(gamestate.fps));
 				text->glPrint(10, 30, string, 0, .8, 1024, 768);
 
-				if (editorenabled) {
+				if (gamestate.editorenabled) {
 					string = "Map editor enabled.";
 				}
 				else {
 					string = "Map editor disabled.";
 				}
 				text->glPrint(10, 60, string, 0, .8, 1024, 768);
-				if (editorenabled) {
+				if (gamestate.editorenabled) {
 					string = "Object size: " + std::to_string(gamestate.editorsize);
 					text->glPrint(10, 75, string, 0, .8, 1024, 768);
 					if (gamestate.editoryaw >= 0) {
@@ -861,9 +861,9 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 						string = "Object pitch: Random";
 					}
 					text->glPrint(10, 105, string, 0, .8, 1024, 768);
-					string = "Object type: " + std::to_string(editortype);
+					string = "Object type: " + std::to_string(gamestate.editortype);
 					text->glPrint(10, 120, string, 0, .8, 1024, 768);
-					switch (editortype) {
+					switch (gamestate.editortype) {
 					case boxtype:
 						string = "(box)";
 						break;
@@ -946,7 +946,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glDepthMask(1);
 		}
 
-		if ((((blackout && gamestate.damageeffects) || (Person::players[0]->bloodloss > 0 && gamestate.damageeffects && Person::players[0]->blooddimamount > 0) || Person::players[0]->dead) && !cameramode) || console) {
+		if ((((gamestate.blackout && gamestate.damageeffects) || (Person::players[0]->bloodloss > 0 && gamestate.damageeffects && Person::players[0]->blooddimamount > 0) || Person::players[0]->dead) && !gamestate.cameramode) || gamestate.console) {
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE);
 			glDisable(GL_LIGHTING);
@@ -963,26 +963,26 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 			if (Person::players[0]->dead) {
-				blackout += multiplier * 3;
+				gamestate.blackout += multiplier * 3;
 			}
 			if (Person::players[0]->dead == 1) {
-				blackout = .4f;
+				gamestate.blackout = .4f;
 			}
-			if (Person::players[0]->dead == 2 && blackout > .6) {
-				blackout = .6;
+			if (Person::players[0]->dead == 2 && gamestate.blackout > .6) {
+				gamestate.blackout = .6;
 			}
-			glColor4f(0, 0, 0, blackout);
+			glColor4f(0, 0, 0, gamestate.blackout);
 			if (!Person::players[0]->dead) {
 				if ((Person::players[0]->bloodloss / Person::players[0]->damagetolerance * (sin(gamestate.woozy) / 4 + .5)) * .3 < .3) {
 					glColor4f(0, 0, 0, Person::players[0]->blooddimamount * Person::players[0]->bloodloss / Person::players[0]->damagetolerance * (sin(gamestate.woozy) / 4 + .5) * .3);
-					blackout = Person::players[0]->blooddimamount * Person::players[0]->bloodloss / Person::players[0]->damagetolerance * (sin(gamestate.woozy) / 4 + .5) * .3;
+					gamestate.blackout = Person::players[0]->blooddimamount * Person::players[0]->bloodloss / Person::players[0]->damagetolerance * (sin(gamestate.woozy) / 4 + .5) * .3;
 				}
 				else {
 					glColor4f(0, 0, 0, Person::players[0]->blooddimamount * .3);
-					blackout = Person::players[0]->blooddimamount * .3;
+					gamestate.blackout = Person::players[0]->blooddimamount * .3;
 				}
 			}
-			if (console) {
+			if (gamestate.console) {
 				glColor4f(.7, 0, 0, .2);
 			}
 			glBegin(GL_QUADS);
@@ -1001,16 +1001,16 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glDepthMask(1);
 		}
 
-		if (flashamount > 0 && gamestate.damageeffects) {
-			if (flashamount > 1) {
-				flashamount = 1;
+		if (gamestate.flashamount > 0 && gamestate.damageeffects) {
+			if (gamestate.flashamount > 1) {
+				gamestate.flashamount = 1;
 			}
 			if (gamestate.flashdelay <= 0) {
-				flashamount -= multiplier;
+				gamestate.flashamount -= multiplier;
 			}
 			gamestate.flashdelay--;
-			if (flashamount < 0) {
-				flashamount = 0;
+			if (gamestate.flashamount < 0) {
+				gamestate.flashamount = 0;
 			}
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE);
@@ -1026,7 +1026,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glScalef(screenwidth, screenheight, 1);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
-			glColor4f(gamestate.flashr, gamestate.flashg, gamestate.flashb, flashamount);
+			glColor4f(gamestate.flashr, gamestate.flashg, gamestate.flashb, gamestate.flashamount);
 			glBegin(GL_QUADS);
 			glVertex3f(0, 0, 0.0f);
 			glVertex3f(256, 0, 0.0f);
@@ -1130,7 +1130,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 					}
 				}
 			}
-			if (editorenabled) {
+			if (gamestate.editorenabled) {
 				Mapcircletexture.bind();
 				for (int i = 0; i < numboundaries; i++) {
 					glColor4f(0, 0, 0, opac / 3);
@@ -1201,7 +1201,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glDepthMask(1);
 		}
 
-		if (gamestate.loading && !stealthloading && (!campaign || Person::players[0]->dead)) {
+		if (gamestate.loading && !gamestate.stealthloading && (!campaign || Person::players[0]->dead)) {
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE);
 			glDisable(GL_LIGHTING);
@@ -1569,7 +1569,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glDepthMask(1);
 		}
 
-		if (console) {
+		if (gamestate.console) {
 			glEnable(GL_TEXTURE_2D);
 			glColor4f(1, 1, 1, 1);
 			int offset = 0;
@@ -1586,7 +1586,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		}
 	}
 
-	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestate.gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
 		multiplier = tempmult;
 	}
 
@@ -1594,7 +1594,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		DrawMenu(gamestate);
 	}
 
-	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestate.gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
 		tempmult = multiplier;
 		multiplier = 0;
 	}
@@ -1614,7 +1614,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		drawtoggle = 0;
 	}
 
-	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestate.gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
 		multiplier = tempmult;
 	}
 	//Jordan fixed your warning!
@@ -1718,7 +1718,7 @@ void DrawMenu(GameState& gamestate)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glPopMatrix();
-	if (!Game::waiting) { // hide the cursor while waiting for a key
+	if (!gamestate.waiting) { // hide the cursor while waiting for a key
 		glPushMatrix();
 		glTranslatef(gamestate.mousecoordh - screenwidth / 2, gamestate.mousecoordv * -1 + screenheight / 2, 0);
 		glScalef((float)screenwidth / 64, (float)screenwidth / 64, 1);
@@ -1745,16 +1745,16 @@ void DrawMenu(GameState& gamestate)
 	glPopMatrix();
 
 	//draw screen flash
-	if (flashamount > 0) {
-		if (flashamount > 1) {
-			flashamount = 1;
+	if (gamestate.flashamount > 0) {
+		if (gamestate.flashamount > 1) {
+			gamestate.flashamount = 1;
 		}
 		if (gamestate.flashdelay <= 0) {
-			flashamount -= multiplier;
+			gamestate.flashamount -= multiplier;
 		}
 		gamestate.flashdelay--;
-		if (flashamount < 0) {
-			flashamount = 0;
+		if (gamestate.flashamount < 0) {
+			gamestate.flashamount = 0;
 		}
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
@@ -1771,7 +1771,7 @@ void DrawMenu(GameState& gamestate)
 		glScalef(screenwidth, screenheight, 1);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
-		glColor4f(gamestate.flashr, gamestate.flashg, gamestate.flashb, flashamount);
+		glColor4f(gamestate.flashr, gamestate.flashg, gamestate.flashb, gamestate.flashamount);
 		glBegin(GL_QUADS);
 		glVertex3f(0, 0, 0.0f);
 		glVertex3f(256, 0, 0.0f);

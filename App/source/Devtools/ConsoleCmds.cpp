@@ -210,11 +210,11 @@ void ch_save_json(const char* args, GameState& gamestate)
 	map_data["version"] = 13;
 
 	map_data["map"]["type"] = gamestate.maptype;
-	map_data["map"]["hostile"] = hostile;
+	map_data["map"]["hostile"] = gamestate.hostile;
 	map_data["map"]["viewdistance"] = viewdistance;
 	map_data["map"]["fadestart"] = fadestart;
 
-	map_data["map"]["skybox"]["texture"] = skyboxtexture;
+	map_data["map"]["skybox"]["texture"] = gamestate.skyboxtexture;
 	map_data["map"]["skybox"]["r"] = gamestate.skyboxr;
 	map_data["map"]["skybox"]["g"] = gamestate.skyboxg;
 	map_data["map"]["skybox"]["b"] = gamestate.skyboxb;
@@ -285,9 +285,9 @@ void ch_save(const char* args, GameState& gamestate)
 	}
 	fpackf(tfile, "Bi", mapvers);
 	fpackf(tfile, "Bi", gamestate.maptype);
-	fpackf(tfile, "Bi", hostile);
+	fpackf(tfile, "Bi", gamestate.hostile);
 	fpackf(tfile, "Bf Bf", viewdistance, fadestart);
-	fpackf(tfile, "Bb Bf Bf Bf", skyboxtexture, gamestate.skyboxr, gamestate.skyboxg, gamestate.skyboxb);
+	fpackf(tfile, "Bb Bf Bf Bf", gamestate.skyboxtexture, gamestate.skyboxr, gamestate.skyboxg, gamestate.skyboxb);
 	fpackf(tfile, "Bf Bf Bf", gamestate.skyboxlightr, gamestate.skyboxlightg, gamestate.skyboxlightb);
 	fpackf(tfile, "Bf Bf Bf Bf Bf Bi", Person::players[0]->coords.x, Person::players[0]->coords.y, Person::players[0]->coords.z,
 		Person::players[0]->yaw, Person::players[0]->targetyaw, Person::players[0]->num_weapons);
@@ -579,9 +579,9 @@ void ch_tutorial(const char* args, GameState&)
 	Tutorial::active = atoi(args);
 }
 
-void ch_hostile(const char* args, GameState&)
+void ch_hostile(const char* args, GameState& gamestate)
 {
-	hostile = atoi(args);
+	gamestate.hostile = atoi(args);
 }
 
 void ch_type(const char* args, GameState& gamestate)
@@ -779,7 +779,7 @@ void ch_fadestart(const char* args, GameState&)
 void ch_slomo(const char* args, GameState& gamestate)
 {
 	gamestate.slomospeed = atof(args);
-	slomo = !slomo;
+	gamestate.slomo = !gamestate.slomo;
 	gamestate.slomodelay = 1000;
 }
 
@@ -798,8 +798,8 @@ void ch_skytint(const char* args, GameState& gamestate)
 
 	SetUpLighting(gamestate);
 
-	terrain.DoShadows(Tutorial::active, texscale, light, skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
-	Object::DoShadows(skyboxtexture, light, terrain);
+	terrain.DoShadows(Tutorial::active, gamestate.texscale, light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+	Object::DoShadows(gamestate.skyboxtexture, light, terrain);
 }
 
 void ch_skylight(const char* args, GameState& gamestate)
@@ -808,16 +808,16 @@ void ch_skylight(const char* args, GameState& gamestate)
 
 	SetUpLighting(gamestate);
 
-	terrain.DoShadows(Tutorial::active, texscale, light, skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
-	Object::DoShadows(skyboxtexture, light, terrain);
+	terrain.DoShadows(Tutorial::active, gamestate.texscale, light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+	Object::DoShadows(gamestate.skyboxtexture, light, terrain);
 }
 
 void ch_skybox(const char*, GameState& gamestate)
 {
-	skyboxtexture = !skyboxtexture;
+	gamestate.skyboxtexture = !gamestate.skyboxtexture;
 
 	SetUpLighting(gamestate);
 
-	terrain.DoShadows(Tutorial::active, texscale, light, skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
-	Object::DoShadows(skyboxtexture, light, terrain);
+	terrain.DoShadows(Tutorial::active, gamestate.texscale, light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+	Object::DoShadows(gamestate.skyboxtexture, light, terrain);
 }

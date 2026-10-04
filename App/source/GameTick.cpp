@@ -237,7 +237,7 @@ void Game::SetUpLighting(GameState& gamestate)
 	if (environment == grassyenvironment) {
 		light.setColors(.95f, .95f, 1.f, .4f, .4f, .44f);
 	}
-	if (!skyboxtexture) {
+	if (!gamestate.skyboxtexture) {
 		light.setColors(1.f, 1.f, 1.f, .4f, .4f, .4f);
 	}
 	float average;
@@ -373,7 +373,7 @@ void Setenvironment(int which, GameState& gamestate)
 
 bool Game::LoadLevel(int which, GameState& gamestate)
 {
-	stealthloading = 0;
+	gamestate.stealthloading = 0;
 	whichlevel = which;
 
 	if (which == -1) {
@@ -409,7 +409,7 @@ void Game::ResetBeforeLevelLoad(bool tutorial, GameState& gamestate)
 	Dialog::dialogs.clear();
 
 	Dialog::indialogue = -1;
-	cameramode = 0;
+	gamestate.cameramode = 0;
 
 	gamestate.damagedealt = 0;
 	damagetaken = 0;
@@ -422,7 +422,7 @@ void Game::ResetBeforeLevelLoad(bool tutorial, GameState& gamestate)
 	Hotspot::current = -1;
 	bonustime = 1;
 
-	skyboxtexture = 1;
+	gamestate.skyboxtexture = 1;
 	gamestate.skyboxr = 1;
 	gamestate.skyboxg = 1;
 	gamestate.skyboxb = 1;
@@ -453,7 +453,7 @@ void Game::ResetBeforeLevelLoad(bool tutorial, GameState& gamestate)
 
 	bonustotal = startbonustotal;
 	bonus = 0;
-	gameon = 1;
+	gamestate.gameon = 1;
 	gamestate.changedelay = 0;
 }
 
@@ -473,10 +473,10 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	int templength;
 	float lamefloat;
 
-	if (!gameon) {
+	if (!gamestate.gameon) {
 		gamestate.visibleloading = true;
 	}
-	if (stealthloading) {
+	if (gamestate.stealthloading) {
 		gamestate.visibleloading = false;
 	}
 	if (!gamestate.stillloading) {
@@ -496,13 +496,13 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 
 	ResetBeforeLevelLoad(tutorial, gamestate);
 
-	if (console) {
+	if (gamestate.console) {
 		emit_sound_np(consolesuccesssound);
 		gamestate.freeze = 0;
-		console = false;
+		gamestate.console = false;
 	}
 
-	if (!stealthloading) {
+	if (!gamestate.stealthloading) {
 		terrain.decals.clear();
 		Sprite::deleteSprites();
 
@@ -534,10 +534,10 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 		gamestate.maptype = mapkilleveryone;
 	}
 	if (mapvers >= 6) {
-		funpackf(tfile, "Bi", &hostile);
+		funpackf(tfile, "Bi", &gamestate.hostile);
 	}
 	else {
-		hostile = 1;
+		gamestate.hostile = 1;
 	}
 	if (mapvers >= 4) {
 		funpackf(tfile, "Bf Bf", &viewdistance, &fadestart);
@@ -547,10 +547,10 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 		fadestart = .6;
 	}
 	if (mapvers >= 2) {
-		funpackf(tfile, "Bb Bf Bf Bf", &skyboxtexture, &gamestate.skyboxr, &gamestate.skyboxg, &gamestate.skyboxb);
+		funpackf(tfile, "Bb Bf Bf Bf", &gamestate.skyboxtexture, &gamestate.skyboxr, &gamestate.skyboxg, &gamestate.skyboxb);
 	}
 	else {
-		skyboxtexture = 1;
+		gamestate.skyboxtexture = 1;
 		gamestate.skyboxr = 1;
 		gamestate.skyboxg = 1;
 		gamestate.skyboxb = 1;
@@ -564,7 +564,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 		gamestate.skyboxlightb = gamestate.skyboxb;
 	}
 	/* TODO - This should be done in an other way so that we can rebuild main player as well (so coords would need to be copied from old ones after rebuilding) */
-	if (stealthloading) {
+	if (gamestate.stealthloading) {
 		funpackf(tfile, "Bf Bf Bf Bf Bf Bi", &lamefloat, &lamefloat, &lamefloat, &lamefloat, &lamefloat, &Person::players[0]->num_weapons);
 	}
 	else {
@@ -632,7 +632,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	}
 	gamestate.oldenvironment = environment;
 
-	Object::LoadObjectsFromFile(tfile, stealthloading, terrain, [&]() {Game::LoadingScreen(gamestate); });
+	Object::LoadObjectsFromFile(tfile, gamestate.stealthloading, terrain, [&]() {Game::LoadingScreen(gamestate); });
 
 	if (mapvers >= 7) {
 		int numhotspots;
@@ -664,7 +664,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 
 	Game::LoadingScreen(gamestate);
 
-	if (!stealthloading) {
+	if (!gamestate.stealthloading) {
 		Object::ComputeCenter();
 		Object::ComputeRadius();
 	}
@@ -704,11 +704,11 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 
 	SetUpLighting(gamestate);
 
-	if (!stealthloading) {
+	if (!gamestate.stealthloading) {
 		Object::AddObjectsToTerrain(environment, terrain, detail);
-		terrain.DoShadows(Tutorial::active, texscale, light, skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+		terrain.DoShadows(Tutorial::active, gamestate.texscale, light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
 		Game::LoadingScreen(gamestate);
-		Object::DoShadows(skyboxtexture, light, terrain);
+		Object::DoShadows(gamestate.skyboxtexture, light, terrain);
 		Game::LoadingScreen(gamestate);
 	}
 
@@ -860,10 +860,10 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 		return false;
 	}
 
-	if (!gameon) {
+	if (!gamestate.gameon) {
 		gamestate.visibleloading = true;
 	}
-	if (stealthloading) {
+	if (gamestate.stealthloading) {
 		gamestate.visibleloading = false;
 	}
 	if (!gamestate.stillloading) {
@@ -885,13 +885,13 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 
 	ResetBeforeLevelLoad(tutorial, gamestate);
 
-	if (console) {
+	if (gamestate.console) {
 		emit_sound_np(consolesuccesssound);
 		gamestate.freeze = 0;
-		console = false;
+		gamestate.console = false;
 	}
 
-	if (!stealthloading) {
+	if (!gamestate.stealthloading) {
 		terrain.decals.clear();
 		Sprite::deleteSprites();
 
@@ -907,11 +907,11 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 		std::cerr << name << " has obsolete map version " << mapvers << std::endl;
 	}
 	gamestate.maptype = map_data["map"].get("type", mapkilleveryone).asInt();
-	hostile = map_data["map"].get("hostile", 1).asInt();
+	gamestate.hostile = map_data["map"].get("hostile", 1).asInt();
 	viewdistance = map_data["map"].get("viewdistance", 100).asFloat();
 	fadestart = map_data["map"].get("fadestart", .6).asFloat();
 
-	skyboxtexture = map_data["map"]["skybox"].get("texture", true).asBool();
+	gamestate.skyboxtexture = map_data["map"]["skybox"].get("texture", true).asBool();
 	gamestate.skyboxr = map_data["map"]["skybox"].get("r", 1).asFloat();
 	gamestate.skyboxg = map_data["map"]["skybox"].get("g", 1).asFloat();
 	gamestate.skyboxb = map_data["map"]["skybox"].get("b", 1).asFloat();
@@ -931,7 +931,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	}
 	gamestate.oldenvironment = environment;
 
-	if (!stealthloading) {
+	if (!gamestate.stealthloading) {
 		Object::LoadObjectsFromJson(map_data["map"]["objects"], terrain, [&]() {Game::LoadingScreen(gamestate); });
 	}
 
@@ -945,7 +945,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 
 	Game::LoadingScreen(gamestate);
 
-	if (!stealthloading) {
+	if (!gamestate.stealthloading) {
 		Object::ComputeCenter();
 		Object::ComputeRadius();
 	}
@@ -959,7 +959,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	Vector3 playerCoords;
 	float playerYaw = 0;
 	float playerTargetYaw = 0;
-	if (stealthloading) {
+	if (gamestate.stealthloading) {
 		playerCoords = Person::players[0]->coords;
 		playerYaw = Person::players[0]->yaw;
 		playerTargetYaw = Person::players[0]->targetyaw;
@@ -976,7 +976,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 			std::cerr << "Invalid Person found in " << name << std::endl;
 		}
 	}
-	if (stealthloading) {
+	if (gamestate.stealthloading) {
 		Person::players[0]->coords = playerCoords;
 		Person::players[0]->yaw = playerYaw;
 		Person::players[0]->targetyaw = playerTargetYaw;
@@ -1000,11 +1000,11 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 
 	SetUpLighting(gamestate);
 
-	if (!stealthloading) {
+	if (!gamestate.stealthloading) {
 		Object::AddObjectsToTerrain(environment, terrain, detail);
-		terrain.DoShadows(Tutorial::active, texscale, light, skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+		terrain.DoShadows(Tutorial::active, gamestate.texscale, light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
 		Game::LoadingScreen(gamestate);
-		Object::DoShadows(skyboxtexture, light, terrain);
+		Object::DoShadows(gamestate.skyboxtexture, light, terrain);
 		Game::LoadingScreen(gamestate);
 	}
 
@@ -1085,7 +1085,7 @@ void Game::ProcessInput(GameState& gamestate)
 
 	/* Menu handling (main menu, leave game) */
 	if (Input::isKeyPressed(SDL_SCANCODE_ESCAPE) &&
-		(gameon || mainmenu == 0)) {
+		(gamestate.gameon || mainmenu == 0)) {
 		selected = -1;
 		if (mainmenu == 0 && !gamestate.winfreeze) {
 			mainmenu = 2; // Pause
@@ -1114,14 +1114,14 @@ void Game::ProcessInput(GameState& gamestate)
 			}
 		}
 
-		if ((Input::isKeyDown(SDL_SCANCODE_ESCAPE)) && gameon) {
-			if (console) {
-				console = false;
+		if ((Input::isKeyDown(SDL_SCANCODE_ESCAPE)) && gamestate.gameon) {
+			if (gamestate.console) {
+				gamestate.console = false;
 				gamestate.freeze = 0;
 			}
 			else if (gamestate.winfreeze) {
 				mainmenu = 9;
-				gameon = 0;
+				gamestate.gameon = 0;
 			}
 		}
 	}
@@ -1175,21 +1175,21 @@ void Game::ProcessInput(GameState& gamestate)
 	}
 
 	/* Devtools */
-	if (devtools && !mainmenu) {
+	if (gamestate.devtools && !mainmenu) {
 		/* Console */
 		if (Input::isKeyPressed(gamestate.consolekey)) {
-			console = !console;
-			if (console) {
+			gamestate.console = !gamestate.console;
+			if (gamestate.console) {
 				OPENAL_SetFrequency(OPENAL_ALL);
 			}
 			else {
 				gamestate.freeze = 0;
-				waiting = false;
+				gamestate.waiting = false;
 			}
 		}
 
 		/* Other devtools, disabled when the console is shown */
-		if (!console) {
+		if (!gamestate.console) {
 			ProcessDevInput(gamestate);
 		}
 	}
@@ -1197,15 +1197,15 @@ void Game::ProcessInput(GameState& gamestate)
 
 void Game::ProcessDevInput(GameState& gamestate)
 {
-	if (!devtools || mainmenu || console) {
+	if (!gamestate.devtools || mainmenu || gamestate.console) {
 		return;
 	}
 
 	if (Input::isKeyDown(SDL_SCANCODE_LALT)) {
 		/* Enable editor */
 		if (Input::isKeyPressed(SDL_SCANCODE_M) && !Input::isKeyDown(SDL_SCANCODE_LSHIFT)) {
-			editorenabled = !editorenabled;
-			if (editorenabled) {
+			gamestate.editorenabled = !gamestate.editorenabled;
+			if (gamestate.editorenabled) {
 				Person::players[0]->damagetolerance = 100000;
 				Person::players[0]->damage = 0;
 				Person::players[0]->permanentdamage = 0;
@@ -1241,7 +1241,7 @@ void Game::ProcessDevInput(GameState& gamestate)
 
 		/* Camera mode */
 		if (Input::isKeyPressed(SDL_SCANCODE_C)) {
-			cameramode = !cameramode;
+			gamestate.cameramode = !gamestate.cameramode;
 		}
 
 		/* Freeze */
@@ -1254,7 +1254,7 @@ void Game::ProcessDevInput(GameState& gamestate)
 
 		/* Toggle slow motion */
 		if (Input::isKeyPressed(SDL_SCANCODE_B)) {
-			slomo = 1 - slomo;
+			gamestate.slomo = 1 - gamestate.slomo;
 			gamestate.slomodelay = 1000;
 		}
 
@@ -1526,17 +1526,17 @@ void Game::ProcessDevInput(GameState& gamestate)
 
 	/* Skip level (only for challenges) */
 	// FIXME: Allow skipping levels in campaigns too
-	if (whichlevel != -2 && Input::isKeyPressed(SDL_SCANCODE_K) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !editorenabled) {
-		targetlevel++;
-		if (targetlevel > gamestate.numchallengelevels - 1) {
-			targetlevel = 0;
+	if (whichlevel != -2 && Input::isKeyPressed(SDL_SCANCODE_K) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !gamestate.editorenabled) {
+		gamestate.targetlevel++;
+		if (gamestate.targetlevel > gamestate.numchallengelevels - 1) {
+			gamestate.targetlevel = 0;
 		}
 		gamestate.loading = 1;
 		gamestate.leveltime = 5;
 	}
 
 	/* Editor mode keys */
-	if (editorenabled) {
+	if (gamestate.editorenabled) {
 		/* Closest player deletion */
 		if (Input::isKeyPressed(SDL_SCANCODE_DELETE) && Input::isKeyDown(SDL_SCANCODE_LSHIFT)) {
 			int closest = findClosestPlayer();
@@ -1558,7 +1558,7 @@ void Game::ProcessDevInput(GameState& gamestate)
 			if (Object::objects.size() < max_objects - 1) {
 				Vector3 scenecoords = Person::players[0]->coords;
 				scenecoords.y -= 3;
-				if (editortype == bushtype || editortype == firetype) {
+				if (gamestate.editortype == bushtype || gamestate.editortype == firetype) {
 					scenecoords.y -= 3.5;
 				}
 				else {
@@ -1568,15 +1568,15 @@ void Game::ProcessDevInput(GameState& gamestate)
 				float tmpyaw, tmppitch;
 				tmpyaw = gamestate.editoryaw;
 				tmppitch = gamestate.editorpitch;
-				if (tmpyaw < 0 || editortype == bushtype) {
+				if (tmpyaw < 0 || gamestate.editortype == bushtype) {
 					tmpyaw = rand() % 360;
 				}
 				if (tmppitch < 0) {
 					tmppitch = rand() % 360;
 				}
 
-				Object::MakeObject(editortype, scenecoords, (int)tmpyaw - ((int)tmpyaw) % 30, (int)tmppitch, gamestate.editorsize, environment, terrain, gamestate.foliage, detail, [&]() {Game::LoadingScreen(gamestate); });
-				if (editortype == treetrunktype) {
+				Object::MakeObject(gamestate.editortype, scenecoords, (int)tmpyaw - ((int)tmpyaw) % 30, (int)tmppitch, gamestate.editorsize, environment, terrain, gamestate.foliage, detail, [&]() {Game::LoadingScreen(gamestate); });
+				if (gamestate.editortype == treetrunktype) {
 					Object::MakeObject(treeleavestype, scenecoords, rand() % 360 * (tmppitch < 2) + (int)gamestate.editoryaw - ((int)gamestate.editoryaw) % 30, gamestate.editorpitch, gamestate.editorsize, environment, terrain, gamestate.foliage, detail, [&]() {Game::LoadingScreen(gamestate); });
 				}
 			}
@@ -1653,17 +1653,17 @@ void Game::ProcessDevInput(GameState& gamestate)
 				bool connected = false;
 				if (numpathpoints > 1) {
 					for (int i = 0; i < numpathpoints; i++) {
-						if (distsq(&pathpoint[i], &Person::players[0]->coords) < .5 && i != pathpointselected && !connected) {
+						if (distsq(&pathpoint[i], &Person::players[0]->coords) < .5 && i != gamestate.pathpointselected && !connected) {
 							bool alreadyconnected = false;
-							for (int j = 0; j < numpathpointconnect[pathpointselected]; j++) {
-								if (pathpointconnect[pathpointselected][j] == i) {
+							for (int j = 0; j < numpathpointconnect[gamestate.pathpointselected]; j++) {
+								if (pathpointconnect[gamestate.pathpointselected][j] == i) {
 									alreadyconnected = true;
 								}
 							}
 							if (!alreadyconnected) {
-								numpathpointconnect[pathpointselected]++;
+								numpathpointconnect[gamestate.pathpointselected]++;
 								connected = true;
-								pathpointconnect[pathpointselected][numpathpointconnect[pathpointselected] - 1] = i;
+								pathpointconnect[gamestate.pathpointselected][numpathpointconnect[gamestate.pathpointselected] - 1] = i;
 							}
 						}
 					}
@@ -1672,11 +1672,11 @@ void Game::ProcessDevInput(GameState& gamestate)
 					numpathpoints++;
 					pathpoint[numpathpoints - 1] = Person::players[0]->coords;
 					numpathpointconnect[numpathpoints - 1] = 0;
-					if (numpathpoints > 1 && pathpointselected != -1) {
-						numpathpointconnect[pathpointselected]++;
-						pathpointconnect[pathpointselected][numpathpointconnect[pathpointselected] - 1] = numpathpoints - 1;
+					if (numpathpoints > 1 && gamestate.pathpointselected != -1) {
+						numpathpointconnect[gamestate.pathpointselected]++;
+						pathpointconnect[gamestate.pathpointselected][numpathpointconnect[gamestate.pathpointselected] - 1] = numpathpoints - 1;
 					}
-					pathpointselected = numpathpoints - 1;
+					gamestate.pathpointselected = numpathpoints - 1;
 				}
 			}
 			else {
@@ -1686,63 +1686,63 @@ void Game::ProcessDevInput(GameState& gamestate)
 
 		/* Select next path waypoint */
 		if (Input::isKeyPressed(SDL_SCANCODE_PERIOD)) {
-			pathpointselected++;
-			if (pathpointselected >= numpathpoints) {
-				pathpointselected = -1;
+			gamestate.pathpointselected++;
+			if (gamestate.pathpointselected >= numpathpoints) {
+				gamestate.pathpointselected = -1;
 			}
 		}
 
 		/* Select previous path waypoint */
 		if (Input::isKeyPressed(SDL_SCANCODE_COMMA) && !Input::isKeyDown(SDL_SCANCODE_LSHIFT)) {
-			pathpointselected--;
-			if (pathpointselected <= -2) {
-				pathpointselected = numpathpoints - 1;
+			gamestate.pathpointselected--;
+			if (gamestate.pathpointselected <= -2) {
+				gamestate.pathpointselected = numpathpoints - 1;
 			}
 		}
 
 		/* Delete path waypoint */
 		if (Input::isKeyPressed(SDL_SCANCODE_COMMA) && Input::isKeyDown(SDL_SCANCODE_LSHIFT)) {
-			if (pathpointselected != -1) {
+			if (gamestate.pathpointselected != -1) {
 				numpathpoints--;
-				pathpoint[pathpointselected] = pathpoint[numpathpoints];
-				numpathpointconnect[pathpointselected] = numpathpointconnect[numpathpoints];
-				for (int i = 0; i < numpathpointconnect[pathpointselected]; i++) {
-					pathpointconnect[pathpointselected][i] = pathpointconnect[numpathpoints][i];
+				pathpoint[gamestate.pathpointselected] = pathpoint[numpathpoints];
+				numpathpointconnect[gamestate.pathpointselected] = numpathpointconnect[numpathpoints];
+				for (int i = 0; i < numpathpointconnect[gamestate.pathpointselected]; i++) {
+					pathpointconnect[gamestate.pathpointselected][i] = pathpointconnect[numpathpoints][i];
 				}
 				for (int i = 0; i < numpathpoints; i++) {
 					for (int j = 0; j < numpathpointconnect[i]; j++) {
-						if (pathpointconnect[i][j] == pathpointselected) {
+						if (pathpointconnect[i][j] == gamestate.pathpointselected) {
 							pathpointconnect[i][j] = pathpointconnect[i][numpathpointconnect[i] - 1];
 							numpathpointconnect[i]--;
 						}
 						if (pathpointconnect[i][j] == numpathpoints) {
-							pathpointconnect[i][j] = pathpointselected;
+							pathpointconnect[i][j] = gamestate.pathpointselected;
 						}
 					}
 				}
-				pathpointselected = numpathpoints - 1;
+				gamestate.pathpointselected = numpathpoints - 1;
 			}
 		}
 
 		/* Select previous object type */
 		if (Input::isKeyPressed(SDL_SCANCODE_LEFT) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			editortype--;
-			if (editortype == treeleavestype || editortype == 10) {
-				editortype--;
+			gamestate.editortype--;
+			if (gamestate.editortype == treeleavestype || gamestate.editortype == 10) {
+				gamestate.editortype--;
 			}
-			if (editortype < 0) {
-				editortype = firetype;
+			if (gamestate.editortype < 0) {
+				gamestate.editortype = firetype;
 			}
 		}
 
 		/* Select next object type */
 		if (Input::isKeyPressed(SDL_SCANCODE_RIGHT) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			editortype++;
-			if (editortype == treeleavestype || editortype == 10) {
-				editortype++;
+			gamestate.editortype++;
+			if (gamestate.editortype == treeleavestype || gamestate.editortype == 10) {
+				gamestate.editortype++;
 			}
-			if (editortype > firetype) {
-				editortype = 0;
+			if (gamestate.editortype > firetype) {
+				gamestate.editortype = 0;
 			}
 		}
 
@@ -2290,7 +2290,7 @@ void doAerialAcrobatics(GameState& gamestate)
 						}
 					}
 					//gravity
-					Person::players[k]->velocity.y += gravity;
+					Person::players[k]->velocity.y += gamestate.gravity;
 				}
 			}
 		}
@@ -2339,7 +2339,7 @@ void doAttacks(GameState& gamestate)
 		}
 	}
 
-	if (!hostile || Dialog::inDialog()) {
+	if (!gamestate.hostile || Dialog::inDialog()) {
 		Person::players[0]->attackkeydown = 0;
 	}
 
@@ -2753,7 +2753,7 @@ void doAttacks(GameState& gamestate)
 													}
 												}
 											}
-											if (!Person::players[i]->dead || musictype != 2) {
+											if (!Person::players[i]->dead || gamestate.musictype != 2) {
 												if (distance < 3.5 &&
 													(Person::players[k]->isRun() || Person::players[k]->isIdle() && Person::players[k]->attackkeydown) &&
 													Person::players[k]->staggerdelay <= 0 &&
@@ -2761,7 +2761,7 @@ void doAttacks(GameState& gamestate)
 														Person::players[i]->skeleton.longdead < 300 &&
 														Person::players[k]->lastattack != spinkickanim &&
 														Person::players[i]->skeleton.free) &&
-													(!Person::players[i]->dead || musictype != stream_fighttheme)) {
+													(!Person::players[i]->dead || gamestate.musictype != stream_fighttheme)) {
 													Person::players[k]->animTarget = dropkickanim;
 													terrain.deleteDeadDecals();
 													for (unsigned int l = 0; l < Object::objects.size(); l++) {
@@ -3029,7 +3029,7 @@ void doPlayerCollisions(GameState& gamestate)
 																				Person::players[k]->coords = (Person::players[k]->coords + Person::players[i]->coords) / 2;
 																				Person::players[i]->coords = Person::players[k]->coords - rotatetarget * sqrt(.6) / 2 * sq((Person::players[i]->scale + Person::players[k]->scale) * 2.5);
 																				Person::players[k]->coords += rotatetarget * sqrt(.6) / 2 * sq((Person::players[i]->scale + Person::players[k]->scale) * 2.5);
-																				if (Person::players[k]->howactive == typeactive || hostile) {
+																				if (Person::players[k]->howactive == typeactive || gamestate.hostile) {
 																					if (Person::players[k]->isIdle()) {
 																						if (Person::players[k]->howactive < typesleeping) {
 																							Person::players[k]->setTargetAnimation(Person::players[k]->getStop());
@@ -3037,12 +3037,12 @@ void doPlayerCollisions(GameState& gamestate)
 																						else if (Person::players[k]->howactive == typesleeping) {
 																							Person::players[k]->setTargetAnimation(getupfromfrontanim);
 																						}
-																						if (!editorenabled) {
+																						if (!gamestate.editorenabled) {
 																							Person::players[k]->howactive = typeactive;
 																						}
 																					}
 																				}
-																				if (Person::players[i]->howactive == typeactive || hostile) {
+																				if (Person::players[i]->howactive == typeactive || gamestate.hostile) {
 																					if (Person::players[i]->isIdle()) {
 																						if (Person::players[i]->howactive < typesleeping) {
 																							Person::players[i]->setTargetAnimation(Person::players[k]->getStop());
@@ -3050,14 +3050,14 @@ void doPlayerCollisions(GameState& gamestate)
 																						else {
 																							Person::players[i]->setTargetAnimation(getupfromfrontanim);
 																						}
-																						if (!editorenabled) {
+																						if (!gamestate.editorenabled) {
 																							Person::players[i]->howactive = typeactive;
 																						}
 																					}
 																				}
 																			}
 																			//jump down on player
-																			if (hostile) {
+																			if (gamestate.hostile) {
 																				if (k == 0 && i != 0 && Person::players[k]->animTarget == jumpdownanim &&
 																					!Person::players[i]->isCrouch() &&
 																					Person::players[i]->animTarget != rollanim &&
@@ -3134,7 +3134,7 @@ void Game::Tick(GameState& gamestate)
 	18 stereo configuration
 	*/
 
-	if (!console) {
+	if (!gamestate.console) {
 		//campaign over?
 		if (mainmenu && gamestate.endgame == 1) {
 			mainmenu = 10;
@@ -3142,7 +3142,7 @@ void Game::Tick(GameState& gamestate)
 		//go to level select after completing a campaign level
 		if (campaign && gamestate.winfreeze && mainmenu == 0 && campaignlevels[actuallevel].choosenext == 1) {
 			mainmenu = 5;
-			gameon = 0;
+			gamestate.gameon = 0;
 			gamestate.winfreeze = 0;
 			fireSound();
 			flash(gamestate);
@@ -3160,7 +3160,7 @@ void Game::Tick(GameState& gamestate)
 	}
 
 	if (!mainmenu) {
-		if (hostile == 1) {
+		if (gamestate.hostile == 1) {
 			gamestate.hostiletime += multiplier;
 		}
 		else {
@@ -3170,11 +3170,11 @@ void Game::Tick(GameState& gamestate)
 			gamestate.leveltime += multiplier;
 		}
 
-		if (console) {
+		if (gamestate.console) {
 			gamestate.freeze = 1;
 
 			inputText(consoletext[0], &gamestate.consoleselected, gamestate);
-			if (!waiting) {
+			if (!gamestate.waiting) {
 				if (!consoletext[0].empty()) {
 					cmd_dispatch(consoletext[0], gamestate);
 					for (int k = 14; k >= 1; k--) {
@@ -3204,7 +3204,7 @@ void Game::Tick(GameState& gamestate)
 			oldwinfreeze++;
 		}
 
-		if (!gamestate.freeze && !gamestate.winfreeze && !(mainmenu && gameon) && (gameon || !gamestate.gamestarted)) {
+		if (!gamestate.freeze && !gamestate.winfreeze && !(mainmenu && gamestate.gameon) && (gamestate.gameon || !gamestate.gamestarted)) {
 
 			//dialogues
 			static float talkdelay = 0;
@@ -3220,7 +3220,7 @@ void Game::Tick(GameState& gamestate)
 				}
 			}
 
-			windvar += multiplier;
+			gamestate.windvar += multiplier;
 			gamestate.smoketex += multiplier;
 			Tutorial::stagetime += multiplier;
 
@@ -3228,7 +3228,7 @@ void Game::Tick(GameState& gamestate)
 			static float hotspotvisual[40];
 			if (Hotspot::hotspots.size()) {
 				Vector3 hotspotsprite;
-				if (editorenabled) {
+				if (gamestate.editorenabled) {
 					for (unsigned i = 0; i < Hotspot::hotspots.size(); i++) {
 						hotspotvisual[i] -= multiplier / 320;
 					}
@@ -3346,7 +3346,7 @@ void Game::Tick(GameState& gamestate)
 			}
 
 			if (Dialog::inDialog()) {
-				cameramode = 1;
+				gamestate.cameramode = 1;
 				if (Dialog::directing) {
 					facing = 0;
 					facing.z = -1;
@@ -3434,7 +3434,7 @@ void Game::Tick(GameState& gamestate)
 						if (Person::players[Dialog::currentScene().participantfocus]->dead) {
 							Dialog::indialogue = -1;
 							Dialog::directing = false;
-							cameramode = 0;
+							gamestate.cameramode = 0;
 						}
 						Dialog::currentScene().camera = viewer;
 						Dialog::currentScene().camerayaw = yaw;
@@ -3497,7 +3497,7 @@ void Game::Tick(GameState& gamestate)
 					if (Dialog::indialogue >= int(Dialog::currentDialog().scenes.size())) {
 						Dialog::indialogue = -1;
 						Dialog::directing = false;
-						cameramode = 0;
+						gamestate.cameramode = 0;
 					}
 				}
 				if (!Dialog::directing) {
@@ -3516,13 +3516,13 @@ void Game::Tick(GameState& gamestate)
 										Hotspot::hotspots.emplace_back(Person::players[0]->coords, -1, 10.f);
 									}
 									if (Dialog::currentScene().sound == -6) {
-										hostile = 1;
+										gamestate.hostile = 1;
 									}
 
 									if (Person::players.at(Dialog::currentScene().participantfocus)->dead) {
 										Dialog::indialogue = -1;
 										Dialog::directing = false;
-										cameramode = 0;
+										gamestate.cameramode = 0;
 									}
 								}
 							}
@@ -3531,15 +3531,15 @@ void Game::Tick(GameState& gamestate)
 					if (Dialog::indialogue >= int(Dialog::currentDialog().scenes.size())) {
 						Dialog::indialogue = -1;
 						Dialog::directing = false;
-						cameramode = 0;
+						gamestate.cameramode = 0;
 						if (Dialog::currentDialog().type > 19 && Dialog::currentDialog().type < 30) {
-							hostile = 1;
+							gamestate.hostile = 1;
 						}
 						if (Dialog::currentDialog().type > 29 && Dialog::currentDialog().type < 40) {
 							windialogue = true;
 						}
 						if (Dialog::currentDialog().type > 49 && Dialog::currentDialog().type < 60) {
-							hostile = 1;
+							gamestate.hostile = 1;
 							for (unsigned i = 1; i < Person::players.size(); i++) {
 								Person::players[i]->aitype = attacktypecutoff;
 							}
@@ -3593,16 +3593,16 @@ void Game::Tick(GameState& gamestate)
 
 			//respawn
 			static bool respawnkeydown;
-			if (!editorenabled &&
+			if (!gamestate.editorenabled &&
 				(whichlevel != -2 &&
 					(Input::isKeyDown(SDL_SCANCODE_K) &&
 						Input::isKeyDown(SDL_SCANCODE_LALT) &&
-						devtools) ||
+						gamestate.devtools) ||
 					(Input::isKeyDown(gamestate.jumpkey) &&
 						!respawnkeydown &&
 						!oldattackkey &&
 						Person::players[0]->dead))) {
-				targetlevel = whichlevel;
+				gamestate.targetlevel = whichlevel;
 				gamestate.loading = 1;
 				gamestate.leveltime = 5;
 			}
@@ -3626,7 +3626,7 @@ void Game::Tick(GameState& gamestate)
 							Person::players[0]->animTarget != dodgebackanim &&
 							Person::players[0]->animTarget != walljumprightkickanim &&
 							Person::players[0]->animTarget != walljumpleftkickanim) {
-							if (cameramode) {
+							if (gamestate.cameramode) {
 								Person::players[0]->targetyaw = 0;
 							}
 							else {
@@ -3638,7 +3638,7 @@ void Game::Tick(GameState& gamestate)
 						facing.z = -1;
 
 						flatfacing = DoRotation(facing, 0, Person::players[i]->yaw + 180, 0);
-						if (cameramode) {
+						if (gamestate.cameramode) {
 							facing = flatfacing;
 						}
 						else {
@@ -3992,7 +3992,7 @@ void Game::Tick(GameState& gamestate)
 										for (unsigned j = 0; j < Person::players.size(); j++) {
 											if (i != j) {
 												if (!Tutorial::active || Tutorial::stage == 49) {
-													if (hostile) {
+													if (gamestate.hostile) {
 														if (normaldotproduct(Person::players[i]->facing, Person::players[i]->coords - Person::players[j]->coords) < 0 &&
 															distsq(&Person::players[i]->coords, &Person::players[j]->coords) < 100 &&
 															distsq(&Person::players[i]->coords, &Person::players[j]->coords) > 1.5 &&
@@ -4103,7 +4103,7 @@ void Game::Tick(GameState& gamestate)
 							Person::players[i]->onterrain &&
 							Person::players[i]->num_weapons &&
 							Person::players[i]->attackkeydown &&
-							musictype != stream_fighttheme) {
+							gamestate.musictype != stream_fighttheme) {
 							if (weapons.weapons[Person::players[i]->weaponids[Person::players[i]->weaponactive]].getType() == knife) {
 								Person::players[i]->setTargetAnimation(crouchstabanim);
 							}
@@ -4383,7 +4383,7 @@ void Game::Tick(GameState& gamestate)
 								Person::players[i]->frameCurrent = 0;
 								Person::players[i]->frameTarget = 1;
 								Person::players[i]->velocity = 0;
-								Person::players[i]->velocity.y += gravity;
+								Person::players[i]->velocity.y += gamestate.gravity;
 								Person::players[i]->coords.y -= 1.4;
 								Person::players[i]->grabdelay = 1;
 							}
@@ -4449,7 +4449,7 @@ void Game::Tick(GameState& gamestate)
 									Person::players[i]->velocity.y = 5;
 								}
 
-								if (gamestate.mousejump && i == 0 && devtools) {
+								if (gamestate.mousejump && i == 0 && gamestate.devtools) {
 									if (!Person::players[i]->isLanding()) {
 										Person::players[i]->tempdeltav = gamestate.deltav;
 									}
@@ -4476,8 +4476,8 @@ void Game::Tick(GameState& gamestate)
 							}
 							if (Person::players[i]->animTarget == jumpupanim &&
 								(((!gamestate.floatjump &&
-									!editorenabled) ||
-									!devtools) ||
+									!gamestate.editorenabled) ||
+									!gamestate.devtools) ||
 									!Person::players[i]->isPlayerControlled())) {
 								if (Person::players[i]->jumppower > multiplier * 6) {
 									Person::players[i]->velocity.y += multiplier * 6;
@@ -4488,7 +4488,7 @@ void Game::Tick(GameState& gamestate)
 									Person::players[i]->jumppower = 0;
 								}
 							}
-							if (((gamestate.floatjump || editorenabled) && devtools) && i == 0) {
+							if (((gamestate.floatjump || gamestate.editorenabled) && gamestate.devtools) && i == 0) {
 								Person::players[i]->velocity.y += multiplier * 30;
 							}
 						}
@@ -4585,7 +4585,7 @@ void Game::Tick(GameState& gamestate)
 					envsound[j] = envsound[numenvsounds];
 				}
 			}
-			OPENAL_SetFrequency(OPENAL_ALL, slomo);
+			OPENAL_SetFrequency(OPENAL_ALL, gamestate.slomo);
 
 			if (Tutorial::active) {
 				Tutorial::DoStuff(multiplier, bloodtoggle, gamestate);
@@ -4666,7 +4666,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 	static float cameraspeed;
 
 	if (!mainmenu) {
-		int oldmusictype = musictype;
+		int oldmusictype = gamestate.musictype;
 
 		if (environment == snowyenvironment) {
 			leveltheme = stream_snowtheme;
@@ -4680,7 +4680,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 
 		realthreat = 0;
 
-		musictype = leveltheme;
+		gamestate.musictype = leveltheme;
 		for (unsigned i = 0; i < Person::players.size(); i++) {
 			if ((Person::players[i]->aitype == attacktypecutoff ||
 				Person::players[i]->aitype == getweapontype ||
@@ -4690,27 +4690,27 @@ void Game::TickOnceAfter(GameState& gamestate)
 				(Person::players[i]->animTarget != sneakattackedanim &&
 					Person::players[i]->animTarget != knifesneakattackedanim &&
 					Person::players[i]->animTarget != swordsneakattackedanim)) {
-				musictype = stream_fighttheme;
+				gamestate.musictype = stream_fighttheme;
 				realthreat = 1;
 			}
 		}
 		if (Person::players[0]->dead) {
-			musictype = stream_menutheme;
+			gamestate.musictype = stream_menutheme;
 		}
 
-		if (musictype == stream_fighttheme) {
+		if (gamestate.musictype == stream_fighttheme) {
 			unseendelay = 1;
 		}
 
-		if (oldmusictype == stream_fighttheme && musictype != stream_fighttheme) {
+		if (oldmusictype == stream_fighttheme && gamestate.musictype != stream_fighttheme) {
 			unseendelay -= multiplier;
 			if (unseendelay > 0) {
-				musictype = stream_fighttheme;
+				gamestate.musictype = stream_fighttheme;
 			}
 		}
 
 		if (gamestate.loading == 2) {
-			musictype = stream_menutheme;
+			gamestate.musictype = stream_menutheme;
 			musicvolume[2] = 512;
 			musicvolume[0] = 0;
 			musicvolume[1] = 0;
@@ -4718,11 +4718,11 @@ void Game::TickOnceAfter(GameState& gamestate)
 		}
 
 		if (gamestate.musictoggle) {
-			if (musictype != oldmusictype && musictype == stream_fighttheme) {
+			if (gamestate.musictype != oldmusictype && gamestate.musictype == stream_fighttheme) {
 				emit_sound_np(alarmsound);
 			}
 		}
-		musicselected = musictype;
+		musicselected = gamestate.musictype;
 
 		if (musicselected == leveltheme) {
 			musicvolume[0] += multiplier * 450;
@@ -4835,10 +4835,10 @@ void Game::TickOnceAfter(GameState& gamestate)
 			maxalarmed = numalarmed;
 		}
 
-		if (gamestate.changedelay <= 0 && !gamestate.loading && !editorenabled && gameon && !Tutorial::active && gamestate.changedelay != -999 && !won) {
+		if (gamestate.changedelay <= 0 && !gamestate.loading && !gamestate.editorenabled && gamestate.gameon && !Tutorial::active && gamestate.changedelay != -999 && !won) {
 			if (Person::players[0]->dead) {
 				gamestate.changedelay = 1;
-				targetlevel = whichlevel;
+				gamestate.targetlevel = whichlevel;
 			}
 			alldead = true;
 			for (unsigned i = 1; i < Person::players.size(); i++) {
@@ -4850,24 +4850,24 @@ void Game::TickOnceAfter(GameState& gamestate)
 
 			if (alldead && !Person::players[0]->dead && gamestate.maptype == mapkilleveryone) {
 				gamestate.changedelay = 1;
-				targetlevel = whichlevel + 1;
-				if (targetlevel > gamestate.numchallengelevels - 1) {
-					targetlevel = 0;
+				gamestate.targetlevel = whichlevel + 1;
+				if (gamestate.targetlevel > gamestate.numchallengelevels - 1) {
+					gamestate.targetlevel = 0;
 				}
 			}
 			if (winhotspot || windialogue) {
 				gamestate.changedelay = 0.1;
-				targetlevel = whichlevel + 1;
-				if (targetlevel > gamestate.numchallengelevels - 1) {
-					targetlevel = 0;
+				gamestate.targetlevel = whichlevel + 1;
+				if (gamestate.targetlevel > gamestate.numchallengelevels - 1) {
+					gamestate.targetlevel = 0;
 				}
 			}
 
 			if (Hotspot::killhotspot) {
 				gamestate.changedelay = 1;
-				targetlevel = whichlevel + 1;
-				if (targetlevel > gamestate.numchallengelevels - 1) {
-					targetlevel = 0;
+				gamestate.targetlevel = whichlevel + 1;
+				if (gamestate.targetlevel > gamestate.numchallengelevels - 1) {
+					gamestate.targetlevel = 0;
 				}
 			}
 
@@ -4879,7 +4879,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 				}
 				else {
 					gamestate.wonleveltime = gamestate.leveltime;
-					Account::active().winLevel(whichlevel, bonustotal - startbonustotal, gamestate.leveltime, devtools);
+					Account::active().winLevel(whichlevel, bonustotal - startbonustotal, gamestate.leveltime, gamestate.devtools);
 				}
 				won = 1;
 				Account::saveFile(Folders::getUserSavePath());
@@ -4896,28 +4896,28 @@ void Game::TickOnceAfter(GameState& gamestate)
 				Hotspot::killhotspot = 0;
 			}
 
-			if (!editorenabled && gameon && !mainmenu) {
+			if (!gamestate.editorenabled && gamestate.gameon && !mainmenu) {
 				if (gamestate.changedelay != -999) {
 					gamestate.changedelay -= multiplier / 7;
 				}
 				if (Person::players[0]->dead) {
-					targetlevel = whichlevel;
+					gamestate.targetlevel = whichlevel;
 				}
 				if (gamestate.loading == 2 && !campaign) {
 					flash(gamestate);
 
 					fireSound(firestartsound);
 
-					if (!Person::players[0]->dead && targetlevel != whichlevel) {
+					if (!Person::players[0]->dead && gamestate.targetlevel != whichlevel) {
 						startbonustotal = bonustotal;
 					}
 
-					LoadLevel(targetlevel, gamestate);
+					LoadLevel(gamestate.targetlevel, gamestate);
 					fireSound();
 
 					gamestate.loading = 3;
 				}
-				if (gamestate.loading == 2 && targetlevel == whichlevel) {
+				if (gamestate.loading == 2 && gamestate.targetlevel == whichlevel) {
 					flash(gamestate);
 					gamestate.loadtime = 0;
 
@@ -4965,9 +4965,9 @@ void Game::TickOnceAfter(GameState& gamestate)
 					}
 				}
 				else if (mainmenu == 0 && gamestate.winfreeze) {
-					stealthloading = (campaignlevels[actuallevel].choosenext == 2);
+					gamestate.stealthloading = (campaignlevels[actuallevel].choosenext == 2);
 
-					if (!stealthloading) {
+					if (!gamestate.stealthloading) {
 						fireSound(firestartsound);
 
 						flash(gamestate);
@@ -4979,7 +4979,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 
 					gamestate.loading = 2;
 					gamestate.loadtime = 0;
-					targetlevel = 7;
+					gamestate.targetlevel = 7;
 					if (!gamestate.firstLoadDone) {
 						LoadStuff(gamestate);
 					}
@@ -4990,10 +4990,10 @@ void Game::TickOnceAfter(GameState& gamestate)
 					LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate);
 					campaign = 1;
 					mainmenu = 0;
-					gameon = 1;
+					gamestate.gameon = 1;
 					pause_sound(stream_menutheme);
 
-					stealthloading = 0;
+					gamestate.stealthloading = 0;
 				}
 			}
 
@@ -5002,7 +5002,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 			}
 		}
 
-		oldmusictype = musictype;
+		oldmusictype = gamestate.musictype;
 	}
 
 	facing = 0;
@@ -5012,7 +5012,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 	facing = DoRotation(facing, 0, 0 - yaw, 0);
 	viewerfacing = facing;
 
-	if (!cameramode) {
+	if (!gamestate.cameramode) {
 		if ((Animation::animations[Person::players[0]->animTarget].attack != 3 && Animation::animations[Person::players[0]->animCurrent].attack != 3) || Person::players[0]->skeleton.free) {
 			target = Person::players[0]->coords + Person::players[0]->currentoffset * (1 - Person::players[0]->target) * Person::players[0]->scale + Person::players[0]->targetoffset * Person::players[0]->target * Person::players[0]->scale - Person::players[0]->facing * .05;
 		}
@@ -5049,7 +5049,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 					cameraloc = cameraloc + coltarget * multiplier * 8;
 				}
 			}
-			if (editorenabled) {
+			if (gamestate.editorenabled) {
 				cameraloc = target;
 			}
 			cameradist += multiplier * 5;
@@ -5092,12 +5092,12 @@ void Game::TickOnceAfter(GameState& gamestate)
 			gamestate.woozy = 0;
 		}
 		camerashake -= multiplier * 2;
-		blackout -= multiplier * 2;
+		gamestate.blackout -= multiplier * 2;
 		if (camerashake < 0) {
 			camerashake = 0;
 		}
-		if (blackout < 0) {
-			blackout = 0;
+		if (gamestate.blackout < 0) {
+			gamestate.blackout = 0;
 		}
 		if (camerashake) {
 			viewer.x += (float)(rand() % 100) * .0005 * camerashake;

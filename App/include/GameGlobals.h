@@ -21,16 +21,9 @@ namespace Game
 	extern Texture Mainmenuitems[10];
 
 	extern int selected;
-	extern int keyselect;
 
-	extern int newdetail;
-	extern int newscreenwidth;
-	extern int newscreenheight;
-
-	extern bool gameon;
 	extern float yaw, pitch;
 	extern SkyBox* skybox;
-	extern bool cameramode;
 
 	extern Model hawk;
 	extern Texture hawktexture;
@@ -41,28 +34,15 @@ namespace Game
 	extern Model cornea;
 	extern Model iris;
 
-	extern bool stealthloading;
-
-	extern int musictype;
-
 	extern Vector3 mapcenter;
 
 	extern Text* text;
 	extern Text* textmono;
 
-	extern bool editorenabled;
-	extern int editortype;
-
 	extern Vector3 pathpoint[30];
 	extern int numpathpoints;
 	extern int numpathpointconnect[30];
 	extern int pathpointconnect[30][30];
-	extern int pathpointselected;
 
-	extern bool console;
 	extern std::string consoletext[15];
-
-	extern int targetlevel;
-
-	extern bool waiting;
 }

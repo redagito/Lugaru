@@ -33,6 +33,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 
+struct GameState;
+
 #define max_sprites 20000
 
 enum
@@ -78,7 +80,8 @@ public:
 
 	// TODO Update and draw in one?
 	static void Draw(const Vector3& viewer, float viewdistance, float fadestart, int environment, const Light& light, float multiplier,
-		float gravity, Terrain& terrain, int detail, const Vector3& viewerfacing, bool bloodtoggle, const Vector3& windvector, bool tutorialActive);
+		float gravity, Terrain& terrain, int detail, const Vector3& viewerfacing, bool bloodtoggle, const Vector3& windvector, bool tutorialActive,
+		GameState& gamestate);
 
 	static void deleteSprites()
 	{

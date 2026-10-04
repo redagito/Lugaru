@@ -195,11 +195,11 @@ void Game::LoadingScreen(GameState& gamestate)
 	// Devtools-only: trace what drives the loading overlay. A correct trace now
 	// shows loadprogress climbing at a steady wall-clock rate and flashamount
 	// bleeding off instead of sitting pinned at 1.
-	if (devtools) {
+	if (gamestate.devtools) {
 		static int tracecount = 0;
 		if (tracecount < 400 && (tracecount % 10) == 0) {
 			fprintf(stderr, "[loading] n=%d elapsed=%.4f loadprogress=%.2f flashamount=%.3f\n",
-					tracecount, elapsed, clock.ramp(), flashamount);
+					tracecount, elapsed, clock.ramp(), gamestate.flashamount);
 		}
 		tracecount++;
 	}
@@ -353,16 +353,16 @@ void Game::LoadingScreen(GameState& gamestate)
 
 	//Text
 
-	if (flashamount > 0) {
-		if (flashamount > 1) {
-			flashamount = 1;
+	if (gamestate.flashamount > 0) {
+		if (gamestate.flashamount > 1) {
+			gamestate.flashamount = 1;
 		}
 		if (gamestate.flashdelay <= 0) {
-			flashamount = LoadingClock::decayFlash(flashamount, elapsed);
+			gamestate.flashamount = LoadingClock::decayFlash(gamestate.flashamount, elapsed);
 		}
 		gamestate.flashdelay--;
-		if (flashamount < 0) {
-			flashamount = 0;
+		if (gamestate.flashamount < 0) {
+			gamestate.flashamount = 0;
 		}
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
@@ -379,7 +379,7 @@ void Game::LoadingScreen(GameState& gamestate)
 		glScalef(screenwidth, screenheight, 1);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
-		glColor4f(gamestate.flashr, gamestate.flashg, gamestate.flashb, flashamount);
+		glColor4f(gamestate.flashr, gamestate.flashg, gamestate.flashb, gamestate.flashamount);
 		glBegin(GL_QUADS);
 		glVertex3f(0, 0, 0.0f);
 		glVertex3f(256, 0, 0.0f);
@@ -594,15 +594,15 @@ void Game::InitGame(GameState& gamestate)
 
 	FadeLoadingScreen(95);
 
-	gameon = 0;
+	gamestate.gameon = 0;
 	mainmenu = 1;
 
 	gamestate.stillloading = 0;
 	gamestate.firstLoadDone = false;
 
-	newdetail = detail;
-	newscreenwidth = screenwidth;
-	newscreenheight = screenheight;
+	gamestate.newdetail = detail;
+	gamestate.newscreenwidth = screenwidth;
+	gamestate.newscreenheight = screenheight;
 
 	Menu::Load(gamestate);
 
@@ -670,7 +670,7 @@ void Game::LoadStuff(GameState& gamestate)
 		gamestate.kTextureSize = 256;
 	}
 
-	realtexdetail = texdetail;
+	gamestate.realtexdetail = texdetail;
 
 	Weapon::Load(trilinear, [&]() { Game::LoadingScreen(gamestate); });
 
@@ -718,9 +718,9 @@ void Game::LoadStuff(GameState& gamestate)
 	SetUpLighting(gamestate);
 
 	fadestart = .6;
-	gravity = -10;
+	gamestate.gravity = -10;
 
-	texscale = .2 / megascale / viewdistdetail;
+	gamestate.texscale = .2 / megascale / viewdistdetail;
 	terrain.scale = 3 * megascale * viewdistdetail;
 
 	viewer.x = terrain.size / 2 * terrain.scale;
@@ -752,7 +752,7 @@ void Game::LoadStuff(GameState& gamestate)
 
 	gamestate.oldenvironment = -4;
 
-	gameon = 1;
+	gamestate.gameon = 1;
 	mainmenu = 0;
 
 	//Fix knife stab, too lazy to do it manually
@@ -817,7 +817,7 @@ void Game::LoadStuff(GameState& gamestate)
 		LoadScreenTexture(gamestate);
 	}
 
-	if (targetlevel != 7) {
+	if (gamestate.targetlevel != 7) {
 		emit_sound_at(fireendsound);
 	}
 

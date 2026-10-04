@@ -33,12 +33,12 @@ void DefaultSettings(GameState& gamestate)
 	detail = 2;
 	gamestate.ismotionblur = 1;
 	gamestate.usermousesensitivity = 1;
-	Game::newscreenwidth = kContextWidth = 1024;
-	Game::newscreenheight = kContextHeight = 768;
+	gamestate.newscreenwidth = kContextWidth = 1024;
+	gamestate.newscreenheight = kContextHeight = 768;
 	gamestate.fullscreen = 0;
 	gamestate.floatjump = 0;
 	gamestate.autoslomo = 1;
-	decalstoggle = true;
+	gamestate.decalstoggle = true;
 	gamestate.invertmouse = 0;
 	bloodtoggle = 0;
 	gamestate.foliage = 1;
@@ -54,7 +54,7 @@ void DefaultSettings(GameState& gamestate)
 	gamestate.velocityblur = 0;
 	gamestate.volume = 0.8f;
 	gamestate.ambientsound = 1;
-	devtools = 0;
+	gamestate.devtools = 0;
 
 	gamestate.crouchkey = SDL_SCANCODE_LSHIFT;
 	gamestate.jumpkey = SDL_SCANCODE_SPACE;
@@ -67,22 +67,22 @@ void DefaultSettings(GameState& gamestate)
 	gamestate.attackkey = MOUSEBUTTON_LEFT;
 	gamestate.consolekey = SDL_SCANCODE_GRAVE;
 
-	Game::newdetail = detail;
+	gamestate.newdetail = detail;
 }
 
 void SaveSettings(GameState& gamestate)
 {
-	if (Game::newdetail < 0) {
-		Game::newdetail = 0;
+	if (gamestate.newdetail < 0) {
+		gamestate.newdetail = 0;
 	}
-	if (Game::newdetail > 2) {
-		Game::newdetail = 2;
+	if (gamestate.newdetail > 2) {
+		gamestate.newdetail = 2;
 	}
-	if (Game::newscreenwidth < gamestate.minscreenwidth || Game::newscreenwidth > gamestate.maxscreenwidth) {
-		Game::newscreenwidth = screenwidth;
+	if (gamestate.newscreenwidth < gamestate.minscreenwidth || gamestate.newscreenwidth > gamestate.maxscreenwidth) {
+		gamestate.newscreenwidth = screenwidth;
 	}
-	if (Game::newscreenheight < gamestate.minscreenheight || Game::newscreenheight > gamestate.maxscreenheight) {
-		Game::newscreenheight = screenheight;
+	if (gamestate.newscreenheight < gamestate.minscreenheight || gamestate.newscreenheight > gamestate.maxscreenheight) {
+		gamestate.newscreenheight = screenheight;
 	}
 	errno = 0;
 	std::ofstream opstream(Folders::getConfigFilePath());
@@ -91,9 +91,9 @@ void SaveSettings(GameState& gamestate)
 		return;
 	}
 	opstream << "Screenwidth:\n";
-	opstream << Game::newscreenwidth;
+	opstream << gamestate.newscreenwidth;
 	opstream << "\nScreenheight:\n";
-	opstream << Game::newscreenheight;
+	opstream << gamestate.newscreenheight;
 	opstream << "\nFullscreen:\n";
 	opstream << gamestate.fullscreen;
 	opstream << "\nMouse sensitivity:\n";
@@ -101,7 +101,7 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nBlur(0,1):\n";
 	opstream << gamestate.ismotionblur;
 	opstream << "\nOverall Detail(0,1,2) higher=better:\n";
-	opstream << Game::newdetail;
+	opstream << gamestate.newdetail;
 	opstream << "\nFloating jump:\n";
 	opstream << gamestate.floatjump;
 	opstream << "\nMouse jump:\n";
@@ -119,7 +119,7 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nTrilinear:\n";
 	opstream << trilinear;
 	opstream << "\nDecals(shadows,blood puddles,etc):\n";
-	opstream << decalstoggle;
+	opstream << gamestate.decalstoggle;
 	opstream << "\nInvert mouse:\n";
 	opstream << gamestate.invertmouse;
 	opstream << "\nGamespeed:\n";
@@ -250,7 +250,7 @@ bool LoadSettings(GameState& gamestate)
 			ipstream >> trilinear;
 		}
 		else if (!strncmp(setting, "Decals", 6)) {
-			ipstream >> decalstoggle;
+			ipstream >> gamestate.decalstoggle;
 		}
 		else if (!strncmp(setting, "Invert mouse", 12)) {
 			ipstream >> gamestate.invertmouse;
@@ -270,7 +270,7 @@ bool LoadSettings(GameState& gamestate)
 			ipstream >> gamestate.texttoggle;
 		}
 		else if (!strncmp(setting, "Devtools", 8)) {
-			ipstream >> devtools;
+			ipstream >> gamestate.devtools;
 		}
 		else if (!strncmp(setting, "Show Points", 11)) {
 			ipstream >> gamestate.showpoints;
@@ -364,6 +364,6 @@ bool LoadSettings(GameState& gamestate)
 		screenheight = 768;
 	}
 
-	Game::newdetail = detail;
+	gamestate.newdetail = detail;
 	return true;
 }

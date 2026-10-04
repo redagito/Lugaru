@@ -6,9 +6,7 @@
 
 #include <type_traits>
 
-#include "GameGlobals.h"
 #include "GameState.hpp"
-#include "Globals.h"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
 {
@@ -836,154 +834,279 @@ TEST_CASE("tranche 4 GameState members are per instance", "[gamestate]")
 }
 
 // Tranche 5 covers twenty-six more scalar globals from App/include/Globals.h
-// and App/include/GameGlobals.h. These assertions read the globals themselves,
-// which is the whole point: the values are pinned here while the globals are
-// still the thing being read, so the literals below are observed rather than
-// assumed. The tranche that follows moves each of these into a GameState member
-// and asserts the same values against that member instead.
+// and App/include/GameGlobals.h. Each member's default is the literal the
+// global it came from was initialised with, and its declared type is the type
+// that global declared. The literals were first pinned by reading the globals
+// themselves, while they were still around to be compared against.
 //
 // Types are pinned next to the values on purpose. A value comparison such as
 // `REQUIRE(x == 0)` holds just as happily for an int as for a float, so on its
 // own it would let a member change type unnoticed.
-TEST_CASE("the tranche 5 globals start at the values GameState will carry", "[gamestate]")
+TEST_CASE("GameState tranche 5 members start at their historical global defaults", "[gamestate]")
 {
+	GameState s;
+
 	SECTION("display options")
 	{
-		REQUIRE(decalstoggle == false);
+		REQUIRE(s.decalstoggle == false);
 	}
 
 	SECTION("motion blur")
 	{
-		REQUIRE(blurness == 0.0f);
+		REQUIRE(s.blurness == 0.0f);
 	}
 
 	SECTION("wind")
 	{
-		REQUIRE(windvar == 0.0f);
+		REQUIRE(s.windvar == 0.0f);
 	}
 
 	SECTION("terrain texturing and physics")
 	{
-		REQUIRE(texscale == 0.0f);
-		REQUIRE(gravity == 0.0f);
+		REQUIRE(s.texscale == 0.0f);
+		REQUIRE(s.gravity == 0.0f);
 	}
 
 	SECTION("time scale")
 	{
-		REQUIRE(slomo == 0);
+		REQUIRE(s.slomo == 0);
 	}
 
 	SECTION("screen darkening from blood loss")
 	{
-		REQUIRE(blackout == 0.0f);
+		REQUIRE(s.blackout == 0.0f);
 	}
 
 	SECTION("screen flash")
 	{
-		REQUIRE(flashamount == 0.0f);
+		REQUIRE(s.flashamount == 0.0f);
 	}
 
 	SECTION("level hostility")
 	{
-		REQUIRE(hostile == 0);
+		REQUIRE(s.hostile == 0);
 	}
 
 	SECTION("skybox")
 	{
-		REQUIRE(skyboxtexture == false);
+		REQUIRE(s.skyboxtexture == false);
 	}
 
 	SECTION("devtools")
 	{
-		REQUIRE(devtools == false);
+		REQUIRE(s.devtools == false);
 	}
 
 	SECTION("texture detail")
 	{
-		REQUIRE(realtexdetail == 0.0f);
+		REQUIRE(s.realtexdetail == 0.0f);
 	}
 
 	SECTION("options menu choices, not yet applied")
 	{
-		REQUIRE(Game::newdetail == 0);
-		REQUIRE(Game::newscreenwidth == 0);
-		REQUIRE(Game::newscreenheight == 0);
+		REQUIRE(s.newdetail == 0);
+		REQUIRE(s.newscreenwidth == 0);
+		REQUIRE(s.newscreenheight == 0);
 	}
 
 	SECTION("session control")
 	{
-		REQUIRE(Game::gameon == false);
+		REQUIRE(s.gameon == false);
 	}
 
 	SECTION("editor")
 	{
-		REQUIRE(Game::editorenabled == false);
-		REQUIRE(Game::editortype == 0);
-		REQUIRE(Game::pathpointselected == 0);
+		REQUIRE(s.editorenabled == false);
+		REQUIRE(s.editortype == 0);
+		REQUIRE(s.pathpointselected == 0);
 	}
 
 	SECTION("keybind capture")
 	{
-		REQUIRE(Game::keyselect == 0);
+		REQUIRE(s.keyselect == 0);
 	}
 
 	SECTION("audio")
 	{
-		REQUIRE(Game::musictype == 0);
+		REQUIRE(s.musictype == 0);
 	}
 
 	SECTION("level loading")
 	{
-		REQUIRE(Game::stealthloading == false);
+		REQUIRE(s.stealthloading == false);
 	}
 
 	SECTION("free camera")
 	{
-		REQUIRE(Game::cameramode == false);
+		REQUIRE(s.cameramode == false);
 	}
 
 	SECTION("console")
 	{
-		REQUIRE(Game::console == false);
+		REQUIRE(s.console == false);
 	}
 
 	SECTION("level switching")
 	{
-		REQUIRE(Game::targetlevel == 0);
+		REQUIRE(s.targetlevel == 0);
 	}
 
 	SECTION("text input")
 	{
-		REQUIRE(Game::waiting == false);
+		REQUIRE(s.waiting == false);
 	}
 
-	SECTION("declared types are the ones the headers declare")
+	SECTION("declared types are preserved from the migrated globals")
 	{
-		REQUIRE(std::is_same<decltype(decalstoggle), bool>::value);
-		REQUIRE(std::is_same<decltype(blurness), float>::value);
-		REQUIRE(std::is_same<decltype(windvar), float>::value);
-		REQUIRE(std::is_same<decltype(texscale), float>::value);
-		REQUIRE(std::is_same<decltype(gravity), float>::value);
-		REQUIRE(std::is_same<decltype(slomo), int>::value);
-		REQUIRE(std::is_same<decltype(blackout), float>::value);
-		REQUIRE(std::is_same<decltype(flashamount), float>::value);
-		REQUIRE(std::is_same<decltype(hostile), int>::value);
-		REQUIRE(std::is_same<decltype(skyboxtexture), bool>::value);
-		REQUIRE(std::is_same<decltype(devtools), bool>::value);
-		REQUIRE(std::is_same<decltype(realtexdetail), float>::value);
-		REQUIRE(std::is_same<decltype(Game::newdetail), int>::value);
-		REQUIRE(std::is_same<decltype(Game::newscreenwidth), int>::value);
-		REQUIRE(std::is_same<decltype(Game::newscreenheight), int>::value);
-		REQUIRE(std::is_same<decltype(Game::gameon), bool>::value);
-		REQUIRE(std::is_same<decltype(Game::editorenabled), bool>::value);
-		REQUIRE(std::is_same<decltype(Game::editortype), int>::value);
-		REQUIRE(std::is_same<decltype(Game::pathpointselected), int>::value);
-		REQUIRE(std::is_same<decltype(Game::keyselect), int>::value);
-		REQUIRE(std::is_same<decltype(Game::musictype), int>::value);
-		REQUIRE(std::is_same<decltype(Game::stealthloading), bool>::value);
-		REQUIRE(std::is_same<decltype(Game::cameramode), bool>::value);
-		REQUIRE(std::is_same<decltype(Game::console), bool>::value);
-		REQUIRE(std::is_same<decltype(Game::targetlevel), int>::value);
-		REQUIRE(std::is_same<decltype(Game::waiting), bool>::value);
+		REQUIRE(std::is_same<decltype(s.decalstoggle), bool>::value);
+		REQUIRE(std::is_same<decltype(s.blurness), float>::value);
+		REQUIRE(std::is_same<decltype(s.windvar), float>::value);
+		REQUIRE(std::is_same<decltype(s.texscale), float>::value);
+		REQUIRE(std::is_same<decltype(s.gravity), float>::value);
+		REQUIRE(std::is_same<decltype(s.slomo), int>::value);
+		REQUIRE(std::is_same<decltype(s.blackout), float>::value);
+		REQUIRE(std::is_same<decltype(s.flashamount), float>::value);
+		REQUIRE(std::is_same<decltype(s.hostile), int>::value);
+		REQUIRE(std::is_same<decltype(s.skyboxtexture), bool>::value);
+		REQUIRE(std::is_same<decltype(s.devtools), bool>::value);
+		REQUIRE(std::is_same<decltype(s.realtexdetail), float>::value);
+		REQUIRE(std::is_same<decltype(s.newdetail), int>::value);
+		REQUIRE(std::is_same<decltype(s.newscreenwidth), int>::value);
+		REQUIRE(std::is_same<decltype(s.newscreenheight), int>::value);
+		REQUIRE(std::is_same<decltype(s.gameon), bool>::value);
+		REQUIRE(std::is_same<decltype(s.editorenabled), bool>::value);
+		REQUIRE(std::is_same<decltype(s.editortype), int>::value);
+		REQUIRE(std::is_same<decltype(s.pathpointselected), int>::value);
+		REQUIRE(std::is_same<decltype(s.keyselect), int>::value);
+		REQUIRE(std::is_same<decltype(s.musictype), int>::value);
+		REQUIRE(std::is_same<decltype(s.stealthloading), bool>::value);
+		REQUIRE(std::is_same<decltype(s.cameramode), bool>::value);
+		REQUIRE(std::is_same<decltype(s.console), bool>::value);
+		REQUIRE(std::is_same<decltype(s.targetlevel), int>::value);
+		REQUIRE(std::is_same<decltype(s.waiting), bool>::value);
+	}
+}
+
+TEST_CASE("tranche 5 GameState members are per instance", "[gamestate]")
+{
+	GameState a;
+	GameState b;
+
+	SECTION("writing one instance leaves the other at its defaults")
+	{
+		a.decalstoggle = true;
+		a.blurness = 1.5f;
+		a.windvar = 2.5f;
+		a.texscale = 3.5f;
+		a.gravity = -10.0f;
+		a.slomo = 1;
+		a.blackout = 4.5f;
+		a.flashamount = 5.5f;
+		a.hostile = 1;
+		a.skyboxtexture = true;
+		a.devtools = true;
+		a.realtexdetail = 2.0f;
+		a.newdetail = 2;
+		a.newscreenwidth = 1920;
+		a.newscreenheight = 1080;
+		a.gameon = true;
+		a.editorenabled = true;
+		a.editortype = 4;
+		a.pathpointselected = 7;
+		a.keyselect = 3;
+		a.musictype = 5;
+		a.stealthloading = true;
+		a.cameramode = true;
+		a.console = true;
+		a.targetlevel = 9;
+		a.waiting = true;
+
+		// Every one of the twenty-six was seeded to a value its default does not
+		// hold, so each assertion below is an observation of a value the writer
+		// never touched rather than a restatement of the default.
+		REQUIRE(b.decalstoggle == false);
+		REQUIRE(b.blurness == 0.0f);
+		REQUIRE(b.windvar == 0.0f);
+		REQUIRE(b.texscale == 0.0f);
+		REQUIRE(b.gravity == 0.0f);
+		REQUIRE(b.slomo == 0);
+		REQUIRE(b.blackout == 0.0f);
+		REQUIRE(b.flashamount == 0.0f);
+		REQUIRE(b.hostile == 0);
+		REQUIRE(b.skyboxtexture == false);
+		REQUIRE(b.devtools == false);
+		REQUIRE(b.realtexdetail == 0.0f);
+		REQUIRE(b.newdetail == 0);
+		REQUIRE(b.newscreenwidth == 0);
+		REQUIRE(b.newscreenheight == 0);
+		REQUIRE(b.gameon == false);
+		REQUIRE(b.editorenabled == false);
+		REQUIRE(b.editortype == 0);
+		REQUIRE(b.pathpointselected == 0);
+		REQUIRE(b.keyselect == 0);
+		REQUIRE(b.musictype == 0);
+		REQUIRE(b.stealthloading == false);
+		REQUIRE(b.cameramode == false);
+		REQUIRE(b.console == false);
+		REQUIRE(b.targetlevel == 0);
+		REQUIRE(b.waiting == false);
+	}
+
+	SECTION("a third instance also starts clean")
+	{
+		a.decalstoggle = true;
+		a.blurness = 6.5f;
+		a.windvar = 7.5f;
+		a.texscale = 8.5f;
+		a.gravity = -20.0f;
+		a.slomo = 1;
+		a.blackout = 9.5f;
+		a.flashamount = 10.5f;
+		a.hostile = 1;
+		a.skyboxtexture = true;
+		a.devtools = true;
+		a.realtexdetail = 4.0f;
+		a.newdetail = 1;
+		a.newscreenwidth = 1280;
+		a.newscreenheight = 720;
+		a.gameon = true;
+		a.editorenabled = true;
+		a.editortype = 6;
+		a.pathpointselected = 11;
+		a.keyselect = 6;
+		a.musictype = 8;
+		a.stealthloading = true;
+		a.cameramode = true;
+		a.console = true;
+		a.targetlevel = 12;
+		a.waiting = true;
+
+		GameState c;
+		REQUIRE(c.decalstoggle == false);
+		REQUIRE(c.blurness == 0.0f);
+		REQUIRE(c.windvar == 0.0f);
+		REQUIRE(c.texscale == 0.0f);
+		REQUIRE(c.gravity == 0.0f);
+		REQUIRE(c.slomo == 0);
+		REQUIRE(c.blackout == 0.0f);
+		REQUIRE(c.flashamount == 0.0f);
+		REQUIRE(c.hostile == 0);
+		REQUIRE(c.skyboxtexture == false);
+		REQUIRE(c.devtools == false);
+		REQUIRE(c.realtexdetail == 0.0f);
+		REQUIRE(c.newdetail == 0);
+		REQUIRE(c.newscreenwidth == 0);
+		REQUIRE(c.newscreenheight == 0);
+		REQUIRE(c.gameon == false);
+		REQUIRE(c.editorenabled == false);
+		REQUIRE(c.editortype == 0);
+		REQUIRE(c.pathpointselected == 0);
+		REQUIRE(c.keyselect == 0);
+		REQUIRE(c.musictype == 0);
+		REQUIRE(c.stealthloading == false);
+		REQUIRE(c.cameramode == false);
+		REQUIRE(c.console == false);
+		REQUIRE(c.targetlevel == 0);
+		REQUIRE(c.waiting == false);
 	}
 }

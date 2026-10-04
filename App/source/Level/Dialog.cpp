@@ -201,7 +201,7 @@ void Dialog::tick(int id, GameState& gamestate)
 	unsigned playerId = type % 10;
 	bool special = (type > 9);
 
-	if ((!hostile || (type > 40) && (type < 50)) &&
+	if ((!gamestate.hostile || (type > 40) && (type < 50)) &&
 		(playerId < Person::players.size()) &&
 		(playerId > 0) &&
 		((gonethrough == 0) || !special) &&

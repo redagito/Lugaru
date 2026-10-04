@@ -822,7 +822,7 @@ void Tutorial::DoStuff(float timemultiplier, bool bloodtoggleflag, GameState& ga
 
 			emit_stream_np(stream_menutheme);
 
-			Game::gameon = 0;
+			gamestate.gameon = 0;
 			mainmenu = 5;
 
 			Game::fireSound();

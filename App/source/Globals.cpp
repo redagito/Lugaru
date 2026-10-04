@@ -22,9 +22,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 // TODO GET RID OF ALL OF THESE!
 
-bool decalstoggle = false;
-float blurness = 0;
-float windvar = 0;
 int difficulty = 0;
 float multiplier = 0;
 float screenwidth = 0, screenheight = 0;
@@ -33,8 +30,6 @@ Vector3 viewer;
 Vector3 viewerfacing;
 float fadestart = 0;
 int environment = 0;
-float texscale = 0;
-float gravity = 0;
 Light light;
 Terrain terrain;
 
@@ -43,24 +38,14 @@ SDL_Window* sdlwindow;
 int detail = 0;
 Frustum frustum;
 float texdetail = 0;
-float realtexdetail = 0;
-int slomo = 0;
 int bloodtoggle = 0;
 float camerashake = 0;
-float blackout = 0;
 bool trilinear;
 Weapons weapons;
-float flashamount = 0;
 Vector3 windvector;
 int mainmenu = 0;
 int whichjointstartarray[26] = { 0 };
 int whichjointendarray[26] = { 0 };
-
-bool skyboxtexture = false;
-
-int hostile = 0;
-
-bool devtools = false;
 
 StereoMode stereomode = stereoNone;
 StereoMode newstereomode = stereoNone;

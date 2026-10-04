@@ -363,9 +363,9 @@ public:
 
     void CheckKick(Terrain& terrain, bool tutorialActive, bool inDialog, float multiplier, int whichjointstartarray[26], GameState& gamestate);
     void CatchFire();
-    void DoBlood(float howmuch, int which, bool tutorialActive);
+    void DoBlood(float howmuch, int which, bool tutorialActive, GameState& gamestate);
     void DoBloodBig(float howmuch, int which, bool tutorialActive, GameState& gamestate);
-    bool DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutorialActive);
+    bool DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutorialActive, GameState& gamestate);
 
     bool wasIdle() { return animation_bits[animCurrent] & ab_idle; }
     bool isIdle() { return animation_bits[animTarget] & ab_idle; }

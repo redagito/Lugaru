@@ -235,9 +235,9 @@ bool SetUp(GameState& gamestate)
 	screenwidth = width;
 	screenheight = height;
 
-	newdetail = detail;
-	newscreenwidth = screenwidth;
-	newscreenheight = screenheight;
+	gamestate.newdetail = detail;
+	gamestate.newscreenwidth = screenwidth;
+	gamestate.newscreenheight = screenheight;
 
 	/* If saved resolution is not in the list, add it to the list (so that it’s selectable in the options) */
 	pair<int, int> startresolution(width, height);
@@ -347,7 +347,7 @@ void DoUpdate(GameState& gamestate)
 	if (gamestate.loading == 4) {
 		multiplier *= .00001;
 	}
-	if (slomo && !mainmenu) {
+	if (gamestate.slomo && !mainmenu) {
 		multiplier *= gamestate.slomospeed;
 	}
 	oldmult = multiplier;
@@ -559,7 +559,7 @@ int main(int argc, char** argv)
 			}
 
 			if (commandLineOptions[DEVTOOLS]) {
-				devtools = true;
+				gamestate.devtools = true;
 			}
 
 			bool gameDone = false;
@@ -568,7 +568,7 @@ int main(int argc, char** argv)
 			srand((int)time(nullptr));
 
 			if (commandLineOptions[CMD].count() > 0) {
-				devtools = true;
+				gamestate.devtools = true;
 				Menu::startChallengeLevel(1, gamestate);
 				for (option::Option* opt = commandLineOptions[CMD]; opt; opt = opt->next()) {
 					if (opt->arg && (strlen(opt->arg) > 0)) {
@@ -586,7 +586,7 @@ int main(int argc, char** argv)
 					gamestate.deltah = 0;
 					gamestate.deltav = 0;
 					SDL_Event e;
-					if (!waiting) {
+					if (!gamestate.waiting) {
 						// message pump
 						while (SDL_PollEvent(&e)) {
 							if (!sdlEventProc(e, gamestate)) {

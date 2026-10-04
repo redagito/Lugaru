@@ -293,19 +293,19 @@ void Menu::drawItems()
 
 void Menu::updateSettingsMenu(GameState& gamestate)
 {
-    std::string sbuf = std::string("Resolution: ") + std::to_string(newscreenwidth) + "*" + std::to_string(newscreenheight);
-    if (((float)newscreenwidth <= (float)newscreenheight * 1.61) && ((float)newscreenwidth >= (float)newscreenheight * 1.59)) {
+    std::string sbuf = std::string("Resolution: ") + std::to_string(gamestate.newscreenwidth) + "*" + std::to_string(gamestate.newscreenheight);
+    if (((float)gamestate.newscreenwidth <= (float)gamestate.newscreenheight * 1.61) && ((float)gamestate.newscreenwidth >= (float)gamestate.newscreenheight * 1.59)) {
         sbuf += " (widescreen)";
     }
     setText(0, sbuf);
     setText(14, gamestate.fullscreen ? "Fullscreen: On" : "Fullscreen: Off");
-    if (newdetail == 0) {
+    if (gamestate.newdetail == 0) {
         setText(1, "Detail: Low");
     }
-    if (newdetail == 1) {
+    if (gamestate.newdetail == 1) {
         setText(1, "Detail: Medium");
     }
-    if (newdetail == 2) {
+    if (gamestate.newdetail == 2) {
         setText(1, "Detail: High");
     }
     if (bloodtoggle == 0) {
@@ -318,13 +318,13 @@ void Menu::updateSettingsMenu(GameState& gamestate)
         setText(2, "Blood: On, high detail (slower)");
     }
     setText(4, gamestate.ismotionblur ? "Blur Effects: Enabled (less compatible)" : "Blur Effects: Disabled (more compatible)");
-    setText(5, decalstoggle ? "Decals: Enabled (slower)" : "Decals: Disabled");
+    setText(5, gamestate.decalstoggle ? "Decals: Enabled (slower)" : "Decals: Disabled");
     setText(6, gamestate.musictoggle ? "Music: Enabled" : "Music: Disabled");
     setText(9, gamestate.invertmouse ? "Invert mouse: Yes" : "Invert mouse: No");
     setText(10, std::string("Mouse Speed: ") + std::to_string(int(gamestate.usermousesensitivity * 5)));
     setText(11, std::string("Volume: ") + std::to_string(int(gamestate.volume * 100)) + "%");
     setText(13, gamestate.showdamagebar ? "Damage Bar: On" : "Damage Bar: Off");
-    if ((newdetail == detail) && (newscreenheight == (int)screenheight) && (newscreenwidth == (int)screenwidth)) {
+    if ((gamestate.newdetail == detail) && (gamestate.newscreenheight == (int)screenheight) && (gamestate.newscreenwidth == (int)screenwidth)) {
         setText(8, "Back");
     } else {
         setText(8, "Back (some changes take effect next time Lugaru is opened)");
@@ -340,17 +340,17 @@ void Menu::updateStereoConfigMenu(GameState& gamestate)
 
 void Menu::updateControlsMenu(GameState& gamestate)
 {
-    setText(0, (std::string) "Forwards: " + (keyselect == 0 ? "_" : Input::keyToChar(gamestate.forwardkey)));
-    setText(1, (std::string) "Back: " + (keyselect == 1 ? "_" : Input::keyToChar(gamestate.backkey)));
-    setText(2, (std::string) "Left: " + (keyselect == 2 ? "_" : Input::keyToChar(gamestate.leftkey)));
-    setText(3, (std::string) "Right: " + (keyselect == 3 ? "_" : Input::keyToChar(gamestate.rightkey)));
-    setText(4, (std::string) "Crouch: " + (keyselect == 4 ? "_" : Input::keyToChar(gamestate.crouchkey)));
-    setText(5, (std::string) "Jump: " + (keyselect == 5 ? "_" : Input::keyToChar(gamestate.jumpkey)));
-    setText(6, (std::string) "Draw: " + (keyselect == 6 ? "_" : Input::keyToChar(gamestate.drawkey)));
-    setText(7, (std::string) "Throw: " + (keyselect == 7 ? "_" : Input::keyToChar(gamestate.throwkey)));
-    setText(8, (std::string) "Attack: " + (keyselect == 8 ? "_" : Input::keyToChar(gamestate.attackkey)));
-    if (devtools) {
-        setText(9, (std::string) "Console: " + (keyselect == 9 ? "_" : Input::keyToChar(gamestate.consolekey)));
+    setText(0, (std::string) "Forwards: " + (gamestate.keyselect == 0 ? "_" : Input::keyToChar(gamestate.forwardkey)));
+    setText(1, (std::string) "Back: " + (gamestate.keyselect == 1 ? "_" : Input::keyToChar(gamestate.backkey)));
+    setText(2, (std::string) "Left: " + (gamestate.keyselect == 2 ? "_" : Input::keyToChar(gamestate.leftkey)));
+    setText(3, (std::string) "Right: " + (gamestate.keyselect == 3 ? "_" : Input::keyToChar(gamestate.rightkey)));
+    setText(4, (std::string) "Crouch: " + (gamestate.keyselect == 4 ? "_" : Input::keyToChar(gamestate.crouchkey)));
+    setText(5, (std::string) "Jump: " + (gamestate.keyselect == 5 ? "_" : Input::keyToChar(gamestate.jumpkey)));
+    setText(6, (std::string) "Draw: " + (gamestate.keyselect == 6 ? "_" : Input::keyToChar(gamestate.drawkey)));
+    setText(7, (std::string) "Throw: " + (gamestate.keyselect == 7 ? "_" : Input::keyToChar(gamestate.throwkey)));
+    setText(8, (std::string) "Attack: " + (gamestate.keyselect == 8 ? "_" : Input::keyToChar(gamestate.attackkey)));
+    if (gamestate.devtools) {
+        setText(9, (std::string) "Console: " + (gamestate.keyselect == 9 ? "_" : Input::keyToChar(gamestate.consolekey)));
     }
 }
 
@@ -409,10 +409,10 @@ void Menu::Load(GameState& gamestate)
             addButton(6, "", 10 + 40, 160);
             addButton(7, "", 10 + 30, 120);
             addButton(8, "", 10 + 20, 80);
-            if (devtools) {
+            if (gamestate.devtools) {
                 addButton(9, "", 10 + 10, 40);
             }
-            addButton(devtools ? 10 : 9, "Back", 10, 10);
+            addButton(gamestate.devtools ? 10 : 9, "Back", 10, 10);
             updateControlsMenu(gamestate);
             break;
         case 5: {
@@ -527,7 +527,7 @@ void Menu::startChallengeLevel(int challengelevel, GameState& gamestate)
 
     gamestate.loading = 2;
     gamestate.loadtime = 0;
-    targetlevel = challengelevel;
+    gamestate.targetlevel = challengelevel;
     if (gamestate.firstLoadDone) {
         TickOnceAfter(gamestate);
     } else {
@@ -537,7 +537,7 @@ void Menu::startChallengeLevel(int challengelevel, GameState& gamestate)
     campaign = 0;
 
     mainmenu = 0;
-    gameon = 1;
+    gamestate.gameon = 1;
     pause_sound(stream_menutheme);
 }
 
@@ -560,7 +560,7 @@ void Menu::Tick(GameState& gamestate)
         switch (mainmenu) {
             case 3:
             case 5:
-                mainmenu = gameon ? 2 : 1;
+                mainmenu = gamestate.gameon ? 2 : 1;
                 break;
             case 4:
             case 18:
@@ -600,7 +600,7 @@ void Menu::Tick(GameState& gamestate)
             case 2:
                 switch (selected) {
                     case 1:
-                        if (gameon) { //resume
+                        if (gamestate.gameon) { //resume
                             mainmenu = 0;
                             pause_sound(stream_menutheme);
                             resume_stream(leveltheme);
@@ -615,30 +615,30 @@ void Menu::Tick(GameState& gamestate)
                         fireSound();
                         flash(gamestate);
                         mainmenu = 3;
-                        if (newdetail > 2) {
-                            newdetail = detail;
+                        if (gamestate.newdetail > 2) {
+                            gamestate.newdetail = detail;
                         }
-                        if (newdetail < 0) {
-                            newdetail = detail;
+                        if (gamestate.newdetail < 0) {
+                            gamestate.newdetail = detail;
                         }
-                        if (newscreenwidth > 3000) {
-                            newscreenwidth = screenwidth;
+                        if (gamestate.newscreenwidth > 3000) {
+                            gamestate.newscreenwidth = screenwidth;
                         }
-                        if (newscreenwidth < 0) {
-                            newscreenwidth = screenwidth;
+                        if (gamestate.newscreenwidth < 0) {
+                            gamestate.newscreenwidth = screenwidth;
                         }
-                        if (newscreenheight > 3000) {
-                            newscreenheight = screenheight;
+                        if (gamestate.newscreenheight > 3000) {
+                            gamestate.newscreenheight = screenheight;
                         }
-                        if (newscreenheight < 0) {
-                            newscreenheight = screenheight;
+                        if (gamestate.newscreenheight < 0) {
+                            gamestate.newscreenheight = screenheight;
                         }
                         break;
                     case 3:
                         fireSound();
                         flash(gamestate);
-                        if (gameon) { //end game
-                            gameon = 0;
+                        if (gamestate.gameon) { //end game
+                            gamestate.gameon = 0;
                             mainmenu = 1;
                         } else { //quit
                             gamestate.tryquit = 1;
@@ -651,20 +651,20 @@ void Menu::Tick(GameState& gamestate)
                 fireSound();
                 switch (selected) {
                     case 0:
-                        newscreenresolution = resolutions.find(std::make_pair(newscreenwidth, newscreenheight));
+                        newscreenresolution = resolutions.find(std::make_pair(gamestate.newscreenwidth, gamestate.newscreenheight));
                         /* Next one (end() + 1 is also end() so the ++ is safe even if it was not found) */
                         newscreenresolution++;
                         if (newscreenresolution == resolutions.end()) {
                             /* It was the last one (or not found), go back to the beginning */
                             newscreenresolution = resolutions.begin();
                         }
-                        newscreenwidth = newscreenresolution->first;
-                        newscreenheight = newscreenresolution->second;
+                        gamestate.newscreenwidth = newscreenresolution->first;
+                        gamestate.newscreenheight = newscreenresolution->second;
                         break;
                     case 1:
-                        newdetail++;
-                        if (newdetail > 2) {
-                            newdetail = 0;
+                        gamestate.newdetail++;
+                        if (gamestate.newdetail > 2) {
+                            gamestate.newdetail = 0;
                         }
                         break;
                     case 2:
@@ -677,7 +677,7 @@ void Menu::Tick(GameState& gamestate)
                         gamestate.ismotionblur = !gamestate.ismotionblur;
                         break;
                     case 5:
-                        decalstoggle = !decalstoggle;
+                        gamestate.decalstoggle = !gamestate.decalstoggle;
                         break;
                     case 6:
                         gamestate.musictoggle = !gamestate.musictoggle;
@@ -698,12 +698,12 @@ void Menu::Tick(GameState& gamestate)
                         flash(gamestate);
                         mainmenu = 4;
                         selected = -1;
-                        keyselect = -1;
+                        gamestate.keyselect = -1;
                         break;
                     case 8:
                         flash(gamestate);
                         SaveSettings(gamestate);
-                        mainmenu = gameon ? 2 : 1;
+                        mainmenu = gamestate.gameon ? 2 : 1;
                         break;
                     case 9:
                         gamestate.invertmouse = !gamestate.invertmouse;
@@ -725,7 +725,7 @@ void Menu::Tick(GameState& gamestate)
                         flash(gamestate);
                         newstereomode = stereomode;
                         mainmenu = 18;
-                        keyselect = -1;
+                        gamestate.keyselect = -1;
                         break;
                     case 13:
                         gamestate.showdamagebar = !gamestate.showdamagebar;
@@ -737,15 +737,15 @@ void Menu::Tick(GameState& gamestate)
                 updateSettingsMenu(gamestate);
                 break;
             case 4:
-                if (!waiting) {
+                if (!gamestate.waiting) {
                     fireSound();
-                    if (selected < (devtools ? 10 : 9) && keyselect == -1) {
-                        keyselect = selected;
+                    if (selected < (gamestate.devtools ? 10 : 9) && gamestate.keyselect == -1) {
+                        gamestate.keyselect = selected;
                     }
-                    if (keyselect != -1) {
+                    if (gamestate.keyselect != -1) {
                         setKeySelected(gamestate);
                     }
-                    if (selected == (devtools ? 10 : 9)) {
+                    if (selected == (gamestate.devtools ? 10 : 9)) {
                         flash(gamestate);
                         mainmenu = 3;
                     }
@@ -760,7 +760,7 @@ void Menu::Tick(GameState& gamestate)
 
                     gamestate.loading = 2;
                     gamestate.loadtime = 0;
-                    targetlevel = 7;
+                    gamestate.targetlevel = 7;
                     if (gamestate.firstLoadDone) {
                         TickOnceAfter(gamestate);
                     } else {
@@ -773,7 +773,7 @@ void Menu::Tick(GameState& gamestate)
                     LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate);
                     campaign = 1;
                     mainmenu = 0;
-                    gameon = 1;
+                    gamestate.gameon = 1;
                     pause_sound(stream_menutheme);
                 }
                 switch (selected) {
@@ -782,7 +782,7 @@ void Menu::Tick(GameState& gamestate)
 
                         gamestate.loading = 2;
                         gamestate.loadtime = 0;
-                        targetlevel = -1;
+                        gamestate.targetlevel = -1;
                         if (gamestate.firstLoadDone) {
                             TickOnceAfter(gamestate);
                         } else {
@@ -791,7 +791,7 @@ void Menu::Tick(GameState& gamestate)
                         LoadLevel(-1, gamestate);
 
                         mainmenu = 0;
-                        gameon = 1;
+                        gamestate.gameon = 1;
                         pause_sound(stream_menutheme);
                         break;
                     case 2:
@@ -801,7 +801,7 @@ void Menu::Tick(GameState& gamestate)
                         mainmenu = 6;
                         break;
                     case 4:
-                        mainmenu = (gameon ? 2 : 1);
+                        mainmenu = (gamestate.gameon ? 2 : 1);
                         break;
                     case 5:
                         mainmenu = 7;
@@ -913,7 +913,7 @@ void Menu::Tick(GameState& gamestate)
 
     if (entername) {
         inputText(newusername, &newuserselected, gamestate);
-        if (!waiting) {                 // the input as finished
+        if (!gamestate.waiting) {                 // the input as finished
             if (!newusername.empty()) { // with enter
                 Account::add(std::string(newusername));
 
@@ -970,7 +970,7 @@ int setKeySelected_thread(void* data)
     }
     if (scancode != SDL_SCANCODE_ESCAPE) {
         fireSound();
-        switch (keyselect) {
+        switch (gamestate.keyselect) {
             case 0:
                 gamestate.forwardkey = scancode;
                 break;
@@ -1005,8 +1005,8 @@ int setKeySelected_thread(void* data)
                 break;
         }
     }
-    keyselect = -1;
-    waiting = false;
+    gamestate.keyselect = -1;
+    gamestate.waiting = false;
     Menu::Load(gamestate);
     return 0;
 }
@@ -1026,13 +1026,13 @@ void Menu::joinKeySelectThread()
 
 void Menu::setKeySelected(GameState& gamestate)
 {
-    waiting = true;
+    gamestate.waiting = true;
     printf("launch thread\n");
     Menu::joinKeySelectThread();
     keyselectthread = SDL_CreateThread(setKeySelected_thread, NULL, &gamestate);
     if (keyselectthread == NULL) {
         fprintf(stderr, "Unable to create thread: %s\n", SDL_GetError());
-        waiting = false;
+        gamestate.waiting = false;
         return;
     }
 }

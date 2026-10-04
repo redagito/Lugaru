@@ -183,25 +183,23 @@ std::string join(const std::set<std::string>& names)
 // GameState already owns.
 const std::set<std::string> kPendingGlobals = {
 	// App/include/Globals.h
-	"decalstoggle", "blurness", "windvar", "difficulty", "multiplier",
+	"difficulty", "multiplier",
 	"screenwidth", "screenheight", "viewdistance", "viewer", "viewerfacing",
-	"fadestart", "environment", "texscale", "gravity", "light", "terrain",
-	"sdlwindow", "detail", "frustum", "texdetail", "realtexdetail", "slomo",
-	"bloodtoggle", "camerashake", "blackout", "trilinear", "weapons",
-	"flashamount", "windvector", "mainmenu", "whichjointstartarray",
-	"whichjointendarray", "skyboxtexture", "hostile", "devtools", "stereomode",
+	"fadestart", "environment", "light", "terrain",
+	"sdlwindow", "detail", "frustum", "texdetail", "bloodtoggle",
+	"camerashake", "trilinear", "weapons",
+	"windvector", "mainmenu", "whichjointstartarray",
+	"whichjointendarray", "stereomode",
 	"newstereomode",
 
 	// App/include/GameGlobals.h
 	"terraintexture", "terraintexture2", "loadscreentexture", "Mapcircletexture",
 	"Maparrowtexture", "Mapboxtexture", "cursortexture", "screentexture",
-	"screentexture2", "Mainmenuitems", "selected", "keyselect", "newdetail",
-	"newscreenwidth", "newscreenheight", "gameon", "yaw", "pitch", "skybox",
-	"cameramode", "hawk", "hawktexture", "hawkcoords", "realhawkcoords", "eye",
-	"cornea", "iris", "stealthloading", "musictype", "mapcenter", "text",
-	"textmono", "editorenabled", "editortype", "pathpoint", "numpathpoints",
-	"numpathpointconnect", "pathpointconnect", "pathpointselected", "console",
-	"consoletext", "targetlevel", "waiting",
+	"screentexture2", "Mainmenuitems", "selected", "yaw", "pitch", "skybox",
+	"hawk", "hawktexture", "hawkcoords", "realhawkcoords", "eye",
+	"cornea", "iris", "mapcenter", "text",
+	"textmono", "pathpoint", "numpathpoints",
+	"numpathpointconnect", "pathpointconnect", "consoletext",
 };
 
 } // namespace
@@ -245,7 +243,7 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 	{
 		// Without this, a parser that quietly matched nothing would leave every
 		// assertion above passing for the wrong reason.
-		REQUIRE(globals.size() == 80);
-		REQUIRE(members.size() == 97);
+		REQUIRE(globals.size() == 54);
+		REQUIRE(members.size() == 123);
 	}
 }
