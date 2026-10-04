@@ -2,14 +2,20 @@
 
 project(GameTest)
 
-file(GLOB TEST_FILES CONFIGURE_DEPENDS
-	${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
+	${CMAKE_CURRENT_SOURCE_DIR}/source/*.c
+	${CMAKE_CURRENT_SOURCE_DIR}/source/*.h
+	${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/source/*.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/source/*.cxx
+	${CMAKE_CURRENT_SOURCE_DIR}/source/*.hxx
+	${CMAKE_CURRENT_SOURCE_DIR}/source/*.def
+	${CMAKE_CURRENT_SOURCE_DIR}/source/*.rc
 )
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${TEST_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES})
 
-add_executable(${PROJECT_NAME} ${TEST_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE GameLib
@@ -18,6 +24,10 @@ target_link_libraries(${PROJECT_NAME}
 
 target_compile_definitions(${PROJECT_NAME}
 	PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
+)
+
+target_include_directories(${PROJECT_NAME}
+	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/source/
 )
 
 target_compile_options(${PROJECT_NAME} PRIVATE
