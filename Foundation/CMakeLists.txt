@@ -25,14 +25,6 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC JsonCpp::JsonCpp
     PUBLIC PNG::PNG # should be private
     PRIVATE JPEG::JPEG
-    # Platform/OpenGLInclude.hpp is a public Foundation header, so every layer
-    # above us can reach it, and it needs GL/gl.h, GL/glext.h and GL/glu.h. The
-    # Windows SDK only ships the first and third, so GL/glext.h comes from these
-    # interface-only packages. Both are external header packages rather than one
-    # of our own layers, so this is not an upward dependency: nothing here pulls
-    # in GraphicsLib, AudioLib, GameLib or AppLib.
-    PUBLIC glext::glext
-    PUBLIC glu::glu
 )
 
 target_include_directories(${PROJECT_NAME} 

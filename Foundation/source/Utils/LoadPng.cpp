@@ -6,7 +6,6 @@
 
 #include "Utils/ImageIO.hpp"
 #include "Platform/Platform.hpp"
-#include "Platform/OpenGLInclude.hpp"
 
 /* stolen from public domain example.c code in libpng distribution. */
 bool load_png(const char* file_name, ImageRec& tex)
