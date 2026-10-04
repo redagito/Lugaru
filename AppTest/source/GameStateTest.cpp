@@ -6,7 +6,9 @@
 
 #include <type_traits>
 
+#include "GameGlobals.h"
 #include "GameState.hpp"
+#include "Globals.h"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
 {
@@ -1108,5 +1110,100 @@ TEST_CASE("tranche 5 GameState members are per instance", "[gamestate]")
 		REQUIRE(c.console == false);
 		REQUIRE(c.targetlevel == 0);
 		REQUIRE(c.waiting == false);
+	}
+}
+
+// Tranche 6 covers sixteen more scalar globals from App/include/Globals.h and
+// App/include/GameGlobals.h. These assertions read the globals themselves, which
+// is the whole point: the values are pinned here while the globals are still the
+// thing being read, so the literals below are observed rather than assumed. The
+// tranche that follows moves each of these into a GameState member and asserts
+// the same values against that member instead.
+//
+// Types are pinned next to the values on purpose. A value comparison such as
+// `REQUIRE(x == 0)` holds just as happily for an int as for a float, so on its
+// own it would let a member change type unnoticed.
+TEST_CASE("the tranche 6 globals start at the values GameState will carry", "[gamestate]")
+{
+	SECTION("game difficulty")
+	{
+		REQUIRE(difficulty == 0);
+	}
+
+	SECTION("window resolution")
+	{
+		REQUIRE(screenwidth == 0.0f);
+		REQUIRE(screenheight == 0.0f);
+	}
+
+	SECTION("view distance and fading")
+	{
+		REQUIRE(viewdistance == 0.0f);
+		REQUIRE(fadestart == 0.0f);
+	}
+
+	SECTION("level theme")
+	{
+		REQUIRE(environment == 0);
+	}
+
+	SECTION("graphics detail")
+	{
+		REQUIRE(detail == 0);
+	}
+
+	SECTION("skin texture resolution")
+	{
+		REQUIRE(texdetail == 0.0f);
+	}
+
+	SECTION("blood")
+	{
+		REQUIRE(bloodtoggle == 0);
+	}
+
+	SECTION("camera shake")
+	{
+		REQUIRE(camerashake == 0.0f);
+	}
+
+	SECTION("texture filtering")
+	{
+		REQUIRE(trilinear == false);
+	}
+
+	SECTION("menu state")
+	{
+		REQUIRE(mainmenu == 0);
+	}
+
+	SECTION("main menu highlight")
+	{
+		REQUIRE(Game::selected == 0);
+	}
+
+	SECTION("camera orientation")
+	{
+		REQUIRE(Game::yaw == 0.0f);
+		REQUIRE(Game::pitch == 0.0f);
+	}
+
+	SECTION("declared types are preserved from the migrated globals")
+	{
+		REQUIRE(std::is_same<decltype(difficulty), int>::value);
+		REQUIRE(std::is_same<decltype(screenwidth), float>::value);
+		REQUIRE(std::is_same<decltype(screenheight), float>::value);
+		REQUIRE(std::is_same<decltype(viewdistance), float>::value);
+		REQUIRE(std::is_same<decltype(fadestart), float>::value);
+		REQUIRE(std::is_same<decltype(environment), int>::value);
+		REQUIRE(std::is_same<decltype(detail), int>::value);
+		REQUIRE(std::is_same<decltype(texdetail), float>::value);
+		REQUIRE(std::is_same<decltype(bloodtoggle), int>::value);
+		REQUIRE(std::is_same<decltype(camerashake), float>::value);
+		REQUIRE(std::is_same<decltype(trilinear), bool>::value);
+		REQUIRE(std::is_same<decltype(mainmenu), int>::value);
+		REQUIRE(std::is_same<decltype(Game::selected), int>::value);
+		REQUIRE(std::is_same<decltype(Game::yaw), float>::value);
+		REQUIRE(std::is_same<decltype(Game::pitch), float>::value);
 	}
 }
