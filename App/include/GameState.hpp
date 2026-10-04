@@ -80,6 +80,8 @@ struct GameState
 
 	// tutorial gating
 	bool cananger = false;
+	bool canattack = false;
+	bool reversaltrain = false;
 
 	// display options
 	bool texttoggle = false;
@@ -107,6 +109,67 @@ struct GameState
 
 	// stereo
 	bool stereoreverse = false;
+	float stereoseparation = 0.05f;
+
+	// window and input
+	bool fullscreen = false;
+	bool ismotionblur = false;
+	float usermousesensitivity = 0;
+
+	// keybinds, persisted by User/Settings under the same names
+	unsigned short crouchkey = 0;
+	unsigned short jumpkey = 0;
+	unsigned short forwardkey = 0;
+	unsigned short backkey = 0;
+	unsigned short leftkey = 0;
+	unsigned short rightkey = 0;
+	unsigned short drawkey = 0;
+	unsigned short throwkey = 0;
+	unsigned short attackkey = 0;
+
+	// audio
+	float volume = 0;
+	bool musictoggle = false;
+	bool ambientsound = false;
+
+	// texture budget: the square edge length of the screentexture copy, chosen
+	// by the detail setting in Game::LoadStuff
+	int kTextureSize = 0;
+
+	// skybox tint, and the light it contributes
+	float skyboxr = 0;
+	float skyboxg = 0;
+	float skyboxb = 0;
+	float skyboxlightr = 0;
+	float skyboxlightg = 0;
+	float skyboxlightb = 0;
+
+	// mouse look, accumulated between SDL events and consumed once a frame
+	float deltah = 0;
+	float deltav = 0;
+
+	// world map
+	float mapradius = 0;
+	int maptype = 0;
+
+	// editor camera
+	float editoryaw = 0;
+	float editorpitch = 0;
+
+	// challenge progression
+	int numchallengelevels = 0;
+
+	// session start
+	bool gamestarted = false;
+
+	// camera wobble from blood loss
+	float woozy = 0;
+
+	// smoke texture animation offset
+	float smoketex = 0;
+
+	// squared distance beyond which objects are culled
+	float playerdist = 0;
 
 	// session control
 	int tryquit = 0;
