@@ -29,7 +29,7 @@ namespace
 const float kSeedGameSpeed = 0.5f;
 const unsigned short kSeedConsoleKey = 42;
 const unsigned short kSeedCrouchKey = 43;
-const unsigned short kSeedJumpKey = 44;
+const unsigned short kSeedJumpKey = 52;
 const unsigned short kSeedForwardKey = 45;
 const unsigned short kSeedBackKey = 46;
 const unsigned short kSeedLeftKey = 47;
