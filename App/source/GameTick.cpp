@@ -57,6 +57,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <ctime>
 #include <limits>
 #include <set>
+#include <stdexcept>
 #include <json/reader.h>
 
 using namespace Game;
@@ -361,7 +362,11 @@ void Setenvironment(int which)
 	}
 	temptexdetail = texdetail;
 	texdetail = 1;
-	terrain.load("Textures/HeightMap.png", environment, []() {Game::LoadingScreen(); });
+	// Fail loudly: if the heightmap does not load, terrain.size stays 0 and
+	// Terrain::getHeight returns 0 everywhere, silently flattening the world.
+	if (!terrain.load("Textures/HeightMap.png", environment, []() {Game::LoadingScreen(); })) {
+		throw std::runtime_error("failed to load terrain heightmap Textures/HeightMap.png");
+	}
 
 	texdetail = temptexdetail;
 }
@@ -4656,7 +4661,6 @@ void Game::TickOnceAfter()
 	static Vector3 target;
 	static Vector3 col;
 	static Vector3 facing;
-	static float changedelay;
 	static bool alldead;
 	static float unseendelay;
 	static float cameraspeed;
@@ -4831,9 +4835,9 @@ void Game::TickOnceAfter()
 			maxalarmed = numalarmed;
 		}
 
-		if (changedelay <= 0 && !state().loading && !editorenabled && gameon && !Tutorial::active && changedelay != -999 && !won) {
+		if (state().changedelay <= 0 && !state().loading && !editorenabled && gameon && !Tutorial::active && state().changedelay != -999 && !won) {
 			if (Person::players[0]->dead) {
-				changedelay = 1;
+				state().changedelay = 1;
 				targetlevel = whichlevel;
 			}
 			alldead = true;
@@ -4845,14 +4849,14 @@ void Game::TickOnceAfter()
 			}
 
 			if (alldead && !Person::players[0]->dead && maptype == mapkilleveryone) {
-				changedelay = 1;
+				state().changedelay = 1;
 				targetlevel = whichlevel + 1;
 				if (targetlevel > numchallengelevels - 1) {
 					targetlevel = 0;
 				}
 			}
 			if (winhotspot || windialogue) {
-				changedelay = 0.1;
+				state().changedelay = 0.1;
 				targetlevel = whichlevel + 1;
 				if (targetlevel > numchallengelevels - 1) {
 					targetlevel = 0;
@@ -4860,14 +4864,14 @@ void Game::TickOnceAfter()
 			}
 
 			if (Hotspot::killhotspot) {
-				changedelay = 1;
+				state().changedelay = 1;
 				targetlevel = whichlevel + 1;
 				if (targetlevel > numchallengelevels - 1) {
 					targetlevel = 0;
 				}
 			}
 
-			if (changedelay > 0 && !Person::players[0]->dead && !won) {
+			if (state().changedelay > 0 && !Person::players[0]->dead && !won) {
 				//high scores, awards, win
 				if (campaign) {
 					Account::active().winCampaignLevel(state().whichchoice, bonustotal, state().leveltime);
@@ -4886,15 +4890,15 @@ void Game::TickOnceAfter()
 
 			if (state().leveltime < 1) {
 				state().loading = 0;
-				changedelay = .1;
+				state().changedelay = .1;
 				alldead = false;
 				winhotspot = false;
 				Hotspot::killhotspot = 0;
 			}
 
 			if (!editorenabled && gameon && !mainmenu) {
-				if (changedelay != -999) {
-					changedelay -= multiplier / 7;
+				if (state().changedelay != -999) {
+					state().changedelay -= multiplier / 7;
 				}
 				if (Person::players[0]->dead) {
 					targetlevel = whichlevel;
@@ -4925,7 +4929,7 @@ void Game::TickOnceAfter()
 
 					state().loading = 3;
 				}
-				if (changedelay <= -999 &&
+				if (state().changedelay <= -999 &&
 					whichlevel != -2 &&
 					!state().loading &&
 					(Person::players[0]->dead ||
@@ -4939,10 +4943,10 @@ void Game::TickOnceAfter()
 					(winhotspot) ||
 					(windialogue) ||
 					(Hotspot::killhotspot)) &&
-					changedelay <= 0) {
+					state().changedelay <= 0) {
 					if (whichlevel != -2 && !state().loading && !Person::players[0]->dead) {
 						state().winfreeze = true;
-						changedelay = -999;
+						state().changedelay = -999;
 					}
 					if (Person::players[0]->dead) {
 						state().loading = 1;

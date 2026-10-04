@@ -171,6 +171,18 @@ void Game::LoadingScreen()
 
 	frametime = currTime; // reset for next time interval
 
+	// Devtools-only: trace what drives the loading overlay. The reported
+	// symptom (solid red instead of a black/red pulse) comes from either
+	// flashamount being pinned at 1, or loadprogress never leaving 100.
+	if (devtools) {
+		static int tracecount = 0;
+		if (tracecount < 40 && (tracecount % 4) == 0) {
+			fprintf(stderr, "[loading] n=%d multiplier=%.4f loadtime=%.2f loadprogress=%.2f flashamount=%.3f\n",
+					tracecount, multiplier, state().loadtime, loadprogress, flashamount);
+		}
+		tracecount++;
+	}
+
 	glLoadIdentity();
 	//Clear to black
 	glClearColor(0, 0, 0, 1);
