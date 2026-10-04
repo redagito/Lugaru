@@ -41,7 +41,7 @@ float Tutorial::stagetime = 0;
 float Tutorial::maxtime = 0;
 float Tutorial::success = 0;
 
-void Tutorial::Do(float multiplier, bool bloodtoggle)
+void Tutorial::Do(float timemultiplier, bool bloodtoggleflag)
 {
 	if (stagetime > maxtime) {
 		stage++;
@@ -93,7 +93,7 @@ void Tutorial::Do(float multiplier, bool bloodtoggle)
 			for (unsigned i = 0; i < Person::players[1]->skeleton.joints.size(); i++) {
 				if (rand() % 2 == 0) {
 					if (!Person::players[1]->skeleton.free) {
-						temp2 = (Person::players[1]->coords - Person::players[1]->oldcoords) / multiplier / 2; //velocity/2;
+						temp2 = (Person::players[1]->coords - Person::players[1]->oldcoords) / timemultiplier / 2; //velocity/2;
 					}
 					if (Person::players[1]->skeleton.free) {
 						temp2 = Person::players[1]->skeleton.joints[i].velocity * Person::players[1]->scale / 2;
@@ -105,7 +105,7 @@ void Tutorial::Do(float multiplier, bool bloodtoggle)
 					if (Person::players[1]->skeleton.free) {
 						temp = Person::players[1]->skeleton.joints[i].position * Person::players[1]->scale + Person::players[1]->coords;
 					}
-					Sprite::MakeSprite(breathsprite, temp, temp2, 1, 1, 1, .6 + (float)abs(rand() % 100) / 200 - .25, 1, bloodtoggle);
+					Sprite::MakeSprite(breathsprite, temp, temp2, 1, 1, 1, .6 + (float)abs(rand() % 100) / 200 - .25, 1, bloodtoggleflag);
 				}
 			}
 		} break;
@@ -340,7 +340,7 @@ void Tutorial::Do(float multiplier, bool bloodtoggle)
 			for (unsigned i = 0; i < Person::players[1]->skeleton.joints.size(); i++) {
 				if (rand() % 2 == 0) {
 					if (!Person::players[1]->skeleton.free) {
-						temp2 = (Person::players[1]->coords - Person::players[1]->oldcoords) / multiplier / 2; //velocity/2;
+						temp2 = (Person::players[1]->coords - Person::players[1]->oldcoords) / timemultiplier / 2; //velocity/2;
 					}
 					if (Person::players[1]->skeleton.free) {
 						temp2 = Person::players[1]->skeleton.joints[i].velocity * Person::players[1]->scale / 2;
@@ -351,7 +351,7 @@ void Tutorial::Do(float multiplier, bool bloodtoggle)
 					if (Person::players[1]->skeleton.free) {
 						temp = Person::players[1]->skeleton.joints[i].position * Person::players[1]->scale + Person::players[1]->coords;
 					}
-					Sprite::MakeSprite(breathsprite, temp, temp2, 1, 1, 1, .6 + (float)abs(rand() % 100) / 200 - .25, 1, bloodtoggle);
+					Sprite::MakeSprite(breathsprite, temp, temp2, 1, 1, 1, .6 + (float)abs(rand() % 100) / 200 - .25, 1, bloodtoggleflag);
 				}
 			}
 
@@ -377,12 +377,12 @@ void Tutorial::Do(float multiplier, bool bloodtoggle)
 		switch (stage) {
 		case 3:
 			if (Game::deltah || Game::deltav) {
-				success += multiplier;
+				success += timemultiplier;
 			}
 			break;
 		case 4:
 			if (Person::players[0]->forwardkeydown || Person::players[0]->backkeydown || Person::players[0]->leftkeydown || Person::players[0]->rightkeydown) {
-				success += multiplier;
+				success += timemultiplier;
 			}
 			break;
 		case 5:
@@ -402,12 +402,12 @@ void Tutorial::Do(float multiplier, bool bloodtoggle)
 			break;
 		case 8:
 			if (Person::players[0]->animTarget == sneakanim) {
-				success += multiplier;
+				success += timemultiplier;
 			}
 			break;
 		case 9:
 			if (Person::players[0]->animTarget == rabbitrunninganim || Person::players[0]->animTarget == wolfrunninganim) {
-				success += multiplier;
+				success += timemultiplier;
 			}
 			break;
 		case 11:
@@ -797,7 +797,7 @@ void Tutorial::DrawTextInfo()
 	Game::text->glPrintOutlined(0.5, 0.5, 0.5, 1, screenwidth / 2 - 7.6 * string3.size() * screenwidth / 1024 * .8, 0 + screenheight * 1 / 10 - 40 * .8 * screenwidth / 1024, string3, 1, 1.5 * screenwidth / 1024 * .8, screenwidth, screenheight);
 }
 
-void Tutorial::DoStuff(float multiplier, bool bloodtoggle)
+void Tutorial::DoStuff(float timemultiplier, bool bloodtoggleflag)
 {
 	Vector3 temp;
 	Vector3 temp2;
@@ -846,7 +846,7 @@ void Tutorial::DoStuff(float multiplier, bool bloodtoggle)
 			for (unsigned i = 0; i < Person::players[1]->skeleton.joints.size(); i++) {
 				if (rand() % 2 == 0) {
 					if (!Person::players[1]->skeleton.free) {
-						temp2 = (Person::players[1]->coords - Person::players[1]->oldcoords) / multiplier / 2; //velocity/2;
+						temp2 = (Person::players[1]->coords - Person::players[1]->oldcoords) / timemultiplier / 2; //velocity/2;
 					}
 					if (Person::players[1]->skeleton.free) {
 						temp2 = Person::players[1]->skeleton.joints[i].velocity * Person::players[1]->scale / 2;
@@ -857,7 +857,7 @@ void Tutorial::DoStuff(float multiplier, bool bloodtoggle)
 					if (Person::players[1]->skeleton.free) {
 						temp = Person::players[1]->skeleton.joints[i].position * Person::players[1]->scale + Person::players[1]->coords;
 					}
-					Sprite::MakeSprite(breathsprite, temp, temp2, 1, 1, 1, .6 + (float)abs(rand() % 100) / 200 - .25, 1, bloodtoggle);
+					Sprite::MakeSprite(breathsprite, temp, temp2, 1, 1, 1, .6 + (float)abs(rand() % 100) / 200 - .25, 1, bloodtoggleflag);
 				}
 			}
 
@@ -866,7 +866,7 @@ void Tutorial::DoStuff(float multiplier, bool bloodtoggle)
 				Person::players[1]->skeleton.joints[i].velocity = 0;
 				if (rand() % 2 == 0) {
 					if (!Person::players[1]->skeleton.free) {
-						temp2 = (Person::players[1]->coords - Person::players[1]->oldcoords) / multiplier / 2; //velocity/2;
+						temp2 = (Person::players[1]->coords - Person::players[1]->oldcoords) / timemultiplier / 2; //velocity/2;
 					}
 					if (Person::players[1]->skeleton.free) {
 						temp2 = Person::players[1]->skeleton.joints[i].velocity * Person::players[1]->scale / 2;
@@ -877,7 +877,7 @@ void Tutorial::DoStuff(float multiplier, bool bloodtoggle)
 					if (Person::players[1]->skeleton.free) {
 						temp = Person::players[1]->skeleton.joints[i].position * Person::players[1]->scale + Person::players[1]->coords;
 					}
-					Sprite::MakeSprite(breathsprite, temp, temp2, 1, 1, 1, .6 + (float)abs(rand() % 100) / 200 - .25, 1, bloodtoggle);
+					Sprite::MakeSprite(breathsprite, temp, temp2, 1, 1, 1, .6 + (float)abs(rand() % 100) / 200 - .25, 1, bloodtoggleflag);
 				}
 			}
 		}

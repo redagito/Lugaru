@@ -151,9 +151,9 @@ void Account::save(FILE* tfile)
     }
 }
 
-void Account::setCurrentCampaign(const std::string& name)
+void Account::setCurrentCampaign(const std::string& campaign)
 {
-    currentCampaign = name;
+    currentCampaign = campaign;
 }
 
 void Account::add(const std::string& name)

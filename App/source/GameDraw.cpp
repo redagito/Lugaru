@@ -219,7 +219,8 @@ int Game::DrawGLScene(StereoSide side)
 
 		// Move the camera for the current eye's point of view.
 		// Reverse the movement if we're reversing stereo
-		glTranslatef((stereoseparation / 2) * side * (stereoreverse ? -1 : 1), 0, 0);
+		// StereoSide is -1/0/+1 precisely so it can be multiplied in (see Stereo.hpp).
+		glTranslatef((stereoseparation / 2) * static_cast<float>(side) * (stereoreverse ? -1 : 1), 0, 0);
 
 		//camera effects
 		if (!cameramode && !state().freeze && !state().winfreeze) {
@@ -587,10 +588,10 @@ int Game::DrawGLScene(StereoSide side)
 				float closestdist = -1;
 				int closest = Hotspot::current;
 				for (unsigned i = 0; i < Hotspot::hotspots.size(); i++) {
-					float distance = distsq(&Person::players[0]->coords, &Hotspot::hotspots[i].position);
-					if (closestdist == -1 || distance < closestdist) {
-						if (distsq(&Person::players[0]->coords, &Hotspot::hotspots[i].position) < Hotspot::hotspots[i].size && ((Hotspot::hotspots[i].type <= 10 && Hotspot::hotspots[i].type >= 0) || (Hotspot::hotspots[i].type <= 40 && Hotspot::hotspots[i].type >= 20))) {
-							closestdist = distance;
+					float hotspotdistance = distsq(&Person::players[0]->coords, &Hotspot::hotspots[i].position);
+				if (closestdist == -1 || hotspotdistance < closestdist) {
+					if (distsq(&Person::players[0]->coords, &Hotspot::hotspots[i].position) < Hotspot::hotspots[i].size && ((Hotspot::hotspots[i].type <= 10 && Hotspot::hotspots[i].type >= 0) || (Hotspot::hotspots[i].type <= 40 && Hotspot::hotspots[i].type >= 20))) {
+						closestdist = hotspotdistance;
 							closest = i;
 						}
 					}

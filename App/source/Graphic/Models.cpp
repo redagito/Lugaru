@@ -442,11 +442,11 @@ bool Model::loadnotex(const std::string& filename)
 	}
 
 	for (i = 0; i < triangleNum; i++) {
-		short vertex[6];
-		funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &vertex[0], &vertex[1], &vertex[2], &vertex[3], &vertex[4], &vertex[5]);
-		Triangles[i].vertex[0] = vertex[0];
-		Triangles[i].vertex[1] = vertex[2];
-		Triangles[i].vertex[2] = vertex[4];
+		short triindices[6];
+		funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &triindices[0], &triindices[1], &triindices[2], &triindices[3], &triindices[4], &triindices[5]);
+		Triangles[i].vertex[0] = triindices[0];
+		Triangles[i].vertex[1] = triindices[2];
+		Triangles[i].vertex[2] = triindices[4];
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
 	}
@@ -508,11 +508,11 @@ bool Model::load(const std::string& filename, ProgressCallback callback)
 	}
 
 	for (i = 0; i < triangleNum; i++) {
-		short vertex[6];
-		funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &vertex[0], &vertex[1], &vertex[2], &vertex[3], &vertex[4], &vertex[5]);
-		Triangles[i].vertex[0] = vertex[0];
-		Triangles[i].vertex[1] = vertex[2];
-		Triangles[i].vertex[2] = vertex[4];
+		short triindices[6];
+		funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &triindices[0], &triindices[1], &triindices[2], &triindices[3], &triindices[4], &triindices[5]);
+		Triangles[i].vertex[0] = triindices[0];
+		Triangles[i].vertex[1] = triindices[2];
+		Triangles[i].vertex[2] = triindices[4];
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
 	}
@@ -575,11 +575,11 @@ bool Model::loaddecal(const std::string& filename)
 	}
 
 	for (i = 0; i < triangleNum; i++) {
-		short vertex[6];
-		funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &vertex[0], &vertex[1], &vertex[2], &vertex[3], &vertex[4], &vertex[5]);
-		Triangles[i].vertex[0] = vertex[0];
-		Triangles[i].vertex[1] = vertex[2];
-		Triangles[i].vertex[2] = vertex[4];
+		short triindices[6];
+		funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &triindices[0], &triindices[1], &triindices[2], &triindices[3], &triindices[4], &triindices[5]);
+		Triangles[i].vertex[0] = triindices[0];
+		Triangles[i].vertex[1] = triindices[2];
+		Triangles[i].vertex[2] = triindices[4];
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
 	}
@@ -639,11 +639,11 @@ bool Model::loadraw(const std::string& filename)
 	}
 
 	for (i = 0; i < triangleNum; i++) {
-		short vertex[6];
-		funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &vertex[0], &vertex[1], &vertex[2], &vertex[3], &vertex[4], &vertex[5]);
-		Triangles[i].vertex[0] = vertex[0];
-		Triangles[i].vertex[1] = vertex[2];
-		Triangles[i].vertex[2] = vertex[4];
+		short triindices[6];
+		funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &triindices[0], &triindices[1], &triindices[2], &triindices[3], &triindices[4], &triindices[5]);
+		Triangles[i].vertex[0] = triindices[0];
+		Triangles[i].vertex[1] = triindices[2];
+		Triangles[i].vertex[2] = triindices[4];
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
 	}

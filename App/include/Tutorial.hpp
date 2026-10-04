@@ -29,9 +29,9 @@ public:
     static float stagetime;
     static float maxtime;
 
-    static void Do(float multiplier, bool bloodtoggle);
+    static void Do(float timemultiplier, bool bloodtoggleflag);
     static void DrawTextInfo();
-    static void DoStuff(float multiplier, bool bloodtoggle);
+    static void DoStuff(float timemultiplier, bool bloodtoggleflag);
 
 private:
     static float success;

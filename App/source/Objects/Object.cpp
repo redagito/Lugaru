@@ -651,7 +651,7 @@ void Object::AddObjectsToTerrain(int environment, Terrain& terrain, int detail)
 	}
 }
 
-void Object::SphereCheckPossible(Vector3* p1, float radius, const Terrain& terrain)
+void Object::SphereCheckPossible(Vector3* p1, float checkradius, const Terrain& terrain)
 {
 	int whichpatchx = p1->x / (terrain.size / subdivision * terrain.scale);
 	int whichpatchz = p1->z / (terrain.size / subdivision * terrain.scale);
@@ -666,7 +666,7 @@ void Object::SphereCheckPossible(Vector3* p1, float radius, const Terrain& terra
 		unsigned int i = terrain.patchobjects[whichpatchx][whichpatchz][j];
 		objects[i]->possible = false;
 
-		if (objects[i]->model.SphereCheckPossible(p1, radius, &objects[i]->position, &objects[i]->yaw) != -1) {
+		if (objects[i]->model.SphereCheckPossible(p1, checkradius, &objects[i]->position, &objects[i]->yaw) != -1) {
 			objects[i]->possible = true;
 		}
 	}

@@ -104,7 +104,11 @@ save_png_done:
 		fclose(fp);
 	}
 	if (!retval) {
+#ifdef LUGARU_PLATFORM_WINDOWS
+		_unlink(file_name);
+#else
 		unlink(file_name);
+#endif
 	}
 	return retval;
 }

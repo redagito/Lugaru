@@ -381,9 +381,12 @@ public:
     bool isStop() { return animation_bits[animTarget] & ab_stop; }
     int getStop();
 
-    bool wasRun() { return animation_bits[animCurrent] & ab_run; }
-    bool isRun() { return animation_bits[animTarget] & ab_run; }
+    bool wasRun() const { return animation_bits[animCurrent] & ab_run; }
+    bool isRun() const { return animation_bits[animTarget] & ab_run; }
     int getRun();
+
+    /** True when this character should steer its yaw toward `targetyaw` this frame. */
+    bool shouldTurnTowardTarget() const;
 
     bool wasLanding() { return animation_bits[animCurrent] & ab_land; }
     bool isLanding() { return animation_bits[animTarget] & ab_land; }

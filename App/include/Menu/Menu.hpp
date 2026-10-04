@@ -58,15 +58,15 @@ class Menu
 {
 public:
 	static void clearMenu();
-	static void addLabel(int id, const std::string& text, int x, int y, float r = 1, float g = 0, float b = 0);
-	static void addButton(int id, const std::string& text, int x, int y, float r = 1, float g = 0, float b = 0);
+	static void addLabel(int id, const std::string& labeltext, int x, int y, float r = 1, float g = 0, float b = 0);
+	static void addButton(int id, const std::string& buttontext, int x, int y, float r = 1, float g = 0, float b = 0);
 	static void addImage(int id, Texture texture, int x, int y, int w, int h, float r = 1, float g = 1, float b = 1);
 	static void addButtonImage(int id, Texture texture, int x, int y, int w, int h, float r = 1, float g = 1, float b = 1);
 	static void addMapLine(int x, int y, int w, int h, float startsize, float endsize, float r, float g, float b);
 	static void addMapMarker(int id, Texture texture, int x, int y, int w, int h, float r, float g, float b);
-	static void addMapLabel(int id, const std::string& text, int x, int y, float r = 1, float g = 0, float b = 0);
-	static void setText(int id, const std::string& text);
-	static void setText(int id, const std::string& text, int x, int y, int w, int h);
+	static void addMapLabel(int id, const std::string& labeltext, int x, int y, float r = 1, float g = 0, float b = 0);
+	static void setText(int id, const std::string& newtext);
+	static void setText(int id, const std::string& newtext, int x, int y, int w, int h);
 	static int getSelected(int mousex, int mousey);
 	static void drawItems();
 
@@ -76,7 +76,7 @@ public:
 	static void updateStereoConfigMenu();
 	static void updateControlsMenu();
 	static void setKeySelected();
-	static void startChallengeLevel(int selected);
+	static void startChallengeLevel(int challengelevel);
 
 private:
 	static void handleFadeEffect();

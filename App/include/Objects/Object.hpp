@@ -100,7 +100,7 @@ public:
 	static void AddObjectsToTerrain(int environment, Terrain& terrain, int detail);
 	static void LoadObjectsFromFile(FILE* tfile, bool skip, const Terrain& terrain, ProgressCallback callback);
 	static void LoadObjectsFromJson(Json::Value, const Terrain& terrain, ProgressCallback callback);
-	static void SphereCheckPossible(Vector3* p1, float radius, const Terrain& terrain);
+	static void SphereCheckPossible(Vector3* p1, float checkradius, const Terrain& terrain);
 	static void DeleteObject(int which, Terrain& terrain);
 	static void MakeObject(int atype, Vector3 where, float ayaw, float apitch, float ascale, int environment, Terrain& terrain, bool foliage, int detail, ProgressCallback callback);
 	static void Draw(bool decalstoggle, float multiplier, const Vector3& viewer, float viewdistance, float fadestart, int environment, 

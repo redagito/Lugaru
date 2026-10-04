@@ -88,13 +88,13 @@ void Menu::clearMenu()
     items.clear();
 }
 
-void Menu::addLabel(int id, const std::string& text, int x, int y, float r, float g, float b)
+void Menu::addLabel(int id, const std::string& labeltext, int x, int y, float r, float g, float b)
 {
-    items.emplace_back(MenuItem::LABEL, id, text, Texture(), x, y, -1, -1, r, g, b);
+    items.emplace_back(MenuItem::LABEL, id, labeltext, Texture(), x, y, -1, -1, r, g, b);
 }
-void Menu::addButton(int id, const std::string& text, int x, int y, float r, float g, float b)
+void Menu::addButton(int id, const std::string& buttontext, int x, int y, float r, float g, float b)
 {
-    items.emplace_back(MenuItem::BUTTON, id, text, Texture(), x, y, -1, -1, r, g, b);
+    items.emplace_back(MenuItem::BUTTON, id, buttontext, Texture(), x, y, -1, -1, r, g, b);
 }
 void Menu::addImage(int id, Texture texture, int x, int y, int w, int h, float r, float g, float b)
 {
@@ -112,27 +112,27 @@ void Menu::addMapMarker(int id, Texture texture, int x, int y, int w, int h, flo
 {
     items.emplace_back(MenuItem::MAPMARKER, id, "", texture, x, y, w, h, r, g, b);
 }
-void Menu::addMapLabel(int id, const std::string& text, int x, int y, float r, float g, float b)
+void Menu::addMapLabel(int id, const std::string& labeltext, int x, int y, float r, float g, float b)
 {
-    items.emplace_back(MenuItem::MAPLABEL, id, text, Texture(), x, y, -1, -1, r, g, b);
+    items.emplace_back(MenuItem::MAPLABEL, id, labeltext, Texture(), x, y, -1, -1, r, g, b);
 }
 
-void Menu::setText(int id, const std::string& text)
+void Menu::setText(int id, const std::string& newtext)
 {
     for (std::vector<MenuItem>::iterator it = items.begin(); it != items.end(); it++) {
         if (it->id == id) {
-            it->text = text;
+            it->text = newtext;
             it->w = it->text.length() * 10;
             break;
         }
     }
 }
 
-void Menu::setText(int id, const std::string& text, int x, int y, int w, int h)
+void Menu::setText(int id, const std::string& newtext, int x, int y, int w, int h)
 {
     for (std::vector<MenuItem>::iterator it = items.begin(); it != items.end(); it++) {
         if (it->id == id) {
-            it->text = text;
+            it->text = newtext;
             it->x = x;
             it->y = y;
             if (w == -1) {
@@ -518,7 +518,7 @@ void Menu::Load()
     }
 }
 
-void Menu::startChallengeLevel(int selected)
+void Menu::startChallengeLevel(int challengelevel)
 {
     fireSound();
     flash();
@@ -527,13 +527,13 @@ void Menu::startChallengeLevel(int selected)
 
     state().loading = 2;
     state().loadtime = 0;
-    targetlevel = selected;
+    targetlevel = challengelevel;
     if (firstLoadDone) {
         TickOnceAfter();
     } else {
         LoadStuff();
     }
-    LoadLevel(selected);
+    LoadLevel(challengelevel);
     campaign = 0;
 
     mainmenu = 0;

@@ -30,8 +30,7 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_compile_options(${PROJECT_NAME} 
-  PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W2 /wd4305 /wd4244>
-  #$<$<CXX_COMPILER_ID:MSVC>:/WX /W4>
-  PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Werror>
+  PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX ${LUGARU_MSVC_WARNINGS}>
+    PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Werror>
   # -Wextra -Wpedantic 
 )

@@ -93,7 +93,7 @@ public:
 
     void AddObject(Vector3 where, float radius, int id);
     void DeleteObject(unsigned int id);
-    void MakeDecal(decal_type type, Vector3 where, float size, float opacity, float rotation, int environment);
+    void MakeDecal(decal_type decaltype, Vector3 where, float decalradius, float opacity, float rotation, int environment);
 
     int lineTerrain(Vector3 p1, Vector3 p2, Vector3* p) const;
     float getHeight(float pointx, float pointz) const;
@@ -114,7 +114,7 @@ public:
 
 private:
     void DeleteDecal(int which);
-    void MakeDecalLock(decal_type type, Vector3 where, int whichx, int whichy, float size, float opacity, float rotation, int environment);
+    void MakeDecalLock(decal_type decaltype, Vector3 where, int whichx, int whichy, float decalradius, float opacity, float rotation, int environment);
 
     void drawpatch(int whichx, int whichy, float opacity, const Vector3& viewer, float viewdistance, float fadestart);
     void drawpatchother(int whichx, int whichy, float opacity, const Vector3& viewer, float viewdistance, float fadestart);

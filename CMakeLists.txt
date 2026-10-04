@@ -27,6 +27,23 @@ find_package(jsoncpp REQUIRED)
 find_package(glext REQUIRED)
 find_package(glu REQUIRED)
 
+# Warnings-as-errors is on everywhere. These are the codes we suppress, with reasons.
+set(LUGARU_MSVC_WARNINGS
+	# Narrowing conversions. The engine mixes float/double/int freely by design
+	# (OpenGL takes floats, JSON returns doubles, size_t loop counters index int
+	# arrays). Adding 1200 explicit casts would be pure noise and would risk
+	# changing values. C4244 conversion, C4305 initialisation, C4267 size_t->int.
+	/wd4244 /wd4305 /wd4267
+	# _setjmp/longjmp against objects with non-trivial destructors. Intrinsic to
+	# the libpng and libjpeg error-handling pattern, which we cannot restructure.
+	/wd4611
+	# vfunpackf/vtryfunpackf throw TruncatedFileException on a short read by
+	# design; the warning just says the compiler had assumed otherwise.
+	/wd4297
+# Struct padding for alignment: my_error_mgr wraps a jmp_buf.
+	/wd4324
+)
+
 include(CTest)
 find_package(Catch2 REQUIRED)
 

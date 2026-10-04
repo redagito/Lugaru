@@ -37,14 +37,14 @@ std::vector<std::string> ListCampaigns()
 {
 	errno = 0;
 	DIR* campaigns = opendir(Folders::getResourcePath("Campaigns").c_str());
-	struct dirent* campaign = NULL;
+	struct dirent* campaignEntry = NULL;
 	if (!campaigns) {
 		perror(("Problem while loading campaigns from " + Folders::getResourcePath("Campaigns")).c_str());
 		exit(EXIT_FAILURE);
 	}
 	std::vector<std::string> campaignNames;
-	while ((campaign = readdir(campaigns)) != NULL) {
-		std::string name(campaign->d_name);
+	while ((campaignEntry = readdir(campaigns)) != NULL) {
+		std::string name(campaignEntry->d_name);
 		if (name.length() < 5) {
 			continue;
 		}

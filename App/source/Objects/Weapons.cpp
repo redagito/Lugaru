@@ -93,15 +93,15 @@ void Weapon::setType(int t)
 }
 
 /* Load weapons models and textures */
-void Weapon::Load(bool trilinear, ProgressCallback callback)
+void Weapon::Load(bool usetrilinear, ProgressCallback callback)
 {
-	knifetextureptr.load("Textures/Knife.png", 0, trilinear, callback);
-	bloodknifetextureptr.load("Textures/BloodKnife.png", 0, trilinear, callback);
-	lightbloodknifetextureptr.load("Textures/BloodKnifeLight.png", 0, trilinear, callback);
-	swordtextureptr.load("Textures/Sword.jpg", 1, trilinear, callback);
-	bloodswordtextureptr.load("Textures/SwordBlood.jpg", 1, trilinear, callback);
-	lightbloodswordtextureptr.load("Textures/SwordBloodLight.jpg", 1, trilinear, callback);
-	stafftextureptr.load("Textures/Staff.jpg", 1, trilinear, callback);
+	knifetextureptr.load("Textures/Knife.png", 0, usetrilinear, callback);
+	bloodknifetextureptr.load("Textures/BloodKnife.png", 0, usetrilinear, callback);
+	lightbloodknifetextureptr.load("Textures/BloodKnifeLight.png", 0, usetrilinear, callback);
+	swordtextureptr.load("Textures/Sword.jpg", 1, usetrilinear, callback);
+	bloodswordtextureptr.load("Textures/SwordBlood.jpg", 1, usetrilinear, callback);
+	lightbloodswordtextureptr.load("Textures/SwordBloodLight.jpg", 1, usetrilinear, callback);
+	stafftextureptr.load("Textures/Staff.jpg", 1, usetrilinear, callback);
 
 	throwingknifemodel.load("Models/ThrowingKnife.solid", callback);
 	throwingknifemodel.Scale(.001, .001, .001);
@@ -127,7 +127,7 @@ void Weapon::Load(bool trilinear, ProgressCallback callback)
 	staffmodel.CalculateNormals(1, callback);
 }
 
-void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int whichjointstartarray[26])
+void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26])
 {
 	int whichpatchx, whichpatchz, whichhit;
 	Vector3 start, end, colpoint, normalrot, footvel, footpoint;
@@ -209,13 +209,13 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 						else if (type == staff) {
 							position = colpoint - normalrot * .2;
 						}
-						Vector3 temppoint1, temppoint2;
-						float distance;
+Vector3 temppoint1, temppoint2;
+					float rotationdistance;
 
-						temppoint1 = 0;
-						temppoint2 = normalrot;
-						distance = findDistance(&temppoint1, &temppoint2);
-						rotation2 = asin((temppoint1.y - temppoint2.y) / distance);
+					temppoint1 = 0;
+					temppoint2 = normalrot;
+					rotationdistance = findDistance(&temppoint1, &temppoint2);
+					rotation2 = asin((temppoint1.y - temppoint2.y) / rotationdistance);
 						rotation2 *= 360 / 6.28;
 						temppoint1.y = 0;
 						temppoint2.y = 0;
@@ -282,7 +282,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 
 							Person::players[j]->weaponids[Person::players[j]->num_weapons - 1] = i;
 
-							Person::players[j]->RagDoll(0, terrain, tutorialActive, inDialog, multiplier, whichjointstartarray);
+							Person::players[j]->RagDoll(0, terrain, tutorialActive, inDialog, multiplier, jointstartarray);
 							Person::players[j]->jointVel(abdomen) += velocity * 2;
 							Person::players[j]->jointVel(neck) += velocity * 2;
 							Person::players[j]->jointVel(rightshoulder) += velocity * 2;
@@ -406,12 +406,12 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 			velocity.y += gravity * multiplier;
 
 			Vector3 temppoint1, temppoint2;
-			float distance;
+			float rotationdistance;
 
 			temppoint1 = 0;
 			temppoint2 = velocity;
-			distance = findDistance(&temppoint1, &temppoint2);
-			rotation2 = asin((temppoint1.y - temppoint2.y) / distance);
+			rotationdistance = findDistance(&temppoint1, &temppoint2);
+			rotation2 = asin((temppoint1.y - temppoint2.y) / rotationdistance);
 			rotation2 *= 360 / 6.28;
 			temppoint1.y = 0;
 			temppoint2.y = 0;
@@ -942,12 +942,12 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 
 			//Rotation
 			Vector3 temppoint1, temppoint2;
-			float distance;
+			float rotationdistance;
 
 			temppoint1 = position;
 			temppoint2 = tippoint;
-			distance = findDistance(&temppoint1, &temppoint2);
-			rotation2 = asin((temppoint1.y - temppoint2.y) / distance);
+			rotationdistance = findDistance(&temppoint1, &temppoint2);
+			rotation2 = asin((temppoint1.y - temppoint2.y) / rotationdistance);
 			rotation2 *= 360 / 6.28;
 			temppoint1.y = 0;
 			temppoint2.y = 0;
@@ -1035,13 +1035,13 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 	}
 }
 
-void Weapons::DoStuff(bool tutorialActive, bool inDialog, int whichjointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye)
+void Weapons::DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye)
 {
 	//Move
 	// TODO What the actual fuck is this?
 	int i = 0;
 	for (std::vector<Weapon>::iterator weapon = weapons.begin(); weapon != weapons.end(); ++weapon) {
-		weapon->doStuff(i++, tutorialActive, inDialog, awardNinja, awardBullseye, whichjointstartarray);
+		weapon->doStuff(i++, tutorialActive, inDialog, awardNinja, awardBullseye, jointstartarray);
 	}
 }
 

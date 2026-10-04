@@ -687,10 +687,10 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 	if (numpathpoints > 30 || numpathpoints < 0) {
 		numpathpoints = 0;
 	}
-	for (int j = 0; j < numpathpoints; j++) {
-		funpackf(tfile, "Bf Bf Bf Bi", &pathpoint[j].x, &pathpoint[j].y, &pathpoint[j].z, &numpathpointconnect[j]);
-		for (int k = 0; k < numpathpointconnect[j]; k++) {
-			funpackf(tfile, "Bi", &pathpointconnect[j][k]);
+	for (int i = 0; i < numpathpoints; i++) {
+		funpackf(tfile, "Bf Bf Bf Bi", &pathpoint[i].x, &pathpoint[i].y, &pathpoint[i].z, &numpathpointconnect[i]);
+		for (int k = 0; k < numpathpointconnect[i]; k++) {
+			funpackf(tfile, "Bi", &pathpointconnect[i][k]);
 		}
 	}
 	Game::LoadingScreen();
@@ -952,8 +952,8 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 	}
 
 	Vector3 playerCoords;
-	float playerYaw;
-	float playerTargetYaw;
+	float playerYaw = 0;
+	float playerTargetYaw = 0;
 	if (stealthloading) {
 		playerCoords = Person::players[0]->coords;
 		playerYaw = Person::players[0]->yaw;
@@ -967,7 +967,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 			Person::players.push_back(std::shared_ptr<Person>(new Person(map_data["map"]["players"][i], mapvers, j)));
 			j++;
 		}
-		catch (InvalidPersonException& e) {
+		catch (InvalidPersonException&) {
 			std::cerr << "Invalid Person found in " << name << std::endl;
 		}
 	}
@@ -980,11 +980,11 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 	Game::LoadingScreen();
 
 	numpathpoints = map_data["map"]["pathpoints"].size();
-	for (unsigned j = 0; j < map_data["map"]["pathpoints"].size(); j++) {
-		pathpoint[j] = map_data["map"]["pathpoints"][j]["pos"];
-		numpathpointconnect[j] = map_data["map"]["pathpoints"][j]["connect"].size();
-		for (unsigned k = 0; k < map_data["map"]["pathpoints"][j]["connect"].size(); k++) {
-			pathpointconnect[j][k] = map_data["map"]["pathpoints"][j]["connect"][k].asInt();
+	for (unsigned i = 0; i < map_data["map"]["pathpoints"].size(); i++) {
+		pathpoint[i] = map_data["map"]["pathpoints"][i]["pos"];
+		numpathpointconnect[i] = map_data["map"]["pathpoints"][i]["connect"].size();
+		for (unsigned k = 0; k < map_data["map"]["pathpoints"][i]["connect"].size(); k++) {
+			pathpointconnect[i][k] = map_data["map"]["pathpoints"][i]["connect"][k].asInt();
 		}
 	}
 
@@ -1899,15 +1899,7 @@ void doAerialAcrobatics()
 	for (unsigned k = 0; k < Person::players.size(); k++) {
 		Person::players[k]->turnspeed = 500;
 
-		if ((Person::players[k]->isRun() &&
-			((Person::players[k]->targetyaw != rabbitrunninganim &&
-				Person::players[k]->targetyaw != wolfrunninganim) ||
-				Person::players[k]->frameTarget == 4)) ||
-			Person::players[k]->animTarget == removeknifeanim ||
-			Person::players[k]->animTarget == crouchremoveknifeanim ||
-			Person::players[k]->animTarget == flipanim ||
-			Person::players[k]->animTarget == fightsidestep ||
-			Person::players[k]->animTarget == walkanim) {
+		if (Person::players[k]->shouldTurnTowardTarget()) {
 			Person::players[k]->yaw = stepTowardf(Person::players[k]->yaw, Person::players[k]->targetyaw, multiplier * Person::players[k]->turnspeed);
 		}
 
@@ -3391,7 +3383,7 @@ void Game::Tick()
 						Input::isKeyPressed(SDL_SCANCODE_9) ||
 						Input::isKeyPressed(SDL_SCANCODE_0) ||
 						Input::isKeyPressed(SDL_SCANCODE_MINUS)) {
-						int whichend;
+						int whichend = -1;
 						if (Input::isKeyPressed(SDL_SCANCODE_1)) {
 							whichend = 1;
 						}
@@ -3464,7 +3456,7 @@ void Game::Tick()
 						Input::isKeyDown(SDL_SCANCODE_KP_8) ||
 						Input::isKeyDown(SDL_SCANCODE_KP_9) ||
 						Input::isKeyDown(SDL_SCANCODE_KP_0)) {
-						int whichend;
+						int whichend = -1;
 						if (Input::isKeyDown(SDL_SCANCODE_KP_1)) {
 							whichend = 1;
 						}

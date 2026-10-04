@@ -102,7 +102,7 @@ void Skeleton::FindForwards()
  * 
  * Tutorial::active
  */
-float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive, bool bloodtoggle, float multiplier, Terrain& terrain, int environment, float camerashake, bool freeze, int detail, int whichjointstartarray[26])
+float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive, bool bloodtoggleflag, float timemultiplier, Terrain& terrainref, int envtype, float shakeamount, bool freeze, int detaillevel, int jointstartarray[26])
 {
 	const float elasticity = .3f;
 	Vector3 bounceness;
@@ -120,17 +120,17 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 	bool breaking = false;
 
 	if (free) {
-		freetime += multiplier;
+		freetime += timemultiplier;
 
-		whichpatchx = (int)(coords->x / (terrain.size / subdivision * terrain.scale));
-		whichpatchz = (int)(coords->z / (terrain.size / subdivision * terrain.scale));
+		whichpatchx = (int)(coords->x / (terrainref.size / subdivision * terrainref.scale));
+		whichpatchz = (int)(coords->z / (terrainref.size / subdivision * terrainref.scale));
 
 		terrainlight = *coords;
-		Object::SphereCheckPossible(&terrainlight, 1, terrain);
+		Object::SphereCheckPossible(&terrainlight, 1, terrainref);
 
 		//Add velocity
 		for (i = 0; i < joints.size(); i++) {
-			joints[i].position = joints[i].position + joints[i].velocity * multiplier;
+			joints[i].position = joints[i].position + joints[i].velocity * timemultiplier;
 
 			switch (joints[i].label) {
 			case head:
@@ -153,7 +153,7 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 			joints[i].oldvelocity = joints[i].velocity;
 		}
 
-		float tempmult = multiplier;
+		float tempmult = timemultiplier;
 		//multiplier/=numrepeats;
 
 		for (int j = 0; j < numrepeats; j++) {
@@ -164,21 +164,21 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 				while (normaldotproduct(temp, lowforward) > -.1 && !sphere_line_intersection(&jointPos(righthip), &jointPos(rightankle), &jointPos(rightknee), &r)) {
 					jointPos(rightknee) -= lowforward * .05f;
 					if (spinny) {
-						jointVel(rightknee) -= lowforward * .05f / multiplier / 4.f;
+						jointVel(rightknee) -= lowforward * .05f / timemultiplier / 4.f;
 					}
 					else {
 						jointVel(rightknee) -= lowforward * .05f;
 					}
 					jointPos(rightankle) += lowforward * .025f;
 					if (spinny) {
-						jointVel(rightankle) += lowforward * .025f / multiplier / 4.f;
+						jointVel(rightankle) += lowforward * .025f / timemultiplier / 4.f;
 					}
 					else {
 						jointVel(rightankle) += lowforward * .25f;
 					}
 					jointPos(righthip) += lowforward * .025f;
 					if (spinny) {
-						jointVel(righthip) += lowforward * .025f / multiplier / 4.f;
+						jointVel(righthip) += lowforward * .025f / timemultiplier / 4.f;
 					}
 					else {
 						jointVel(righthip) += lowforward * .025f;
@@ -193,21 +193,21 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 				while (normaldotproduct(temp, lowforward) > -.1 && !sphere_line_intersection(&jointPos(lefthip), &jointPos(leftankle), &jointPos(leftknee), &r)) {
 					jointPos(leftknee) -= lowforward * .05f;
 					if (spinny) {
-						jointVel(leftknee) -= lowforward * .05f / multiplier / 4.f;
+						jointVel(leftknee) -= lowforward * .05f / timemultiplier / 4.f;
 					}
 					else {
 						jointVel(leftknee) -= lowforward * .05f;
 					}
 					jointPos(leftankle) += lowforward * .025f;
 					if (spinny) {
-						jointVel(leftankle) += lowforward * .025f / multiplier / 4.f;
+						jointVel(leftankle) += lowforward * .025f / timemultiplier / 4.f;
 					}
 					else {
 						jointVel(leftankle) += lowforward * .25f;
 					}
 					jointPos(lefthip) += lowforward * .025f;
 					if (spinny) {
-						jointVel(lefthip) += lowforward * .025f / multiplier / 4.f;
+						jointVel(lefthip) += lowforward * .025f / timemultiplier / 4.f;
 					}
 					else {
 						jointVel(lefthip) += lowforward * .025f;
@@ -225,20 +225,20 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 				}
 				if (joints[i].delay > 0) {
 					bool freely = true;
-					for (unsigned j = 0; j < joints.size(); j++) {
-						if (joints[j].locked) {
+					for (unsigned k = 0; k < joints.size(); k++) {
+						if (joints[k].locked) {
 							freely = false;
 						}
 					}
 					if (freely) {
-						joints[i].delay -= multiplier * 3.f;
+						joints[i].delay -= timemultiplier * 3.f;
 					}
 				}
 			}
 
 			for (i = 0; i < muscles.size(); i++) {
 				//Length constraints
-				muscles[i].DoConstraint(spinny, multiplier, freeze);
+				muscles[i].DoConstraint(spinny, timemultiplier, freeze);
 			}
 
 			float friction;
@@ -246,7 +246,7 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 				//Length constraints
 				//Ground constraint
 				groundlevel = 0;
-				if (joints[i].position.y * (*scale) + coords->y < terrain.getHeight(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) + groundlevel) {
+				if (joints[i].position.y * (*scale) + coords->y < terrainref.getHeight(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) + groundlevel) {
 					freefall = 0;
 					friction = 1.5;
 					if (joints[i].label == groin && !joints[i].locked && joints[i].delay <= 0) {
@@ -266,7 +266,7 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 						}
 					}
 
-					terrainnormal = terrain.getNormal(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z);
+					terrainnormal = terrainref.getNormal(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z);
 					ReflectVector(&joints[i].velocity, &terrainnormal);
 					bounceness = terrainnormal * findLength(&joints[i].velocity) * (abs(normaldotproduct(joints[i].velocity, terrainnormal)));
 					if (!joints[i].locked) {
@@ -290,9 +290,9 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 							// to reproduce, type 'wolfie' in console and play a while
 							// I'll just comment it out for now
 							//Object::objects[k]->model.MakeDecal(breakdecal, DoRotation(temp - Object::objects[k]->position, 0, -Object::objects[k]->yaw, 0), .4, .5, rand() % 360);
-							Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, 1, 1, 1, 4, .2f, bloodtoggle);
+							Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, 1, 1, 1, 4, .2f, bloodtoggleflag);
 							breaking = false;
-							camerashake += .6f;
+							shakeamount += .6f;
 
 							emit_sound_at(breaksound2, joints[i].position * (*scale) + *coords);
 
@@ -318,33 +318,33 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 						}
 					}
 
-					if (environment == snowyenvironment && magnitudeSquared(&bounceness) > 500 && terrain.getOpacity(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) < .2f) {
-						terrainlight = terrain.getLighting(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z);
-						Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, terrainlight.x, terrainlight.y, terrainlight.z, .5f, .7f, bloodtoggle);
-						if (detail == 2) {
-							terrain.MakeDecal(bodyprintdecal, joints[i].position * (*scale) + *coords, .4f, .4f, 0, environment);
+					if (envtype == snowyenvironment && magnitudeSquared(&bounceness) > 500 && terrainref.getOpacity(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) < .2f) {
+						terrainlight = terrainref.getLighting(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z);
+						Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, terrainlight.x, terrainlight.y, terrainlight.z, .5f, .7f, bloodtoggleflag);
+						if (detaillevel == 2) {
+							terrainref.MakeDecal(bodyprintdecal, joints[i].position * (*scale) + *coords, .4f, .4f, 0, envtype);
 						}
 					}
-					else if (environment == desertenvironment && magnitudeSquared(&bounceness) > 500 && terrain.getOpacity(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) < .2f) {
-						terrainlight = terrain.getLighting(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z);
-						Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, terrainlight.x * 190 / 255, terrainlight.y * 170 / 255, terrainlight.z * 108 / 255, .5f, .7f, bloodtoggle);
+					else if (envtype == desertenvironment && magnitudeSquared(&bounceness) > 500 && terrainref.getOpacity(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) < .2f) {
+						terrainlight = terrainref.getLighting(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z);
+						Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, terrainlight.x * 190 / 255, terrainlight.y * 170 / 255, terrainlight.z * 108 / 255, .5f, .7f, bloodtoggleflag);
 					}
 
-					else if (environment == grassyenvironment && magnitudeSquared(&bounceness) > 500 && terrain.getOpacity(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) < .2f) {
-						terrainlight = terrain.getLighting(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z);
-						Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, terrainlight.x * 90 / 255, terrainlight.y * 70 / 255, terrainlight.z * 8 / 255, .5f, .5f, bloodtoggle);
+					else if (envtype == grassyenvironment && magnitudeSquared(&bounceness) > 500 && terrainref.getOpacity(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) < .2f) {
+						terrainlight = terrainref.getLighting(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z);
+						Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, terrainlight.x * 90 / 255, terrainlight.y * 70 / 255, terrainlight.z * 8 / 255, .5f, .5f, bloodtoggleflag);
 					}
 					else if (magnitudeSquared(&bounceness) > 500) {
-						Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, terrainlight.x, terrainlight.y, terrainlight.z, .5f, .2f, bloodtoggle);
+						Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, terrainlight.x, terrainlight.y, terrainlight.z, .5f, .2f, bloodtoggleflag);
 					}
 
-					joints[i].position.y = (terrain.getHeight(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) + groundlevel - coords->y) / (*scale);
+					joints[i].position.y = (terrainref.getHeight(joints[i].position.x * (*scale) + coords->x, joints[i].position.z * (*scale) + coords->z) + groundlevel - coords->y) / (*scale);
 					if (longdead > 100) {
 						broken = 1;
 					}
 				}
-				for (unsigned int m = 0; m < terrain.patchobjects[whichpatchx][whichpatchz].size(); m++) {
-					unsigned int k = terrain.patchobjects[whichpatchx][whichpatchz][m];
+				for (unsigned int m = 0; m < terrainref.patchobjects[whichpatchx][whichpatchz].size(); m++) {
+					unsigned int k = terrainref.patchobjects[whichpatchx][whichpatchz][m];
 					if (k < Object::objects.size()) {
 						if (Object::objects[k]->possible) {
 							friction = Object::objects[k]->friction;
@@ -381,9 +381,9 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 								if (!tutorialActive || id == 0) {
 									if (magnitudeSquared(&bounceness) > 4000 && breaking) {
 										Object::objects[k]->model.MakeDecal(breakdecal, DoRotation(temp - Object::objects[k]->position, 0, -Object::objects[k]->yaw, 0), .4f, .5f, (float)(rand() % 360));
-										Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, 1, 1, 1, 4, .2f, bloodtoggle);
+										Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, 1, 1, 1, 4, .2f, bloodtoggleflag);
 										breaking = false;
-										camerashake += .6f;
+										shakeamount += .6f;
 
 										emit_sound_at(breaksound2, joints[i].position * (*scale) + *coords);
 
@@ -391,10 +391,10 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 									}
 								}
 								if (Object::objects[k]->type == treetrunktype) {
-									Object::objects[k]->rotx += joints[i].velocity.x * multiplier * .4f;
-									Object::objects[k]->roty += joints[i].velocity.z * multiplier * .4f;
-									Object::objects[k + 1]->rotx += joints[i].velocity.x * multiplier * .4f;
-									Object::objects[k + 1]->roty += joints[i].velocity.z * multiplier * .4f;
+									Object::objects[k]->rotx += joints[i].velocity.x * timemultiplier * .4f;
+									Object::objects[k]->roty += joints[i].velocity.z * timemultiplier * .4f;
+									Object::objects[k + 1]->rotx += joints[i].velocity.x * timemultiplier * .4f;
+									Object::objects[k + 1]->roty += joints[i].velocity.z * timemultiplier * .4f;
 								}
 								if (!joints[i].locked) {
 									damage += magnitudeSquared(&bounceness) / 2500;
@@ -420,7 +420,7 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 									}
 								}
 								if (magnitudeSquared(&bounceness) > 500) {
-									Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, 1, 1, 1, .5f, .2f, bloodtoggle);
+									Sprite::MakeSprite(cloudsprite, joints[i].position * (*scale) + *coords, joints[i].velocity * .06f, 1, 1, 1, .5f, .2f, bloodtoggleflag);
 								}
 								joints[i].position = (temp - *coords) / (*scale) + terrainnormal * .005f;
 								if (longdead > 100) {
@@ -433,21 +433,21 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 				joints[i].realoldposition = joints[i].position * (*scale) + *coords;
 			}
 		}
-		multiplier = tempmult;
+		timemultiplier = tempmult;
 
-		for (unsigned int m = 0; m < terrain.patchobjects[whichpatchx][whichpatchz].size(); m++) {
-			unsigned int k = terrain.patchobjects[whichpatchx][whichpatchz][m];
+		for (unsigned int m = 0; m < terrainref.patchobjects[whichpatchx][whichpatchz].size(); m++) {
+			unsigned int k = terrainref.patchobjects[whichpatchx][whichpatchz][m];
 			if (Object::objects[k]->possible) {
 				for (i = 0; i < 26; i++) {
 					//Make this less stupid
-					Vector3 start = joints[jointlabels[whichjointstartarray[i]]].position * (*scale) + *coords;
+					Vector3 start = joints[jointlabels[jointstartarray[i]]].position * (*scale) + *coords;
 					Vector3 end = joints[jointlabels[whichjointendarray[i]]].position * (*scale) + *coords;
 					whichhit = Object::objects[k]->model.LineCheckSlidePossible(&start, &end, &Object::objects[k]->position, &Object::objects[k]->yaw);
 					if (whichhit != -1) {
 						joints[jointlabels[whichjointendarray[i]]].position = (end - *coords) / (*scale);
 						for (unsigned j = 0; j < muscles.size(); j++) {
-							if ((muscles[j].parent1->label == whichjointstartarray[i] && muscles[j].parent2->label == whichjointendarray[i]) || (muscles[j].parent2->label == whichjointstartarray[i] && muscles[j].parent1->label == whichjointendarray[i])) {
-								muscles[j].DoConstraint(spinny, multiplier, freeze);
+							if ((muscles[j].parent1->label == jointstartarray[i] && muscles[j].parent2->label == whichjointendarray[i]) || (muscles[j].parent2->label == jointstartarray[i] && muscles[j].parent1->label == whichjointendarray[i])) {
+								muscles[j].DoConstraint(spinny, timemultiplier, freeze);
 							}
 						}
 					}
@@ -488,7 +488,7 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 	if (!free) {
 		for (i = 0; i < muscles.size(); i++) {
 			if (muscles[i].type == boneconnect) {
-				muscles[i].DoConstraint(0, multiplier, freeze);
+				muscles[i].DoConstraint(0, timemultiplier, freeze);
 			}
 		}
 	}
@@ -502,7 +502,7 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
  * USES:
  * Person/Person::DoStuff
  */
-void Skeleton::DoGravity(float* scale, float multiplier, float gravity)
+void Skeleton::DoGravity(float* scale, float timemultiplier, float gravityamount)
 {
 	for (unsigned i = 0; i < joints.size(); i++) {
 		if (
@@ -512,7 +512,7 @@ void Skeleton::DoGravity(float* scale, float multiplier, float gravity)
 				(joints[i].mass < 5)) &&
 			(((joints[i].label != leftelbow) && (joints[i].label != rightelbow)) ||
 				(forward.y < .3))) {
-			joints[i].velocity.y += gravity * multiplier / (*scale);
+			joints[i].velocity.y += gravityamount * timemultiplier / (*scale);
 		}
 	}
 }
@@ -648,7 +648,7 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 	const std::string& model3filename, const std::string& model4filename,
 	const std::string& model5filename, const std::string& model6filename,
 	const std::string& model7filename, const std::string& modellowfilename,
-	const std::string& modelclothesfilename, bool clothes, bool tutorialActive, ProgressCallback callback)
+	const std::string& modelclothesfilename, bool aclothes, bool tutorialActive, ProgressCallback callback)
 {
 	GLfloat M[16];
 	FILE* tfile = nullptr;
@@ -701,7 +701,7 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 	}
 	drawmodellow.CalculateNormals(0, callback);
 
-	if (clothes) {
+	if (aclothes) {
 		modelclothes.loadnotex(modelclothesfilename);
 		modelclothes.Rotate(180, 0, 0);
 		modelclothes.Scale(.041f, .04f, .041f);
@@ -855,7 +855,7 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 
 	// load clothes
 
-	if (clothes) {
+	if (aclothes) {
 		tfile = Folders::openMandatoryFile(Folders::getResourcePath(clothesfilename), "rb");
 
 		// skip num_joints

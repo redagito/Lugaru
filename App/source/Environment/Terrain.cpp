@@ -37,7 +37,7 @@ int Terrain::lineTerrain(Vector3 p1, Vector3 p2, Vector3* p) const
 	int endx = 0.f, endy = 0.f;
 	float highest = 0.f, lowest = 0.f;
 
-	Vector3 triangles[3];
+	Vector3 facets[3];
 
 	p1 /= scale;
 	p2 /= scale;
@@ -90,19 +90,19 @@ int Terrain::lineTerrain(Vector3 p1, Vector3 p2, Vector3* p) const
 				}
 			}
 			if ((p1.y <= highest || p2.y <= highest) && (p1.y >= lowest || p2.y >= lowest)) {
-				triangles[0].x = (float)i;
-				triangles[0].y = heightmap[i][j];
-				triangles[0].z = (float)j;
+				facets[0].x = (float)i;
+				facets[0].y = heightmap[i][j];
+				facets[0].z = (float)j;
 
-				triangles[1].x = (float)i;
-				triangles[1].y = heightmap[i][j + 1];
-				triangles[1].z = (float)(j + 1);
+				facets[1].x = (float)i;
+				facets[1].y = heightmap[i][j + 1];
+				facets[1].z = (float)(j + 1);
 
-				triangles[2].x = (float)(i + 1);
-				triangles[2].y = heightmap[i + 1][j];
-				triangles[2].z = (float)j;
+				facets[2].x = (float)(i + 1);
+				facets[2].y = heightmap[i + 1][j];
+				facets[2].z = (float)j;
 
-				intersecting = LineFacet(p1, p2, triangles[0], triangles[1], triangles[2], &point);
+				intersecting = LineFacet(p1, p2, facets[0], facets[1], facets[2], &point);
 				distance = distsq(&p1, &point);
 				if ((distance < olddistance || firstintersecting == -1) && intersecting == 1) {
 					olddistance = distance;
@@ -110,19 +110,19 @@ int Terrain::lineTerrain(Vector3 p1, Vector3 p2, Vector3* p) const
 					*p = point;
 				}
 
-				triangles[0].x = (float)(i + 1);
-				triangles[0].y = heightmap[i + 1][j];
-				triangles[0].z = (float)j;
+				facets[0].x = (float)(i + 1);
+				facets[0].y = heightmap[i + 1][j];
+				facets[0].z = (float)j;
 
-				triangles[1].x = (float)i;
-				triangles[1].y = heightmap[i][j + 1];
-				triangles[1].z = (float)(j + 1);
+				facets[1].x = (float)i;
+				facets[1].y = heightmap[i][j + 1];
+				facets[1].z = (float)(j + 1);
 
-				triangles[2].x = (float)(i + 1);
-				triangles[2].y = heightmap[i + 1][j + 1];
-				triangles[2].z = (float)(j + 1);
+				facets[2].x = (float)(i + 1);
+				facets[2].y = heightmap[i + 1][j + 1];
+				facets[2].z = (float)(j + 1);
 
-				intersecting = LineFacet(p1, p2, triangles[0], triangles[1], triangles[2], &point);
+				intersecting = LineFacet(p1, p2, facets[0], facets[1], facets[2], &point);
 				distance = distsq(&p1, &point);
 				if ((distance < olddistance || firstintersecting == -1) && intersecting == 1) {
 					olddistance = distance;
@@ -1252,39 +1252,39 @@ void Terrain::DeleteDecal(int which)
 	decals.erase(decals.begin() + which);
 }
 
-void Terrain::MakeDecal(decal_type type, Vector3 where, float size, float opacity, float rotation, int environment)
+void Terrain::MakeDecal(decal_type decaltype, Vector3 where, float decalradius, float opacity, float rotation, int environment)
 {
-	if (opacity > 0 && size > 0) {
+	if (opacity > 0 && decalradius > 0) {
 		int patchx[4];
 		int patchy[4];
 
-		patchx[0] = (where.x + size) / scale;
-		patchx[1] = (where.x - size) / scale;
-		patchx[2] = (where.x - size) / scale;
-		patchx[3] = (where.x + size) / scale;
+		patchx[0] = (where.x + decalradius) / scale;
+		patchx[1] = (where.x - decalradius) / scale;
+		patchx[2] = (where.x - decalradius) / scale;
+		patchx[3] = (where.x + decalradius) / scale;
 
-		patchy[0] = (where.z - size) / scale;
-		patchy[1] = (where.z - size) / scale;
-		patchy[2] = (where.z + size) / scale;
-		patchy[3] = (where.z + size) / scale;
+		patchy[0] = (where.z - decalradius) / scale;
+		patchy[1] = (where.z - decalradius) / scale;
+		patchy[2] = (where.z + decalradius) / scale;
+		patchy[3] = (where.z + decalradius) / scale;
 
 		if ((patchx[0] != patchx[1] || patchy[0] != patchy[1]) && (patchx[0] != patchx[2] || patchy[0] != patchy[2]) && (patchx[0] != patchx[3] || patchy[0] != patchy[3])) {
-			MakeDecalLock(type, where, patchx[0], patchy[0], size, opacity, rotation, environment);
+			MakeDecalLock(decaltype, where, patchx[0], patchy[0], decalradius, opacity, rotation, environment);
 		}
 
 		if ((patchx[1] != patchx[2] || patchy[1] != patchy[2]) && (patchx[1] != patchx[3] || patchy[1] != patchy[3])) {
-			MakeDecalLock(type, where, patchx[1], patchy[1], size, opacity, rotation, environment);
+			MakeDecalLock(decaltype, where, patchx[1], patchy[1], decalradius, opacity, rotation, environment);
 		}
 
 		if ((patchx[2] != patchx[3] || patchy[2] != patchy[3])) {
-			MakeDecalLock(type, where, patchx[2], patchy[2], size, opacity, rotation, environment);
+			MakeDecalLock(decaltype, where, patchx[2], patchy[2], decalradius, opacity, rotation, environment);
 		}
 
-		MakeDecalLock(type, where, patchx[3], patchy[3], size, opacity, rotation, environment);
+		MakeDecalLock(decaltype, where, patchx[3], patchy[3], decalradius, opacity, rotation, environment);
 	}
 }
 
-void Terrain::MakeDecalLock(decal_type type, Vector3 where, int whichx, int whichy, float size, float opacity, float rotation, int environment)
+void Terrain::MakeDecalLock(decal_type decaltype, Vector3 where, int whichx, int whichy, float decalradius, float opacity, float rotation, int environment)
 {
 	Vector3 rot = getLighting(where.x, where.z);
 	float decalbright = (rot.x + rot.y + rot.z) / 3;
@@ -1301,7 +1301,7 @@ void Terrain::MakeDecalLock(decal_type type, Vector3 where, int whichx, int whic
 		decalbright = 1;
 	}
 
-	Decal decal(where, type, opacity, rotation, decalbright, whichx, whichy, size, *this, true);
+	Decal decal(where, decaltype, opacity, rotation, decalbright, whichx, whichy, decalradius, *this, true);
 
 	if (!(decal.texcoords[0][0] < 0 && decal.texcoords[1][0] < 0 && decal.texcoords[2][0] < 0)) {
 		if (!(decal.texcoords[0][1] < 0 && decal.texcoords[1][1] < 0 && decal.texcoords[2][1] < 0)) {
@@ -1315,7 +1315,7 @@ void Terrain::MakeDecalLock(decal_type type, Vector3 where, int whichx, int whic
 		}
 	}
 
-	Decal decal2(where, type, opacity, rotation, decalbright, whichx, whichy, size, *this, false);
+	Decal decal2(where, decaltype, opacity, rotation, decalbright, whichx, whichy, decalradius, *this, false);
 
 	if (!(decal2.texcoords[0][0] < 0 && decal2.texcoords[1][0] < 0 && decal2.texcoords[2][0] < 0)) {
 		if (!(decal2.texcoords[0][1] < 0 && decal2.texcoords[1][1] < 0 && decal2.texcoords[2][1] < 0)) {
