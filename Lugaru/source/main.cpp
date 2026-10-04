@@ -107,14 +107,14 @@ void initGL()
 
 static Point gMidPoint;
 
-bool SetUp()
+bool SetUp(GameState& gamestate)
 {
 	cellophane = 0;
 	texdetail = 4;
-	state().slomospeed = 0.25;
+	gamestate.slomospeed = 0.25;
 	slomofreq = 8012;
 
-	DefaultSettings();
+	DefaultSettings(gamestate);
 
 	if (!SDL_WasInit(SDL_INIT_VIDEO)) {
 		if (SDL_Init(SDL_INIT_VIDEO) == -1) {
@@ -122,9 +122,9 @@ bool SetUp()
 			return false;
 		}
 	}
-	if (!LoadSettings()) {
+	if (!LoadSettings(gamestate)) {
 		fprintf(stderr, "Failed to load config, creating default\n");
-		SaveSettings();
+		SaveSettings(gamestate);
 	}
 
 	if (SDL_GL_LoadLibrary(NULL) == -1) {
@@ -245,7 +245,7 @@ bool SetUp()
 		resolutions.insert(startresolution);
 	}
 
-	InitGame();
+	InitGame(gamestate);
 
 	return true;
 }
@@ -317,7 +317,7 @@ void DoFrameRate(int update)
 	}
 }
 
-void DoUpdate()
+void DoUpdate(GameState& gamestate)
 {
 	static float sps = 200;
 	static int count;
@@ -328,7 +328,7 @@ void DoUpdate()
 		multiplier = .6;
 	}
 
-	state().fps = 1 / multiplier;
+	gamestate.fps = 1 / multiplier;
 
 	count = multiplier * sps;
 	if (count < 2) {
@@ -336,7 +336,7 @@ void DoUpdate()
 	}
 
 	realmultiplier = multiplier;
-	multiplier *= state().gamespeed;
+	multiplier *= gamestate.gamespeed;
 	if (difficulty == 1) {
 		multiplier *= .9;
 	}
@@ -344,11 +344,11 @@ void DoUpdate()
 		multiplier *= .8;
 	}
 
-	if (state().loading == 4) {
+	if (gamestate.loading == 4) {
 		multiplier *= .00001;
 	}
 	if (slomo && !mainmenu) {
-		multiplier *= state().slomospeed;
+		multiplier *= gamestate.slomospeed;
 	}
 	oldmult = multiplier;
 	multiplier /= (float)count;
@@ -358,17 +358,17 @@ void DoUpdate()
 	TickOnce();
 
 	for (int i = 0; i < count; i++) {
-		Tick();
+		Tick(gamestate);
 	}
 	multiplier = oldmult;
 
-	TickOnceAfter();
+	TickOnceAfter(gamestate);
 	if (stereomode == stereoNone) {
-		DrawGLScene(stereoCenter);
+		DrawGLScene(stereoCenter, gamestate);
 	}
 	else {
-		DrawGLScene(stereoLeft);
-		DrawGLScene(stereoRight);
+		DrawGLScene(stereoLeft, gamestate);
+		DrawGLScene(stereoRight, gamestate);
 	}
 }
 
@@ -547,9 +547,13 @@ int main(int argc, char** argv)
 	try {
 #endif
 		{
+			// The one and only GameState for this process. Everything below takes
+			// it by reference; nothing else constructs one.
+			GameState gamestate;
+
 			newGame();
 
-			if (!SetUp()) {
+			if (!SetUp(gamestate)) {
 				delete[] commandLineOptionsBuffer;
 				return 42;
 			}
@@ -565,10 +569,10 @@ int main(int argc, char** argv)
 
 			if (commandLineOptions[CMD].count() > 0) {
 				devtools = true;
-				Menu::startChallengeLevel(1);
+				Menu::startChallengeLevel(1, gamestate);
 				for (option::Option* opt = commandLineOptions[CMD]; opt; opt = opt->next()) {
 					if (opt->arg && (strlen(opt->arg) > 0)) {
-						cmd_dispatch(opt->arg);
+						cmd_dispatch(opt->arg, gamestate);
 					}
 				}
 			}
@@ -593,13 +597,13 @@ int main(int argc, char** argv)
 					}
 
 					// game
-					DoUpdate();
+					DoUpdate(gamestate);
 				}
 				else {
 					if (gameFocused) {
 						// allow game chance to pause
 						gameFocused = false;
-						DoUpdate();
+						DoUpdate(gamestate);
 					}
 
 					// game is not in focus, give CPU time to other apps by waiting for messages instead of 'peeking'

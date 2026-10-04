@@ -56,7 +56,7 @@ std::vector<std::string> ListCampaigns()
 	return campaignNames;
 }
 
-void LoadCampaign()
+void LoadCampaign(GameState& gamestate)
 {
 	if (!Account::hasActive()) {
 		return;
@@ -69,7 +69,7 @@ void LoadCampaign()
 		}
 		std::cerr << "Could not find campaign \"" << Account::active().getCurrentCampaign() << "\", falling back to main." << std::endl;
 		Account::active().setCurrentCampaign("main");
-		return LoadCampaign();
+		return LoadCampaign(gamestate);
 	}
 	ipstream.ignore(256, ':');
 	int numlevels;
@@ -93,10 +93,10 @@ void LoadCampaign()
 
 	std::ifstream test(Folders::getResourcePath("Textures/" + Account::active().getCurrentCampaign() + "/World.png"));
 	if (test.good()) {
-		Game::Mainmenuitems[7].load("Textures/" + Account::active().getCurrentCampaign() + "/World.png", 0, trilinear, []() {Game::LoadingScreen(); });
+		Game::Mainmenuitems[7].load("Textures/" + Account::active().getCurrentCampaign() + "/World.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 	}
 	else {
-		Game::Mainmenuitems[7].load("Textures/World.png", 0, trilinear, []() {Game::LoadingScreen(); });
+		Game::Mainmenuitems[7].load("Textures/World.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 	}
 
 	if (Account::active().getCampaignChoicesMade() == 0) {

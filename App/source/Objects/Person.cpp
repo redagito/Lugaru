@@ -39,7 +39,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 std::vector<std::shared_ptr<Person>> Person::players;
 
-Person::Person()
+Person::Person(GameState& gamestate)
 	: whichpatchx(0)
 	, whichpatchz(0)
 	, animCurrent(bounceidleanim)
@@ -302,7 +302,7 @@ Person::Person()
 	, whichskin(0)
 	, rabbitkickragdoll(false)
 
-	, tempanimation("Tempanim", lowheight, neutral, []() { Game::LoadingScreen(); })
+	, tempanimation("Tempanim", lowheight, neutral, [&]() { Game::LoadingScreen(gamestate); })
 
 	, jumpclimb(false)
 {
@@ -311,8 +311,8 @@ Person::Person()
 }
 
 /* Read a person in tfile. Throws an error if it’s not valid */
-Person::Person(FILE* tfile, int mapvers, unsigned i)
-	: Person()
+Person::Person(FILE* tfile, int mapvers, unsigned i, GameState& gamestate)
+	: Person(gamestate)
 {
 	id = i;
 	funpackf(tfile, "Bi Bi Bf Bf Bf Bi", &whichskin, &creature, &coords.x, &coords.y, &coords.z, &num_weapons);
@@ -415,16 +415,16 @@ Person::Person(FILE* tfile, int mapvers, unsigned i)
 	realoldcoords = coords;
 }
 
-void Person::changeCreatureType(person_type type, bool tutorialActive)
+void Person::changeCreatureType(person_type type, bool tutorialActive, GameState& gamestate)
 {
 	creature = type;
 	whichskin = 0;
-	skeletonLoad(tutorialActive);
+	skeletonLoad(tutorialActive, gamestate);
 	scale = PersonType::types[creature].defaultScale;
 	damagetolerance = PersonType::types[creature].defaultDamageTolerance;
 }
 
-void Person::skeletonLoad(bool tutorialActive)
+void Person::skeletonLoad(bool tutorialActive, GameState& gamestate)
 {
 	skeleton.id = id;
 	skeleton.Load(
@@ -440,9 +440,9 @@ void Person::skeletonLoad(bool tutorialActive)
 		PersonType::types[creature].modelFileNames[6],
 		PersonType::types[creature].lowModelFileName,
 		PersonType::types[creature].modelClothesFileName,
-		PersonType::types[creature].clothes, tutorialActive, []() {Game::LoadingScreen(); });
+		PersonType::types[creature].clothes, tutorialActive, [&]() {Game::LoadingScreen(gamestate); });
 
-	skeleton.drawmodel.textureptr.load(PersonType::types[creature].skins[whichskin], 1, &skeleton.skinText[0], &skeleton.skinsize, trilinear, []() {Game::LoadingScreen(); });
+	skeleton.drawmodel.textureptr.load(PersonType::types[creature].skins[whichskin], 1, &skeleton.skinText[0], &skeleton.skinsize, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 }
 
 void Person::setProportions(float head, float body, float arms, float legs)
@@ -472,7 +472,7 @@ Vector3 Person::getProportionXYZ(int part) const
  * USES:
  * GameTick/doPlayerCollisions
  */
-void Person::CheckKick(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26])
+void Person::CheckKick(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate)
 {
 	if (!(hasvictim && (animTarget == rabbitkickanim && victim && victim != this->shared_from_this() && frameCurrent >= 2 && animCurrent == rabbitkickanim) && distsq(&coords, &victim->coords) < 1.2 && !victim->skeleton.free)) {
 		return;
@@ -489,12 +489,12 @@ void Person::CheckKick(Terrain& terrainref, bool tutorialActive, bool inDialog, 
 		if (!tutorialActive) {
 			emit_sound_at(heavyimpactsound, victim->coords);
 		}
-		victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+		victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 		for (unsigned i = 0; i < victim->skeleton.joints.size(); i++) {
 			victim->skeleton.joints[i].velocity += relative * 120 * damagemult;
 		}
 		victim->Puff(neck);
-		victim->DoDamage(100 * damagemult / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+		victim->DoDamage(100 * damagemult / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 		if (id == 0) {
 			camerashake += .4;
 		}
@@ -1195,9 +1195,9 @@ bool Person::DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutor
 /* EFFECT
  * guessing this performs a reversal
  */
-void Person::Reverse(bool tutorialActive)
+void Person::Reverse(bool tutorialActive, GameState& gamestate)
 {
-	if (!((victim->isPlayerControlled() || hostiletime > 1 || staggerdelay <= 0) && victim->animTarget != jumpupanim && victim->animTarget != jumpdownanim && (!tutorialActive || state().cananger) && hostile)) {
+	if (!((victim->isPlayerControlled() || hostiletime > 1 || staggerdelay <= 0) && victim->animTarget != jumpupanim && victim->animTarget != jumpdownanim && (!tutorialActive || gamestate.cananger) && hostile)) {
 		return;
 	}
 
@@ -1516,7 +1516,7 @@ void Person::Reverse(bool tutorialActive)
 /* EFFECT
  * get hurt
  */
-void Person::DoDamage(float howmuch, Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26])
+void Person::DoDamage(float howmuch, Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate)
 {
 	// stats?
 	if (id == 0) {
@@ -1556,7 +1556,7 @@ void Person::DoDamage(float howmuch, Terrain& terrainref, bool tutorialActive, b
 	}
 
 	// cancel attack?
-	if (aitype == passivetype && damage < damagetolerance && ((!tutorialActive || state().cananger) && hostile)) {
+	if (aitype == passivetype && damage < damagetolerance && ((!tutorialActive || gamestate.cananger) && hostile)) {
 		aitype = attacktypecutoff;
 	}
 	if (!tutorialActive && !isPlayerControlled() && damage < damagetolerance && damage > damagetolerance * 2 / 3 && creature == rabbittype) {
@@ -1593,8 +1593,8 @@ void Person::DoDamage(float howmuch, Terrain& terrainref, bool tutorialActive, b
 		emit_sound_at(splattersound, coords);
 
 		skeleton.free = 2;
-		DoDamage(10000, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
-		RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+		DoDamage(10000, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
+		RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 		if (!dead && (creature == wolftype) && (aitype != playercontrolled)) {
 			award_bonus(0, Wolfbonus);
 		}
@@ -1638,13 +1638,13 @@ void Person::DoDamage(float howmuch, Terrain& terrainref, bool tutorialActive, b
 /* EFFECT
  * calculate/animate head facing direction?
  */
-void Person::DoHead(float timemultiplier)
+void Person::DoHead(float timemultiplier, GameState& gamestate)
 {
 	static Vector3 rotatearound;
 	static Vector3 headfacing;
 	static float lookspeed = 500;
 
-	if (!state().freeze && !state().winfreeze) {
+	if (!gamestate.freeze && !gamestate.winfreeze) {
 
 		//head facing
 		targetheadyaw = (float)((int)((0 - yaw - targetheadyaw + 180) * 100) % 36000) / 100;
@@ -1754,7 +1754,7 @@ void Person::DoHead(float timemultiplier)
 /* EFFECT
  * ragdolls character?
  */
-void Person::RagDoll(bool checkcollision, Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26])
+void Person::RagDoll(bool checkcollision, Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate)
 {
 	static Vector3 change;
 	static int i;
@@ -1824,12 +1824,12 @@ void Person::RagDoll(bool checkcollision, Terrain& terrainref, bool tutorialActi
 			skeleton.joints[jointindex].velocity = 0;
 			skeleton.joints[jointindex].velchange = 0;
 		}
-		skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, state().freeze, detail, jointstartarray);
+		skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, gamestate.freeze, detail, jointstartarray);
 		if (Animation::animations[animCurrent].height == lowheight || Animation::animations[animTarget].height == lowheight) {
-			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, state().freeze, detail, jointstartarray);
-			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, state().freeze, detail, jointstartarray);
-			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, state().freeze, detail, jointstartarray);
-			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, state().freeze, detail, jointstartarray);
+			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, gamestate.freeze, detail, jointstartarray);
+			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, gamestate.freeze, detail, jointstartarray);
+			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, gamestate.freeze, detail, jointstartarray);
+			skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, gamestate.freeze, detail, jointstartarray);
 		}
 
 		ragdollspeed = targetFrame().speed * 2;
@@ -1884,7 +1884,7 @@ void Person::RagDoll(bool checkcollision, Terrain& terrainref, bool tutorialActi
 				i = terrainref.patchobjects[whichpatchx][whichpatchz][l];
 				lowpoint = coords;
 				lowpoint.y += 1;
-				if (SphereCheck(&lowpoint, 3, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray) != -1) {
+				if (SphereCheck(&lowpoint, 3, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate) != -1) {
 					coords.x = lowpoint.x;
 					coords.z = lowpoint.z;
 				}
@@ -2009,7 +2009,7 @@ void Person::setTargetAnimation(int animation)
  * MONSTER
  * TODO: ???
  */
-void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26])
+void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate)
 {
 	if (!skeleton.free) {
 		static float oldtarget;
@@ -2094,7 +2094,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 
 			if (animTarget == rabbittacklinganim && frameTarget == 1) {
 				if (victim->aitype == attacktypecutoff && victim->stunned <= 0 && victim->surprised <= 0 && victim->id != 0) {
-					Reverse(tutorialActive);
+					Reverse(tutorialActive, gamestate);
 				}
 				if (animTarget == rabbittacklinganim && frameTarget == 1 && !victim->isCrouch() && victim->animTarget != backhandspringanim) {
 					if (normaldotproduct(victim->facing, facing) > 0) {
@@ -2108,7 +2108,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 					victim->yaw = yaw;
 					victim->targetyaw = yaw;
 					if (victim->aitype == gethelptype) {
-						victim->DoDamage(victim->damagetolerance - victim->damage, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->DoDamage(victim->damagetolerance - victim->damage, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					}
 					if (PersonType::types[creature].hasClaws) {
 						DoBloodBig(0, 255, tutorialActive);
@@ -2480,7 +2480,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 							victim->spurt = 1;
 							victim->DoBloodBig(2 / victim->armorhead, 175, tutorialActive);
 						}
-						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						Vector3 relative;
 						relative = victim->coords - coords;
 						relative.y = 0;
@@ -2491,7 +2491,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						}
 						victim->jointVel(head) += relative * damagemult * 200;
 						victim->Puff(head);
-						victim->DoDamage(damagemult * 100 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->DoDamage(damagemult * 100 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 						SolidHitBonus(id);
 					}
@@ -2515,7 +2515,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 							victim->spurt = 1;
 							victim->DoBloodBig(2, 175, tutorialActive);
 						}
-						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						Vector3 relative;
 						relative = victim->coords - coords;
 						relative.y = 0;
@@ -2528,7 +2528,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						}
 						victim->jointVel(head) += relative * damagemult * 100;
 						victim->Puff(head);
-						victim->DoDamage(damagemult * 50 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->DoDamage(damagemult * 50 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					}
 				}
 
@@ -2548,7 +2548,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 							victim->spurt = 1;
 							victim->DoBloodBig(2 / victim->armorhead, 175, tutorialActive);
 						}
-						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						Vector3 relative;
 						relative = facing;
 						relative.y = 0;
@@ -2559,7 +2559,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						}
 						victim->jointVel(head) += relative * damagemult * 200;
 						victim->Puff(head);
-						victim->DoDamage(damagemult * 150 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->DoDamage(damagemult * 150 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 						if (victim->damage > victim->damagetolerance) {
 							award_bonus(id, style);
@@ -2586,7 +2586,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 							victim->spurt = 1;
 							victim->DoBloodBig(2 / victim->armorhead, 175, tutorialActive);
 						}
-						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						Vector3 relative;
 						relative = facing;
 						relative.y = 0;
@@ -2597,7 +2597,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						}
 						victim->jointVel(head) += relative * damagemult * 200;
 						victim->Puff(head);
-						victim->DoDamage(damagemult * 150 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->DoDamage(damagemult * 150 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 						if (victim->damage > victim->damagetolerance) {
 							award_bonus(id, style);
@@ -2619,7 +2619,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 							DoBlood(.2, 235, tutorialActive);
 						}
 						emit_sound_at(whooshhitsound, victim->coords);
-						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						Vector3 relative;
 						relative = victim->coords - coords;
 						relative.y = 0;
@@ -2629,7 +2629,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						}
 						victim->jointVel(head) += relative * damagemult * 100;
 						victim->Puff(head);
-						victim->DoDamage(damagemult * 50 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->DoDamage(damagemult * 50 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					}
 				}
 
@@ -2689,7 +2689,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 							slomo = 1;
 							slomodelay = .2;
 						}
-						victim->DoDamage(damagemult * 500 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->DoDamage(damagemult * 500 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						victim->jointVel(abdomen) += relative * damagemult * 300;
 					}
 				}
@@ -2727,7 +2727,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						}
 
 						victim->Puff(abdomen);
-						victim->DoDamage(damagemult * 20 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->DoDamage(damagemult * 20 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						victim->jointVel(abdomen) += relative * damagemult * 200;
 						staggerdelay = .5;
 						if (!victim->dead) {
@@ -2801,7 +2801,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 
 							if (whichtri != -1) {
 								if (victim->dead != 2) {
-									victim->DoDamage(abs((victim->damagetolerance - victim->permanentdamage) * 2), terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+									victim->DoDamage(abs((victim->damagetolerance - victim->permanentdamage) * 2), terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 									if (!victim->dead) {
 										award_bonus(id, FinishedBonus);
 									}
@@ -2951,7 +2951,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 							emit_sound_at(heavyimpactsound, victim->coords, 128);
 						}
 
-						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						Vector3 relative;
 						relative = victim->coords - coords;
 						relative.y = 0;
@@ -2969,7 +2969,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 
 						victim->Puff(head);
 						victim->Puff(abdomen);
-						victim->DoDamage(damagemult * 60 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->DoDamage(damagemult * 60 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 						SolidHitBonus(id);
 					}
@@ -2998,7 +2998,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						}
 
 						if (victim->damage > victim->damagetolerance - 60 || normaldotproduct(victim->facing, victim->coords - coords) > 0 || Animation::animations[victim->animTarget].height == lowheight) {
-							victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+							victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						}
 						Vector3 relative;
 						relative = victim->coords - coords;
@@ -3018,7 +3018,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						victim->stunned = 1;
 
 						victim->Puff(abdomen);
-						victim->DoDamage(damagemult * 60 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->DoDamage(damagemult * 60 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 						SolidHitBonus(id);
 					}
@@ -3131,7 +3131,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 								Sprite::MakeSprite(bloodflamesprite, footpoint, footvel * 5, 1, 1, 1, .2, 1, bloodtoggle);
 								Sprite::MakeSprite(bloodflamesprite, footpoint, footvel * 2, 1, 1, 1, .2, 1, bloodtoggle);
 							}
-							victim->DoDamage(damagemult * 0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+							victim->DoDamage(damagemult * 0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						}
 					}
 				}
@@ -3161,7 +3161,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 								float bloodlossamount;
 								bloodlossamount = 200 + abs((float)(rand() % 40)) - 20;
 								victim->bloodloss += bloodlossamount / victim->armorhigh;
-								victim->DoDamage(damagemult * 0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+								victim->DoDamage(damagemult * 0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 								Vector3 footvel, footpoint;
 								footvel = 0;
@@ -3237,7 +3237,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 							}
 							emit_sound_at(staffheadsound, victim->coords);
 						}
-						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						Vector3 relative;
 						relative = victim->coords - coords;
 						relative.y = 0;
@@ -3252,7 +3252,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						victim->jointVel(neck) += relative * damagemult * 230;
 						victim->Puff(head);
 						if (!tutorialActive) {
-							victim->DoDamage(damagemult * 120 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+							victim->DoDamage(damagemult * 120 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 							award_bonus(id, solidhit, 30);
 						}
@@ -3272,7 +3272,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 							}
 							emit_sound_at(staffheadsound, victim->coords);
 						}
-						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						Vector3 relative;
 						relative = victim->coords - coords;
 						relative.y = 0;
@@ -3285,7 +3285,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						victim->jointVel(neck) += relative * damagemult * 220;
 						victim->Puff(head);
 						if (!tutorialActive) {
-							victim->DoDamage(damagemult * 350 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+							victim->DoDamage(damagemult * 350 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 							award_bonus(id, solidhit, 60);
 						}
@@ -3317,7 +3317,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 							//victim->skeleton.joints[i].velocity=0;
 						}
 
-						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						Vector3 relative;
 						relative = 0;
 						relative.y = -1;
@@ -3335,7 +3335,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						}
 						victim->Puff(abdomen);
 						if (!tutorialActive) {
-							victim->DoDamage(damagemult * 100 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+							victim->DoDamage(damagemult * 100 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 							if (!victim->dead) {
 								award_bonus(id, solidhit, 40);
@@ -3362,7 +3362,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 								victim->spurt = 1;
 								DoBlood(.2, 250, tutorialActive);
 							}
-							victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+							victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 							for (unsigned i = 0; i < victim->skeleton.joints.size(); i++) {
 								victim->skeleton.joints[i].velocity += relative * damagemult * 40;
 							}
@@ -3371,9 +3371,9 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 								emit_sound_at(heavyimpactsound, victim->coords, 128.);
 							}
 							victim->Puff(head);
-							victim->DoDamage(damagemult * 100 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+							victim->DoDamage(damagemult * 100 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 							if (victim->howactive == typesleeping) {
-								victim->DoDamage(damagemult * 150 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+								victim->DoDamage(damagemult * 150 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 							}
 							if (PersonType::types[creature].hasClaws) {
 								emit_sound_at(clawslicesound, victim->coords, 128.);
@@ -3383,7 +3383,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						}
 						else {
 							if (victim->damage >= victim->damagetolerance) {
-								victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+								victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 							}
 							for (unsigned i = 0; i < victim->skeleton.joints.size(); i++) {
 								victim->skeleton.joints[i].velocity += relative * damagemult * 10;
@@ -3397,7 +3397,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 								emit_sound_at(landsound2, victim->coords, 128.);
 							}
 							victim->Puff(abdomen);
-							victim->DoDamage(damagemult * 30 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+							victim->DoDamage(damagemult * 30 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 							if (PersonType::types[creature].hasClaws) {
 								emit_sound_at(clawslicesound, victim->coords, 128.);
 								victim->spurt = 1;
@@ -3424,7 +3424,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						Normalise(&relative);
 
 						if (Animation::animations[victim->animTarget].height == middleheight || Animation::animations[victim->animCurrent].height == middleheight || victim->damage >= victim->damagetolerance - 40) {
-							victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+							victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 							for (unsigned i = 0; i < victim->skeleton.joints.size(); i++) {
 								victim->skeleton.joints[i].velocity += relative * damagemult * 15;
@@ -3438,11 +3438,11 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 							}
 							victim->Puff(rightankle);
 							victim->Puff(leftankle);
-							victim->DoDamage(damagemult * 40 / victim->protectionlow, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+							victim->DoDamage(damagemult * 40 / victim->protectionlow, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						}
 						else {
 							if (victim->damage >= victim->damagetolerance) {
-								victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+								victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 							}
 							for (unsigned i = 0; i < victim->skeleton.joints.size(); i++) {
 								victim->skeleton.joints[i].velocity += relative * damagemult * 10;
@@ -3462,7 +3462,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 								emit_sound_at(landsound2, victim->coords, 128.);
 							}
 							victim->Puff(abdomen);
-							victim->DoDamage(damagemult * 30 / victim->protectionlow, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+							victim->DoDamage(damagemult * 30 / victim->protectionlow, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						}
 
 						SolidHitBonus(id);
@@ -3487,7 +3487,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						victim->spurt = 1;
 						victim->DoBloodBig(2 / victim->armorhigh, 170, tutorialActive);
 					}
-					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					Vector3 relative;
 					relative = victim->coords - oldcoords;
 					relative.y = 0;
@@ -3497,7 +3497,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 					}
 					victim->jointVel(abdomen) += relative * damagemult * 200;
 					victim->Puff(abdomen);
-					victim->DoDamage(damagemult * 150 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->DoDamage(damagemult * 150 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 					award_bonus(id, Reversal);
 				}
@@ -3525,7 +3525,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						DoBlood(.2, 230, tutorialActive);
 					}
 					emit_sound_at(whooshhitsound, victim->coords, 128.);
-					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					Vector3 relative;
 					relative = victim->coords - oldcoords;
 					relative.y = 0;
@@ -3535,7 +3535,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 					}
 					victim->jointVel(abdomen) += relative * damagemult * 200;
 					victim->Puff(head);
-					victim->DoDamage(damagemult * 70 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->DoDamage(damagemult * 70 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 				}
 
 				if (animCurrent == staffspinhitreversalanim && currentFrame().label == 7) {
@@ -3553,7 +3553,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 					if (!tutorialActive) {
 						emit_sound_at(heavyimpactsound, victim->coords, 128.);
 					}
-					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					award_bonus(id, staffreversebonus); // Huh, again?
 
 					Vector3 relative;
@@ -3565,12 +3565,12 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 					}
 					victim->jointVel(abdomen) += relative * damagemult * 200;
 					victim->Puff(head);
-					victim->DoDamage(damagemult * 70 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->DoDamage(damagemult * 70 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 				}
 
 				if (animCurrent == upunchreversalanim && currentFrame().label == 7) {
 					escapednum = 0;
-					victim->RagDoll(1, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->RagDoll(1, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					Vector3 relative;
 					relative = facing;
 					relative.y = 0;
@@ -3589,7 +3589,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 					victim->jointVel(rightshoulder) *= .7;
 
 					victim->Puff(abdomen);
-					victim->DoDamage(damagemult * 90 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->DoDamage(damagemult * 90 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 					award_bonus(id, Reversal);
 
@@ -3619,7 +3619,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 
 				if (animCurrent == swordslashreversalanim && currentFrame().label == 7) {
 					escapednum = 0;
-					victim->RagDoll(1, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->RagDoll(1, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					Vector3 relative;
 					relative = facing;
 					relative.y = 0;
@@ -3652,7 +3652,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 					if (!tutorialActive) {
 						emit_sound_at(heavyimpactsound, victim->coords, 128.);
 					}
-					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					Vector3 relative;
 					relative = victim->coords - oldcoords;
 					relative.y = 0;
@@ -3663,14 +3663,14 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 					}
 					victim->jointVel(abdomen) += relative * damagemult * 200;
 					victim->Puff(abdomen);
-					victim->DoDamage(damagemult * 30 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->DoDamage(damagemult * 30 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 					award_bonus(id, Reversal);
 				}
 
 				if (hasvictim && animCurrent == sneakattackanim && currentFrame().label == 7) {
 					escapednum = 0;
-					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					victim->skeleton.spinny = 0;
 					Vector3 relative;
 					relative = facing * -1;
@@ -3761,7 +3761,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						victim->skeleton.joints[i].velocity = 0;
 					}
 					if (animTarget == knifefollowanim) {
-						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						for (unsigned i = 0; i < victim->skeleton.joints.size(); i++) {
 							victim->skeleton.joints[i].velocity = 0;
 						}
@@ -3898,13 +3898,13 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 					if (victim->damage < victim->damagetolerance - 100) {
 						victim->velocity = relative * 200;
 					}
-					victim->DoDamage(damagemult * 100 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->DoDamage(damagemult * 100 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					victim->velocity = 0;
 				}
 
 				if (animCurrent == sweepreversalanim && ((currentFrame().label == 9 && victim->damage < victim->damagetolerance) || (currentFrame().label == 7 && victim->damage > victim->damagetolerance))) {
 					escapednum = 0;
-					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					Vector3 relative;
 					relative = facing * -1;
 					relative.y = 0;
@@ -4210,7 +4210,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 				if (animCurrent == knifesneakattackedanim || animCurrent == swordsneakattackedanim) {
 					velocity = 0;
 					velocity.y = -5;
-					RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 				}
 				if (Animation::animations[animTarget].attack == reversed) {
 					escapednum++;
@@ -4278,9 +4278,9 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						}
 					}
 					if (!hasstaff) {
-						DoDamage(35, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						DoDamage(35, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					}
-					RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					lastfeint = 0;
 					rabbitkickragdoll = 1;
 				}
@@ -4289,7 +4289,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						velocity = 0;
 						velocity.y = -10;
 						//DoDamage(100);
-						RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						skeleton.spinny = 0;
 						SolidHitBonus(!id); // FIXME: tricky id
 					}
@@ -4306,7 +4306,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 				if (animCurrent == rabbittackledbackanim || animCurrent == rabbittackledfrontanim) {
 					velocity = 0;
 					velocity.y = -10;
-					RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+					RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 					skeleton.spinny = 0;
 				}
 				if (animCurrent == jumpreversedanim) {
@@ -4314,7 +4314,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 						velocity = 0;
 						velocity.y = -10;
 						//DoDamage(100);
-						RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+						RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 						skeleton.spinny = 0;
 						SolidHitBonus(!id); // FIXME: tricky id
 					}
@@ -4525,7 +4525,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
  * MONSTER
  * TODO Wtf is this? Refactor!
  */
-void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26])
+void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate)
 {
 	static Vector3 terrainnormal;
 	static Vector3 flatfacing;
@@ -4760,7 +4760,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 				numafterkill++;
 			}
 
-			RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+			RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 		}
 	}
 
@@ -5178,7 +5178,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 			award_bonus(0, Wolfbonus);
 		}
 
-		RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+		RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 		if (hasWeapon()) {
 			weapons.weapons[weaponids[0]].drop(velocity * scale * -.3, velocity * scale);
@@ -5303,11 +5303,11 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 
 		skeleton.DoGravity(&scale, timemultiplier, gravity);
 		float damageamount;
-		damageamount = skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, state().freeze, detail, jointstartarray) * 5;
+		damageamount = skeleton.DoConstraints(&coords, &scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, gamestate.freeze, detail, jointstartarray) * 5;
 		if (damage > damagetolerance - damageamount && !dead && (bonus != spinecrusher || bonustime > 1) && (bonus != style || bonustime > 1) && (bonus != cannon || bonustime > 1)) {
 			award_bonus(id, deepimpact);
 		}
-		DoDamage(damageamount / ((protectionhigh + protectionhead + protectionlow) / 3), terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+		DoDamage(damageamount / ((protectionhigh + protectionhead + protectionlow) / 3), terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 
 		Vector3 average;
 		average = 0;
@@ -5341,7 +5341,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 						pause_sound(whooshsound);
 					}
 					skeleton.free = 3;
-					DrawSkeleton(terrainref, tutorialActive, timemultiplier, jointstartarray);
+					DrawSkeleton(terrainref, tutorialActive, timemultiplier, jointstartarray, gamestate);
 					skeleton.free = 2;
 				}
 				if (dead == 2 && bloodloss < damagetolerance) {
@@ -5799,7 +5799,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 			hasvictim = 1;
 		}
 		if (velocity.y < -30 && animTarget == jumpdownanim) {
-			RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+			RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 		}
 		if (animCurrent != getIdle(inDialog) && wasIdle() && animTarget != getIdle(inDialog) && isIdle()) {
 			animTarget = getIdle(inDialog);
@@ -6222,7 +6222,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 
 		if (coords.y < terrainref.getHeight(coords.x, coords.z) && (animTarget == jumpdownanim || animTarget == jumpupanim || isFlip())) {
 			if (isFlip() && targetFrame().label == 7) {
-				RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+				RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 			}
 
 			if (animTarget == jumpupanim) {
@@ -6348,7 +6348,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 /* EFFECT
  * inverse kinematics helper function
  */
-static void IKHelper(Person* p, float interp, Terrain& terrainref, bool tutorialActive, float timemultiplier, int jointstartarray[26])
+static void IKHelper(Person* p, float interp, Terrain& terrainref, bool tutorialActive, float timemultiplier, int jointstartarray[26], GameState& gamestate)
 {
 	Vector3 point, change, change2;
 	float heightleft, heightright;
@@ -6383,14 +6383,14 @@ static void IKHelper(Person* p, float interp, Terrain& terrainref, bool tutorial
 	p->jointPos(rightknee) = (p->jointPos(rightfoot) + change2) / 2 + (p->jointPos(rightknee)) / 2;
 
 	// fix up skeleton now that we've moved body parts?
-	p->skeleton.DoConstraints(&p->coords, &p->scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, state().freeze, detail, jointstartarray);
+	p->skeleton.DoConstraints(&p->coords, &p->scale, tutorialActive, bloodtoggle, timemultiplier, terrainref, environment, camerashake, gamestate.freeze, detail, jointstartarray);
 }
 
 /* EFFECT
  * MONSTER
  * TODO: ???
  */
-int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemultiplier, int jointstartarray[26])
+int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemultiplier, int jointstartarray[26], GameState& gamestate)
 {
 	int oldplayerdetail;
 	if ((frustum.SphereInFrustum(coords.x, coords.y + scale * 3, coords.z, scale * 8) && distsq(&viewer, &coords) < viewdistance * viewdistance) || skeleton.free == 3) {
@@ -6459,29 +6459,29 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 				const bool cond2 = (wasIdle() || wasCrouch() || wasLanding() || wasLandhard() || animCurrent == drawrightanim || animCurrent == drawleftanim || animCurrent == crouchdrawrightanim);
 
 				if (onterrain && (cond1 && cond2) && !skeleton.free) {
-					IKHelper(this, 1, terrainref, tutorialActive, timemultiplier, jointstartarray);
+					IKHelper(this, 1, terrainref, tutorialActive, timemultiplier, jointstartarray, gamestate);
 					if (creature == wolftype) {
-						IKHelper(this, 1, terrainref, tutorialActive, timemultiplier, jointstartarray);
+						IKHelper(this, 1, terrainref, tutorialActive, timemultiplier, jointstartarray, gamestate);
 					}
 				}
 
 				if (onterrain && (cond1 && !cond2) && !skeleton.free) {
-					IKHelper(this, target, terrainref, tutorialActive, timemultiplier, jointstartarray);
+					IKHelper(this, target, terrainref, tutorialActive, timemultiplier, jointstartarray, gamestate);
 					if (creature == wolftype) {
-						IKHelper(this, target, terrainref, tutorialActive, timemultiplier, jointstartarray);
+						IKHelper(this, target, terrainref, tutorialActive, timemultiplier, jointstartarray, gamestate);
 					}
 				}
 
 				if (onterrain && (!cond1 && cond2) && !skeleton.free) {
-					IKHelper(this, 1 - target, terrainref, tutorialActive, timemultiplier, jointstartarray);
+					IKHelper(this, 1 - target, terrainref, tutorialActive, timemultiplier, jointstartarray, gamestate);
 					if (creature == wolftype) {
-						IKHelper(this, 1 - target, terrainref, tutorialActive, timemultiplier, jointstartarray);
+						IKHelper(this, 1 - target, terrainref, tutorialActive, timemultiplier, jointstartarray, gamestate);
 					}
 				}
 			}
 
 			if (!skeleton.free && (!Animation::animations[animTarget].attack && animTarget != getupfrombackanim && ((animTarget != rollanim && !isFlip()) || targetFrame().label == 6) && animTarget != getupfromfrontanim && animTarget != wolfrunninganim && animTarget != rabbitrunninganim && animTarget != backhandspringanim && animTarget != walljumpfrontanim && animTarget != hurtidleanim && !isLandhard() && !isSleeping())) {
-				DoHead(timemultiplier);
+				DoHead(timemultiplier, gamestate);
 			}
 			else {
 				targetheadyaw = -targetyaw;
@@ -6689,13 +6689,13 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 			if (skeleton.free != 2 && (skeleton.free == 1 || skeleton.free == 3 || id == 0 || (normalsupdatedelay <= 0) || animTarget == getupfromfrontanim || animTarget == getupfrombackanim || animCurrent == getupfromfrontanim || animCurrent == getupfrombackanim)) {
 				normalsupdatedelay = 1;
 				if (playerdetail || skeleton.free == 3) {
-					skeleton.drawmodel.CalculateNormals(0, []() {Game::LoadingScreen(); });
+					skeleton.drawmodel.CalculateNormals(0, [&]() {Game::LoadingScreen(gamestate); });
 				}
 				if (!playerdetail || skeleton.free == 3) {
-					skeleton.drawmodellow.CalculateNormals(0, []() {Game::LoadingScreen(); });
+					skeleton.drawmodellow.CalculateNormals(0, [&]() {Game::LoadingScreen(gamestate); });
 				}
 				if (skeleton.clothes) {
-					skeleton.drawmodelclothes.CalculateNormals(0, []() {Game::LoadingScreen(); });
+					skeleton.drawmodelclothes.CalculateNormals(0, [&]() {Game::LoadingScreen(gamestate); });
 				}
 			}
 			else {
@@ -6796,7 +6796,7 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 				glDepthMask(0);
 				glEnable(GL_LIGHTING);
 				glEnable(GL_BLEND);
-				if (canattack && state().cananger) {
+				if (canattack && gamestate.cananger) {
 					if (Animation::animations[animTarget].attack == normalattack || Animation::animations[animTarget].attack == reversed) {
 						glDisable(GL_TEXTURE_2D);
 						glColor4f(1, 0, 0, 0.8);
@@ -6835,7 +6835,7 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 					glDepthMask(0);
 					glEnable(GL_LIGHTING);
 					glEnable(GL_BLEND);
-					if (canattack && state().cananger) {
+					if (canattack && gamestate.cananger) {
 						if (Animation::animations[animTarget].attack == normalattack || Animation::animations[animTarget].attack == reversed) {
 							glDisable(GL_TEXTURE_2D);
 							glColor4f(1, 0, 0, 0.8);
@@ -7140,7 +7140,7 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 
 /* FUNCTION?
  */
-int Person::SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26])
+int Person::SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate)
 {
 	static float distance;
 	static float olddistance;
@@ -7195,7 +7195,7 @@ int Person::SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, fl
 							p1->y = point.y + radius;
 							if ((animTarget == jumpdownanim || isFlip())) {
 								if (isFlip() && (frameTarget < 5 || targetFrame().label == 7 || targetFrame().label == 4)) {
-									RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray);
+									RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate);
 								}
 
 								if (animTarget == jumpupanim) {
@@ -7351,17 +7351,17 @@ void Person::takeWeapon(int weaponId)
 	weaponids[0] = weaponId;
 }
 
-void Person::addClothes()
+void Person::addClothes(GameState& gamestate)
 {
 	if (clothes.size() > 0) {
 		for (unsigned i = 0; i < clothes.size(); i++) {
-			addClothes(i);
+			addClothes(i, gamestate);
 		}
 		DoMipmaps();
 	}
 }
 
-bool Person::addClothes(const int& clothesId)
+bool Person::addClothes(const int& clothesId, GameState& gamestate)
 {
 	const std::string fileName = clothes[clothesId];
 
@@ -7369,7 +7369,7 @@ bool Person::addClothes(const int& clothesId)
 
 	//Load Image
 	ImageRec texture;
-	bool opened = load_image(Folders::getResourcePath(fileName).c_str(), texture, []() {Game::LoadingScreen(); });
+	bool opened = load_image(Folders::getResourcePath(fileName).c_str(), texture, [&]() {Game::LoadingScreen(gamestate); });
 
 	float alphanum;
 	//Is it valid?
@@ -7430,7 +7430,7 @@ bool Person::addClothes(const int& clothesId)
 	}
 }
 
-void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier)
+void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, GameState& gamestate)
 {
 	if (!isPlayerControlled() && !inDialog) {
 		jumpclimb = 0;
@@ -7594,7 +7594,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 				jumpkeydown = 1;
 			}
 
-			if ((!tutorialActive || state().cananger) &&
+			if ((!tutorialActive || gamestate.cananger) &&
 				hostile &&
 				!Person::players[0]->dead &&
 				distsq(&coords, &Person::players[0]->coords) < 400 &&
@@ -7643,7 +7643,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 			}
 		}
 
-		if (aitype != passivetype && state().leveltime > .5) {
+		if (aitype != passivetype && gamestate.leveltime > .5) {
 			howactive = typeactive;
 		}
 
@@ -7716,7 +7716,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 			//hearing sounds
 			if (!Game::editorenabled) {
 				if (howactive <= typesleeping) {
-					if (numenvsounds > 0 && (!tutorialActive || state().cananger) && hostile) {
+					if (numenvsounds > 0 && (!tutorialActive || gamestate.cananger) && hostile) {
 						for (int j = 0; j < numenvsounds; j++) {
 							float vol = howactive == typesleeping ? envsoundvol[j] - 14 : envsoundvol[j];
 							if (vol > 0 && distsq(&coords, &envsound[j]) < 2 * (vol + vol * (creature == rabbittype) * 3)) {
@@ -7735,7 +7735,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 			}
 
 			if (howactive < typesleeping &&
-				((!tutorialActive || state().cananger) && hostile) &&
+				((!tutorialActive || gamestate.cananger) && hostile) &&
 				!Person::players[0]->dead &&
 				distsq(&coords, &Person::players[0]->coords) < 400 &&
 				occluded < 25) {
@@ -7918,7 +7918,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 				jumpkeydown = 1;
 			}
 
-			if (numenvsounds > 0 && ((!tutorialActive || state().cananger) && hostile)) {
+			if (numenvsounds > 0 && ((!tutorialActive || gamestate.cananger) && hostile)) {
 				for (int k = 0; k < numenvsounds; k++) {
 					if (distsq(&coords, &envsound[k]) < 2 * (envsoundvol[k] + envsoundvol[k] * (creature == rabbittype) * 3)) {
 						aitype = attacktypecutoff;
@@ -7930,7 +7930,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 				losupdatedelay < 0 &&
 				!Game::editorenabled &&
 				occluded < 2 &&
-				((!tutorialActive || state().cananger) && hostile)) {
+				((!tutorialActive || gamestate.cananger) && hostile)) {
 				losupdatedelay = .2;
 				if (distsq(&coords, &Person::players[0]->coords) < 4 && Animation::animations[animTarget].height != lowheight) {
 					aitype = attacktypecutoff;
@@ -8116,7 +8116,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 
 				lastseentime = 12;
 
-				if (!Person::players[0]->dead && ((!tutorialActive || state().cananger) && hostile)) {
+				if (!Person::players[0]->dead && ((!tutorialActive || gamestate.cananger) && hostile)) {
 					if (ally < 0 || hasWeapon() || lastchecktime <= 0) {
 						aitype = attacktypecutoff;
 						lastseentime = 1;
@@ -8423,7 +8423,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 						}
 					}
 					if (reversalindex >= 0) {
-						Person::players[reversalindex]->Reverse(tutorialActive);
+						Person::players[reversalindex]->Reverse(tutorialActive, gamestate);
 					}
 				}
 
@@ -8544,8 +8544,8 @@ bool Person::catchKnife()
 		((PersonType::types[creature].knifeCatchingType == 1) && (rand() % 3 != 0) && (!hasWeapon()) && (isIdle() || isRun() || animTarget == walkanim));
 }
 
-Person::Person(Json::Value value, int /*mapvers*/, unsigned i)
-	: Person()
+Person::Person(Json::Value value, int /*mapvers*/, unsigned i, GameState& gamestate)
+	: Person(gamestate)
 {
 	id = i;
 

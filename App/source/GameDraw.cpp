@@ -62,7 +62,7 @@ void Game::flash(float amount, int delay) // shouldn't be that way, these should
 void DrawMenu();
 
 /*********************> DrawGLScene() <*****/
-int Game::DrawGLScene(StereoSide side)
+int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 {
 	static float texcoordwidth, texcoordheight;
 	static float texviewwidth, texviewheight;
@@ -93,7 +93,7 @@ int Game::DrawGLScene(StereoSide side)
 		}
 	}
 
-	if (state().freeze || state().winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
 		tempmult = multiplier;
 		multiplier = 0;
 	}
@@ -117,7 +117,7 @@ int Game::DrawGLScene(StereoSide side)
 		changed = 0;
 
 		int olddrawmode = drawmode;
-		if (ismotionblur && !state().loading) {
+		if (ismotionblur && !gamestate.loading) {
 			if ((magnitudeSquared(&Person::players[0]->velocity) > 200) && velocityblur && !cameramode) {
 				drawmode = motionblurmode;
 				motionbluramount = 200 / (magnitudeSquared(&Person::players[0]->velocity));
@@ -129,7 +129,7 @@ int Game::DrawGLScene(StereoSide side)
 			}
 		}
 
-		if (slomo && !state().loading) {
+		if (slomo && !gamestate.loading) {
 			if (ismotionblur) {
 				drawmode = motionblurmode;
 			}
@@ -141,9 +141,9 @@ int Game::DrawGLScene(StereoSide side)
 			camerashake = 0;
 			changed = 1;
 		}
-		if ((!changed && !slomo) || state().loading) {
+		if ((!changed && !slomo) || gamestate.loading) {
 			drawmode = normalmode;
-			if (ismotionblur && (/*state().fps>100||*/ alwaysblur)) {
+			if (ismotionblur && (/*gamestate.fps>100||*/ alwaysblur)) {
 				if (olddrawmode != realmotionblurmode) {
 					change = 1;
 				}
@@ -160,14 +160,14 @@ int Game::DrawGLScene(StereoSide side)
 			}
 		}
 
-		if (state().freeze || state().winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
+		if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
 			drawmode = normalmode;
 		}
-		if ((state().freeze || state().winfreeze) && ismotionblur && !mainmenu) {
+		if ((gamestate.freeze || gamestate.winfreeze) && ismotionblur && !mainmenu) {
 			drawmode = radialzoommode;
 		}
 
-		if (state().winfreeze || mainmenu) {
+		if (gamestate.winfreeze || mainmenu) {
 			drawmode = normalmode;
 		}
 
@@ -223,14 +223,14 @@ int Game::DrawGLScene(StereoSide side)
 		glTranslatef((stereoseparation / 2) * static_cast<float>(side) * (stereoreverse ? -1 : 1), 0, 0);
 
 		//camera effects
-		if (!cameramode && !state().freeze && !state().winfreeze) {
+		if (!cameramode && !gamestate.freeze && !gamestate.winfreeze) {
 			//shake
 			glRotatef(float(rand() % 100) / 10 * camerashake /*+(woozy*woozy)/10*/, 0, 0, 1);
 			//sway
 			glRotatef(pitch + sin(woozy / 2) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 1, 0, 0);
 			glRotatef(yaw + sin(woozy) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 0, 1, 0);
 		}
-		if (cameramode || state().freeze || state().winfreeze) {
+		if (cameramode || gamestate.freeze || gamestate.winfreeze) {
 			glRotatef(pitch, 1, 0, 0);
 			glRotatef(yaw, 0, 1, 0);
 		}
@@ -423,7 +423,7 @@ int Game::DrawGLScene(StereoSide side)
 							Person::players[k]->occluded = 0;
 						}
 						if (Person::players[k]->occluded < 25) {
-							Person::players[k]->DrawSkeleton(terrain, Tutorial::active, multiplier, whichjointstartarray);
+							Person::players[k]->DrawSkeleton(terrain, Tutorial::active, multiplier, whichjointstartarray, gamestate);
 						}
 					}
 				}
@@ -451,7 +451,7 @@ int Game::DrawGLScene(StereoSide side)
 			glDisable(GL_LIGHTING);
 			glEnable(GL_BLEND);
 			glTranslatef(hawkcoords.x, hawkcoords.y, hawkcoords.z);
-			glRotatef(state().hawkyaw, 0, 1, 0);
+			glRotatef(gamestate.hawkyaw, 0, 1, 0);
 			glTranslatef(25, 0, 0);
 			distance = distsq(&viewer, &realhawkcoords) * 1.2;
 			glColor4f(light.color[0], light.color[1], light.color[2], (viewdistance * viewdistance - (distance - (viewdistance * viewdistance * fadestart)) * (1 / (1 - fadestart))) / viewdistance / viewdistance);
@@ -497,7 +497,7 @@ int Game::DrawGLScene(StereoSide side)
 						Person::players[k]->occluded = 0;
 					}
 					if (Person::players[k]->occluded < 25) {
-						Person::players[k]->DrawSkeleton(terrain, Tutorial::active, multiplier, whichjointstartarray);
+						Person::players[k]->DrawSkeleton(terrain, Tutorial::active, multiplier, whichjointstartarray, gamestate);
 					}
 				}
 			}
@@ -562,7 +562,7 @@ int Game::DrawGLScene(StereoSide side)
 		glColor4f(.5, .5, .5, 1);
 		if (!console) {
 			if (!Tutorial::active) {
-				if (bonus > 0 && bonustime < 1 && !state().winfreeze && !Dialog::inDialog()) {
+				if (bonus > 0 && bonustime < 1 && !gamestate.winfreeze && !Dialog::inDialog()) {
 					const char* bonus_name;
 					if (bonus < bonus_count) {
 						bonus_name = bonus_names[bonus];
@@ -580,7 +580,7 @@ int Game::DrawGLScene(StereoSide side)
 			}
 
 			if (Tutorial::active) {
-				Tutorial::DrawTextInfo();
+				Tutorial::DrawTextInfo(gamestate);
 			}
 
 			//Hot spots
@@ -735,9 +735,9 @@ int Game::DrawGLScene(StereoSide side)
 				}
 			}
 
-			if (!Tutorial::active && !state().winfreeze && !Dialog::inDialog() && !mainmenu) {
+			if (!Tutorial::active && !gamestate.winfreeze && !Dialog::inDialog() && !mainmenu) {
 				if (campaign) {
-					if (state().scoreadded) {
+					if (gamestate.scoreadded) {
 						string = "Score: " + std::to_string(int(Account::active().getCampaignScore()));
 					}
 					else {
@@ -834,7 +834,7 @@ int Game::DrawGLScene(StereoSide side)
 			glColor4f(.5, .5, .5, 1);
 
 			if ((texttoggle || editorenabled) && devtools && !mainmenu) {
-				string = "The framespersecond is " + std::to_string(int(state().fps));
+				string = "The framespersecond is " + std::to_string(int(gamestate.fps));
 				text->glPrint(10, 30, string, 0, .8, 1024, 768);
 
 				if (editorenabled) {
@@ -1201,7 +1201,7 @@ int Game::DrawGLScene(StereoSide side)
 			glDepthMask(1);
 		}
 
-		if (state().loading && !stealthloading && (!campaign || Person::players[0]->dead)) {
+		if (gamestate.loading && !stealthloading && (!campaign || Person::players[0]->dead)) {
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE);
 			glDisable(GL_LIGHTING);
@@ -1241,17 +1241,17 @@ int Game::DrawGLScene(StereoSide side)
 
 			//Minimap
 
-			if (state().loading != 4) {
+			if (gamestate.loading != 4) {
 				glEnable(GL_TEXTURE_2D);
 				glColor4f(1, 1, 1, 1);
 				string = "Loading...";
 				text->glPrint(1024 / 2 - 90, 768 / 2, string, 1, 2, 1024, 768);
 			}
-			state().loading = 2;
+			gamestate.loading = 2;
 			drawmode = normalmode;
 		}
 
-		if (state().winfreeze && !campaign) {
+		if (gamestate.winfreeze && !campaign) {
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE);
 			glDisable(GL_LIGHTING);
@@ -1302,7 +1302,7 @@ int Game::DrawGLScene(StereoSide side)
 			string = "Press Escape to return to menu or Space to continue";
 			text->glPrintOutlined(640 / 2 - string.size() * 5, 480 * 1 / 16, string, 1, 1, 640, 480);
 
-			int wontime = (int)round(state().wonleveltime);
+			int wontime = (int)round(gamestate.wonleveltime);
 			string = "Time:      " + std::to_string(int((wontime - wontime % 60) / 60));
 			if (wontime % 60 < 10) {
 				string += "0";
@@ -1577,7 +1577,7 @@ int Game::DrawGLScene(StereoSide side)
 				offset = consoleselected - 60;
 			}
 			textmono->glPrint(10, 30, " ]", 0, 1, 1024, 768);
-			if (state().consoleblink) {
+			if (gamestate.consoleblink) {
 				textmono->glPrint(30 + (float)consoleselected * 10 - offset * 10, 30, "_", 0, 1, 1024, 768);
 			}
 			for (unsigned i = 0; i < 15; i++) {
@@ -1586,7 +1586,7 @@ int Game::DrawGLScene(StereoSide side)
 		}
 	}
 
-	if (state().freeze || state().winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
 		multiplier = tempmult;
 	}
 
@@ -1594,7 +1594,7 @@ int Game::DrawGLScene(StereoSide side)
 		DrawMenu();
 	}
 
-	if (state().freeze || state().winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
 		tempmult = multiplier;
 		multiplier = 0;
 	}
@@ -1608,13 +1608,13 @@ int Game::DrawGLScene(StereoSide side)
 	glDrawBuffer(GL_BACK);
 	glReadBuffer(GL_BACK);
 
-	weapons.DoStuff(Tutorial::active, Dialog::inDialog(), whichjointstartarray, []() { award_bonus(0, ninja); }, []() { award_bonus(0, Bullseyebonus); });
+	weapons.DoStuff(Tutorial::active, Dialog::inDialog(), whichjointstartarray, []() { award_bonus(0, ninja); }, []() { award_bonus(0, Bullseyebonus); }, gamestate);
 
 	if (drawtoggle == 2) {
 		drawtoggle = 0;
 	}
 
-	if (state().freeze || state().winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
 		multiplier = tempmult;
 	}
 	//Jordan fixed your warning!

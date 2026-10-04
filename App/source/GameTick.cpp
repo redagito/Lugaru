@@ -198,14 +198,14 @@ static int findClosestObject()
 	return closest;
 }
 
-void Game::cmd_dispatch(const std::string cmd)
+void Game::cmd_dispatch(const std::string cmd, GameState& gamestate)
 {
 	int i, n_cmds = sizeof(cmd_names) / sizeof(cmd_names[0]);
 
 	for (i = 0; i < n_cmds; i++) {
 		if (cmd.substr(0, cmd.find(' ')) == std::string(cmd_names[i])) {
 			std::cout << "|" << cmd.substr(cmd.find(' ') + 1) << "|" << std::endl;
-			cmd_handlers[i](cmd.substr(cmd.find(' ') + 1).c_str());
+			cmd_handlers[i](cmd.substr(cmd.find(' ') + 1).c_str(), gamestate);
 			break;
 		}
 	}
@@ -250,7 +250,7 @@ void Game::SetUpLighting()
 	light.ambient[2] *= (skyboxlightb + average) / 2;
 }
 
-void Setenvironment(int which)
+void Setenvironment(int which, GameState& gamestate)
 {
 	float temptexdetail;
 	environment = which;
@@ -268,18 +268,18 @@ void Setenvironment(int which)
 			emit_stream_np(stream_wind);
 		}
 
-		Object::treetextureptr.load("Textures/SnowTree.png", 0, trilinear, []() {Game::LoadingScreen(); });
-		Object::bushtextureptr.load("Textures/BushSnow.png", 0, trilinear, []() {Game::LoadingScreen(); });
-		Object::rocktextureptr.load("Textures/BoulderSnow.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
-		Object::boxtextureptr.load("Textures/SnowBox.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
+		Object::treetextureptr.load("Textures/SnowTree.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Object::bushtextureptr.load("Textures/BushSnow.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Object::rocktextureptr.load("Textures/BoulderSnow.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Object::boxtextureptr.load("Textures/SnowBox.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
 		footstepsound = footstepsn1;
 		footstepsound2 = footstepsn2;
 		footstepsound3 = footstepst1;
 		footstepsound4 = footstepst2;
 
-		terraintexture.load("Textures/Snow.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
-		terraintexture2.load("Textures/Rock.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
+		terraintexture.load("Textures/Snow.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		terraintexture2.load("Textures/Rock.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
 		temptexdetail = texdetail;
 		if (texdetail > 1) {
@@ -290,17 +290,17 @@ void Setenvironment(int which)
 			"Textures/Skybox(snow)/Back.jpg",
 			"Textures/Skybox(snow)/Right.jpg",
 			"Textures/Skybox(snow)/Up.jpg",
-			"Textures/Skybox(snow)/Down.jpg", trilinear, []() {Game::LoadingScreen(); });
+			"Textures/Skybox(snow)/Down.jpg", trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
 		texdetail = temptexdetail;
 	}
 	else if (environment == desertenvironment) {
 		windvector = 0;
 		windvector.z = 2;
-		Object::treetextureptr.load("Textures/DesertTree.png", 0, trilinear, []() {Game::LoadingScreen(); });
-		Object::bushtextureptr.load("Textures/BushDesert.png", 0, trilinear, []() {Game::LoadingScreen(); });
-		Object::rocktextureptr.load("Textures/BoulderDesert.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
-		Object::boxtextureptr.load("Textures/DesertBox.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
+		Object::treetextureptr.load("Textures/DesertTree.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Object::bushtextureptr.load("Textures/BushDesert.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Object::rocktextureptr.load("Textures/BoulderDesert.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Object::boxtextureptr.load("Textures/DesertBox.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
 		if (ambientsound) {
 			emit_stream_np(stream_desertambient);
@@ -311,8 +311,8 @@ void Setenvironment(int which)
 		footstepsound3 = footstepsn1;
 		footstepsound4 = footstepsn2;
 
-		terraintexture.load("Textures/Sand.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
-		terraintexture2.load("Textures/SandSlope.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
+		terraintexture.load("Textures/Sand.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		terraintexture2.load("Textures/SandSlope.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
 		temptexdetail = texdetail;
 		if (texdetail > 1) {
@@ -323,17 +323,17 @@ void Setenvironment(int which)
 			"Textures/Skybox(sand)/Back.jpg",
 			"Textures/Skybox(sand)/Right.jpg",
 			"Textures/Skybox(sand)/Up.jpg",
-			"Textures/Skybox(sand)/Down.jpg", trilinear, []() {Game::LoadingScreen(); });
+			"Textures/Skybox(sand)/Down.jpg", trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
 		texdetail = temptexdetail;
 	}
 	else if (environment == grassyenvironment) {
 		windvector = 0;
 		windvector.z = 2;
-		Object::treetextureptr.load("Textures/Tree.png", 0, trilinear, []() {Game::LoadingScreen(); });
-		Object::bushtextureptr.load("Textures/Bush.png", 0, trilinear, []() {Game::LoadingScreen(); });
-		Object::rocktextureptr.load("Textures/Boulder.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
-		Object::boxtextureptr.load("Textures/GrassBox.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
+		Object::treetextureptr.load("Textures/Tree.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Object::bushtextureptr.load("Textures/Bush.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Object::rocktextureptr.load("Textures/Boulder.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Object::boxtextureptr.load("Textures/GrassBox.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
 		if (ambientsound) {
 			emit_stream_np(stream_wind, 100.);
@@ -344,8 +344,8 @@ void Setenvironment(int which)
 		footstepsound3 = footstepst1;
 		footstepsound4 = footstepst2;
 
-		terraintexture.load("Textures/GrassDirt.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
-		terraintexture2.load("Textures/MossRock.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
+		terraintexture.load("Textures/GrassDirt.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		terraintexture2.load("Textures/MossRock.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
 		temptexdetail = texdetail;
 		if (texdetail > 1) {
@@ -356,7 +356,7 @@ void Setenvironment(int which)
 			"Textures/Skybox(grass)/Back.jpg",
 			"Textures/Skybox(grass)/Right.jpg",
 			"Textures/Skybox(grass)/Up.jpg",
-			"Textures/Skybox(grass)/Down.jpg", trilinear, []() {Game::LoadingScreen(); });
+			"Textures/Skybox(grass)/Down.jpg", trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
 		texdetail = temptexdetail;
 	}
@@ -364,32 +364,32 @@ void Setenvironment(int which)
 	texdetail = 1;
 	// Fail loudly: if the heightmap does not load, terrain.size stays 0 and
 	// Terrain::getHeight returns 0 everywhere, silently flattening the world.
-	if (!terrain.load("Textures/HeightMap.png", environment, []() {Game::LoadingScreen(); })) {
+	if (!terrain.load("Textures/HeightMap.png", environment, [&]() {Game::LoadingScreen(gamestate); })) {
 		throw std::runtime_error("failed to load terrain heightmap Textures/HeightMap.png");
 	}
 
 	texdetail = temptexdetail;
 }
 
-bool Game::LoadLevel(int which)
+bool Game::LoadLevel(int which, GameState& gamestate)
 {
 	stealthloading = 0;
 	whichlevel = which;
 
 	if (which == -1) {
-		return LoadLevel("tutorial", true);
+		return LoadLevel("tutorial", true, gamestate);
 	}
 	else if (which >= 0 && which <= 15) {
 		char buf[32];
 		sprintf(buf, "map%d", which + 1); // challenges
-		return LoadLevel(buf);
+		return LoadLevel(buf, false, gamestate);
 	}
 	else {
-		return LoadLevel("mapsave");
+		return LoadLevel("mapsave", false, gamestate);
 	}
 }
 
-void Game::ResetBeforeLevelLoad(bool tutorial)
+void Game::ResetBeforeLevelLoad(bool tutorial, GameState& gamestate)
 {
 	Tutorial::active = tutorial;
 
@@ -401,7 +401,7 @@ void Game::ResetBeforeLevelLoad(bool tutorial)
 		Tutorial::maxtime = 1;
 	}
 
-	state().scoreadded = 0;
+	gamestate.scoreadded = 0;
 	windialogue = false;
 	hostiletime = 0;
 	won = 0;
@@ -427,8 +427,8 @@ void Game::ResetBeforeLevelLoad(bool tutorial)
 	skyboxg = 1;
 	skyboxb = 1;
 
-	state().freeze = 0;
-	state().winfreeze = 0;
+	gamestate.freeze = 0;
+	gamestate.winfreeze = 0;
 
 	for (unsigned char i = 0; i < 100; i++) {
 		bonusnum[i] = 0;
@@ -454,12 +454,12 @@ void Game::ResetBeforeLevelLoad(bool tutorial)
 	bonustotal = startbonustotal;
 	bonus = 0;
 	gameon = 1;
-	state().changedelay = 0;
+	gamestate.changedelay = 0;
 }
 
-bool Game::LoadLevel(const std::string& name, bool tutorial)
+bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestate)
 {
-	if (LoadJsonLevel(name, tutorial)) {
+	if (LoadJsonLevel(name, tutorial, gamestate)) {
 		// Try JSON loading first, binary is fallback
 		return true;
 	}
@@ -474,13 +474,13 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 	float lamefloat;
 
 	if (!gameon) {
-		state().visibleloading = true;
+		gamestate.visibleloading = true;
 	}
 	if (stealthloading) {
-		state().visibleloading = false;
+		gamestate.visibleloading = false;
 	}
-	if (!state().stillloading) {
-		state().loadtime = 0;
+	if (!gamestate.stillloading) {
+		gamestate.loadtime = 0;
 	}
 	gamestarted = 1;
 
@@ -494,11 +494,11 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 	errno = 0;
 	tfile = Folders::openMandatoryFile(level_path, "rb");
 
-	ResetBeforeLevelLoad(tutorial);
+	ResetBeforeLevelLoad(tutorial, gamestate);
 
 	if (console) {
 		emit_sound_np(consolesuccesssound);
-		state().freeze = 0;
+		gamestate.freeze = 0;
 		console = false;
 	}
 
@@ -511,7 +511,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 				terrain.patchobjects[i][j].clear();
 			}
 		}
-		Game::LoadingScreen();
+		Game::LoadingScreen(gamestate);
 	}
 
 	weapons.weapons.clear();
@@ -579,7 +579,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 		}
 	}
 
-	Game::LoadingScreen();
+	Game::LoadingScreen(gamestate);
 
 	funpackf(tfile, "Bf Bf Bf", &Person::players[0]->armorhead, &Person::players[0]->armorhigh, &Person::players[0]->armorlow);
 	funpackf(tfile, "Bf Bf Bf", &Person::players[0]->protectionhead, &Person::players[0]->protectionhigh, &Person::players[0]->protectionlow);
@@ -628,11 +628,11 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 	funpackf(tfile, "Bi", &environment);
 
 	if (environment != oldenvironment) {
-		Setenvironment(environment);
+		Setenvironment(environment, gamestate);
 	}
 	oldenvironment = environment;
 
-	Object::LoadObjectsFromFile(tfile, stealthloading, terrain, []() {Game::LoadingScreen(); });
+	Object::LoadObjectsFromFile(tfile, stealthloading, terrain, [&]() {Game::LoadingScreen(gamestate); });
 
 	if (mapvers >= 7) {
 		int numhotspots;
@@ -662,14 +662,14 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 		Hotspot::hotspots.clear();
 	}
 
-	Game::LoadingScreen();
+	Game::LoadingScreen(gamestate);
 
 	if (!stealthloading) {
 		Object::ComputeCenter();
 		Object::ComputeRadius();
 	}
 
-	Game::LoadingScreen();
+	Game::LoadingScreen(gamestate);
 
 	int numplayers;
 	funpackf(tfile, "Bi", &numplayers);
@@ -679,14 +679,14 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 	unsigned j = 1;
 	for (int i = 1; i < numplayers; i++) {
 		try {
-			Person::players.push_back(std::shared_ptr<Person>(new Person(tfile, mapvers, j)));
+			Person::players.push_back(std::shared_ptr<Person>(new Person(tfile, mapvers, j, gamestate)));
 			j++;
 		}
 		catch (InvalidPersonException& e) {
 			std::cerr << "Invalid Person found in " << name << ":" << e.what() << std::endl;
 		}
 	}
-	Game::LoadingScreen();
+	Game::LoadingScreen(gamestate);
 
 	funpackf(tfile, "Bi", &numpathpoints);
 	if (numpathpoints > 30 || numpathpoints < 0) {
@@ -698,7 +698,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 			funpackf(tfile, "Bi", &pathpointconnect[i][k]);
 		}
 	}
-	Game::LoadingScreen();
+	Game::LoadingScreen(gamestate);
 
 	funpackf(tfile, "Bf Bf Bf Bf", &mapcenter.x, &mapcenter.y, &mapcenter.z, &mapradius);
 
@@ -706,16 +706,16 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 
 	if (!stealthloading) {
 		Object::AddObjectsToTerrain(environment, terrain, detail);
-		terrain.DoShadows(Tutorial::active, texscale, light, skyboxtexture, []() {Game::LoadingScreen(); });
-		Game::LoadingScreen();
+		terrain.DoShadows(Tutorial::active, texscale, light, skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+		Game::LoadingScreen(gamestate);
 		Object::DoShadows(skyboxtexture, light, terrain);
-		Game::LoadingScreen();
+		Game::LoadingScreen(gamestate);
 	}
 
 	fclose(tfile);
 
 	for (unsigned i = 0; i < Person::players.size(); i++) {
-		Game::LoadingScreen();
+		Game::LoadingScreen(gamestate);
 		if (i == 0) {
 			Person::players[i]->burnt = 0;
 			Person::players[i]->bled = 0;
@@ -727,9 +727,9 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 		}
 		Person::players[i]->skeleton.free = 0;
 
-		Person::players[i]->skeletonLoad(Tutorial::active);
+		Person::players[i]->skeletonLoad(Tutorial::active, gamestate);
 
-		Person::players[i]->addClothes();
+		Person::players[i]->addClothes(gamestate);
 
 		if (i == 0) {
 			Person::players[i]->animCurrent = bounceidleanim;
@@ -767,9 +767,9 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 				Person::players[i]->damagetolerance = 200;
 			}
 
-			Game::LoadingScreen();
+			Game::LoadingScreen(gamestate);
 
-			Person::players[i]->tempanimation = Animation("Tempanim", lowheight, neutral, []() { Game::LoadingScreen(); });
+			Person::players[i]->tempanimation = Animation("Tempanim", lowheight, neutral, [&]() { Game::LoadingScreen(gamestate); });
 
 			Person::players[i]->headmorphness = 0;
 			Person::players[i]->targetheadmorphness = 1;
@@ -826,7 +826,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 	hawkcoords = Person::players[0]->coords;
 	hawkcoords.y += 30;
 
-	Game::LoadingScreen();
+	Game::LoadingScreen(gamestate);
 
 	OPENAL_StopSound(OPENAL_ALL);
 	if (ambientsound) {
@@ -845,14 +845,14 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 	oldmusicvolume[2] = 0;
 	oldmusicvolume[3] = 0;
 
-	state().leveltime = 0;
-	state().wonleveltime = 0;
-	state().visibleloading = false;
+	gamestate.leveltime = 0;
+	gamestate.wonleveltime = 0;
+	gamestate.visibleloading = false;
 
 	return true;
 }
 
-bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
+bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& gamestate)
 {
 	const std::string level_path = Folders::getResourcePath("Maps/" + name + ".json");
 	if (!Folders::file_exists(level_path)) {
@@ -861,13 +861,13 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 	}
 
 	if (!gameon) {
-		state().visibleloading = true;
+		gamestate.visibleloading = true;
 	}
 	if (stealthloading) {
-		state().visibleloading = false;
+		gamestate.visibleloading = false;
 	}
-	if (!state().stillloading) {
-		state().loadtime = 0;
+	if (!gamestate.stillloading) {
+		gamestate.loadtime = 0;
 	}
 	gamestarted = 1;
 
@@ -883,11 +883,11 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 	unsigned mapvers = map_data["version"].asInt();
 	map_file.close();
 
-	ResetBeforeLevelLoad(tutorial);
+	ResetBeforeLevelLoad(tutorial, gamestate);
 
 	if (console) {
 		emit_sound_np(consolesuccesssound);
-		state().freeze = 0;
+		gamestate.freeze = 0;
 		console = false;
 	}
 
@@ -900,7 +900,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 				terrain.patchobjects[i][j].clear();
 			}
 		}
-		Game::LoadingScreen();
+		Game::LoadingScreen(gamestate);
 	}
 
 	if (mapvers < 13) {
@@ -919,7 +919,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 	skyboxlightg = map_data["map"]["skybox"].get("lightg", skyboxg).asFloat();
 	skyboxlightb = map_data["map"]["skybox"].get("lightb", skyboxb).asFloat();
 
-	Game::LoadingScreen();
+	Game::LoadingScreen(gamestate);
 
 	//dialogues
 	Dialog::loadDialogs(map_data["map"]["dialogs"]);
@@ -927,12 +927,12 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 	environment = map_data["map"]["environment"].asInt();
 
 	if (environment != oldenvironment) {
-		Setenvironment(environment);
+		Setenvironment(environment, gamestate);
 	}
 	oldenvironment = environment;
 
 	if (!stealthloading) {
-		Object::LoadObjectsFromJson(map_data["map"]["objects"], terrain, []() {Game::LoadingScreen(); });
+		Object::LoadObjectsFromJson(map_data["map"]["objects"], terrain, [&]() {Game::LoadingScreen(gamestate); });
 	}
 
 	Hotspot::hotspots.resize(map_data["map"]["hotspots"].size());
@@ -943,14 +943,14 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 		Hotspot::hotspots[i].position = map_data["map"]["hotspots"][i]["position"];
 	}
 
-	Game::LoadingScreen();
+	Game::LoadingScreen(gamestate);
 
 	if (!stealthloading) {
 		Object::ComputeCenter();
 		Object::ComputeRadius();
 	}
 
-	Game::LoadingScreen();
+	Game::LoadingScreen(gamestate);
 
 	if (map_data["map"]["players"].size() > maxplayers) {
 		std::cout << "Warning: this level contains more players than allowed" << std::endl;
@@ -969,7 +969,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 	unsigned j = 0;
 	for (unsigned i = 0; i < map_data["map"]["players"].size(); i++) {
 		try {
-			Person::players.push_back(std::shared_ptr<Person>(new Person(map_data["map"]["players"][i], mapvers, j)));
+			Person::players.push_back(std::shared_ptr<Person>(new Person(map_data["map"]["players"][i], mapvers, j, gamestate)));
 			j++;
 		}
 		catch (InvalidPersonException&) {
@@ -982,7 +982,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 		Person::players[0]->targetyaw = playerTargetYaw;
 	}
 
-	Game::LoadingScreen();
+	Game::LoadingScreen(gamestate);
 
 	numpathpoints = map_data["map"]["pathpoints"].size();
 	for (unsigned i = 0; i < map_data["map"]["pathpoints"].size(); i++) {
@@ -993,7 +993,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 		}
 	}
 
-	Game::LoadingScreen();
+	Game::LoadingScreen(gamestate);
 
 	mapcenter = map_data["map"]["center"];
 	mapradius = map_data["map"]["radius"].asFloat();
@@ -1002,18 +1002,18 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 
 	if (!stealthloading) {
 		Object::AddObjectsToTerrain(environment, terrain, detail);
-		terrain.DoShadows(Tutorial::active, texscale, light, skyboxtexture, []() {Game::LoadingScreen(); });
-		Game::LoadingScreen();
+		terrain.DoShadows(Tutorial::active, texscale, light, skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+		Game::LoadingScreen(gamestate);
 		Object::DoShadows(skyboxtexture, light, terrain);
-		Game::LoadingScreen();
+		Game::LoadingScreen(gamestate);
 	}
 
 	for (unsigned i = 0; i < Person::players.size(); i++) {
-		Game::LoadingScreen();
+		Game::LoadingScreen(gamestate);
 
 		Person::players[i]->skeleton.free = 0;
-		Person::players[i]->skeletonLoad(Tutorial::active);
-		Person::players[i]->addClothes();
+		Person::players[i]->skeletonLoad(Tutorial::active, gamestate);
+		Person::players[i]->addClothes(gamestate);
 
 		Person::players[i]->speed = 1 + (float)(rand() % 100) / 1000;
 		if (difficulty == 0) {
@@ -1048,7 +1048,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 	hawkcoords = Person::players[0]->coords;
 	hawkcoords.y += 30;
 
-	Game::LoadingScreen();
+	Game::LoadingScreen(gamestate);
 
 	OPENAL_StopSound(OPENAL_ALL);
 	if (ambientsound) {
@@ -1067,9 +1067,9 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 	oldmusicvolume[2] = 0;
 	oldmusicvolume[3] = 0;
 
-	state().leveltime = 0;
-	state().wonleveltime = 0;
-	state().visibleloading = false;
+	gamestate.leveltime = 0;
+	gamestate.wonleveltime = 0;
+	gamestate.visibleloading = false;
 
 	return true;
 }
@@ -1078,7 +1078,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
  * Gameplay-related input processing is still done in Game::Tick() for now
  * as it is tightly coupled to the game logic.
  */
-void Game::ProcessInput()
+void Game::ProcessInput(GameState& gamestate)
 {
 	/* Pump SDL input events */
 	Input::Tick();
@@ -1087,7 +1087,7 @@ void Game::ProcessInput()
 	if (Input::isKeyPressed(SDL_SCANCODE_ESCAPE) &&
 		(gameon || mainmenu == 0)) {
 		selected = -1;
-		if (mainmenu == 0 && !state().winfreeze) {
+		if (mainmenu == 0 && !gamestate.winfreeze) {
 			mainmenu = 2; // Pause
 		}
 		else if (mainmenu == 1 || mainmenu == 2) {
@@ -1109,17 +1109,17 @@ void Game::ProcessInput()
 	/* Challenge mode */
 	if (!campaign && !mainmenu) {
 		if ((Input::isKeyPressed(jumpkey) || Input::isKeyPressed(SDL_SCANCODE_SPACE))) {
-			if (state().winfreeze) {
-				state().winfreeze = 0;
+			if (gamestate.winfreeze) {
+				gamestate.winfreeze = 0;
 			}
 		}
 
 		if ((Input::isKeyDown(SDL_SCANCODE_ESCAPE)) && gameon) {
 			if (console) {
 				console = false;
-				state().freeze = 0;
+				gamestate.freeze = 0;
 			}
-			else if (state().winfreeze) {
+			else if (gamestate.winfreeze) {
 				mainmenu = 9;
 				gameon = 0;
 			}
@@ -1183,19 +1183,19 @@ void Game::ProcessInput()
 				OPENAL_SetFrequency(OPENAL_ALL);
 			}
 			else {
-				state().freeze = 0;
+				gamestate.freeze = 0;
 				waiting = false;
 			}
 		}
 
 		/* Other devtools, disabled when the console is shown */
 		if (!console) {
-			ProcessDevInput();
+			ProcessDevInput(gamestate);
 		}
 	}
 }
 
-void Game::ProcessDevInput()
+void Game::ProcessDevInput(GameState& gamestate)
 {
 	if (!devtools || mainmenu || console) {
 		return;
@@ -1236,7 +1236,7 @@ void Game::ProcessDevInput()
 			if (environment > 2) {
 				environment = 0;
 			}
-			Setenvironment(environment);
+			Setenvironment(environment, gamestate);
 		}
 
 		/* Camera mode */
@@ -1246,8 +1246,8 @@ void Game::ProcessDevInput()
 
 		/* Freeze */
 		if (Input::isKeyPressed(SDL_SCANCODE_V)) {
-			state().freeze = !state().freeze;
-			if (state().freeze) {
+			gamestate.freeze = !gamestate.freeze;
+			if (gamestate.freeze) {
 				OPENAL_SetFrequency(OPENAL_ALL);
 			}
 		}
@@ -1260,7 +1260,7 @@ void Game::ProcessDevInput()
 
 		/* Ragdoll */
 		if (Input::isKeyPressed(SDL_SCANCODE_N)) {
-			Person::players[0]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+			Person::players[0]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 			emit_sound_at(whooshsound, Person::players[0]->coords, 128.);
 		}
 
@@ -1355,10 +1355,10 @@ void Game::ProcessDevInput()
 
 				Person::players[closest]->skeleton.drawmodel.textureptr.load(
 					PersonType::types[Person::players[closest]->creature].skins[Person::players[closest]->whichskin], 1,
-					&Person::players[closest]->skeleton.skinText[0], &Person::players[closest]->skeleton.skinsize, trilinear, []() {Game::LoadingScreen(); });
+					&Person::players[closest]->skeleton.skinText[0], &Person::players[closest]->skeleton.skinsize, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 			}
 
-			Person::players[closest]->addClothes();
+			Person::players[closest]->addClothes(gamestate);
 		}
 
 		/* Change creature type */
@@ -1370,7 +1370,7 @@ void Game::ProcessDevInput()
 
 			if (closest >= 0) {
 				person_type nextType = static_cast<person_type>((Person::players[closest]->creature + 1) % PersonType::types.size());
-				Person::players[closest]->changeCreatureType(nextType, Tutorial::active);
+				Person::players[closest]->changeCreatureType(nextType, Tutorial::active, gamestate);
 			}
 		}
 
@@ -1419,7 +1419,7 @@ void Game::ProcessDevInput()
 				if (Person::players[closest]->skeleton.free == 2) {
 					Person::players[closest]->skeleton.free = 0;
 				}
-				Person::players[closest]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+				Person::players[closest]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 				Person::players[closest]->dead = 2;
 				Person::players[closest]->headless = 1;
 				Person::players[closest]->DoBloodBig(3, 165, Tutorial::active);
@@ -1495,12 +1495,12 @@ void Game::ProcessDevInput()
 						continue;
 					}
 					if (distsq(&Person::players[j]->coords, &Person::players[closest]->coords) < 25) {
-						Person::players[j]->DoDamage((25 - distsq(&Person::players[j]->coords, &Person::players[closest]->coords)) * 60, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+						Person::players[j]->DoDamage((25 - distsq(&Person::players[j]->coords, &Person::players[closest]->coords)) * 60, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 						if (Person::players[j]->skeleton.free == 2) {
 							Person::players[j]->skeleton.free = 1;
 						}
 						Person::players[j]->skeleton.longdead = 0;
-						Person::players[j]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+						Person::players[j]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 						for (unsigned i = 0; i < Person::players[j]->skeleton.joints.size(); i++) {
 							temppos = Person::players[j]->skeleton.joints[i].position + Person::players[j]->coords;
 							if (distsq(&temppos, &Person::players[closest]->coords) < 25) {
@@ -1513,8 +1513,8 @@ void Game::ProcessDevInput()
 					}
 				}
 
-				Person::players[closest]->DoDamage(10000, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
-				Person::players[closest]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+				Person::players[closest]->DoDamage(10000, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+				Person::players[closest]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 				Person::players[closest]->dead = 2;
 				Person::players[closest]->coords = 20;
 				Person::players[closest]->skeleton.free = 2;
@@ -1531,8 +1531,8 @@ void Game::ProcessDevInput()
 		if (targetlevel > numchallengelevels - 1) {
 			targetlevel = 0;
 		}
-		state().loading = 1;
-		state().leveltime = 5;
+		gamestate.loading = 1;
+		gamestate.leveltime = 5;
 	}
 
 	/* Editor mode keys */
@@ -1575,27 +1575,27 @@ void Game::ProcessDevInput()
 					tmppitch = rand() % 360;
 				}
 
-				Object::MakeObject(editortype, scenecoords, (int)tmpyaw - ((int)tmpyaw) % 30, (int)tmppitch, editorsize, environment, terrain, foliage, detail, []() {Game::LoadingScreen(); });
+				Object::MakeObject(editortype, scenecoords, (int)tmpyaw - ((int)tmpyaw) % 30, (int)tmppitch, editorsize, environment, terrain, foliage, detail, [&]() {Game::LoadingScreen(gamestate); });
 				if (editortype == treetrunktype) {
-					Object::MakeObject(treeleavestype, scenecoords, rand() % 360 * (tmppitch < 2) + (int)editoryaw - ((int)editoryaw) % 30, editorpitch, editorsize, environment, terrain, foliage, detail, []() {Game::LoadingScreen(); });
+					Object::MakeObject(treeleavestype, scenecoords, rand() % 360 * (tmppitch < 2) + (int)editoryaw - ((int)editoryaw) % 30, editorpitch, editorsize, environment, terrain, foliage, detail, [&]() {Game::LoadingScreen(gamestate); });
 				}
 			}
 		}
 
 		/* Add player */
 		if (Input::isKeyPressed(SDL_SCANCODE_P) && !Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			Person::players.push_back(std::shared_ptr<Person>(new Person()));
+			Person::players.push_back(std::shared_ptr<Person>(new Person(gamestate)));
 
 			Person::players.back()->id = Person::players.size() - 1;
 
 			Person::players.back()->scale = Person::players[0]->scale;
 			Person::players.back()->creature = rabbittype;
-			Person::players.back()->howactive = state().editoractive;
+			Person::players.back()->howactive = gamestate.editoractive;
 			Person::players.back()->whichskin = (int)(abs(rand() % 3));
 
-			Person::players.back()->skeletonLoad(Tutorial::active);
+			Person::players.back()->skeletonLoad(Tutorial::active, gamestate);
 
-			Person::players.back()->skeleton.drawmodelclothes.textureptr.load("Textures/Belt.png", 1, trilinear, []() {Game::LoadingScreen(); });
+			Person::players.back()->skeleton.drawmodelclothes.textureptr.load("Textures/Belt.png", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 			Person::players.back()->speed = 1 + (float)(rand() % 100) / 1000;
 
 			Person::players.back()->targetyaw = Person::players[0]->targetyaw;
@@ -1627,7 +1627,7 @@ void Game::ProcessDevInput()
 				Person::players.back()->clothestintg.push_back(Person::players[0]->clothestintg[i]);
 				Person::players.back()->clothestintb.push_back(Person::players[0]->clothestintb[i]);
 			}
-			Person::players.back()->addClothes();
+			Person::players.back()->addClothes(gamestate);
 
 			Person::players.back()->power = Person::players[0]->power;
 			Person::players.back()->speedmult = Person::players[0]->speedmult;
@@ -1639,7 +1639,7 @@ void Game::ProcessDevInput()
 		if (Input::isKeyPressed(SDL_SCANCODE_P) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
 			if (Person::players.back()->numwaypoints < 90) {
 				Person::players.back()->waypoints[Person::players.back()->numwaypoints] = Person::players[0]->coords;
-				Person::players.back()->waypointtype[Person::players.back()->numwaypoints] = state().editorpathtype;
+				Person::players.back()->waypointtype[Person::players.back()->numwaypoints] = gamestate.editorpathtype;
 				Person::players.back()->numwaypoints++;
 			}
 			else {
@@ -1898,7 +1898,7 @@ void doJumpReversals()
 	}
 }
 
-void doAerialAcrobatics()
+void doAerialAcrobatics(GameState& gamestate)
 {
 	static Vector3 facing, flatfacing;
 	for (unsigned k = 0; k < Person::players.size(); k++) {
@@ -1927,7 +1927,7 @@ void doAerialAcrobatics()
 			Person::players[k]->yaw = stepTowardf(Person::players[k]->yaw, Person::players[k]->targetyaw, multiplier * Person::players[k]->turnspeed * 4);
 		}
 
-		Person::players[k]->DoStuff(terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+		Person::players[k]->DoStuff(terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 		if (Person::players[k]->immobile && k != 0) {
 			Person::players[k]->coords = Person::players[k]->realoldcoords;
 		}
@@ -1970,7 +1970,7 @@ void doAerialAcrobatics()
 						Person::players[k]->coords.y > terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z) - .1) {
 						Person::players[k]->coords.y = terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z);
 					}
-					if (Person::players[k]->SphereCheck(&lowpoint, 1.3, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray) != -1) {
+					if (Person::players[k]->SphereCheck(&lowpoint, 1.3, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate) != -1) {
 						flatfacing = lowpoint - Person::players[k]->coords;
 						Person::players[k]->coords = lowpoint;
 						Person::players[k]->coords.y -= 1.3;
@@ -2090,7 +2090,7 @@ void doAerialAcrobatics()
 						if (Person::players[k]->animTarget == jumpdownanim || Person::players[k]->isFlip()) {
 							//flipped into a rock
 							if (Person::players[k]->isFlip() && Person::players[k]->targetFrame().label == 7) {
-								Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+								Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 							}
 
 							if (Person::players[k]->animTarget == jumpupanim) {
@@ -2128,7 +2128,7 @@ void doAerialAcrobatics()
 					lowpoint = Person::players[k]->coords;
 					lowpoint.y += 1.35;
 					if (Object::objects[i]->type != rocktype) {
-						if (Person::players[k]->SphereCheck(&lowpoint, 1.33, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray) != -1) {
+						if (Person::players[k]->SphereCheck(&lowpoint, 1.33, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate) != -1) {
 							if (Person::players[k]->animTarget != jumpupanim &&
 								Person::players[k]->animTarget != jumpdownanim &&
 								Person::players[k]->onterrain) {
@@ -2281,7 +2281,7 @@ void doAerialAcrobatics()
 							Person::players[k]->frameTarget > 6)) {
 						//stagger off ledge (?)
 						if (Person::players[k]->animTarget == staggerbackhighanim || Person::players[k]->animTarget == staggerbackhardanim) {
-							Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+							Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 						}
 						Person::players[k]->setTargetAnimation(jumpdownanim);
 
@@ -2298,7 +2298,7 @@ void doAerialAcrobatics()
 	}
 }
 
-void doAttacks()
+void doAttacks(GameState& gamestate)
 {
 	static int randattack;
 	static bool playerrealattackkeydown = 0;
@@ -2334,7 +2334,7 @@ void doAttacks()
 				Person::players[k]->animTarget == staffspinhitanim) &&
 				Person::players[0]->animCurrent != dodgebackanim &&
 				!Person::players[k]->skeleton.free) {
-				Person::players[k]->Reverse(Tutorial::active);
+				Person::players[k]->Reverse(Tutorial::active, gamestate);
 			}
 		}
 	}
@@ -2881,7 +2881,7 @@ void doAttacks()
 	}
 }
 
-void doPlayerCollisions()
+void doPlayerCollisions(GameState& gamestate)
 {
 	static Vector3 rotatetarget;
 	static float collisionradius;
@@ -2963,8 +2963,8 @@ void doPlayerCollisions()
 																		Person::players[l]->velocity = Person::players[0]->velocity;
 																		Person::players[l]->skeleton.free = 0;
 																		Person::players[l]->yaw = 0;
-																		Person::players[l]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
-																		Person::players[l]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+																		Person::players[l]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+																		Person::players[l]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 																		camerashake += .3;
 																		Person::players[l]->skeleton.longdead = 0;
 																		Person::players[0]->lastcollide = 1;
@@ -2997,16 +2997,16 @@ void doPlayerCollisions()
 																					emit_sound_at(heavyimpactsound, Person::players[i]->coords);
 																				}
 
-																				Person::players[i]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+																				Person::players[i]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 																				if (Person::players[i]->damage > Person::players[i]->damagetolerance - magnitudeSquared(&rotatetarget) / 4 && !Person::players[i]->dead) {
 																					award_bonus(0, aimbonus);
 																				}
-																				Person::players[i]->DoDamage(magnitudeSquared(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
-																				Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+																				Person::players[i]->DoDamage(magnitudeSquared(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+																				Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 																				if (Person::players[k]->damage > Person::players[k]->damagetolerance - magnitudeSquared(&rotatetarget) / 4 && !Person::players[k]->dead) {
 																					award_bonus(0, aimbonus); // Huh, again?
 																				}
-																				Person::players[k]->DoDamage(magnitudeSquared(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+																				Person::players[k]->DoDamage(magnitudeSquared(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 
 																				for (unsigned j = 0; j < Person::players[i]->skeleton.joints.size(); j++) {
 																					Person::players[i]->skeleton.joints[j].velocity = Person::players[i]->skeleton.joints[j].velocity / 5 + Person::players[k]->velocity;
@@ -3067,8 +3067,8 @@ void doPlayerCollisions()
 																					Person::players[i]->velocity = Person::players[k]->velocity;
 																					Person::players[k]->velocity = Person::players[k]->velocity * -.5;
 																					Person::players[k]->velocity.y = Person::players[i]->velocity.y;
-																					Person::players[i]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
-																					Person::players[i]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+																					Person::players[i]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+																					Person::players[i]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 																					Person::players[k]->lastcollide = 1;
 																					award_bonus(k, AboveBonus);
 																				}
@@ -3082,8 +3082,8 @@ void doPlayerCollisions()
 																					Person::players[k]->velocity = Person::players[i]->velocity;
 																					Person::players[i]->velocity = Person::players[i]->velocity * -.3;
 																					Person::players[i]->velocity.y = Person::players[k]->velocity.y;
-																					Person::players[k]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
-																					Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+																					Person::players[k]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+																					Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 																					Person::players[i]->lastcollide = 1;
 																					award_bonus(i, AboveBonus);
 																				}
@@ -3091,8 +3091,8 @@ void doPlayerCollisions()
 																		}
 																	}
 																}
-																Person::players[i]->CheckKick(terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
-																Person::players[k]->CheckKick(terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+																Person::players[i]->CheckKick(terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+																Person::players[k]->CheckKick(terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 															}
 														}
 													}
@@ -3110,13 +3110,13 @@ void doPlayerCollisions()
 	}
 }
 
-void Game::Tick()
+void Game::Tick(GameState& gamestate)
 {
 	static Vector3 facing, flatfacing;
 	static int target;
 
 	/* Pump SDL input events and process non-gameplay related ones */
-	ProcessInput();
+	ProcessInput(gamestate);
 
 	/*
 	Values of mainmenu :
@@ -3140,10 +3140,10 @@ void Game::Tick()
 			mainmenu = 10;
 		}
 		//go to level select after completing a campaign level
-		if (campaign && state().winfreeze && mainmenu == 0 && campaignlevels[actuallevel].choosenext == 1) {
+		if (campaign && gamestate.winfreeze && mainmenu == 0 && campaignlevels[actuallevel].choosenext == 1) {
 			mainmenu = 5;
 			gameon = 0;
-			state().winfreeze = 0;
+			gamestate.winfreeze = 0;
 			fireSound();
 			flash();
 			if (musictoggle) {
@@ -3151,12 +3151,12 @@ void Game::Tick()
 				emit_stream_np(stream_menutheme);
 				pause_sound(leveltheme);
 			}
-			Menu::Load();
+			Menu::Load(gamestate);
 		}
 	}
 
 	if (mainmenu) {
-		Menu::Tick();
+		Menu::Tick(gamestate);
 	}
 
 	if (!mainmenu) {
@@ -3166,17 +3166,17 @@ void Game::Tick()
 		else {
 			hostiletime = 0;
 		}
-		if (!state().winfreeze) {
-			state().leveltime += multiplier;
+		if (!gamestate.winfreeze) {
+			gamestate.leveltime += multiplier;
 		}
 
 		if (console) {
-			state().freeze = 1;
+			gamestate.freeze = 1;
 
 			inputText(consoletext[0], &consoleselected);
 			if (!waiting) {
 				if (!consoletext[0].empty()) {
-					cmd_dispatch(consoletext[0]);
+					cmd_dispatch(consoletext[0], gamestate);
 					for (int k = 14; k >= 1; k--) {
 						consoletext[k] = consoletext[k - 1];
 					}
@@ -3185,26 +3185,26 @@ void Game::Tick()
 				}
 			}
 
-			state().consoleblinkdelay -= multiplier;
-			if (state().consoleblinkdelay <= 0) {
-				state().consoleblinkdelay = .3;
-				state().consoleblink = !state().consoleblink;
+			gamestate.consoleblinkdelay -= multiplier;
+			if (gamestate.consoleblinkdelay <= 0) {
+				gamestate.consoleblinkdelay = .3;
+				gamestate.consoleblink = !gamestate.consoleblink;
 			}
 		}
 
 		static int oldwinfreeze;
-		if (state().winfreeze && !oldwinfreeze) {
+		if (gamestate.winfreeze && !oldwinfreeze) {
 			OPENAL_SetFrequency(OPENAL_ALL);
 			emit_sound_np(consolesuccesssound);
 		}
-		if (state().winfreeze == 0) {
-			oldwinfreeze = state().winfreeze;
+		if (gamestate.winfreeze == 0) {
+			oldwinfreeze = gamestate.winfreeze;
 		}
 		else {
 			oldwinfreeze++;
 		}
 
-		if (!state().freeze && !state().winfreeze && !(mainmenu && gameon) && (gameon || !gamestarted)) {
+		if (!gamestate.freeze && !gamestate.winfreeze && !(mainmenu && gameon) && (gameon || !gamestarted)) {
 
 			//dialogues
 			static float talkdelay = 0;
@@ -3255,7 +3255,7 @@ void Game::Tick()
 
 			//Tutorial
 			if (Tutorial::active) {
-				Tutorial::Do(multiplier, bloodtoggle);
+				Tutorial::Do(multiplier, bloodtoggle, gamestate);
 			}
 
 			//bonuses
@@ -3315,7 +3315,7 @@ void Game::Tick()
 				}
 			}
 
-			doAerialAcrobatics();
+			doAerialAcrobatics(gamestate);
 
 			static Vector3 oldviewer;
 
@@ -3559,21 +3559,21 @@ void Game::Tick()
 			}
 
 			Dialog::dialoguetime += multiplier;
-			state().hawkyaw += multiplier * 25;
+			gamestate.hawkyaw += multiplier * 25;
 			realhawkcoords = 0;
 			realhawkcoords.x = 25;
-			realhawkcoords = DoRotation(realhawkcoords, 0, state().hawkyaw, 0) + hawkcoords;
-			state().hawkcalldelay -= multiplier / 2;
+			realhawkcoords = DoRotation(realhawkcoords, 0, gamestate.hawkyaw, 0) + hawkcoords;
+			gamestate.hawkcalldelay -= multiplier / 2;
 
-			if (state().hawkcalldelay <= 0) {
+			if (gamestate.hawkcalldelay <= 0) {
 				emit_sound_at(hawksound, realhawkcoords);
 
-				state().hawkcalldelay = 16 + abs(rand() % 8);
+				gamestate.hawkcalldelay = 16 + abs(rand() % 8);
 			}
 
-			doAttacks();
+			doAttacks(gamestate);
 
-			doPlayerCollisions();
+			doPlayerCollisions(gamestate);
 
 			doJumpReversals();
 
@@ -3586,7 +3586,7 @@ void Game::Tick()
 			for (unsigned k = 0; k < Person::players.size(); k++) {
 				if (!isnormal(Person::players[k]->coords.x) || !isnormal(Person::players[k]->coords.y) || !isnormal(Person::players[k]->coords.z)) {
 					if (!isnormal(Person::players[k]->coords.x) || !isnormal(Person::players[k]->coords.y) || !isnormal(Person::players[k]->coords.z)) {
-						Person::players[k]->DoDamage(1000, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+						Person::players[k]->DoDamage(1000, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 					}
 				}
 			}
@@ -3603,8 +3603,8 @@ void Game::Tick()
 						!oldattackkey &&
 						Person::players[0]->dead))) {
 				targetlevel = whichlevel;
-				state().loading = 1;
-				state().leveltime = 5;
+				gamestate.loading = 1;
+				gamestate.leveltime = 5;
 			}
 			respawnkeydown = Input::isKeyDown(jumpkey);
 
@@ -3680,7 +3680,7 @@ void Game::Tick()
 						Person::players[i]->targetheadpitch = pitchOf(Dialog::currentScene().participantfacing[i]);
 					}
 
-					if (state().leveltime < .5) {
+					if (gamestate.leveltime < .5) {
 						numenvsounds = 0;
 					}
 
@@ -3728,7 +3728,7 @@ void Game::Tick()
 						Person::players[i]->avoidcollided = 0;
 					}
 
-					Person::players[i]->doAI(terrain, Tutorial::active, Dialog::inDialog(), multiplier);
+					Person::players[i]->doAI(terrain, Tutorial::active, Dialog::inDialog(), multiplier, gamestate);
 
 					if (Animation::animations[Person::players[i]->animTarget].attack == reversed) {
 						//Person::players[i]->targetyaw=Person::players[i]->yaw;
@@ -3952,7 +3952,7 @@ void Game::Tick()
 																		weapons.weapons[k].blooddrip = 5;
 																		Person::players[i]->victim->weaponstuck = -1;
 																		Person::players[i]->victim->bloodloss += 2000;
-																		Person::players[i]->victim->DoDamage(2000, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+																		Person::players[i]->victim->DoDamage(2000, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 																	}
 																}
 																if (Person::players[i]->victim->num_weapons > 0) {
@@ -4189,7 +4189,7 @@ void Game::Tick()
 								}
 							}
 							if (target >= 0) {
-								Person::players[target]->Reverse(Tutorial::active);
+								Person::players[target]->Reverse(Tutorial::active, gamestate);
 							}
 							Person::players[i]->lowreversaldelay = .5;
 
@@ -4235,7 +4235,7 @@ void Game::Tick()
 									}
 								}
 								if (target >= 0) {
-									Person::players[target]->Reverse(Tutorial::active);
+									Person::players[target]->Reverse(Tutorial::active, gamestate);
 								}
 								Person::players[i]->highreversaldelay = .5;
 
@@ -4449,7 +4449,7 @@ void Game::Tick()
 									Person::players[i]->velocity.y = 5;
 								}
 
-								if (state().mousejump && i == 0 && devtools) {
+								if (gamestate.mousejump && i == 0 && devtools) {
 									if (!Person::players[i]->isLanding()) {
 										Person::players[i]->tempdeltav = deltav;
 									}
@@ -4569,7 +4569,7 @@ void Game::Tick()
 
 			//do animations
 			for (unsigned k = 0; k < Person::players.size(); k++) {
-				Person::players[k]->DoAnimations(terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray);
+				Person::players[k]->DoAnimations(terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 				Person::players[k]->whichpatchx = Person::players[k]->coords.x / (terrain.size / subdivision * terrain.scale);
 				Person::players[k]->whichpatchz = Person::players[k]->coords.z / (terrain.size / subdivision * terrain.scale);
 			}
@@ -4653,7 +4653,7 @@ void Game::TickOnce()
 	}
 }
 
-void Game::TickOnceAfter()
+void Game::TickOnceAfter(GameState& gamestate)
 {
 	// TODO Holds state?
 	static Vector3 colviewer;
@@ -4709,7 +4709,7 @@ void Game::TickOnceAfter()
 			}
 		}
 
-		if (state().loading == 2) {
+		if (gamestate.loading == 2) {
 			musictype = stream_menutheme;
 			musicvolume[2] = 512;
 			musicvolume[0] = 0;
@@ -4752,7 +4752,7 @@ void Game::TickOnceAfter()
 			}
 		}
 
-		if (musicvolume[2] > 128 && !state().loading && !mainmenu) {
+		if (musicvolume[2] > 128 && !gamestate.loading && !mainmenu) {
 			musicvolume[2] = 128;
 		}
 
@@ -4835,9 +4835,9 @@ void Game::TickOnceAfter()
 			maxalarmed = numalarmed;
 		}
 
-		if (state().changedelay <= 0 && !state().loading && !editorenabled && gameon && !Tutorial::active && state().changedelay != -999 && !won) {
+		if (gamestate.changedelay <= 0 && !gamestate.loading && !editorenabled && gameon && !Tutorial::active && gamestate.changedelay != -999 && !won) {
 			if (Person::players[0]->dead) {
-				state().changedelay = 1;
+				gamestate.changedelay = 1;
 				targetlevel = whichlevel;
 			}
 			alldead = true;
@@ -4849,14 +4849,14 @@ void Game::TickOnceAfter()
 			}
 
 			if (alldead && !Person::players[0]->dead && maptype == mapkilleveryone) {
-				state().changedelay = 1;
+				gamestate.changedelay = 1;
 				targetlevel = whichlevel + 1;
 				if (targetlevel > numchallengelevels - 1) {
 					targetlevel = 0;
 				}
 			}
 			if (winhotspot || windialogue) {
-				state().changedelay = 0.1;
+				gamestate.changedelay = 0.1;
 				targetlevel = whichlevel + 1;
 				if (targetlevel > numchallengelevels - 1) {
 					targetlevel = 0;
@@ -4864,46 +4864,46 @@ void Game::TickOnceAfter()
 			}
 
 			if (Hotspot::killhotspot) {
-				state().changedelay = 1;
+				gamestate.changedelay = 1;
 				targetlevel = whichlevel + 1;
 				if (targetlevel > numchallengelevels - 1) {
 					targetlevel = 0;
 				}
 			}
 
-			if (state().changedelay > 0 && !Person::players[0]->dead && !won) {
+			if (gamestate.changedelay > 0 && !Person::players[0]->dead && !won) {
 				//high scores, awards, win
 				if (campaign) {
-					Account::active().winCampaignLevel(state().whichchoice, bonustotal, state().leveltime);
-					state().scoreadded = 1;
+					Account::active().winCampaignLevel(gamestate.whichchoice, bonustotal, gamestate.leveltime);
+					gamestate.scoreadded = 1;
 				}
 				else {
-					state().wonleveltime = state().leveltime;
-					Account::active().winLevel(whichlevel, bonustotal - startbonustotal, state().leveltime, devtools);
+					gamestate.wonleveltime = gamestate.leveltime;
+					Account::active().winLevel(whichlevel, bonustotal - startbonustotal, gamestate.leveltime, devtools);
 				}
 				won = 1;
 				Account::saveFile(Folders::getUserSavePath());
 			}
 		}
 
-		if (!state().winfreeze) {
+		if (!gamestate.winfreeze) {
 
-			if (state().leveltime < 1) {
-				state().loading = 0;
-				state().changedelay = .1;
+			if (gamestate.leveltime < 1) {
+				gamestate.loading = 0;
+				gamestate.changedelay = .1;
 				alldead = false;
 				winhotspot = false;
 				Hotspot::killhotspot = 0;
 			}
 
 			if (!editorenabled && gameon && !mainmenu) {
-				if (state().changedelay != -999) {
-					state().changedelay -= multiplier / 7;
+				if (gamestate.changedelay != -999) {
+					gamestate.changedelay -= multiplier / 7;
 				}
 				if (Person::players[0]->dead) {
 					targetlevel = whichlevel;
 				}
-				if (state().loading == 2 && !campaign) {
+				if (gamestate.loading == 2 && !campaign) {
 					flash();
 
 					fireSound(firestartsound);
@@ -4912,44 +4912,44 @@ void Game::TickOnceAfter()
 						startbonustotal = bonustotal;
 					}
 
-					LoadLevel(targetlevel);
+					LoadLevel(targetlevel, gamestate);
 					fireSound();
 
-					state().loading = 3;
+					gamestate.loading = 3;
 				}
-				if (state().loading == 2 && targetlevel == whichlevel) {
+				if (gamestate.loading == 2 && targetlevel == whichlevel) {
 					flash();
-					state().loadtime = 0;
+					gamestate.loadtime = 0;
 
 					fireSound(firestartsound);
 
-					LoadLevel(campaignlevels[Account::active().getCampaignChoicesMade()].mapname.c_str());
+					LoadLevel(campaignlevels[Account::active().getCampaignChoicesMade()].mapname.c_str(), false, gamestate);
 
 					fireSound();
 
-					state().loading = 3;
+					gamestate.loading = 3;
 				}
-				if (state().changedelay <= -999 &&
+				if (gamestate.changedelay <= -999 &&
 					whichlevel != -2 &&
-					!state().loading &&
+					!gamestate.loading &&
 					(Person::players[0]->dead ||
 						(alldead && maptype == mapkilleveryone) ||
 						(winhotspot) ||
 						(Hotspot::killhotspot))) {
-					state().loading = 1;
+					gamestate.loading = 1;
 				}
 				if ((Person::players[0]->dead ||
 					(alldead && maptype == mapkilleveryone) ||
 					(winhotspot) ||
 					(windialogue) ||
 					(Hotspot::killhotspot)) &&
-					state().changedelay <= 0) {
-					if (whichlevel != -2 && !state().loading && !Person::players[0]->dead) {
-						state().winfreeze = true;
-						state().changedelay = -999;
+					gamestate.changedelay <= 0) {
+					if (whichlevel != -2 && !gamestate.loading && !Person::players[0]->dead) {
+						gamestate.winfreeze = true;
+						gamestate.changedelay = -999;
 					}
 					if (Person::players[0]->dead) {
-						state().loading = 1;
+						gamestate.loading = 1;
 					}
 				}
 			}
@@ -4959,12 +4959,12 @@ void Game::TickOnceAfter()
 				// 0 = load next level
 				// 1 = go back to level select screen
 				// 2 = stealthload next level
-				if (mainmenu == 0 && state().winfreeze && (campaignlevels[actuallevel].choosenext) == 1) {
+				if (mainmenu == 0 && gamestate.winfreeze && (campaignlevels[actuallevel].choosenext) == 1) {
 					if (campaignlevels[actuallevel].nextlevel.empty()) {
 						endgame = 1;
 					}
 				}
-				else if (mainmenu == 0 && state().winfreeze) {
+				else if (mainmenu == 0 && gamestate.winfreeze) {
 					stealthloading = (campaignlevels[actuallevel].choosenext == 2);
 
 					if (!stealthloading) {
@@ -4975,19 +4975,19 @@ void Game::TickOnceAfter()
 
 					startbonustotal = 0;
 
-					LoadCampaign();
+					LoadCampaign(gamestate);
 
-					state().loading = 2;
-					state().loadtime = 0;
+					gamestate.loading = 2;
+					gamestate.loadtime = 0;
 					targetlevel = 7;
 					if (!firstLoadDone) {
-						LoadStuff();
+						LoadStuff(gamestate);
 					}
-					state().whichchoice = 0;
+					gamestate.whichchoice = 0;
 					actuallevel = campaignlevels[actuallevel].nextlevel.front();
-					state().visibleloading = true;
-					state().stillloading = 1;
-					LoadLevel(campaignlevels[actuallevel].mapname.c_str());
+					gamestate.visibleloading = true;
+					gamestate.stillloading = 1;
+					LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate);
 					campaign = 1;
 					mainmenu = 0;
 					gameon = 1;
@@ -4997,8 +4997,8 @@ void Game::TickOnceAfter()
 				}
 			}
 
-			if (state().loading == 3) {
-				state().loading = 0;
+			if (gamestate.loading == 3) {
+				gamestate.loading = 0;
 			}
 		}
 

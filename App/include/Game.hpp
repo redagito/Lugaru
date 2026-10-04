@@ -46,32 +46,34 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #define NB_CAMPAIGN_MENU_ITEM 7
 
+struct GameState;
+
 namespace Game 
 {
 
 	void newGame();
 	void deleteGame();
 
-	void InitGame();
-	void LoadStuff();
+	void InitGame(GameState& gamestate);
+	void LoadStuff(GameState& gamestate);
 	void LoadScreenTexture();
-	void LoadingScreen();
-	int DrawGLScene(StereoSide side);
+	void LoadingScreen(GameState& gamestate);
+	int DrawGLScene(StereoSide side, GameState& gamestate);
 	void playdialoguescenesound();
 	int findClosestPlayer();
-	void ResetBeforeLevelLoad(bool tutorial);
-	bool LoadLevel(int which);
-	bool LoadLevel(const std::string& name, bool tutorial = false);
-	bool LoadJsonLevel(const std::string& name, bool tutorial = false);
+	void ResetBeforeLevelLoad(bool tutorial, GameState& gamestate);
+	bool LoadLevel(int which, GameState& gamestate);
+	bool LoadLevel(const std::string& name, bool tutorial, GameState& gamestate);
+	bool LoadJsonLevel(const std::string& name, bool tutorial, GameState& gamestate);
 
-	void cmd_dispatch(const std::string cmd);
+	void cmd_dispatch(const std::string cmd, GameState& gamestate);
 
-	void ProcessInput();
-	void ProcessDevInput();
+	void ProcessInput(GameState& gamestate);
+	void ProcessDevInput(GameState& gamestate);
 
-	void Tick();
+	void Tick(GameState& gamestate);
 	void TickOnce();
-	void TickOnceAfter();
+	void TickOnceAfter(GameState& gamestate);
 
 	void SetUpLighting();
 	GLvoid ReSizeGLScene(float fov, float near);

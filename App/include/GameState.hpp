@@ -65,14 +65,3 @@ struct GameState
 	// tutorial gating
 	bool cananger = false;
 };
-
-// TEMPORARY SEAM. state() exists so the migration away from globals is a small,
-// reviewable diff; it is a single global by another name and later phases must
-// replace it with an explicitly passed GameState reference.
-//
-// The instance is a function-local static, not a namespace-scope global: a
-// function-local static is constructed on first use, so it can never be read
-// before construction, whereas a namespace-scope global would be zero-initialised
-// during static init and could hand back a pre-construction maxscreenwidth of 0
-// instead of 3000.
-GameState& state();

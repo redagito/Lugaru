@@ -33,6 +33,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <cmath>
 
+struct GameState;
+
 #define knife 1
 #define sword 2
 #define staff 3
@@ -45,7 +47,7 @@ public:
     static void Load(bool usetrilinear, ProgressCallback callback);
 
     void draw();
-    void doStuff(int, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26]);
+    void doStuff(int, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26], GameState& gamestate);
 
     int getType()
     {
@@ -126,7 +128,7 @@ public:
     std::vector<Weapon> weapons;
 
     void Draw();
-    void DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye);
+    void DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye, GameState& gamestate);
 };
 
 extern Weapons weapons;

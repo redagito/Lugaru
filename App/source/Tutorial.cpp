@@ -41,14 +41,14 @@ float Tutorial::stagetime = 0;
 float Tutorial::maxtime = 0;
 float Tutorial::success = 0;
 
-void Tutorial::Do(float timemultiplier, bool bloodtoggleflag)
+void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamestate)
 {
 	if (stagetime > maxtime) {
 		stage++;
 		success = 0;
 		if (stage <= 1) {
 			canattack = 0;
-			state().cananger = 0;
+			gamestate.cananger = 0;
 			reversaltrain = 0;
 		}
 		switch (stage) {
@@ -127,16 +127,16 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag)
 			maxtime = 500;
 			if (bonus == cannon) {
 				bonus = Slicebonus;
-				state().againbonus = 1;
+				gamestate.againbonus = 1;
 			}
 			else {
-				state().againbonus = 0;
+				gamestate.againbonus = 0;
 			}
 			break;
 		case 27:
 			maxtime = 4;
 			reversaltrain = 1;
-			state().cananger = 1;
+			gamestate.cananger = 1;
 			Person::players[1]->aitype = attacktypecutoff;
 			break;
 		case 28:
@@ -151,7 +151,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag)
 		case 30:
 			maxtime = 4;
 			reversaltrain = 0;
-			state().cananger = 0;
+			gamestate.cananger = 0;
 			Person::players[1]->aitype = passivetype;
 			break;
 		case 31:
@@ -163,28 +163,28 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag)
 			break;
 		case 33:
 			maxtime = 400;
-			state().cananger = 1;
+			gamestate.cananger = 1;
 			canattack = 1;
 			Person::players[1]->aitype = attacktypecutoff;
 			break;
 		case 36:
 			maxtime = 2;
 			reversaltrain = 0;
-			state().cananger = 0;
+			gamestate.cananger = 0;
 			Person::players[1]->aitype = passivetype;
 			break;
 		case 37:
 			damagedealt = 0;
 			damagetaken = 0;
 			maxtime = 50;
-			state().cananger = 1;
+			gamestate.cananger = 1;
 			canattack = 1;
 			Person::players[1]->aitype = attacktypecutoff;
 			break;
 		case 38:
 			maxtime = 4;
 			canattack = 0;
-			state().cananger = 0;
+			gamestate.cananger = 0;
 			Person::players[1]->aitype = passivetype;
 			break;
 		case 39: {
@@ -224,7 +224,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag)
 			Person::players[1]->num_weapons = 1;
 			Person::players[1]->weaponids[0] = 0;
 
-			state().cananger = 1;
+			gamestate.cananger = 1;
 			canattack = 1;
 			Person::players[1]->aitype = attacktypecutoff;
 
@@ -290,7 +290,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag)
 		} break;
 		case 48:
 			canattack = 0;
-			state().cananger = 0;
+			gamestate.cananger = 0;
 			Person::players[1]->aitype = passivetype;
 
 			maxtime = 15;
@@ -313,7 +313,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag)
 			break;
 		case 49:
 			canattack = 0;
-			state().cananger = 0;
+			gamestate.cananger = 0;
 			Person::players[1]->aitype = passivetype;
 
 			maxtime = 200;
@@ -484,7 +484,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag)
 			if (Person::players[0]->escapednum == 2) {
 				success = 1;
 				reversaltrain = 0;
-				state().cananger = 0;
+				gamestate.cananger = 0;
 				Person::players[1]->aitype = passivetype;
 			}
 			break;
@@ -501,7 +501,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag)
 			if (Animation::animations[Person::players[0]->animTarget].attack == reversal) {
 				success = 1;
 				reversaltrain = 0;
-				state().cananger = 0;
+				gamestate.cananger = 0;
 				Person::players[1]->aitype = passivetype;
 			}
 			break;
@@ -549,7 +549,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag)
 	}
 }
 
-void Tutorial::DrawTextInfo()
+void Tutorial::DrawTextInfo(GameState& gamestate)
 {
 	std::string string1 = " ";
 	std::string string2 = " ";
@@ -642,7 +642,7 @@ void Tutorial::DrawTextInfo()
 	case 21:
 		string1 = "This attack is devastating if timed correctly.";
 		string2 = "Even if timed incorrectly, it will knock the enemy over.";
-		if (state().againbonus) {
+		if (gamestate.againbonus) {
 			string3 = "Try rabbit-kicking the imaginary enemy again.";
 		}
 		else {

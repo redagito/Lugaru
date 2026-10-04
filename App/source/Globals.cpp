@@ -18,18 +18,9 @@ You should have received a copy of the GNU General Public License
 along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "GameState.hpp"
 #include "Globals.h"
 
 // TODO GET RID OF ALL OF THESE!
-
-GameState& state()
-{
-	// Function-local static, not a namespace-scope global: it is constructed on
-	// first call, so no other translation unit can read it before construction.
-	static GameState instance;
-	return instance;
-}
 
 float volume = 0;
 bool ismotionblur = false;

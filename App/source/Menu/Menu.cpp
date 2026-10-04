@@ -370,7 +370,7 @@ Values of mainmenu :
 18 stereo configuration
 */
 
-void Menu::Load()
+void Menu::Load(GameState& gamestate)
 {
     clearMenu();
     switch (mainmenu) {
@@ -416,7 +416,7 @@ void Menu::Load()
             updateControlsMenu();
             break;
         case 5: {
-            LoadCampaign();
+            LoadCampaign(gamestate);
             addLabel(-1, Account::active().getName(), 5, 400);
             addButton(1, "Tutorial", 5, 300);
             addButton(2, "Challenge", 5, 240);
@@ -518,22 +518,22 @@ void Menu::Load()
     }
 }
 
-void Menu::startChallengeLevel(int challengelevel)
+void Menu::startChallengeLevel(int challengelevel, GameState& gamestate)
 {
     fireSound();
     flash();
 
     startbonustotal = 0;
 
-    state().loading = 2;
-    state().loadtime = 0;
+    gamestate.loading = 2;
+    gamestate.loadtime = 0;
     targetlevel = challengelevel;
     if (firstLoadDone) {
-        TickOnceAfter();
+        TickOnceAfter(gamestate);
     } else {
-        LoadStuff();
+        LoadStuff(gamestate);
     }
-    LoadLevel(challengelevel);
+    LoadLevel(challengelevel, gamestate);
     campaign = 0;
 
     mainmenu = 0;
@@ -541,7 +541,7 @@ void Menu::startChallengeLevel(int challengelevel)
     pause_sound(stream_menutheme);
 }
 
-void Menu::Tick()
+void Menu::Tick(GameState& gamestate)
 {
     //escape key pressed
     if (Input::isKeyPressed(SDL_SCANCODE_ESCAPE) &&
@@ -549,7 +549,7 @@ void Menu::Tick()
         selected = -1;
         //finished with settings menu
         if (mainmenu == 3) {
-            SaveSettings();
+            SaveSettings(gamestate);
         }
         //effects
         if (mainmenu >= 3 && mainmenu != 8) {
@@ -702,7 +702,7 @@ void Menu::Tick()
                         break;
                     case 8:
                         flash();
-                        SaveSettings();
+                        SaveSettings(gamestate);
                         mainmenu = gameon ? 2 : 1;
                         break;
                     case 9:
@@ -743,7 +743,7 @@ void Menu::Tick()
                         keyselect = selected;
                     }
                     if (keyselect != -1) {
-                        setKeySelected();
+                        setKeySelected(gamestate);
                     }
                     if (selected == (devtools ? 10 : 9)) {
                         flash();
@@ -758,19 +758,19 @@ void Menu::Tick()
                 if ((selected - NB_CAMPAIGN_MENU_ITEM >= Account::active().getCampaignChoicesMade())) {
                     startbonustotal = 0;
 
-                    state().loading = 2;
-                    state().loadtime = 0;
+                    gamestate.loading = 2;
+                    gamestate.loadtime = 0;
                     targetlevel = 7;
                     if (firstLoadDone) {
-                        TickOnceAfter();
+                        TickOnceAfter(gamestate);
                     } else {
-                        LoadStuff();
+                        LoadStuff(gamestate);
                     }
-                    state().whichchoice = selected - NB_CAMPAIGN_MENU_ITEM - Account::active().getCampaignChoicesMade();
-                    actuallevel = (Account::active().getCampaignChoicesMade() > 0 ? campaignlevels[Account::active().getCampaignChoicesMade() - 1].nextlevel[state().whichchoice] : 0);
-                    state().visibleloading = true;
-                    state().stillloading = 1;
-                    LoadLevel(campaignlevels[actuallevel].mapname.c_str());
+                    gamestate.whichchoice = selected - NB_CAMPAIGN_MENU_ITEM - Account::active().getCampaignChoicesMade();
+                    actuallevel = (Account::active().getCampaignChoicesMade() > 0 ? campaignlevels[Account::active().getCampaignChoicesMade() - 1].nextlevel[gamestate.whichchoice] : 0);
+                    gamestate.visibleloading = true;
+                    gamestate.stillloading = 1;
+                    LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate);
                     campaign = 1;
                     mainmenu = 0;
                     gameon = 1;
@@ -780,15 +780,15 @@ void Menu::Tick()
                     case 1:
                         startbonustotal = 0;
 
-                        state().loading = 2;
-                        state().loadtime = 0;
+                        gamestate.loading = 2;
+                        gamestate.loadtime = 0;
                         targetlevel = -1;
                         if (firstLoadDone) {
-                            TickOnceAfter();
+                            TickOnceAfter(gamestate);
                         } else {
-                            LoadStuff();
+                            LoadStuff(gamestate);
                         }
-                        LoadLevel(-1);
+                        LoadLevel(-1, gamestate);
 
                         mainmenu = 0;
                         gameon = 1;
@@ -820,7 +820,7 @@ void Menu::Tick()
                             }
                             Account::active().setCurrentCampaign(*c);
                         }
-                        Load();
+                        Load(gamestate);
                         break;
                 }
                 break;
@@ -865,7 +865,7 @@ void Menu::Tick()
                 break;
             case 9:
                 if (selected < numchallengelevels && selected <= Account::active().getProgress()) {
-                    startChallengeLevel(selected);
+                    startChallengeLevel(selected, gamestate);
                 }
                 if (selected == numchallengelevels) {
                     fireSound();
@@ -928,7 +928,7 @@ void Menu::Tick()
                 newuserselected = 0;
             }
             entername = 0;
-            Load();
+            Load(gamestate);
         }
 
         newuserblinkdelay -= multiplier;
@@ -944,14 +944,15 @@ void Menu::Tick()
     }
 
     if (oldmainmenu != mainmenu) {
-        Load();
+        Load(gamestate);
     }
     oldmainmenu = mainmenu;
 }
 
-int setKeySelected_thread(void*)
+int setKeySelected_thread(void* data)
 {
     using namespace Game;
+    GameState& gamestate = *static_cast<GameState*>(data);
     int scancode = -1;
     SDL_Event evenement;
     while (scancode == -1) {
@@ -1006,15 +1007,15 @@ int setKeySelected_thread(void*)
     }
     keyselect = -1;
     waiting = false;
-    Menu::Load();
+    Menu::Load(gamestate);
     return 0;
 }
 
-void Menu::setKeySelected()
+void Menu::setKeySelected(GameState& gamestate)
 {
     waiting = true;
     printf("launch thread\n");
-    SDL_Thread* thread = SDL_CreateThread(setKeySelected_thread, NULL, NULL);
+    SDL_Thread* thread = SDL_CreateThread(setKeySelected_thread, NULL, &gamestate);
     if (thread == NULL) {
         fprintf(stderr, "Unable to create thread: %s\n", SDL_GetError());
         waiting = false;

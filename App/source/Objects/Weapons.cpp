@@ -127,7 +127,7 @@ void Weapon::Load(bool usetrilinear, ProgressCallback callback)
 	staffmodel.CalculateNormals(1, callback);
 }
 
-void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26])
+void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26], GameState& gamestate)
 {
 	int whichpatchx, whichpatchz, whichhit;
 	Vector3 start, end, colpoint, normalrot, footvel, footpoint;
@@ -282,7 +282,7 @@ Vector3 temppoint1, temppoint2;
 
 							Person::players[j]->weaponids[Person::players[j]->num_weapons - 1] = i;
 
-							Person::players[j]->RagDoll(0, terrain, tutorialActive, inDialog, multiplier, jointstartarray);
+							Person::players[j]->RagDoll(0, terrain, tutorialActive, inDialog, multiplier, jointstartarray, gamestate);
 							Person::players[j]->jointVel(abdomen) += velocity * 2;
 							Person::players[j]->jointVel(neck) += velocity * 2;
 							Person::players[j]->jointVel(rightshoulder) += velocity * 2;
@@ -448,7 +448,7 @@ Vector3 temppoint1, temppoint2;
 			Normalise(&vel);
 			newpoint1 = midp - vel * length * (tipmass / (mass + tipmass));
 			newpoint2 = midp + vel * length * (mass / (mass + tipmass));
-			if (!state().freeze) {
+			if (!gamestate.freeze) {
 				if (freetime > .04) {
 					velocity = velocity + (newpoint1 - position) / multiplier;
 					tipvelocity = tipvelocity + (newpoint2 - tippoint) / multiplier;
@@ -1035,13 +1035,13 @@ Vector3 temppoint1, temppoint2;
 	}
 }
 
-void Weapons::DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye)
+void Weapons::DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye, GameState& gamestate)
 {
 	//Move
 	// TODO What the actual fuck is this?
 	int i = 0;
 	for (std::vector<Weapon>::iterator weapon = weapons.begin(); weapon != weapons.end(); ++weapon) {
-		weapon->doStuff(i++, tutorialActive, inDialog, awardNinja, awardBullseye, jointstartarray);
+		weapon->doStuff(i++, tutorialActive, inDialog, awardNinja, awardBullseye, jointstartarray, gamestate);
 	}
 }
 

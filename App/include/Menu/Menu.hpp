@@ -26,6 +26,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Graphic/Texture.hpp"
 
+struct GameState;
+
 struct MenuItem
 {
 	enum MenuItemType
@@ -70,13 +72,13 @@ public:
 	static int getSelected(int mousex, int mousey);
 	static void drawItems();
 
-	static void Load();
-	static void Tick();
+	static void Load(GameState& gamestate);
+	static void Tick(GameState& gamestate);
 	static void updateSettingsMenu();
 	static void updateStereoConfigMenu();
 	static void updateControlsMenu();
-	static void setKeySelected();
-	static void startChallengeLevel(int challengelevel);
+	static void setKeySelected(GameState& gamestate);
+	static void startChallengeLevel(int challengelevel, GameState& gamestate);
 
 private:
 	static void handleFadeEffect();

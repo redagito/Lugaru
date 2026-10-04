@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "GameState.hpp"
 #include "Objects/Person.hpp"
 #include "Objects/PersonType.hpp"
 
@@ -26,7 +27,10 @@ void ensurePersonTypesLoaded()
 std::shared_ptr<Person> makePerson()
 {
 	ensurePersonTypesLoaded();
-	return std::make_shared<Person>();
+	// Person only needs the GameState for its loading-progress callback, so a
+	// throwaway instance is enough here.
+	GameState gamestate;
+	return std::make_shared<Person>(gamestate);
 }
 
 } // namespace

@@ -21,8 +21,10 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _SETTINGS_HPP_
 #define _SETTINGS_HPP_
 
-void DefaultSettings();
-void SaveSettings();
-bool LoadSettings();
+struct GameState;
+
+void DefaultSettings(GameState& gamestate);
+void SaveSettings(GameState& gamestate);
+bool LoadSettings(GameState& gamestate);
 
 #endif

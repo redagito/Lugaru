@@ -28,7 +28,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Utils/Input.hpp"
 #include "WindowContext.hpp"
 
-void DefaultSettings()
+void DefaultSettings(GameState& gamestate)
 {
 	detail = 2;
 	ismotionblur = 1;
@@ -44,7 +44,7 @@ void DefaultSettings()
 	foliage = 1;
 	musictoggle = 1;
 	trilinear = 1;
-	state().gamespeed = 1;
+	gamestate.gamespeed = 1;
 	damageeffects = 0;
 	texttoggle = 1;
 	alwaysblur = 0;
@@ -70,7 +70,7 @@ void DefaultSettings()
 	Game::newdetail = detail;
 }
 
-void SaveSettings()
+void SaveSettings(GameState& gamestate)
 {
 	if (Game::newdetail < 0) {
 		Game::newdetail = 0;
@@ -78,10 +78,10 @@ void SaveSettings()
 	if (Game::newdetail > 2) {
 		Game::newdetail = 2;
 	}
-	if (Game::newscreenwidth < minscreenwidth || Game::newscreenwidth > state().maxscreenwidth) {
+	if (Game::newscreenwidth < minscreenwidth || Game::newscreenwidth > gamestate.maxscreenwidth) {
 		Game::newscreenwidth = screenwidth;
 	}
-	if (Game::newscreenheight < minscreenheight || Game::newscreenheight > state().maxscreenheight) {
+	if (Game::newscreenheight < minscreenheight || Game::newscreenheight > gamestate.maxscreenheight) {
 		Game::newscreenheight = screenheight;
 	}
 	errno = 0;
@@ -105,7 +105,7 @@ void SaveSettings()
 	opstream << "\nFloating jump:\n";
 	opstream << floatjump;
 	opstream << "\nMouse jump:\n";
-	opstream << state().mousejump;
+	opstream << gamestate.mousejump;
 	opstream << "\nAmbient sound:\n";
 	opstream << ambientsound;
 	opstream << "\nBlood (0,1,2):\n";
@@ -123,10 +123,10 @@ void SaveSettings()
 	opstream << "\nInvert mouse:\n";
 	opstream << invertmouse;
 	opstream << "\nGamespeed:\n";
-	if (state().oldgamespeed == 0) {
-		state().oldgamespeed = 1;
+	if (gamestate.oldgamespeed == 0) {
+		gamestate.oldgamespeed = 1;
 	}
-	opstream << state().oldgamespeed;
+	opstream << gamestate.oldgamespeed;
 	opstream << "\nDamage effects(blackout, doublevision):\n";
 	opstream << damageeffects;
 	opstream << "\nText:\n";
@@ -173,7 +173,7 @@ void SaveSettings()
 	opstream.close();
 }
 
-bool LoadSettings()
+bool LoadSettings(GameState& gamestate)
 {
 	errno = 0;
 	std::ifstream ipstream(Folders::getConfigFilePath(), std::ios::in);
@@ -203,13 +203,13 @@ bool LoadSettings()
 
 		if (!strncmp(setting, "Screenwidth", 11)) {
 			ipstream >> kContextWidth;
-			if (kContextWidth < (int)minscreenwidth || kContextWidth >(int)state().maxscreenwidth) {
+			if (kContextWidth < (int)minscreenwidth || kContextWidth >(int)gamestate.maxscreenwidth) {
 				kContextWidth = (int)minscreenwidth;
 			}
 		}
 		else if (!strncmp(setting, "Screenheight", 12)) {
 			ipstream >> kContextHeight;
-			if (kContextHeight < (int)minscreenheight || kContextHeight >(int)state().maxscreenheight) {
+			if (kContextHeight < (int)minscreenheight || kContextHeight >(int)gamestate.maxscreenheight) {
 				kContextHeight = (int)minscreenheight;
 			}
 		}
@@ -229,7 +229,7 @@ bool LoadSettings()
 			ipstream >> floatjump;
 		}
 		else if (!strncmp(setting, "Mouse jump", 10)) {
-			ipstream >> state().mousejump;
+			ipstream >> gamestate.mousejump;
 		}
 		else if (!strncmp(setting, "Ambient sound", 13)) {
 			ipstream >> ambientsound;
@@ -256,11 +256,11 @@ bool LoadSettings()
 			ipstream >> invertmouse;
 		}
 		else if (!strncmp(setting, "Gamespeed", 9)) {
-			ipstream >> state().gamespeed;
-			state().oldgamespeed = state().gamespeed;
-			if (state().oldgamespeed == 0) {
-				state().gamespeed = 1;
-				state().oldgamespeed = 1;
+			ipstream >> gamestate.gamespeed;
+			gamestate.oldgamespeed = gamestate.gamespeed;
+			if (gamestate.oldgamespeed == 0) {
+				gamestate.gamespeed = 1;
+				gamestate.oldgamespeed = 1;
 			}
 		}
 		else if (!strncmp(setting, "Damage effects", 14)) {
@@ -357,10 +357,10 @@ bool LoadSettings()
 	if (detail < 0) {
 		detail = 0;
 	}
-	if (screenwidth < minscreenwidth || screenwidth > state().maxscreenwidth) {
+	if (screenwidth < minscreenwidth || screenwidth > gamestate.maxscreenwidth) {
 		screenwidth = 1024;
 	}
-	if (screenheight < minscreenheight || screenheight > state().maxscreenheight) {
+	if (screenheight < minscreenheight || screenheight > gamestate.maxscreenheight) {
 		screenheight = 768;
 	}
 

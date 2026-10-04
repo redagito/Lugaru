@@ -96,7 +96,7 @@ void Game::deleteGame()
 	Dispose();
 }
 
-void LoadSave(const std::string& fileName, GLubyte* array)
+void LoadSave(const std::string& fileName, GLubyte* array, GameState& gamestate)
 {
 
 	//Load Image
@@ -105,7 +105,7 @@ void LoadSave(const std::string& fileName, GLubyte* array)
 
 	//Load Image
 	ImageRec texture;
-	if (!load_image(Folders::getResourcePath(fileName).c_str(), texture, []() {Game::LoadingScreen(); })) {
+	if (!load_image(Folders::getResourcePath(fileName).c_str(), texture, [&]() {Game::LoadingScreen(gamestate); })) {
 		texdetail = temptexdetail;
 		return;
 	}
@@ -140,9 +140,9 @@ GLvoid Game::ReSizeGLScene(float fov, float pnear)
 	glLoadIdentity();
 }
 
-void Game::LoadingScreen()
+void Game::LoadingScreen(GameState& gamestate)
 {
-	if (!state().visibleloading) {
+	if (!gamestate.visibleloading) {
 		return;
 	}
 
@@ -178,7 +178,7 @@ void Game::LoadingScreen()
 		static int tracecount = 0;
 		if (tracecount < 40 && (tracecount % 4) == 0) {
 			fprintf(stderr, "[loading] n=%d multiplier=%.4f loadtime=%.2f loadprogress=%.2f flashamount=%.3f\n",
-					tracecount, multiplier, state().loadtime, loadprogress, flashamount);
+					tracecount, multiplier, gamestate.loadtime, loadprogress, flashamount);
 		}
 		tracecount++;
 	}
@@ -188,9 +188,9 @@ void Game::LoadingScreen()
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	state().loadtime += multiplier * 4;
+	gamestate.loadtime += multiplier * 4;
 
-	loadprogress = state().loadtime;
+	loadprogress = gamestate.loadtime;
 	if (loadprogress > 100) {
 		loadprogress = 100;
 	}
@@ -433,7 +433,7 @@ void FadeLoadingScreen(float howmuch)
 	swap_gl_buffers();
 }
 
-void Game::InitGame()
+void Game::InitGame(GameState& gamestate)
 {
 	numchallengelevels = 14;
 
@@ -519,13 +519,13 @@ void Game::InitGame()
 
 	FadeLoadingScreen(0);
 
-	state().stillloading = 1;
+	gamestate.stillloading = 1;
 
 	int temptexdetail = texdetail;
 	texdetail = 1;
-	text->LoadFontTexture("Textures/Font.png", trilinear, []() { Game::LoadingScreen(); });
+	text->LoadFontTexture("Textures/Font.png", trilinear, [&]() { Game::LoadingScreen(gamestate); });
 	text->BuildFont();
-	textmono->LoadFontTexture("Textures/FontMono.png", trilinear, []() { Game::LoadingScreen(); });
+	textmono->LoadFontTexture("Textures/FontMono.png", trilinear, [&]() { Game::LoadingScreen(gamestate); });
 	textmono->BuildFont();
 	texdetail = temptexdetail;
 
@@ -551,23 +551,23 @@ void Game::InitGame()
 		emit_stream_np(stream_menutheme);
 	}
 
-	cursortexture.load("Textures/Cursor.png", 0, trilinear, []() {Game::LoadingScreen(); });
+	cursortexture.load("Textures/Cursor.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
-	Mapcircletexture.load("Textures/MapCircle.png", 0, trilinear, []() {Game::LoadingScreen(); });
-	Mapboxtexture.load("Textures/MapBox.png", 0, trilinear, []() {Game::LoadingScreen(); });
-	Maparrowtexture.load("Textures/MapArrow.png", 0, trilinear, []() {Game::LoadingScreen(); });
+	Mapcircletexture.load("Textures/MapCircle.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	Mapboxtexture.load("Textures/MapBox.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	Maparrowtexture.load("Textures/MapArrow.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
 	temptexdetail = texdetail;
 	if (texdetail > 2) {
 		texdetail = 2;
 	}
-	Mainmenuitems[0].load("Textures/Lugaru.png", 0, trilinear, []() {Game::LoadingScreen(); });
-	Mainmenuitems[1].load("Textures/NewGame.png", 0, trilinear, []() {Game::LoadingScreen(); });
-	Mainmenuitems[2].load("Textures/Options.png", 0, trilinear, []() {Game::LoadingScreen(); });
-	Mainmenuitems[3].load("Textures/Quit.png", 0, trilinear, []() {Game::LoadingScreen(); });
-	Mainmenuitems[4].load("Textures/Eyelid.png", 0, trilinear, []() {Game::LoadingScreen(); });
-	Mainmenuitems[5].load("Textures/Resume.png", 0, trilinear, []() {Game::LoadingScreen(); });
-	Mainmenuitems[6].load("Textures/EndGame.png", 0, trilinear, []() {Game::LoadingScreen(); });
+	Mainmenuitems[0].load("Textures/Lugaru.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	Mainmenuitems[1].load("Textures/NewGame.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	Mainmenuitems[2].load("Textures/Options.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	Mainmenuitems[3].load("Textures/Quit.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	Mainmenuitems[4].load("Textures/Eyelid.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	Mainmenuitems[5].load("Textures/Resume.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	Mainmenuitems[6].load("Textures/EndGame.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
 	texdetail = temptexdetail;
 
@@ -576,20 +576,20 @@ void Game::InitGame()
 	gameon = 0;
 	mainmenu = 1;
 
-	state().stillloading = 0;
+	gamestate.stillloading = 0;
 	firstLoadDone = false;
 
 	newdetail = detail;
 	newscreenwidth = screenwidth;
 	newscreenheight = screenheight;
 
-	Menu::Load();
+	Menu::Load(gamestate);
 
-	Animation::loadAll([]() {Game::LoadingScreen(); });
+	Animation::loadAll([&]() {Game::LoadingScreen(gamestate); });
 
 	PersonType::Load();
 
-	Person::players.emplace_back(new Person());
+	Person::players.emplace_back(new Person(gamestate));
 }
 
 void Game::LoadScreenTexture()
@@ -611,25 +611,25 @@ void Game::LoadScreenTexture()
 
 //TODO: move LoadStuff() closer to GameTick.cpp to get rid of various vars shared in Game.hpp
 /* Loads models and textures which only needs to be loaded once */
-void Game::LoadStuff()
+void Game::LoadStuff(GameState& gamestate)
 {
 	float temptexdetail;
 	float viewdistdetail;
 	float megascale = 1;
 
-	state().loadtime = 0;
+	gamestate.loadtime = 0;
 
-	state().stillloading = 1;
+	gamestate.stillloading = 1;
 
-	state().visibleloading = false; //don't use loadscreentexture yet
-	loadscreentexture.load("Textures/Fire.jpg", 1, trilinear, []() {Game::LoadingScreen(); });
-	state().visibleloading = true;
+	gamestate.visibleloading = false; //don't use loadscreentexture yet
+	loadscreentexture.load("Textures/Fire.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	gamestate.visibleloading = true;
 
 	temptexdetail = texdetail;
 	texdetail = 1;
-	text->LoadFontTexture("Textures/Font.png", trilinear, []() { Game::LoadingScreen(); });
+	text->LoadFontTexture("Textures/Font.png", trilinear, [&]() { Game::LoadingScreen(gamestate); });
 	text->BuildFont();
-	textmono->LoadFontTexture("Textures/FontMono.png", trilinear, []() { Game::LoadingScreen(); });
+	textmono->LoadFontTexture("Textures/FontMono.png", trilinear, [&]() { Game::LoadingScreen(gamestate); });
 	textmono->BuildFont();
 	texdetail = temptexdetail;
 
@@ -651,28 +651,28 @@ void Game::LoadStuff()
 
 	realtexdetail = texdetail;
 
-	Weapon::Load(trilinear, []() { Game::LoadingScreen(); });
+	Weapon::Load(trilinear, [&]() { Game::LoadingScreen(gamestate); });
 
-	terrain.shadowtexture.load("Textures/Shadow.png", 0, trilinear, []() {LoadingScreen(); });
-	terrain.bloodtexture.load("Textures/Blood.png", 0, trilinear, []() {LoadingScreen(); });
-	terrain.breaktexture.load("Textures/Break.png", 0, trilinear, []() {LoadingScreen(); });
-	terrain.bloodtexture2.load("Textures/Blood.png", 0, trilinear, []() {LoadingScreen(); });
+	terrain.shadowtexture.load("Textures/Shadow.png", 0, trilinear, [&]() {LoadingScreen(gamestate); });
+	terrain.bloodtexture.load("Textures/Blood.png", 0, trilinear, [&]() {LoadingScreen(gamestate); });
+	terrain.breaktexture.load("Textures/Break.png", 0, trilinear, [&]() {LoadingScreen(gamestate); });
+	terrain.bloodtexture2.load("Textures/Blood.png", 0, trilinear, [&]() {LoadingScreen(gamestate); });
 
-	terrain.footprinttexture.load("Textures/Footprint.png", 0, trilinear, []() {LoadingScreen(); });
-	terrain.bodyprinttexture.load("Textures/Bodyprint.png", 0, trilinear, []() {LoadingScreen(); });
-	hawktexture.load("Textures/Hawk.png", 0, trilinear, []() { LoadingScreen(); });
+	terrain.footprinttexture.load("Textures/Footprint.png", 0, trilinear, [&]() {LoadingScreen(gamestate); });
+	terrain.bodyprinttexture.load("Textures/Bodyprint.png", 0, trilinear, [&]() {LoadingScreen(gamestate); });
+	hawktexture.load("Textures/Hawk.png", 0, trilinear, [&]() { LoadingScreen(gamestate); });
 
-	Sprite::cloudtexture.load("Textures/Cloud.png", 1, trilinear, []() {LoadingScreen(); });
-	Sprite::cloudimpacttexture.load("Textures/CloudImpact.png", 1, trilinear, []() { LoadingScreen(); });
-	Sprite::bloodtexture.load("Textures/BloodParticle.png", 1, trilinear, []() { LoadingScreen(); });
-	Sprite::snowflaketexture.load("Textures/SnowFlake.png", 1, trilinear, []() {LoadingScreen(); });
-	Sprite::flametexture.load("Textures/Flame.png", 1, trilinear, []() {LoadingScreen(); });
-	Sprite::bloodflametexture.load("Textures/BloodFlame.png", 1, trilinear, []() {LoadingScreen(); });
-	Sprite::smoketexture.load("Textures/Smoke.png", 1, trilinear, []() {LoadingScreen(); });
-	Sprite::shinetexture.load("Textures/Shine.png", 1, trilinear, []() {LoadingScreen(); });
-	Sprite::splintertexture.load("Textures/Splinter.png", 1, trilinear, []() {LoadingScreen(); });
-	Sprite::leaftexture.load("Textures/Leaf.png", 1, trilinear, []() {LoadingScreen(); });
-	Sprite::toothtexture.load("Textures/Tooth.png", 1, trilinear, []() {LoadingScreen(); });
+	Sprite::cloudtexture.load("Textures/Cloud.png", 1, trilinear, [&]() {LoadingScreen(gamestate); });
+	Sprite::cloudimpacttexture.load("Textures/CloudImpact.png", 1, trilinear, [&]() { LoadingScreen(gamestate); });
+	Sprite::bloodtexture.load("Textures/BloodParticle.png", 1, trilinear, [&]() { LoadingScreen(gamestate); });
+	Sprite::snowflaketexture.load("Textures/SnowFlake.png", 1, trilinear, [&]() {LoadingScreen(gamestate); });
+	Sprite::flametexture.load("Textures/Flame.png", 1, trilinear, [&]() {LoadingScreen(gamestate); });
+	Sprite::bloodflametexture.load("Textures/BloodFlame.png", 1, trilinear, [&]() {LoadingScreen(gamestate); });
+	Sprite::smoketexture.load("Textures/Smoke.png", 1, trilinear, [&]() {LoadingScreen(gamestate); });
+	Sprite::shinetexture.load("Textures/Shine.png", 1, trilinear, [&]() {LoadingScreen(gamestate); });
+	Sprite::splintertexture.load("Textures/Splinter.png", 1, trilinear, [&]() {LoadingScreen(gamestate); });
+	Sprite::leaftexture.load("Textures/Leaf.png", 1, trilinear, [&]() {LoadingScreen(gamestate); });
+	Sprite::toothtexture.load("Textures/Tooth.png", 1, trilinear, [&]() {LoadingScreen(gamestate); });
 
 	yaw = 0;
 	pitch = 0;
@@ -692,7 +692,7 @@ void Game::LoadStuff()
 	light.location.z = -.2;
 	Normalise(&light.location);
 
-	LoadingScreen();
+	LoadingScreen(gamestate);
 
 	SetUpLighting();
 
@@ -705,29 +705,29 @@ void Game::LoadStuff()
 	viewer.x = terrain.size / 2 * terrain.scale;
 	viewer.z = terrain.size / 2 * terrain.scale;
 
-	hawk.load("Models/Hawk.solid", []() { LoadingScreen(); });
+	hawk.load("Models/Hawk.solid", [&]() { LoadingScreen(gamestate); });
 	hawk.Scale(.03, .03, .03);
 	hawk.Rotate(90, 1, 1);
-	hawk.CalculateNormals(0, []() { LoadingScreen(); });
+	hawk.CalculateNormals(0, [&]() { LoadingScreen(gamestate); });
 	hawk.ScaleNormals(-1, -1, -1);
 	hawkcoords.x = terrain.size / 2 * terrain.scale - 5 - 7;
 	hawkcoords.z = terrain.size / 2 * terrain.scale - 5 - 7;
 	hawkcoords.y = terrain.getHeight(hawkcoords.x, hawkcoords.z) + 25;
 
-	eye.load("Models/Eye.solid", []() { Game::LoadingScreen(); });
+	eye.load("Models/Eye.solid", [&]() { Game::LoadingScreen(gamestate); });
 	eye.Scale(.03, .03, .03);
-	eye.CalculateNormals(0, []() { LoadingScreen(); });
+	eye.CalculateNormals(0, [&]() { LoadingScreen(gamestate); });
 
-	cornea.load("Models/Cornea.solid", []() { Game::LoadingScreen(); });
+	cornea.load("Models/Cornea.solid", [&]() { Game::LoadingScreen(gamestate); });
 	cornea.Scale(.03, .03, .03);
-	cornea.CalculateNormals(0, []() { Game::LoadingScreen(); });
+	cornea.CalculateNormals(0, [&]() { Game::LoadingScreen(gamestate); });
 
-	iris.load("Models/Iris.solid", []() { Game::LoadingScreen(); });
+	iris.load("Models/Iris.solid", [&]() { Game::LoadingScreen(gamestate); });
 	iris.Scale(.03, .03, .03);
-	iris.CalculateNormals(0, []() { LoadingScreen(); });
+	iris.CalculateNormals(0, [&]() { LoadingScreen(gamestate); });
 
-	LoadSave("Textures/WolfBloodFur.png", &PersonType::types[wolftype].bloodText[0]);
-	LoadSave("Textures/BloodFur.png", &PersonType::types[rabbittype].bloodText[0]);
+	LoadSave("Textures/WolfBloodFur.png", &PersonType::types[wolftype].bloodText[0], gamestate);
+	LoadSave("Textures/BloodFur.png", &PersonType::types[rabbittype].bloodText[0], gamestate);
 
 	oldenvironment = -4;
 
@@ -746,7 +746,7 @@ void Game::LoadStuff()
 		}
 	}
 
-	LoadingScreen();
+	LoadingScreen(gamestate);
 
 	for (unsigned i = 0; i < Person::players[0]->skeleton.joints.size(); i++) {
 		for (unsigned j = 0; j < Animation::animations[knifesneakattackedanim].frames.size(); j++) {
@@ -754,7 +754,7 @@ void Game::LoadStuff()
 		}
 	}
 
-	LoadingScreen();
+	LoadingScreen(gamestate);
 
 	for (unsigned i = 0; i < Person::players[0]->skeleton.joints.size(); i++) {
 		Animation::animations[dead1anim].frames[1].joints[i].position = Animation::animations[dead1anim].frames[0].joints[i].position;
@@ -777,12 +777,12 @@ void Game::LoadStuff()
 			Animation::animations[swordsneakattackanim].frames[j].joints[i].position += moveamount;
 		}
 	}
-	LoadingScreen();
+	LoadingScreen(gamestate);
 	for (unsigned j = 0; j < Animation::animations[swordsneakattackanim].frames.size(); j++) {
 		Animation::animations[swordsneakattackanim].frames[j].weapontarget += moveamount;
 	}
 
-	LoadingScreen();
+	LoadingScreen(gamestate);
 
 	for (unsigned i = 0; i < Person::players[0]->skeleton.joints.size(); i++) {
 		for (unsigned j = 0; j < Animation::animations[swordsneakattackedanim].frames.size(); j++) {
@@ -790,7 +790,7 @@ void Game::LoadStuff()
 		}
 	}
 
-	LoadingScreen();
+	LoadingScreen(gamestate);
 
 	if (!screentexture) {
 		LoadScreenTexture();
@@ -800,10 +800,10 @@ void Game::LoadStuff()
 		emit_sound_at(fireendsound);
 	}
 
-	state().stillloading = 0;
-	state().loading = 0;
-	state().changedelay = 1;
+	gamestate.stillloading = 0;
+	gamestate.loading = 0;
+	gamestate.changedelay = 1;
 
-	state().visibleloading = false;
+	gamestate.visibleloading = false;
 	firstLoadDone = true;
 }
