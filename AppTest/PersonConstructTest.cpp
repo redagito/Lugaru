@@ -27,9 +27,10 @@ void ensurePersonTypesLoaded()
 std::shared_ptr<Person> makePerson()
 {
 	ensurePersonTypesLoaded();
-	// Person only needs the GameState for its loading-progress callback, so a
-	// throwaway instance is enough here.
-	GameState gamestate;
+	// Person only needs the GameState for its loading-progress callback, which it
+	// consumes synchronously in its constructor. Static so it unambiguously
+	// outlives every Person the helper hands out.
+	static GameState gamestate;
 	return std::make_shared<Person>(gamestate);
 }
 

@@ -21,9 +21,9 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Math/Vector3.hpp"
 
 #include <string>
+#include <vector>
 
 struct GameState;
-#include <vector>
 
 extern bool campaign;
 

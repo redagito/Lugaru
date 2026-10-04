@@ -78,6 +78,11 @@ public:
 	static void updateStereoConfigMenu();
 	static void updateControlsMenu();
 	static void setKeySelected(GameState& gamestate);
+	/**
+	 * Waits for the key-capture thread started by setKeySelected() to finish.
+	 * Must be called before the GameState that thread references is destroyed.
+	 */
+	static void joinKeySelectThread();
 	static void startChallengeLevel(int challengelevel, GameState& gamestate);
 
 private:

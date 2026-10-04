@@ -24,10 +24,12 @@ TEST_CASE("functions that mutate game state take the GameState to mutate", "[gam
 
 	SECTION("a function that never writes GameState does not take one")
 	{
-		// Negative control. Without it the checks above could hold for any
-		// signature at all; this pins that the trait really distinguishes the
-		// two shapes.
-		REQUIRE_FALSE(std::is_invocable_v<decltype(&Tutorial::DoStuff), GameState&>);
+		// Negative control. `DefaultSettings` used to take no arguments at all, so
+		// requiring that it is NOT callable with zero arguments proves the trait
+		// really distinguishes the injected shape from the old global-accessor
+		// shape, rather than holding for any one-argument signature.
+		REQUIRE_FALSE(std::is_invocable_v<decltype(&DefaultSettings)>);
+		REQUIRE_FALSE(std::is_invocable_v<decltype(&SaveSettings)>);
 	}
 }
 

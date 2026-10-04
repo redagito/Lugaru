@@ -143,7 +143,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		}
 		if ((!changed && !slomo) || gamestate.loading) {
 			drawmode = normalmode;
-			if (ismotionblur && (/*gamestate.fps>100||*/ alwaysblur)) {
+			if (ismotionblur && alwaysblur) {
 				if (olddrawmode != realmotionblurmode) {
 					change = 1;
 				}

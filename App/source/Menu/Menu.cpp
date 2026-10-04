@@ -1011,12 +1011,26 @@ int setKeySelected_thread(void* data)
     return 0;
 }
 
+// The key-capture thread holds a reference to the caller's GameState, so its
+// handle is retained and must be joined before that GameState goes out of
+// scope. See Menu::joinKeySelectThread().
+static SDL_Thread* keyselectthread = nullptr;
+
+void Menu::joinKeySelectThread()
+{
+	if (keyselectthread != nullptr) {
+		SDL_WaitThread(keyselectthread, nullptr);
+		keyselectthread = nullptr;
+	}
+}
+
 void Menu::setKeySelected(GameState& gamestate)
 {
     waiting = true;
     printf("launch thread\n");
-    SDL_Thread* thread = SDL_CreateThread(setKeySelected_thread, NULL, &gamestate);
-    if (thread == NULL) {
+    Menu::joinKeySelectThread();
+    keyselectthread = SDL_CreateThread(setKeySelected_thread, NULL, &gamestate);
+    if (keyselectthread == NULL) {
         fprintf(stderr, "Unable to create thread: %s\n", SDL_GetError());
         waiting = false;
         return;

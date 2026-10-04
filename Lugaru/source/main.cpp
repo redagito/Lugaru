@@ -611,6 +611,10 @@ int main(int argc, char** argv)
 				}
 			}
 
+			// The key-capture thread holds a reference to gamestate, so it must be
+			// joined before gamestate goes out of scope below.
+			Menu::joinKeySelectThread();
+
 			deleteGame();
 		}
 
