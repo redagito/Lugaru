@@ -225,7 +225,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		//camera effects
 		if (!cameramode && !gamestate.freeze && !gamestate.winfreeze) {
 			//shake
-			glRotatef(float(rand() % 100) / 10 * camerashake /*+(woozy*woozy)/10*/, 0, 0, 1);
+			glRotatef(float(rand() % 100) / 10 * camerashake /*+(gamestate.woozy*gamestate.woozy)/10*/, 0, 0, 1);
 			//sway
 			glRotatef(pitch + sin(gamestate.woozy / 2) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 1, 0, 0);
 			glRotatef(yaw + sin(gamestate.woozy) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 0, 1, 0);

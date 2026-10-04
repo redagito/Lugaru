@@ -566,8 +566,9 @@ TEST_CASE("GameState tranche 4 members start at their historical global defaults
 	SECTION("texture budget")
 	{
 		// kTextureSize looks like a compile-time constant, but Game::LoadStuff
-		// assigns it from the runtime detail setting, so it is state and starts
-		// at zero rather than at any of the values it is later given.
+		// assigns it from the runtime detail setting, so it is a member rather
+		// than a constant, and starts at zero rather than at any of the values
+		// it is later given.
 		REQUIRE(s.kTextureSize == 0);
 	}
 
