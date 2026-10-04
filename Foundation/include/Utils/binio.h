@@ -109,19 +109,24 @@ struct TruncatedFileException : public std::exception
     extern void vspackf  (void *buffer,       const char *format, va_list args);
     extern void vfpackf  (FILE *file,         const char *format, va_list args);
 
-    extern void unpackf  (                    const char *format, ...);
-    extern void sunpackf (const void *buffer, const char *format, ...);
-    extern void funpackf (FILE       *file,   const char *format, ...);
-    extern void vsunpackf(const void *buffer, const char *format, va_list args);
-    extern void vfunpackf(FILE       *file,   const char *format, va_list args);
+    /*
+     * These throw TruncatedFileException (or bad_alloc), so they are declared
+     * noexcept(false) explicitly: without it MSVC infers a non-throwing
+     * specification and warns C4297 at the throw site.
+     */
+    extern void unpackf  (                    const char *format, ...) noexcept(false);
+    extern void sunpackf (const void *buffer, const char *format, ...) noexcept(false);
+    extern void funpackf (FILE       *file,   const char *format, ...) noexcept(false);
+    extern void vsunpackf(const void *buffer, const char *format, va_list args) noexcept(false);
+    extern void vfunpackf(FILE       *file,   const char *format, va_list args) noexcept(false);
 
     /*
      * Like funpackf(), but returns false instead of throwing when the stream
      * ends before the record has been read. Use for optional trailing data in
      * older files; the caller supplies its own defaults.
      */
-    extern bool tryfunpackf (FILE       *file,   const char *format, ...);
-    extern bool vtryfunpackf(FILE       *file,   const char *format, va_list args);
+    extern bool tryfunpackf (FILE       *file,   const char *format, ...) noexcept(false);
+    extern bool vtryfunpackf(FILE       *file,   const char *format, va_list args) noexcept(false);
 
 #ifdef _MSC_VER
 #ifndef va_copy

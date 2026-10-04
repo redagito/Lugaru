@@ -37,10 +37,7 @@ set(LUGARU_MSVC_WARNINGS
 	# _setjmp/longjmp against objects with non-trivial destructors. Intrinsic to
 	# the libpng and libjpeg error-handling pattern, which we cannot restructure.
 	/wd4611
-	# vfunpackf/vtryfunpackf throw TruncatedFileException on a short read by
-	# design; the warning just says the compiler had assumed otherwise.
-	/wd4297
-# Struct padding for alignment: my_error_mgr wraps a jmp_buf.
+	# Struct padding for alignment: my_error_mgr wraps a jmp_buf.
 	/wd4324
 )
 
