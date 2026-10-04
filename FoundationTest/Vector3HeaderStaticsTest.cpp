@@ -238,8 +238,12 @@ TEST_CASE("Vector3 operator/ and dot products", "[vector3][headerstatics]")
 
 	SECTION("division by zero yields an infinity rather than being guarded")
 	{
+		// Read the divisor through a volatile so the optimiser cannot fold it to a
+		// literal zero and reject the division as undefined; the float handed to
+		// operator/ is still exactly 0.0f.
+		volatile float zero = 0.0f;
 		const Vector3 v(1.0f, 0.0f, -4.0f);
-		const Vector3 divided = v / 0.0f;
+		const Vector3 divided = v / zero;
 		REQUIRE(std::isinf(divided.x));
 		REQUIRE(std::isnan(divided.y));
 		REQUIRE(std::isinf(divided.z));

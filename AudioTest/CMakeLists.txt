@@ -20,6 +20,12 @@ target_compile_definitions(${PROJECT_NAME}
 	PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
 )
 
+target_compile_options(${PROJECT_NAME} PRIVATE
+  PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX ${LUGARU_MSVC_WARNINGS}>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Werror>
+  # -Wextra -Wpedantic
+)
+
 include(Catch)
 catch_discover_tests(${PROJECT_NAME}
 	WORKING_DIRECTORY ${LUGARU_TEST_WORKING_DIR}

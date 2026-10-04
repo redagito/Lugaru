@@ -108,7 +108,6 @@ TEST_CASE("Account save and load round-trip", "[account]")
 	SECTION("an empty account still round-trips")
 	{
 		Account::add("Empty");
-		Account& stored = Account::get(Account::getNbAccounts() - 1);
 
 		Account::saveFile(kSavePath);
 		Account::loadFile(kSavePath);

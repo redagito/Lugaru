@@ -693,8 +693,8 @@ TEST_CASE("LineFacetHit normal overload", "[vector3][statics]")
 		Vector3 bySevenArgs;
 		from = Vector3(0.33333334f, 10.0f, 0.6666667f);
 		to = Vector3(0.33333334f, -10.0f, 0.6666667f);
-		Vector3 unit(0.0f, -1.0f, 0.0f);
-		REQUIRE(LineFacetHit(&from, &to, &tilted.a, &tilted.b, &tilted.c, &unit, &bySixArgs) == 1.0f);
+		Vector3 sixArgNormal = unit;
+		REQUIRE(LineFacetHit(&from, &to, &tilted.a, &tilted.b, &tilted.c, &sixArgNormal, &bySixArgs) == 1.0f);
 		REQUIRE(LineFacetHit(&from, &to, &tilted.a, &tilted.b, &tilted.c, &normal, &bySevenArgs) == 1.0f);
 		REQUIRE(std::fabs(bySixArgs.y - bySevenArgs.y) < kEpsilon);
 	}
