@@ -74,9 +74,9 @@ public:
 
 	static void Load(GameState& gamestate);
 	static void Tick(GameState& gamestate);
-	static void updateSettingsMenu();
-	static void updateStereoConfigMenu();
-	static void updateControlsMenu();
+	static void updateSettingsMenu(GameState& gamestate);
+	static void updateStereoConfigMenu(GameState& gamestate);
+	static void updateControlsMenu(GameState& gamestate);
 	static void setKeySelected(GameState& gamestate);
 	/**
 	 * Waits for the key-capture thread started by setKeySelected() to finish.

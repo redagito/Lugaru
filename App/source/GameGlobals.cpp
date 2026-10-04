@@ -23,13 +23,10 @@ namespace Game
 	bool gameon = 0;
 	float deltah = 0;
 	float deltav = 0;
-	int mousecoordh = 0;
-	int mousecoordv = 0;
 	float yaw = 0;
 	float pitch = 0;
 	SkyBox* skybox = NULL;
 	bool cameramode = 0;
-	bool firstLoadDone = false;
 
 	Model hawk;
 	Texture hawktexture;
@@ -52,11 +49,8 @@ namespace Game
 
 	bool editorenabled = 0;
 	int editortype = 0;
-	float editorsize = 0;
 	float editoryaw = 0;
 	float editorpitch = 0;
-
-	int tryquit = 0;
 
 	Vector3 pathpoint[30];
 	int numpathpoints = 0;
@@ -64,17 +58,13 @@ namespace Game
 	int pathpointconnect[30][30] = {};
 	int pathpointselected = 0;
 
-	int endgame = 0;
 	int numchallengelevels = 0;
 
 	bool console = false;
 	std::string consoletext[15] = {};
-	unsigned consoleselected = 0;
 
 	unsigned short crouchkey = 0, jumpkey = 0, forwardkey = 0, backkey = 0, leftkey = 0, rightkey = 0, drawkey = 0, throwkey = 0, attackkey = 0;
-	unsigned short consolekey = 0;
 
-	int oldenvironment = 0;
 	int targetlevel = 0;
 
 	bool waiting = false;

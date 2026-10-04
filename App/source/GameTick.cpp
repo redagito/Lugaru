@@ -403,7 +403,7 @@ void Game::ResetBeforeLevelLoad(bool tutorial, GameState& gamestate)
 
 	gamestate.scoreadded = 0;
 	windialogue = false;
-	hostiletime = 0;
+	gamestate.hostiletime = 0;
 	won = 0;
 
 	Dialog::dialogs.clear();
@@ -411,7 +411,7 @@ void Game::ResetBeforeLevelLoad(bool tutorial, GameState& gamestate)
 	Dialog::indialogue = -1;
 	cameramode = 0;
 
-	damagedealt = 0;
+	gamestate.damagedealt = 0;
 	damagetaken = 0;
 
 	if (Account::hasActive()) {
@@ -627,10 +627,10 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 
 	funpackf(tfile, "Bi", &environment);
 
-	if (environment != oldenvironment) {
+	if (environment != gamestate.oldenvironment) {
 		Setenvironment(environment, gamestate);
 	}
-	oldenvironment = environment;
+	gamestate.oldenvironment = environment;
 
 	Object::LoadObjectsFromFile(tfile, stealthloading, terrain, [&]() {Game::LoadingScreen(gamestate); });
 
@@ -926,10 +926,10 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 
 	environment = map_data["map"]["environment"].asInt();
 
-	if (environment != oldenvironment) {
+	if (environment != gamestate.oldenvironment) {
 		Setenvironment(environment, gamestate);
 	}
-	oldenvironment = environment;
+	gamestate.oldenvironment = environment;
 
 	if (!stealthloading) {
 		Object::LoadObjectsFromJson(map_data["map"]["objects"], terrain, [&]() {Game::LoadingScreen(gamestate); });
@@ -1145,11 +1145,11 @@ void Game::ProcessInput(GameState& gamestate)
 	/* Stereo video mode hotkeys */
 	if (Input::isKeyPressed(SDL_SCANCODE_F6)) {
 		if (Input::isKeyDown(SDL_SCANCODE_LSHIFT)) {
-			stereoreverse = true;
+			gamestate.stereoreverse = true;
 			printf("Stereo reversed\n");
 		}
 		else {
-			stereoreverse = false;
+			gamestate.stereoreverse = false;
 			printf("Stereo unreversed\n");
 		}
 	}
@@ -1177,7 +1177,7 @@ void Game::ProcessInput(GameState& gamestate)
 	/* Devtools */
 	if (devtools && !mainmenu) {
 		/* Console */
-		if (Input::isKeyPressed(consolekey)) {
+		if (Input::isKeyPressed(gamestate.consolekey)) {
 			console = !console;
 			if (console) {
 				OPENAL_SetFrequency(OPENAL_ALL);
@@ -1255,7 +1255,7 @@ void Game::ProcessDevInput(GameState& gamestate)
 		/* Toggle slow motion */
 		if (Input::isKeyPressed(SDL_SCANCODE_B)) {
 			slomo = 1 - slomo;
-			slomodelay = 1000;
+			gamestate.slomodelay = 1000;
 		}
 
 		/* Ragdoll */
@@ -1422,7 +1422,7 @@ void Game::ProcessDevInput(GameState& gamestate)
 				Person::players[closest]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
 				Person::players[closest]->dead = 2;
 				Person::players[closest]->headless = 1;
-				Person::players[closest]->DoBloodBig(3, 165, Tutorial::active);
+				Person::players[closest]->DoBloodBig(3, 165, Tutorial::active, gamestate);
 
 				camerashake += .3;
 			}
@@ -1575,9 +1575,9 @@ void Game::ProcessDevInput(GameState& gamestate)
 					tmppitch = rand() % 360;
 				}
 
-				Object::MakeObject(editortype, scenecoords, (int)tmpyaw - ((int)tmpyaw) % 30, (int)tmppitch, editorsize, environment, terrain, foliage, detail, [&]() {Game::LoadingScreen(gamestate); });
+				Object::MakeObject(editortype, scenecoords, (int)tmpyaw - ((int)tmpyaw) % 30, (int)tmppitch, gamestate.editorsize, environment, terrain, gamestate.foliage, detail, [&]() {Game::LoadingScreen(gamestate); });
 				if (editortype == treetrunktype) {
-					Object::MakeObject(treeleavestype, scenecoords, rand() % 360 * (tmppitch < 2) + (int)editoryaw - ((int)editoryaw) % 30, editorpitch, editorsize, environment, terrain, foliage, detail, [&]() {Game::LoadingScreen(gamestate); });
+					Object::MakeObject(treeleavestype, scenecoords, rand() % 360 * (tmppitch < 2) + (int)editoryaw - ((int)editoryaw) % 30, editorpitch, gamestate.editorsize, environment, terrain, gamestate.foliage, detail, [&]() {Game::LoadingScreen(gamestate); });
 				}
 			}
 		}
@@ -1748,15 +1748,15 @@ void Game::ProcessDevInput(GameState& gamestate)
 
 		/* Decrease size for next object */
 		if (Input::isKeyDown(SDL_SCANCODE_DOWN) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			editorsize -= multiplier;
-			if (editorsize < .1) {
-				editorsize = .1;
+			gamestate.editorsize -= multiplier;
+			if (gamestate.editorsize < .1) {
+				gamestate.editorsize = .1;
 			}
 		}
 
 		/* Increase size for next object */
 		if (Input::isKeyDown(SDL_SCANCODE_UP) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			editorsize += multiplier;
+			gamestate.editorsize += multiplier;
 		}
 
 		/* Decrease yaw for next object */
@@ -3136,7 +3136,7 @@ void Game::Tick(GameState& gamestate)
 
 	if (!console) {
 		//campaign over?
-		if (mainmenu && endgame == 1) {
+		if (mainmenu && gamestate.endgame == 1) {
 			mainmenu = 10;
 		}
 		//go to level select after completing a campaign level
@@ -3145,7 +3145,7 @@ void Game::Tick(GameState& gamestate)
 			gameon = 0;
 			gamestate.winfreeze = 0;
 			fireSound();
-			flash();
+			flash(gamestate);
 			if (musictoggle) {
 				OPENAL_SetFrequency(OPENAL_ALL);
 				emit_stream_np(stream_menutheme);
@@ -3161,10 +3161,10 @@ void Game::Tick(GameState& gamestate)
 
 	if (!mainmenu) {
 		if (hostile == 1) {
-			hostiletime += multiplier;
+			gamestate.hostiletime += multiplier;
 		}
 		else {
-			hostiletime = 0;
+			gamestate.hostiletime = 0;
 		}
 		if (!gamestate.winfreeze) {
 			gamestate.leveltime += multiplier;
@@ -3173,7 +3173,7 @@ void Game::Tick(GameState& gamestate)
 		if (console) {
 			gamestate.freeze = 1;
 
-			inputText(consoletext[0], &consoleselected);
+			inputText(consoletext[0], &gamestate.consoleselected, gamestate);
 			if (!waiting) {
 				if (!consoletext[0].empty()) {
 					cmd_dispatch(consoletext[0], gamestate);
@@ -3181,7 +3181,7 @@ void Game::Tick(GameState& gamestate)
 						consoletext[k] = consoletext[k - 1];
 					}
 					consoletext[0].clear();
-					consoleselected = 0;
+					gamestate.consoleselected = 0;
 				}
 			}
 
@@ -3298,11 +3298,11 @@ void Game::Tick(GameState& gamestate)
 
 			//snow effects
 			if (environment == snowyenvironment) {
-				precipdelay -= multiplier;
-				while (precipdelay < 0) {
-					precipdelay += .04;
+				gamestate.precipdelay -= multiplier;
+				while (gamestate.precipdelay < 0) {
+					gamestate.precipdelay += .04;
 					if (!detail) {
-						precipdelay += .04;
+						gamestate.precipdelay += .04;
 					}
 					Vector3 footvel, footpoint;
 
@@ -4475,7 +4475,7 @@ void Game::Tick(GameState& gamestate)
 								Person::players[i]->tempdeltav = deltav;
 							}
 							if (Person::players[i]->animTarget == jumpupanim &&
-								(((!floatjump &&
+								(((!gamestate.floatjump &&
 									!editorenabled) ||
 									!devtools) ||
 									!Person::players[i]->isPlayerControlled())) {
@@ -4488,7 +4488,7 @@ void Game::Tick(GameState& gamestate)
 									Person::players[i]->jumppower = 0;
 								}
 							}
-							if (((floatjump || editorenabled) && devtools) && i == 0) {
+							if (((gamestate.floatjump || editorenabled) && devtools) && i == 0) {
 								Person::players[i]->velocity.y += multiplier * 30;
 							}
 						}
@@ -4588,7 +4588,7 @@ void Game::Tick(GameState& gamestate)
 			OPENAL_SetFrequency(OPENAL_ALL, slomo);
 
 			if (Tutorial::active) {
-				Tutorial::DoStuff(multiplier, bloodtoggle);
+				Tutorial::DoStuff(multiplier, bloodtoggle, gamestate);
 			}
 
 			//3d sound
@@ -4631,14 +4631,14 @@ void Game::Tick(GameState& gamestate)
 	}
 }
 
-void Game::TickOnce()
+void Game::TickOnce(GameState& gamestate)
 {
 	if (mainmenu) {
 		yaw += multiplier * 5;
 	}
 	else if (Dialog::directing || !Dialog::inDialog()) {
 		yaw += deltah * .7;
-		if (invertmouse) {
+		if (gamestate.invertmouse) {
 			pitch -= deltav * .7;
 		}
 		else {
@@ -4904,7 +4904,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 					targetlevel = whichlevel;
 				}
 				if (gamestate.loading == 2 && !campaign) {
-					flash();
+					flash(gamestate);
 
 					fireSound(firestartsound);
 
@@ -4918,7 +4918,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 					gamestate.loading = 3;
 				}
 				if (gamestate.loading == 2 && targetlevel == whichlevel) {
-					flash();
+					flash(gamestate);
 					gamestate.loadtime = 0;
 
 					fireSound(firestartsound);
@@ -4961,7 +4961,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 				// 2 = stealthload next level
 				if (mainmenu == 0 && gamestate.winfreeze && (campaignlevels[actuallevel].choosenext) == 1) {
 					if (campaignlevels[actuallevel].nextlevel.empty()) {
-						endgame = 1;
+						gamestate.endgame = 1;
 					}
 				}
 				else if (mainmenu == 0 && gamestate.winfreeze) {
@@ -4970,7 +4970,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 					if (!stealthloading) {
 						fireSound(firestartsound);
 
-						flash();
+						flash(gamestate);
 					}
 
 					startbonustotal = 0;
@@ -4980,7 +4980,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 					gamestate.loading = 2;
 					gamestate.loadtime = 0;
 					targetlevel = 7;
-					if (!firstLoadDone) {
+					if (!gamestate.firstLoadDone) {
 						LoadStuff(gamestate);
 					}
 					gamestate.whichchoice = 0;

@@ -301,10 +301,10 @@ Vector3 temppoint1, temppoint2;
 
 							if (!tutorialActive) {
 								if (Person::players[j]->weaponstuckwhere == 0) {
-									Person::players[j]->DoBloodBig(2, 205, tutorialActive);
+									Person::players[j]->DoBloodBig(2, 205, tutorialActive, gamestate);
 								}
 								if (Person::players[j]->weaponstuckwhere == 1) {
-									Person::players[j]->DoBloodBig(2, 200, tutorialActive);
+									Person::players[j]->DoBloodBig(2, 200, tutorialActive, gamestate);
 								}
 								Person::players[j]->damage += 200 / Person::players[j]->armorhigh;
 								Person::players[j]->deathbleeding = 1;

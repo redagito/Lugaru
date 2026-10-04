@@ -138,7 +138,7 @@ static void set_clothes(int pnum, const char* args, GameState& gamestate)
 			consoletext[k] = consoletext[k - 1];
 		}
 		consoletext[0] = std::string("Could not load the requested texture '") + args + "', aborting.";
-		consoleselected = 0;
+		gamestate.consoleselected = 0;
 
 		return;
 	}
@@ -171,9 +171,9 @@ static void list_clothes(int pnum)
 
 /* Console commands themselves */
 
-void ch_quit(const char*, GameState&)
+void ch_quit(const char*, GameState& gamestate)
 {
-	tryquit = 1;
+	gamestate.tryquit = 1;
 }
 
 void ch_map(const char* args, GameState& gamestate)
@@ -184,7 +184,7 @@ void ch_map(const char* args, GameState& gamestate)
 			consoletext[k] = consoletext[k - 1];
 		}
 		consoletext[0] = std::string("Could not load the requested level '") + args + "', aborting.";
-		consoleselected = 0;
+		gamestate.consoleselected = 0;
 	}
 	whichlevel = -2;
 	campaign = 0;
@@ -537,9 +537,9 @@ void ch_belt(const char*, GameState&)
 	Person::players[0]->skeleton.clothes = !Person::players[0]->skeleton.clothes;
 }
 
-void ch_cellophane(const char*, GameState&)
+void ch_cellophane(const char*, GameState& gamestate)
 {
-	cellophane = !cellophane;
+	gamestate.cellophane = !gamestate.cellophane;
 }
 
 void ch_funnybunny(const char*, GameState& gamestate)
@@ -780,7 +780,7 @@ void ch_slomo(const char* args, GameState& gamestate)
 {
 	gamestate.slomospeed = atof(args);
 	slomo = !slomo;
-	slomodelay = 1000;
+	gamestate.slomodelay = 1000;
 }
 
 void ch_slofreq(const char* args, GameState&)

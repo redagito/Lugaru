@@ -29,11 +29,9 @@ namespace Game
 
 	extern bool gameon;
 	extern float deltah, deltav;
-	extern int mousecoordh, mousecoordv;
 	extern float yaw, pitch;
 	extern SkyBox* skybox;
 	extern bool cameramode;
-	extern bool firstLoadDone;
 
 	extern Model hawk;
 	extern Texture hawktexture;
@@ -56,11 +54,8 @@ namespace Game
 
 	extern bool editorenabled;
 	extern int editortype;
-	extern float editorsize;
 	extern float editoryaw;
 	extern float editorpitch;
-
-	extern int tryquit;
 
 	extern Vector3 pathpoint[30];
 	extern int numpathpoints;
@@ -68,18 +63,14 @@ namespace Game
 	extern int pathpointconnect[30][30];
 	extern int pathpointselected;
 
-	extern int endgame;
 	extern int numchallengelevels;
 
 	extern bool console;
 	extern std::string consoletext[15];
-	extern unsigned consoleselected;
 
-	extern int oldenvironment;
 	extern int targetlevel;
 
 	extern bool waiting;
 
 	extern unsigned short crouchkey, jumpkey, forwardkey, backkey, leftkey, rightkey, drawkey, throwkey, attackkey;
-	extern unsigned short consolekey;
 }

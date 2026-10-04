@@ -36,22 +36,22 @@ void DefaultSettings(GameState& gamestate)
 	Game::newscreenwidth = kContextWidth = 1024;
 	Game::newscreenheight = kContextHeight = 768;
 	fullscreen = 0;
-	floatjump = 0;
-	autoslomo = 1;
+	gamestate.floatjump = 0;
+	gamestate.autoslomo = 1;
 	decalstoggle = true;
-	invertmouse = 0;
+	gamestate.invertmouse = 0;
 	bloodtoggle = 0;
-	foliage = 1;
+	gamestate.foliage = 1;
 	musictoggle = 1;
 	trilinear = 1;
 	gamestate.gamespeed = 1;
-	damageeffects = 0;
-	texttoggle = 1;
-	alwaysblur = 0;
-	showpoints = 0;
-	showdamagebar = 0;
-	immediate = 0;
-	velocityblur = 0;
+	gamestate.damageeffects = 0;
+	gamestate.texttoggle = 1;
+	gamestate.alwaysblur = 0;
+	gamestate.showpoints = 0;
+	gamestate.showdamagebar = 0;
+	gamestate.immediate = 0;
+	gamestate.velocityblur = 0;
 	volume = 0.8f;
 	ambientsound = 1;
 	devtools = 0;
@@ -65,7 +65,7 @@ void DefaultSettings(GameState& gamestate)
 	Game::drawkey = SDL_SCANCODE_E;
 	Game::throwkey = SDL_SCANCODE_Q;
 	Game::attackkey = MOUSEBUTTON_LEFT;
-	Game::consolekey = SDL_SCANCODE_GRAVE;
+	gamestate.consolekey = SDL_SCANCODE_GRAVE;
 
 	Game::newdetail = detail;
 }
@@ -78,10 +78,10 @@ void SaveSettings(GameState& gamestate)
 	if (Game::newdetail > 2) {
 		Game::newdetail = 2;
 	}
-	if (Game::newscreenwidth < minscreenwidth || Game::newscreenwidth > gamestate.maxscreenwidth) {
+	if (Game::newscreenwidth < gamestate.minscreenwidth || Game::newscreenwidth > gamestate.maxscreenwidth) {
 		Game::newscreenwidth = screenwidth;
 	}
-	if (Game::newscreenheight < minscreenheight || Game::newscreenheight > gamestate.maxscreenheight) {
+	if (Game::newscreenheight < gamestate.minscreenheight || Game::newscreenheight > gamestate.maxscreenheight) {
 		Game::newscreenheight = screenheight;
 	}
 	errno = 0;
@@ -103,7 +103,7 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nOverall Detail(0,1,2) higher=better:\n";
 	opstream << Game::newdetail;
 	opstream << "\nFloating jump:\n";
-	opstream << floatjump;
+	opstream << gamestate.floatjump;
 	opstream << "\nMouse jump:\n";
 	opstream << gamestate.mousejump;
 	opstream << "\nAmbient sound:\n";
@@ -111,9 +111,9 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nBlood (0,1,2):\n";
 	opstream << bloodtoggle;
 	opstream << "\nAuto slomo:\n";
-	opstream << autoslomo;
+	opstream << gamestate.autoslomo;
 	opstream << "\nFoliage:\n";
-	opstream << foliage;
+	opstream << gamestate.foliage;
 	opstream << "\nMusic:\n";
 	opstream << musictoggle;
 	opstream << "\nTrilinear:\n";
@@ -121,24 +121,24 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nDecals(shadows,blood puddles,etc):\n";
 	opstream << decalstoggle;
 	opstream << "\nInvert mouse:\n";
-	opstream << invertmouse;
+	opstream << gamestate.invertmouse;
 	opstream << "\nGamespeed:\n";
 	if (gamestate.oldgamespeed == 0) {
 		gamestate.oldgamespeed = 1;
 	}
 	opstream << gamestate.oldgamespeed;
 	opstream << "\nDamage effects(blackout, doublevision):\n";
-	opstream << damageeffects;
+	opstream << gamestate.damageeffects;
 	opstream << "\nText:\n";
-	opstream << texttoggle;
+	opstream << gamestate.texttoggle;
 	opstream << "\nShow Points:\n";
-	opstream << showpoints;
+	opstream << gamestate.showpoints;
 	opstream << "\nAlways Blur:\n";
-	opstream << alwaysblur;
+	opstream << gamestate.alwaysblur;
 	opstream << "\nImmediate mode (turn on on G5):\n";
-	opstream << immediate;
+	opstream << gamestate.immediate;
 	opstream << "\nVelocity blur:\n";
-	opstream << velocityblur;
+	opstream << gamestate.velocityblur;
 	opstream << "\nVolume:\n";
 	opstream << volume;
 	opstream << "\nForward key:\n";
@@ -160,15 +160,15 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nAttack key:\n";
 	opstream << Game::attackkey;
 	opstream << "\nConsole key:\n";
-	opstream << Game::consolekey;
+	opstream << gamestate.consolekey;
 	opstream << "\nDamage bar:\n";
-	opstream << showdamagebar;
+	opstream << gamestate.showdamagebar;
 	opstream << "\nStereoMode:\n";
 	opstream << stereomode;
 	opstream << "\nStereoSeparation:\n";
 	opstream << stereoseparation;
 	opstream << "\nStereoReverse:\n";
-	opstream << stereoreverse;
+	opstream << gamestate.stereoreverse;
 	opstream << "\n";
 	opstream.close();
 }
@@ -203,14 +203,14 @@ bool LoadSettings(GameState& gamestate)
 
 		if (!strncmp(setting, "Screenwidth", 11)) {
 			ipstream >> kContextWidth;
-			if (kContextWidth < (int)minscreenwidth || kContextWidth >(int)gamestate.maxscreenwidth) {
-				kContextWidth = (int)minscreenwidth;
+			if (kContextWidth < (int)gamestate.minscreenwidth || kContextWidth >(int)gamestate.maxscreenwidth) {
+				kContextWidth = (int)gamestate.minscreenwidth;
 			}
 		}
 		else if (!strncmp(setting, "Screenheight", 12)) {
 			ipstream >> kContextHeight;
-			if (kContextHeight < (int)minscreenheight || kContextHeight >(int)gamestate.maxscreenheight) {
-				kContextHeight = (int)minscreenheight;
+			if (kContextHeight < (int)gamestate.minscreenheight || kContextHeight >(int)gamestate.maxscreenheight) {
+				kContextHeight = (int)gamestate.minscreenheight;
 			}
 		}
 		else if (!strncmp(setting, "Fullscreen", 10)) {
@@ -226,7 +226,7 @@ bool LoadSettings(GameState& gamestate)
 			ipstream >> detail;
 		}
 		else if (!strncmp(setting, "Floating jump", 13)) {
-			ipstream >> floatjump;
+			ipstream >> gamestate.floatjump;
 		}
 		else if (!strncmp(setting, "Mouse jump", 10)) {
 			ipstream >> gamestate.mousejump;
@@ -238,10 +238,10 @@ bool LoadSettings(GameState& gamestate)
 			ipstream >> bloodtoggle;
 		}
 		else if (!strncmp(setting, "Auto slomo", 10)) {
-			ipstream >> autoslomo;
+			ipstream >> gamestate.autoslomo;
 		}
 		else if (!strncmp(setting, "Foliage", 7)) {
-			ipstream >> foliage;
+			ipstream >> gamestate.foliage;
 		}
 		else if (!strncmp(setting, "Music", 5)) {
 			ipstream >> musictoggle;
@@ -253,7 +253,7 @@ bool LoadSettings(GameState& gamestate)
 			ipstream >> decalstoggle;
 		}
 		else if (!strncmp(setting, "Invert mouse", 12)) {
-			ipstream >> invertmouse;
+			ipstream >> gamestate.invertmouse;
 		}
 		else if (!strncmp(setting, "Gamespeed", 9)) {
 			ipstream >> gamestate.gamespeed;
@@ -264,25 +264,25 @@ bool LoadSettings(GameState& gamestate)
 			}
 		}
 		else if (!strncmp(setting, "Damage effects", 14)) {
-			ipstream >> damageeffects;
+			ipstream >> gamestate.damageeffects;
 		}
 		else if (!strncmp(setting, "Text", 4)) {
-			ipstream >> texttoggle;
+			ipstream >> gamestate.texttoggle;
 		}
 		else if (!strncmp(setting, "Devtools", 8)) {
 			ipstream >> devtools;
 		}
 		else if (!strncmp(setting, "Show Points", 11)) {
-			ipstream >> showpoints;
+			ipstream >> gamestate.showpoints;
 		}
 		else if (!strncmp(setting, "Always Blur", 11)) {
-			ipstream >> alwaysblur;
+			ipstream >> gamestate.alwaysblur;
 		}
 		else if (!strncmp(setting, "Immediate mode ", 15)) {
-			ipstream >> immediate;
+			ipstream >> gamestate.immediate;
 		}
 		else if (!strncmp(setting, "Velocity blur", 13)) {
-			ipstream >> velocityblur;
+			ipstream >> gamestate.velocityblur;
 		}
 		else if (!strncmp(setting, "Volume", 6)) {
 			ipstream >> volume;
@@ -315,10 +315,10 @@ bool LoadSettings(GameState& gamestate)
 			ipstream >> Game::attackkey;
 		}
 		else if (!strncmp(setting, "Console key", 11)) {
-			ipstream >> Game::consolekey;
+			ipstream >> gamestate.consolekey;
 		}
 		else if (!strncmp(setting, "Damage bar", 10)) {
-			ipstream >> showdamagebar;
+			ipstream >> gamestate.showdamagebar;
 		}
 		else if (!strncmp(setting, "StereoMode", 10)) {
 			int i;
@@ -329,7 +329,7 @@ bool LoadSettings(GameState& gamestate)
 			ipstream >> stereoseparation;
 		}
 		else if (!strncmp(setting, "StereoReverse", 13)) {
-			ipstream >> stereoreverse;
+			ipstream >> gamestate.stereoreverse;
 		}
 		else {
 			ipstream >> string;
@@ -357,10 +357,10 @@ bool LoadSettings(GameState& gamestate)
 	if (detail < 0) {
 		detail = 0;
 	}
-	if (screenwidth < minscreenwidth || screenwidth > gamestate.maxscreenwidth) {
+	if (screenwidth < gamestate.minscreenwidth || screenwidth > gamestate.maxscreenwidth) {
 		screenwidth = 1024;
 	}
-	if (screenheight < minscreenheight || screenheight > gamestate.maxscreenheight) {
+	if (screenheight < gamestate.minscreenheight || screenheight > gamestate.maxscreenheight) {
 		screenheight = 768;
 	}
 

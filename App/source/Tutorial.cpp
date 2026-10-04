@@ -174,7 +174,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			Person::players[1]->aitype = passivetype;
 			break;
 		case 37:
-			damagedealt = 0;
+			gamestate.damagedealt = 0;
 			damagetaken = 0;
 			maxtime = 50;
 			gamestate.cananger = 1;
@@ -709,7 +709,7 @@ void Tutorial::DrawTextInfo(GameState& gamestate)
 		break;
 	case 37:
 		string1 = "Now spar with the enemy for " + std::to_string(int(maxtime - stagetime)) + " more seconds.";
-		string2 = "Damage dealt: " + std::to_string(int(damagedealt));
+		string2 = "Damage dealt: " + std::to_string(int(gamestate.damagedealt));
 		string3 = "Damage taken: " + std::to_string(int(damagetaken));
 		break;
 	case 38:
@@ -797,7 +797,7 @@ void Tutorial::DrawTextInfo(GameState& gamestate)
 	Game::text->glPrintOutlined(0.5, 0.5, 0.5, 1, screenwidth / 2 - 7.6 * string3.size() * screenwidth / 1024 * .8, 0 + screenheight * 1 / 10 - 40 * .8 * screenwidth / 1024, string3, 1, 1.5 * screenwidth / 1024 * .8, screenwidth, screenheight);
 }
 
-void Tutorial::DoStuff(float timemultiplier, bool bloodtoggleflag)
+void Tutorial::DoStuff(float timemultiplier, bool bloodtoggleflag, GameState& gamestate)
 {
 	Vector3 temp;
 	Vector3 temp2;
@@ -827,7 +827,7 @@ void Tutorial::DoStuff(float timemultiplier, bool bloodtoggleflag)
 
 			Game::fireSound();
 
-			Game::flash();
+			Game::flash(gamestate);
 		}
 	}
 	else {
@@ -836,7 +836,7 @@ void Tutorial::DoStuff(float timemultiplier, bool bloodtoggleflag)
 
 			Person::players[0]->coords = (oldtemp + oldtemp2) / 2;
 
-			Game::flash();
+			Game::flash(gamestate);
 		}
 	}
 	if (stage >= 14 && stage < 50) {

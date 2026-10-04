@@ -57,12 +57,12 @@ extern float accountcampaigntime[10];
 extern int accountcampaignchoicesmade[10];
 extern int accountcampaignchoices[10][5000];
 
-void Dispose()
+void Dispose(GameState& gamestate)
 {
 
-	if (Game::endgame == 2) {
+	if (gamestate.endgame == 2) {
 		Account::active().endGame();
-		Game::endgame = 0;
+		gamestate.endgame = 0;
 	}
 
 	Account::saveFile(Folders::getUserSavePath());
@@ -85,7 +85,7 @@ void Game::newGame()
 	skybox = new SkyBox();
 }
 
-void Game::deleteGame()
+void Game::deleteGame(GameState& gamestate)
 {
 	delete skybox;
 	delete text;
@@ -94,7 +94,7 @@ void Game::deleteGame()
 	glDeleteTextures(1, &screentexture);
 	glDeleteTextures(1, &screentexture2);
 
-	Dispose();
+	Dispose(gamestate);
 }
 
 void LoadSave(const std::string& fileName, GLubyte* array, GameState& gamestate)
@@ -357,10 +357,10 @@ void Game::LoadingScreen(GameState& gamestate)
 		if (flashamount > 1) {
 			flashamount = 1;
 		}
-		if (flashdelay <= 0) {
+		if (gamestate.flashdelay <= 0) {
 			flashamount = LoadingClock::decayFlash(flashamount, elapsed);
 		}
-		flashdelay--;
+		gamestate.flashdelay--;
 		if (flashamount < 0) {
 			flashamount = 0;
 		}
@@ -379,7 +379,7 @@ void Game::LoadingScreen(GameState& gamestate)
 		glScalef(screenwidth, screenheight, 1);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
-		glColor4f(flashr, flashg, flashb, flashamount);
+		glColor4f(gamestate.flashr, gamestate.flashg, gamestate.flashb, flashamount);
 		glBegin(GL_QUADS);
 		glVertex3f(0, 0, 0.0f);
 		glVertex3f(256, 0, 0.0f);
@@ -598,7 +598,7 @@ void Game::InitGame(GameState& gamestate)
 	mainmenu = 1;
 
 	gamestate.stillloading = 0;
-	firstLoadDone = false;
+	gamestate.firstLoadDone = false;
 
 	newdetail = detail;
 	newscreenwidth = screenwidth;
@@ -750,7 +750,7 @@ void Game::LoadStuff(GameState& gamestate)
 	LoadSave("Textures/WolfBloodFur.png", &PersonType::types[wolftype].bloodText[0], gamestate);
 	LoadSave("Textures/BloodFur.png", &PersonType::types[rabbittype].bloodText[0], gamestate);
 
-	oldenvironment = -4;
+	gamestate.oldenvironment = -4;
 
 	gameon = 1;
 	mainmenu = 0;
@@ -826,5 +826,5 @@ void Game::LoadStuff(GameState& gamestate)
 	gamestate.changedelay = 1;
 
 	gamestate.visibleloading = false;
-	firstLoadDone = true;
+	gamestate.firstLoadDone = true;
 }

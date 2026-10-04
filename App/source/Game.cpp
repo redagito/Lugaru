@@ -20,6 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Game.hpp"
 #include "GameGlobals.h"
+#include "GameState.hpp"
 
 #include "Audio/openal_wrapper.hpp"
 #include "Level/Dialog.hpp"
@@ -38,7 +39,7 @@ void Game::fireSound(int sound)
     emit_sound_at(sound);
 }
 
-void Game::inputText(std::string& str, unsigned* charselected)
+void Game::inputText(std::string& str, unsigned* charselected, GameState& gamestate)
 {
     SDL_Event evenement;
 
@@ -49,7 +50,7 @@ void Game::inputText(std::string& str, unsigned* charselected)
 
     while (SDL_PollEvent(&evenement)) {
         if (!sdlEventProc(evenement)) {
-            tryquit = 1;
+            gamestate.tryquit = 1;
             break;
         }
         switch (evenement.type) {

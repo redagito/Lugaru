@@ -291,7 +291,7 @@ void Menu::drawItems()
     }
 }
 
-void Menu::updateSettingsMenu()
+void Menu::updateSettingsMenu(GameState& gamestate)
 {
     std::string sbuf = std::string("Resolution: ") + std::to_string(newscreenwidth) + "*" + std::to_string(newscreenheight);
     if (((float)newscreenwidth <= (float)newscreenheight * 1.61) && ((float)newscreenwidth >= (float)newscreenheight * 1.59)) {
@@ -320,10 +320,10 @@ void Menu::updateSettingsMenu()
     setText(4, ismotionblur ? "Blur Effects: Enabled (less compatible)" : "Blur Effects: Disabled (more compatible)");
     setText(5, decalstoggle ? "Decals: Enabled (slower)" : "Decals: Disabled");
     setText(6, musictoggle ? "Music: Enabled" : "Music: Disabled");
-    setText(9, invertmouse ? "Invert mouse: Yes" : "Invert mouse: No");
+    setText(9, gamestate.invertmouse ? "Invert mouse: Yes" : "Invert mouse: No");
     setText(10, std::string("Mouse Speed: ") + std::to_string(int(usermousesensitivity * 5)));
     setText(11, std::string("Volume: ") + std::to_string(int(volume * 100)) + "%");
-    setText(13, showdamagebar ? "Damage Bar: On" : "Damage Bar: Off");
+    setText(13, gamestate.showdamagebar ? "Damage Bar: On" : "Damage Bar: Off");
     if ((newdetail == detail) && (newscreenheight == (int)screenheight) && (newscreenwidth == (int)screenwidth)) {
         setText(8, "Back");
     } else {
@@ -331,14 +331,14 @@ void Menu::updateSettingsMenu()
     }
 }
 
-void Menu::updateStereoConfigMenu()
+void Menu::updateStereoConfigMenu(GameState& gamestate)
 {
     setText(0, std::string("Stereo mode: ") + StereoModeName(newstereomode));
     setText(1, std::string("Stereo separation: ") + std::to_string(stereoseparation));
-    setText(2, std::string("Reverse stereo: ") + (stereoreverse ? "Yes" : "No"));
+    setText(2, std::string("Reverse stereo: ") + (gamestate.stereoreverse ? "Yes" : "No"));
 }
 
-void Menu::updateControlsMenu()
+void Menu::updateControlsMenu(GameState& gamestate)
 {
     setText(0, (std::string) "Forwards: " + (keyselect == 0 ? "_" : Input::keyToChar(forwardkey)));
     setText(1, (std::string) "Back: " + (keyselect == 1 ? "_" : Input::keyToChar(backkey)));
@@ -350,7 +350,7 @@ void Menu::updateControlsMenu()
     setText(7, (std::string) "Throw: " + (keyselect == 7 ? "_" : Input::keyToChar(throwkey)));
     setText(8, (std::string) "Attack: " + (keyselect == 8 ? "_" : Input::keyToChar(attackkey)));
     if (devtools) {
-        setText(9, (std::string) "Console: " + (keyselect == 9 ? "_" : Input::keyToChar(consolekey)));
+        setText(9, (std::string) "Console: " + (keyselect == 9 ? "_" : Input::keyToChar(gamestate.consolekey)));
     }
 }
 
@@ -397,7 +397,7 @@ void Menu::Load(GameState& gamestate)
             addButton(7, "-Configure Controls-", 10 + 15, 90);
             addButton(12, "-Configure Stereo -", 10 + 15, 55);
             addButton(8, "Back", 10, 10);
-            updateSettingsMenu();
+            updateSettingsMenu(gamestate);
             break;
         case 4:
             addButton(0, "", 10, 400);
@@ -413,7 +413,7 @@ void Menu::Load(GameState& gamestate)
                 addButton(9, "", 10 + 10, 40);
             }
             addButton(devtools ? 10 : 9, "Back", 10, 10);
-            updateControlsMenu();
+            updateControlsMenu(gamestate);
             break;
         case 5: {
             LoadCampaign(gamestate);
@@ -513,7 +513,7 @@ void Menu::Load(GameState& gamestate)
             addButton(1, "", 10, 360);
             addButton(2, "", 40, 320);
             addButton(3, "Back", 10, 10);
-            updateStereoConfigMenu();
+            updateStereoConfigMenu(gamestate);
             break;
     }
 }
@@ -521,14 +521,14 @@ void Menu::Load(GameState& gamestate)
 void Menu::startChallengeLevel(int challengelevel, GameState& gamestate)
 {
     fireSound();
-    flash();
+    flash(gamestate);
 
     startbonustotal = 0;
 
     gamestate.loading = 2;
     gamestate.loadtime = 0;
     targetlevel = challengelevel;
-    if (firstLoadDone) {
+    if (gamestate.firstLoadDone) {
         TickOnceAfter(gamestate);
     } else {
         LoadStuff(gamestate);
@@ -554,7 +554,7 @@ void Menu::Tick(GameState& gamestate)
         //effects
         if (mainmenu >= 3 && mainmenu != 8) {
             fireSound();
-            flash();
+            flash(gamestate);
         }
         //go back
         switch (mainmenu) {
@@ -576,19 +576,19 @@ void Menu::Tick(GameState& gamestate)
     }
 
     //menu buttons
-    selected = getSelected(mousecoordh * 640 / screenwidth, 480 - mousecoordv * 480 / screenheight);
+    selected = getSelected(gamestate.mousecoordh * 640 / screenwidth, 480 - gamestate.mousecoordv * 480 / screenheight);
 
     // some specific case where we do something even if the left mouse button is not pressed.
-    if ((mainmenu == 5) && (endgame == 2)) {
+    if ((mainmenu == 5) && (gamestate.endgame == 2)) {
         Account::active().endGame();
-        endgame = 0;
+        gamestate.endgame = 0;
     }
     if (mainmenu == 10) {
-        endgame = 2;
+        gamestate.endgame = 2;
     }
     if (mainmenu == 18 && Input::isKeyPressed(MOUSEBUTTON_RIGHT) && selected == 1) {
         stereoseparation -= 0.001;
-        updateStereoConfigMenu();
+        updateStereoConfigMenu(gamestate);
     }
 
     static int oldmainmenu = mainmenu;
@@ -606,14 +606,14 @@ void Menu::Tick(GameState& gamestate)
                             resume_stream(leveltheme);
                         } else { //new game
                             fireSound(firestartsound);
-                            flash();
+                            flash(gamestate);
                             mainmenu = (Account::hasActive() ? 5 : 7);
                             selected = -1;
                         }
                         break;
                     case 2: //options
                         fireSound();
-                        flash();
+                        flash(gamestate);
                         mainmenu = 3;
                         if (newdetail > 2) {
                             newdetail = detail;
@@ -636,12 +636,12 @@ void Menu::Tick(GameState& gamestate)
                         break;
                     case 3:
                         fireSound();
-                        flash();
+                        flash(gamestate);
                         if (gameon) { //end game
                             gameon = 0;
                             mainmenu = 1;
                         } else { //quit
-                            tryquit = 1;
+                            gamestate.tryquit = 1;
                             pause_sound(stream_menutheme);
                         }
                         break;
@@ -695,18 +695,18 @@ void Menu::Tick(GameState& gamestate)
                         }
                         break;
                     case 7: // controls
-                        flash();
+                        flash(gamestate);
                         mainmenu = 4;
                         selected = -1;
                         keyselect = -1;
                         break;
                     case 8:
-                        flash();
+                        flash(gamestate);
                         SaveSettings(gamestate);
                         mainmenu = gameon ? 2 : 1;
                         break;
                     case 9:
-                        invertmouse = !invertmouse;
+                        gamestate.invertmouse = !gamestate.invertmouse;
                         break;
                     case 10:
                         usermousesensitivity += .2;
@@ -722,19 +722,19 @@ void Menu::Tick(GameState& gamestate)
                         OPENAL_SetSFXMasterVolume((int)(volume * 255));
                         break;
                     case 12:
-                        flash();
+                        flash(gamestate);
                         newstereomode = stereomode;
                         mainmenu = 18;
                         keyselect = -1;
                         break;
                     case 13:
-                        showdamagebar = !showdamagebar;
+                        gamestate.showdamagebar = !gamestate.showdamagebar;
                         break;
                     case 14:
                         toggleFullscreen();
                         break;
                 }
-                updateSettingsMenu();
+                updateSettingsMenu(gamestate);
                 break;
             case 4:
                 if (!waiting) {
@@ -746,22 +746,22 @@ void Menu::Tick(GameState& gamestate)
                         setKeySelected(gamestate);
                     }
                     if (selected == (devtools ? 10 : 9)) {
-                        flash();
+                        flash(gamestate);
                         mainmenu = 3;
                     }
                 }
-                updateControlsMenu();
+                updateControlsMenu(gamestate);
                 break;
             case 5:
                 fireSound();
-                flash();
+                flash(gamestate);
                 if ((selected - NB_CAMPAIGN_MENU_ITEM >= Account::active().getCampaignChoicesMade())) {
                     startbonustotal = 0;
 
                     gamestate.loading = 2;
                     gamestate.loadtime = 0;
                     targetlevel = 7;
-                    if (firstLoadDone) {
+                    if (gamestate.firstLoadDone) {
                         TickOnceAfter(gamestate);
                     } else {
                         LoadStuff(gamestate);
@@ -783,7 +783,7 @@ void Menu::Tick(GameState& gamestate)
                         gamestate.loading = 2;
                         gamestate.loadtime = 0;
                         targetlevel = -1;
-                        if (firstLoadDone) {
+                        if (gamestate.firstLoadDone) {
                             TickOnceAfter(gamestate);
                         } else {
                             LoadStuff(gamestate);
@@ -827,11 +827,11 @@ void Menu::Tick(GameState& gamestate)
             case 6:
                 fireSound();
                 if (selected == 1) {
-                    flash();
+                    flash(gamestate);
                     Account::destroyActive();
                     mainmenu = 7;
                 } else if (selected == 2) {
-                    flash();
+                    flash(gamestate);
                     mainmenu = 5;
                 }
                 break;
@@ -840,11 +840,11 @@ void Menu::Tick(GameState& gamestate)
                 if (selected == 0 && Account::getNbAccounts() < 8) {
                     entername = 1;
                 } else if (selected < Account::getNbAccounts() + 1) {
-                    flash();
+                    flash(gamestate);
                     mainmenu = 5;
                     Account::setActive(selected - 1);
                 } else if (selected == Account::getNbAccounts() + 1) {
-                    flash();
+                    flash(gamestate);
                     if (Account::hasActive()) {
                         mainmenu = 5;
                     } else {
@@ -857,7 +857,7 @@ void Menu::Tick(GameState& gamestate)
                 break;
             case 8:
                 fireSound();
-                flash();
+                flash(gamestate);
                 if (selected <= 2) {
                     Account::active().setDifficulty(selected);
                 }
@@ -869,14 +869,14 @@ void Menu::Tick(GameState& gamestate)
                 }
                 if (selected == numchallengelevels) {
                     fireSound();
-                    flash();
+                    flash(gamestate);
                     mainmenu = 5;
                 }
                 break;
             case 10:
                 if (selected == 3) {
                     fireSound();
-                    flash();
+                    flash(gamestate);
                     mainmenu = 5;
                 }
                 break;
@@ -895,16 +895,16 @@ void Menu::Tick(GameState& gamestate)
                             }
                         }
                     } else if (selected == 2) {
-                        stereoreverse = !stereoreverse;
+                        gamestate.stereoreverse = !gamestate.stereoreverse;
                     } else if (selected == 3) {
-                        flash();
+                        flash(gamestate);
                         mainmenu = 3;
 
                         stereomode = newstereomode;
                         InitStereo(stereomode, kContextWidth, kContextHeight);
                     }
                 }
-                updateStereoConfigMenu();
+                updateStereoConfigMenu(gamestate);
                 break;
         }
     }
@@ -912,14 +912,14 @@ void Menu::Tick(GameState& gamestate)
     OPENAL_SetFrequency(channels[stream_menutheme]);
 
     if (entername) {
-        inputText(newusername, &newuserselected);
+        inputText(newusername, &newuserselected, gamestate);
         if (!waiting) {                 // the input as finished
             if (!newusername.empty()) { // with enter
                 Account::add(std::string(newusername));
 
                 mainmenu = 8;
 
-                flash();
+                flash(gamestate);
 
                 fireSound(firestartsound);
 
@@ -999,7 +999,7 @@ int setKeySelected_thread(void* data)
                 attackkey = scancode;
                 break;
             case 9:
-                consolekey = scancode;
+                gamestate.consolekey = scancode;
                 break;
             default:
                 break;

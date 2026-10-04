@@ -25,21 +25,12 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 float volume = 0;
 bool ismotionblur = false;
 float usermousesensitivity = 0;
-bool floatjump = false;
-bool cellophane = false;
-bool autoslomo = false;
 bool decalstoggle = false;
-bool invertmouse = false;
-bool texttoggle = false;
 float blurness = 0;
-float targetblurness = 0;
 float windvar = 0;
-float precipdelay = 0;
 int difficulty = 0;
 float multiplier = 0;
-float realmultiplier = 0;
 float screenwidth = 0, screenheight = 0;
-float minscreenwidth = 640, minscreenheight = 480;
 bool fullscreen = 0;
 float viewdistance = 0;
 Vector3 viewer;
@@ -60,33 +51,21 @@ float texdetail = 0;
 float realtexdetail = 0;
 float playerdist = 0;
 int slomo = 0;
-float slomodelay = 0;
 int bloodtoggle = 0;
 float camerashake = 0;
 float woozy = 0;
 float blackout = 0;
-bool foliage = false;
 bool musictoggle = false;
 bool trilinear;
 Weapons weapons;
-bool damageeffects = false;
 bool ambientsound = false;
-float flashamount = 0, flashr = 0, flashg = 0, flashb = 0;
-int flashdelay = 0;
-float motionbluramount = 0;
-bool showpoints = false;
-bool showdamagebar = false;
-bool alwaysblur = false;
-bool immediate = false;
-bool velocityblur = false;
+float flashamount = 0;
 Vector3 windvector;
 int mainmenu = 0;
 int whichjointstartarray[26] = { 0 };
 int whichjointendarray[26] = { 0 };
 
 float smoketex = 0;
-
-float damagedealt = 0;
 
 int maptype = 0;
 
@@ -102,7 +81,6 @@ float skyboxlightg = 0;
 float skyboxlightb = 0;
 
 int hostile = 0;
-float hostiletime = 0;
 
 bool devtools = false;
 
@@ -111,4 +89,3 @@ bool gamestarted = false;
 StereoMode stereomode = stereoNone;
 StereoMode newstereomode = stereoNone;
 float stereoseparation = 0.05;
-bool stereoreverse = false;

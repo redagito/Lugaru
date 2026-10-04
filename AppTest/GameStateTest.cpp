@@ -6,9 +6,7 @@
 
 #include <type_traits>
 
-#include "GameGlobals.h"
 #include "GameState.hpp"
-#include "Globals.h"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
 {
@@ -242,91 +240,6 @@ TEST_CASE("tranche 2 GameState members are per instance", "[gamestate]")
 		REQUIRE(std::is_same<decltype(a.freeze), bool>::value);
 		REQUIRE(std::is_same<decltype(a.winfreeze), bool>::value);
 		REQUIRE(std::is_same<decltype(a.cananger), bool>::value);
-	}
-}
-
-// Temporary: this asserts the values of the globals that tranche 3 is about to
-// copy, so a wrong GameState default fails here while the source of truth is
-// still the global. Deleted once the globals are gone.
-TEST_CASE("tranche 3 globals still hold the values their GameState members copy", "[gamestate]")
-{
-	SECTION("screen limits")
-	{
-		REQUIRE(minscreenwidth == 640.0f);
-		REQUIRE(minscreenheight == 480.0f);
-	}
-
-	SECTION("session control")
-	{
-		REQUIRE(Game::tryquit == 0);
-		REQUIRE(Game::endgame == 0);
-	}
-
-	SECTION("timing")
-	{
-		REQUIRE(realmultiplier == 0.0f);
-		REQUIRE(hostiletime == 0.0f);
-	}
-
-	SECTION("screen flash")
-	{
-		REQUIRE(flashr == 0.0f);
-		REQUIRE(flashg == 0.0f);
-		REQUIRE(flashb == 0.0f);
-		REQUIRE(flashdelay == 0);
-	}
-
-	SECTION("precipitation pacing")
-	{
-		REQUIRE(precipdelay == 0.0f);
-	}
-
-	SECTION("display options")
-	{
-		REQUIRE(velocityblur == false);
-		REQUIRE(texttoggle == false);
-		REQUIRE(damagedealt == 0.0f);
-		REQUIRE(alwaysblur == false);
-		REQUIRE(immediate == false);
-		REQUIRE(floatjump == false);
-		REQUIRE(autoslomo == false);
-		REQUIRE(slomodelay == 0.0f);
-		REQUIRE(showdamagebar == false);
-		REQUIRE(showpoints == false);
-		REQUIRE(invertmouse == false);
-		REQUIRE(damageeffects == false);
-		REQUIRE(cellophane == false);
-		REQUIRE(foliage == false);
-	}
-
-	SECTION("motion blur")
-	{
-		REQUIRE(motionbluramount == 0.0f);
-		REQUIRE(targetblurness == 0.0f);
-	}
-
-	SECTION("level loading and switching")
-	{
-		REQUIRE(Game::oldenvironment == 0);
-		REQUIRE(Game::firstLoadDone == false);
-	}
-
-	SECTION("editor")
-	{
-		REQUIRE(Game::editorsize == 0.0f);
-	}
-
-	SECTION("console")
-	{
-		REQUIRE(Game::consolekey == 0);
-		REQUIRE(Game::consoleselected == 0);
-	}
-
-	SECTION("input")
-	{
-		REQUIRE(stereoreverse == false);
-		REQUIRE(Game::mousecoordh == 0);
-		REQUIRE(Game::mousecoordv == 0);
 	}
 }
 

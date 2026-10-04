@@ -52,7 +52,7 @@ namespace Game
 {
 
 	void newGame();
-	void deleteGame();
+	void deleteGame(GameState& gamestate);
 
 	void InitGame(GameState& gamestate);
 	void LoadStuff(GameState& gamestate);
@@ -72,7 +72,7 @@ namespace Game
 	void ProcessDevInput(GameState& gamestate);
 
 	void Tick(GameState& gamestate);
-	void TickOnce();
+	void TickOnce(GameState& gamestate);
 	void TickOnceAfter(GameState& gamestate);
 
 	void SetUpLighting();
@@ -80,8 +80,8 @@ namespace Game
 
 	void fireSound(int sound = fireendsound);
 
-	void inputText(std::string& str, unsigned* charselected);
-	void flash(float amount = 1, int delay = 1);
+	void inputText(std::string& str, unsigned* charselected, GameState& gamestate);
+	void flash(GameState& gamestate, float amount = 1, int delay = 1);
 }
 
 inline void swap_gl_buffers(void)

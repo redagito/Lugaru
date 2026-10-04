@@ -109,7 +109,7 @@ static Point gMidPoint;
 
 bool SetUp(GameState& gamestate)
 {
-	cellophane = 0;
+	gamestate.cellophane = 0;
 	texdetail = 4;
 	gamestate.slomospeed = 0.25;
 	slomofreq = 8012;
@@ -250,25 +250,25 @@ bool SetUp(GameState& gamestate)
 	return true;
 }
 
-static void DoMouse()
+static void DoMouse(GameState& gamestate)
 {
 
-	if (mainmenu || ((abs(deltah) < 10 * realmultiplier * 1000) && (abs(deltav) < 10 * realmultiplier * 1000))) {
+	if (mainmenu || ((abs(deltah) < 10 * gamestate.realmultiplier * 1000) && (abs(deltav) < 10 * gamestate.realmultiplier * 1000))) {
 		deltah *= usermousesensitivity;
 		deltav *= usermousesensitivity;
-		mousecoordh += deltah;
-		mousecoordv += deltav;
-		if (mousecoordh < 0) {
-			mousecoordh = 0;
+		gamestate.mousecoordh += deltah;
+		gamestate.mousecoordv += deltav;
+		if (gamestate.mousecoordh < 0) {
+			gamestate.mousecoordh = 0;
 		}
-		else if (mousecoordh >= kContextWidth) {
-			mousecoordh = kContextWidth - 1;
+		else if (gamestate.mousecoordh >= kContextWidth) {
+			gamestate.mousecoordh = kContextWidth - 1;
 		}
-		if (mousecoordv < 0) {
-			mousecoordv = 0;
+		if (gamestate.mousecoordv < 0) {
+			gamestate.mousecoordv = 0;
 		}
-		else if (mousecoordv >= kContextHeight) {
-			mousecoordv = kContextHeight - 1;
+		else if (gamestate.mousecoordv >= kContextHeight) {
+			gamestate.mousecoordv = kContextHeight - 1;
 		}
 	}
 }
@@ -335,7 +335,7 @@ void DoUpdate(GameState& gamestate)
 		count = 2;
 	}
 
-	realmultiplier = multiplier;
+	gamestate.realmultiplier = multiplier;
 	multiplier *= gamestate.gamespeed;
 	if (difficulty == 1) {
 		multiplier *= .9;
@@ -353,9 +353,9 @@ void DoUpdate(GameState& gamestate)
 	oldmult = multiplier;
 	multiplier /= (float)count;
 
-	DoMouse();
+	DoMouse(gamestate);
 
-	TickOnce();
+	TickOnce(gamestate);
 
 	for (int i = 0; i < count; i++) {
 		Tick(gamestate);
@@ -577,7 +577,7 @@ int main(int argc, char** argv)
 				}
 			}
 
-			while (!gameDone && !tryquit) {
+			while (!gameDone && !gamestate.tryquit) {
 				if (IsFocused()) {
 					gameFocused = true;
 
@@ -615,7 +615,7 @@ int main(int argc, char** argv)
 			// joined before gamestate goes out of scope below.
 			Menu::joinKeySelectThread();
 
-			deleteGame();
+			deleteGame(gamestate);
 		}
 
 		CleanUp();

@@ -355,14 +355,14 @@ public:
 
     void setProportions(float head, float body, float arms, float legs);
     float getProportion(int part) const;
-    Vector3 getProportionXYZ(int part) const;
+    Vector3 getProportionXYZ(int part, GameState& gamestate) const;
 
     void changeCreatureType(person_type type, bool tutorialActive, GameState& gamestate);
 
     void CheckKick(Terrain& terrain, bool tutorialActive, bool inDialog, float multiplier, int whichjointstartarray[26], GameState& gamestate);
     void CatchFire();
     void DoBlood(float howmuch, int which, bool tutorialActive);
-    void DoBloodBig(float howmuch, int which, bool tutorialActive);
+    void DoBloodBig(float howmuch, int which, bool tutorialActive, GameState& gamestate);
     bool DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutorialActive);
 
     bool wasIdle() { return animation_bits[animCurrent] & ab_idle; }

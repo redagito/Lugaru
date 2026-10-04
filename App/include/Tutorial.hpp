@@ -33,7 +33,7 @@ public:
 
     static void Do(float timemultiplier, bool bloodtoggleflag, GameState& gamestate);
     static void DrawTextInfo(GameState& gamestate);
-    static void DoStuff(float timemultiplier, bool bloodtoggleflag);
+    static void DoStuff(float timemultiplier, bool bloodtoggleflag, GameState& gamestate);
 
 private:
     static float success;
