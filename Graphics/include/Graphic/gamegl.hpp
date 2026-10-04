@@ -30,22 +30,9 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <string>
 
-#ifdef LUGARU_PLATFORM_WINDOWS
-#define WIN32_LEAN_AND_MEAN
-#define Polygon WinPolygon
-#include <windows.h>
-#undef Polygon
-#endif
-
-#define GL_GLEXT_PROTOTYPES 1
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <OpenGL/glext.h>
-#include <OpenGL/glu.h>
-#else
-#include <GL/gl.h>
-#include <GL/glext.h>
-#include <GL/glu.h>
-#endif
+// The platform GL includes live in Foundation, which owns the platform layer.
+// This header keeps its name and its standard library includes; it just no
+// longer owns a second copy of the GL-include logic.
+#include "Platform/OpenGLInclude.hpp"
 
 #endif

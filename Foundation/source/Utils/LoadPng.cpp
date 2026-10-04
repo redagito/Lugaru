@@ -6,16 +6,7 @@
 
 #include "Utils/ImageIO.hpp"
 #include "Platform/Platform.hpp"
-
-#ifdef LUGARU_PLATFORM_WINDOWS
-#define WIN32_LEAN_AND_MEAN
-#define Polygon WinPolygon
-#include <windows.h>
-#undef Polygon
-#include <GL/gl.h>
-#else
-#include "Graphic/gamegl.hpp"
-#endif
+#include "Platform/OpenGLInclude.hpp"
 
 /* stolen from public domain example.c code in libpng distribution. */
 bool load_png(const char* file_name, ImageRec& tex)
