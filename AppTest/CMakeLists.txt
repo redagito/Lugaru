@@ -24,6 +24,10 @@ target_link_libraries(${PROJECT_NAME}
 
 target_compile_definitions(${PROJECT_NAME}
 	PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
+	# The migration guard reads Globals.h, GameGlobals.h and GameState.hpp at
+	# runtime. Hand it their real location rather than letting it guess one from
+	# whatever working directory ctest was configured with.
+	PRIVATE LUGARU_APP_INCLUDE_DIR="${CMAKE_SOURCE_DIR}/App/include"
 )
 
 target_include_directories(${PROJECT_NAME}
