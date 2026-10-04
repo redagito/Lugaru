@@ -6,7 +6,9 @@
 
 #include <type_traits>
 
+#include "GameGlobals.h"
 #include "GameState.hpp"
+#include "Globals.h"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
 {
@@ -830,5 +832,158 @@ TEST_CASE("tranche 4 GameState members are per instance", "[gamestate]")
 		REQUIRE(std::is_same<decltype(a.playerdist), float>::value);
 		REQUIRE(std::is_same<decltype(a.canattack), bool>::value);
 		REQUIRE(std::is_same<decltype(a.reversaltrain), bool>::value);
+	}
+}
+
+// Tranche 5 covers twenty-six more scalar globals from App/include/Globals.h
+// and App/include/GameGlobals.h. These assertions read the globals themselves,
+// which is the whole point: the values are pinned here while the globals are
+// still the thing being read, so the literals below are observed rather than
+// assumed. The tranche that follows moves each of these into a GameState member
+// and asserts the same values against that member instead.
+//
+// Types are pinned next to the values on purpose. A value comparison such as
+// `REQUIRE(x == 0)` holds just as happily for an int as for a float, so on its
+// own it would let a member change type unnoticed.
+TEST_CASE("the tranche 5 globals start at the values GameState will carry", "[gamestate]")
+{
+	SECTION("display options")
+	{
+		REQUIRE(decalstoggle == false);
+	}
+
+	SECTION("motion blur")
+	{
+		REQUIRE(blurness == 0.0f);
+	}
+
+	SECTION("wind")
+	{
+		REQUIRE(windvar == 0.0f);
+	}
+
+	SECTION("terrain texturing and physics")
+	{
+		REQUIRE(texscale == 0.0f);
+		REQUIRE(gravity == 0.0f);
+	}
+
+	SECTION("time scale")
+	{
+		REQUIRE(slomo == 0);
+	}
+
+	SECTION("screen darkening from blood loss")
+	{
+		REQUIRE(blackout == 0.0f);
+	}
+
+	SECTION("screen flash")
+	{
+		REQUIRE(flashamount == 0.0f);
+	}
+
+	SECTION("level hostility")
+	{
+		REQUIRE(hostile == 0);
+	}
+
+	SECTION("skybox")
+	{
+		REQUIRE(skyboxtexture == false);
+	}
+
+	SECTION("devtools")
+	{
+		REQUIRE(devtools == false);
+	}
+
+	SECTION("texture detail")
+	{
+		REQUIRE(realtexdetail == 0.0f);
+	}
+
+	SECTION("options menu choices, not yet applied")
+	{
+		REQUIRE(Game::newdetail == 0);
+		REQUIRE(Game::newscreenwidth == 0);
+		REQUIRE(Game::newscreenheight == 0);
+	}
+
+	SECTION("session control")
+	{
+		REQUIRE(Game::gameon == false);
+	}
+
+	SECTION("editor")
+	{
+		REQUIRE(Game::editorenabled == false);
+		REQUIRE(Game::editortype == 0);
+		REQUIRE(Game::pathpointselected == 0);
+	}
+
+	SECTION("keybind capture")
+	{
+		REQUIRE(Game::keyselect == 0);
+	}
+
+	SECTION("audio")
+	{
+		REQUIRE(Game::musictype == 0);
+	}
+
+	SECTION("level loading")
+	{
+		REQUIRE(Game::stealthloading == false);
+	}
+
+	SECTION("free camera")
+	{
+		REQUIRE(Game::cameramode == false);
+	}
+
+	SECTION("console")
+	{
+		REQUIRE(Game::console == false);
+	}
+
+	SECTION("level switching")
+	{
+		REQUIRE(Game::targetlevel == 0);
+	}
+
+	SECTION("text input")
+	{
+		REQUIRE(Game::waiting == false);
+	}
+
+	SECTION("declared types are the ones the headers declare")
+	{
+		REQUIRE(std::is_same<decltype(decalstoggle), bool>::value);
+		REQUIRE(std::is_same<decltype(blurness), float>::value);
+		REQUIRE(std::is_same<decltype(windvar), float>::value);
+		REQUIRE(std::is_same<decltype(texscale), float>::value);
+		REQUIRE(std::is_same<decltype(gravity), float>::value);
+		REQUIRE(std::is_same<decltype(slomo), int>::value);
+		REQUIRE(std::is_same<decltype(blackout), float>::value);
+		REQUIRE(std::is_same<decltype(flashamount), float>::value);
+		REQUIRE(std::is_same<decltype(hostile), int>::value);
+		REQUIRE(std::is_same<decltype(skyboxtexture), bool>::value);
+		REQUIRE(std::is_same<decltype(devtools), bool>::value);
+		REQUIRE(std::is_same<decltype(realtexdetail), float>::value);
+		REQUIRE(std::is_same<decltype(Game::newdetail), int>::value);
+		REQUIRE(std::is_same<decltype(Game::newscreenwidth), int>::value);
+		REQUIRE(std::is_same<decltype(Game::newscreenheight), int>::value);
+		REQUIRE(std::is_same<decltype(Game::gameon), bool>::value);
+		REQUIRE(std::is_same<decltype(Game::editorenabled), bool>::value);
+		REQUIRE(std::is_same<decltype(Game::editortype), int>::value);
+		REQUIRE(std::is_same<decltype(Game::pathpointselected), int>::value);
+		REQUIRE(std::is_same<decltype(Game::keyselect), int>::value);
+		REQUIRE(std::is_same<decltype(Game::musictype), int>::value);
+		REQUIRE(std::is_same<decltype(Game::stealthloading), bool>::value);
+		REQUIRE(std::is_same<decltype(Game::cameramode), bool>::value);
+		REQUIRE(std::is_same<decltype(Game::console), bool>::value);
+		REQUIRE(std::is_same<decltype(Game::targetlevel), int>::value);
+		REQUIRE(std::is_same<decltype(Game::waiting), bool>::value);
 	}
 }
