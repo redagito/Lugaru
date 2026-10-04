@@ -168,9 +168,9 @@ bool SetUp(GameState& gamestate)
 	// TODO High DPI fix necessary?
 	Uint32 sdlflags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN; // | SDL_WINDOW_ALLOW_HIGHDPI;
 	if (commandLineOptions[FULLSCREEN]) {
-		fullscreen = commandLineOptions[FULLSCREEN].last()->type();
+		gamestate.fullscreen = commandLineOptions[FULLSCREEN].last()->type();
 	}
-	if (fullscreen) {
+	if (gamestate.fullscreen) {
 		sdlflags |= SDL_WINDOW_FULLSCREEN;
 	}
 	if (!commandLineOptions[NOMOUSEGRAB].last()->type()) {
@@ -253,11 +253,11 @@ bool SetUp(GameState& gamestate)
 static void DoMouse(GameState& gamestate)
 {
 
-	if (mainmenu || ((abs(deltah) < 10 * gamestate.realmultiplier * 1000) && (abs(deltav) < 10 * gamestate.realmultiplier * 1000))) {
-		deltah *= usermousesensitivity;
-		deltav *= usermousesensitivity;
-		gamestate.mousecoordh += deltah;
-		gamestate.mousecoordv += deltav;
+	if (mainmenu || ((abs(gamestate.deltah) < 10 * gamestate.realmultiplier * 1000) && (abs(gamestate.deltav) < 10 * gamestate.realmultiplier * 1000))) {
+		gamestate.deltah *= gamestate.usermousesensitivity;
+		gamestate.deltav *= gamestate.usermousesensitivity;
+		gamestate.mousecoordh += gamestate.deltah;
+		gamestate.mousecoordv += gamestate.deltav;
 		if (gamestate.mousecoordh < 0) {
 			gamestate.mousecoordh = 0;
 		}
@@ -583,13 +583,13 @@ int main(int argc, char** argv)
 
 					// check windows messages
 
-					deltah = 0;
-					deltav = 0;
+					gamestate.deltah = 0;
+					gamestate.deltav = 0;
 					SDL_Event e;
 					if (!waiting) {
 						// message pump
 						while (SDL_PollEvent(&e)) {
-							if (!sdlEventProc(e)) {
+							if (!sdlEventProc(e, gamestate)) {
 								gameDone = true;
 								break;
 							}

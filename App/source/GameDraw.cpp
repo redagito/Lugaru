@@ -93,31 +93,31 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		}
 	}
 
-	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestate.gamestarted)) {
 		tempmult = multiplier;
 		multiplier = 0;
 	}
 
 	if (!mainmenu) {
 		if (editorenabled) {
-			numboundaries = mapradius * 2;
+			numboundaries = gamestate.mapradius * 2;
 			if (numboundaries > 360) {
 				numboundaries = 360;
 			}
 			for (int i = 0; i < numboundaries; i++) {
 				boundary[i] = 0;
 				boundary[i].z = 1;
-				boundary[i] = mapcenter + DoRotation(boundary[i] * mapradius, 0, i * (360 / ((float)(numboundaries))), 0);
+				boundary[i] = mapcenter + DoRotation(boundary[i] * gamestate.mapradius, 0, i * (360 / ((float)(numboundaries))), 0);
 			}
 		}
 
-		SetUpLighting();
+		SetUpLighting(gamestate);
 
 		static int changed;
 		changed = 0;
 
 		int olddrawmode = drawmode;
-		if (ismotionblur && !gamestate.loading) {
+		if (gamestate.ismotionblur && !gamestate.loading) {
 			if ((magnitudeSquared(&Person::players[0]->velocity) > 200) && gamestate.velocityblur && !cameramode) {
 				drawmode = motionblurmode;
 				gamestate.motionbluramount = 200 / (magnitudeSquared(&Person::players[0]->velocity));
@@ -130,7 +130,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		}
 
 		if (slomo && !gamestate.loading) {
-			if (ismotionblur) {
+			if (gamestate.ismotionblur) {
 				drawmode = motionblurmode;
 			}
 			gamestate.motionbluramount = .2;
@@ -143,7 +143,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		}
 		if ((!changed && !slomo) || gamestate.loading) {
 			drawmode = normalmode;
-			if (ismotionblur && gamestate.alwaysblur) {
+			if (gamestate.ismotionblur && gamestate.alwaysblur) {
 				if (olddrawmode != realmotionblurmode) {
 					change = 1;
 				}
@@ -160,10 +160,10 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			}
 		}
 
-		if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
+		if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestate.gamestarted)) {
 			drawmode = normalmode;
 		}
-		if ((gamestate.freeze || gamestate.winfreeze) && ismotionblur && !mainmenu) {
+		if ((gamestate.freeze || gamestate.winfreeze) && gamestate.ismotionblur && !mainmenu) {
 			drawmode = radialzoommode;
 		}
 
@@ -176,17 +176,17 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		}
 
 		if (!texcoordwidth) {
-			texviewwidth = kTextureSize;
+			texviewwidth = gamestate.kTextureSize;
 			if (texviewwidth > screenwidth) {
 				texviewwidth = screenwidth;
 			}
-			texviewheight = kTextureSize;
+			texviewheight = gamestate.kTextureSize;
 			if (texviewheight > screenheight) {
 				texviewheight = screenheight;
 			}
 
-			texcoordwidth = screenwidth / kTextureSize;
-			texcoordheight = screenheight / kTextureSize;
+			texcoordwidth = screenwidth / gamestate.kTextureSize;
+			texcoordheight = screenheight / gamestate.kTextureSize;
 			if (texcoordwidth > 1) {
 				texcoordwidth = 1;
 			}
@@ -220,15 +220,15 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		// Move the camera for the current eye's point of view.
 		// Reverse the movement if we're reversing stereo
 		// StereoSide is -1/0/+1 precisely so it can be multiplied in (see Stereo.hpp).
-		glTranslatef((stereoseparation / 2) * static_cast<float>(side) * (gamestate.stereoreverse ? -1 : 1), 0, 0);
+		glTranslatef((gamestate.stereoseparation / 2) * static_cast<float>(side) * (gamestate.stereoreverse ? -1 : 1), 0, 0);
 
 		//camera effects
 		if (!cameramode && !gamestate.freeze && !gamestate.winfreeze) {
 			//shake
 			glRotatef(float(rand() % 100) / 10 * camerashake /*+(woozy*woozy)/10*/, 0, 0, 1);
 			//sway
-			glRotatef(pitch + sin(woozy / 2) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 1, 0, 0);
-			glRotatef(yaw + sin(woozy) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 0, 1, 0);
+			glRotatef(pitch + sin(gamestate.woozy / 2) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 1, 0, 0);
+			glRotatef(yaw + sin(gamestate.woozy) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 0, 1, 0);
 		}
 		if (cameramode || gamestate.freeze || gamestate.winfreeze) {
 			glRotatef(pitch, 1, 0, 0);
@@ -262,7 +262,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glRotatef((float)(abs(rand() % 100)) / 1000, 0, 1, 0);
 		}
 
-		skybox->draw(environment == desertenvironment, viewdistance, blurness, skyboxtexture, Vector3{ skyboxr, skyboxg, skyboxb });
+		skybox->draw(environment == desertenvironment, viewdistance, blurness, skyboxtexture, Vector3{ gamestate.skyboxr, gamestate.skyboxg, gamestate.skyboxb });
 		glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, 0);
 		glPopMatrix();
 		glTranslatef(-viewer.x, -viewer.y, -viewer.z);
@@ -288,7 +288,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 							size = .4f;
 							opacity = .4 - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
 							if (k != 0 && Tutorial::active) {
-								opacity = .2 + .2 * sin(smoketex * 6 + i) - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
+								opacity = .2 + .2 * sin(gamestate.smoketex * 6 + i) - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
 							}
 							terrain.MakeDecal(shadowdecal, point, size, opacity, rotation, environment);
 							for (unsigned int l = 0; l < terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
@@ -298,7 +298,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 									size = .4f;
 									opacity = .4f;
 									if (k != 0 && Tutorial::active) {
-										opacity = .2 + .2 * sin(smoketex * 6 + i);
+										opacity = .2 + .2 * sin(gamestate.smoketex * 6 + i);
 									}
 									Object::objects[j]->model.MakeDecal(shadowdecal, &point, &size, &opacity, &rotation);
 								}
@@ -320,7 +320,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 							size = .4f;
 							opacity = .4 - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 5;
 							if (k != 0 && Tutorial::active) {
-								opacity = .2 + .2 * sin(smoketex * 6 + i) - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
+								opacity = .2 + .2 * sin(gamestate.smoketex * 6 + i) - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
 							}
 							terrain.MakeDecal(shadowdecal, point, size, opacity * .7, rotation, environment);
 							for (unsigned int l = 0; l < terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
@@ -335,7 +335,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 									size = .4f;
 									opacity = .4f;
 									if (k != 0 && Tutorial::active) {
-										opacity = .2 + .2 * sin(smoketex * 6 + i);
+										opacity = .2 + .2 * sin(gamestate.smoketex * 6 + i);
 									}
 									Object::objects[j]->model.MakeDecal(shadowdecal, &point, &size, &opacity, &rotation);
 								}
@@ -431,15 +431,15 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		}
 
 		if (!cameramode && musictype == stream_fighttheme) {
-			playerdist = distsqflat(&Person::players[0]->coords, &viewer);
+			gamestate.playerdist = distsqflat(&Person::players[0]->coords, &viewer);
 		}
 		else {
-			playerdist = -100;
+			gamestate.playerdist = -100;
 		}
 		glPushMatrix();
 		glCullFace(GL_BACK);
 		glEnable(GL_TEXTURE_2D);
-		Object::Draw(decalstoggle, multiplier, viewer, viewdistance, fadestart, environment, light, frustum, terrain, detail, blurness, windvar, playerdist);
+		Object::Draw(decalstoggle, multiplier, viewer, viewdistance, fadestart, environment, light, frustum, terrain, detail, blurness, windvar, gamestate.playerdist);
 		glPopMatrix();
 
 		//draw hawk
@@ -847,15 +847,15 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				if (editorenabled) {
 					string = "Object size: " + std::to_string(gamestate.editorsize);
 					text->glPrint(10, 75, string, 0, .8, 1024, 768);
-					if (editoryaw >= 0) {
-						string = "Object yaw: " + std::to_string(editoryaw);
+					if (gamestate.editoryaw >= 0) {
+						string = "Object yaw: " + std::to_string(gamestate.editoryaw);
 					}
 					else {
 						string = "Object yaw: Random";
 					}
 					text->glPrint(10, 90, string, 0, .8, 1024, 768);
-					if (editorpitch >= 0) {
-						string = "Object pitch: " + std::to_string(editorpitch);
+					if (gamestate.editorpitch >= 0) {
+						string = "Object pitch: " + std::to_string(gamestate.editorpitch);
 					}
 					else {
 						string = "Object pitch: Random";
@@ -973,9 +973,9 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			}
 			glColor4f(0, 0, 0, blackout);
 			if (!Person::players[0]->dead) {
-				if ((Person::players[0]->bloodloss / Person::players[0]->damagetolerance * (sin(woozy) / 4 + .5)) * .3 < .3) {
-					glColor4f(0, 0, 0, Person::players[0]->blooddimamount * Person::players[0]->bloodloss / Person::players[0]->damagetolerance * (sin(woozy) / 4 + .5) * .3);
-					blackout = Person::players[0]->blooddimamount * Person::players[0]->bloodloss / Person::players[0]->damagetolerance * (sin(woozy) / 4 + .5) * .3;
+				if ((Person::players[0]->bloodloss / Person::players[0]->damagetolerance * (sin(gamestate.woozy) / 4 + .5)) * .3 < .3) {
+					glColor4f(0, 0, 0, Person::players[0]->blooddimamount * Person::players[0]->bloodloss / Person::players[0]->damagetolerance * (sin(gamestate.woozy) / 4 + .5) * .3);
+					blackout = Person::players[0]->blooddimamount * Person::players[0]->bloodloss / Person::players[0]->damagetolerance * (sin(gamestate.woozy) / 4 + .5) * .3;
 				}
 				else {
 					glColor4f(0, 0, 0, Person::players[0]->blooddimamount * .3);
@@ -1352,7 +1352,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-					glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, kTextureSize, kTextureSize, 0);
+					glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, gamestate.kTextureSize, gamestate.kTextureSize, 0);
 				}
 			}
 		}
@@ -1586,7 +1586,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		}
 	}
 
-	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestate.gamestarted)) {
 		multiplier = tempmult;
 	}
 
@@ -1594,7 +1594,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		DrawMenu(gamestate);
 	}
 
-	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestate.gamestarted)) {
 		tempmult = multiplier;
 		multiplier = 0;
 	}
@@ -1614,7 +1614,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		drawtoggle = 0;
 	}
 
-	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gameon) || (!gameon && gamestate.gamestarted)) {
 		multiplier = tempmult;
 	}
 	//Jordan fixed your warning!

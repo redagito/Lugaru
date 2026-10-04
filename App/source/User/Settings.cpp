@@ -31,18 +31,18 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 void DefaultSettings(GameState& gamestate)
 {
 	detail = 2;
-	ismotionblur = 1;
-	usermousesensitivity = 1;
+	gamestate.ismotionblur = 1;
+	gamestate.usermousesensitivity = 1;
 	Game::newscreenwidth = kContextWidth = 1024;
 	Game::newscreenheight = kContextHeight = 768;
-	fullscreen = 0;
+	gamestate.fullscreen = 0;
 	gamestate.floatjump = 0;
 	gamestate.autoslomo = 1;
 	decalstoggle = true;
 	gamestate.invertmouse = 0;
 	bloodtoggle = 0;
 	gamestate.foliage = 1;
-	musictoggle = 1;
+	gamestate.musictoggle = 1;
 	trilinear = 1;
 	gamestate.gamespeed = 1;
 	gamestate.damageeffects = 0;
@@ -52,19 +52,19 @@ void DefaultSettings(GameState& gamestate)
 	gamestate.showdamagebar = 0;
 	gamestate.immediate = 0;
 	gamestate.velocityblur = 0;
-	volume = 0.8f;
-	ambientsound = 1;
+	gamestate.volume = 0.8f;
+	gamestate.ambientsound = 1;
 	devtools = 0;
 
-	Game::crouchkey = SDL_SCANCODE_LSHIFT;
-	Game::jumpkey = SDL_SCANCODE_SPACE;
-	Game::leftkey = SDL_SCANCODE_A;
-	Game::forwardkey = SDL_SCANCODE_W;
-	Game::backkey = SDL_SCANCODE_S;
-	Game::rightkey = SDL_SCANCODE_D;
-	Game::drawkey = SDL_SCANCODE_E;
-	Game::throwkey = SDL_SCANCODE_Q;
-	Game::attackkey = MOUSEBUTTON_LEFT;
+	gamestate.crouchkey = SDL_SCANCODE_LSHIFT;
+	gamestate.jumpkey = SDL_SCANCODE_SPACE;
+	gamestate.leftkey = SDL_SCANCODE_A;
+	gamestate.forwardkey = SDL_SCANCODE_W;
+	gamestate.backkey = SDL_SCANCODE_S;
+	gamestate.rightkey = SDL_SCANCODE_D;
+	gamestate.drawkey = SDL_SCANCODE_E;
+	gamestate.throwkey = SDL_SCANCODE_Q;
+	gamestate.attackkey = MOUSEBUTTON_LEFT;
 	gamestate.consolekey = SDL_SCANCODE_GRAVE;
 
 	Game::newdetail = detail;
@@ -95,11 +95,11 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nScreenheight:\n";
 	opstream << Game::newscreenheight;
 	opstream << "\nFullscreen:\n";
-	opstream << fullscreen;
+	opstream << gamestate.fullscreen;
 	opstream << "\nMouse sensitivity:\n";
-	opstream << usermousesensitivity;
+	opstream << gamestate.usermousesensitivity;
 	opstream << "\nBlur(0,1):\n";
-	opstream << ismotionblur;
+	opstream << gamestate.ismotionblur;
 	opstream << "\nOverall Detail(0,1,2) higher=better:\n";
 	opstream << Game::newdetail;
 	opstream << "\nFloating jump:\n";
@@ -107,7 +107,7 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nMouse jump:\n";
 	opstream << gamestate.mousejump;
 	opstream << "\nAmbient sound:\n";
-	opstream << ambientsound;
+	opstream << gamestate.ambientsound;
 	opstream << "\nBlood (0,1,2):\n";
 	opstream << bloodtoggle;
 	opstream << "\nAuto slomo:\n";
@@ -115,7 +115,7 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nFoliage:\n";
 	opstream << gamestate.foliage;
 	opstream << "\nMusic:\n";
-	opstream << musictoggle;
+	opstream << gamestate.musictoggle;
 	opstream << "\nTrilinear:\n";
 	opstream << trilinear;
 	opstream << "\nDecals(shadows,blood puddles,etc):\n";
@@ -140,25 +140,25 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nVelocity blur:\n";
 	opstream << gamestate.velocityblur;
 	opstream << "\nVolume:\n";
-	opstream << volume;
+	opstream << gamestate.volume;
 	opstream << "\nForward key:\n";
-	opstream << Game::forwardkey;
+	opstream << gamestate.forwardkey;
 	opstream << "\nBack key:\n";
-	opstream << Game::backkey;
+	opstream << gamestate.backkey;
 	opstream << "\nLeft key:\n";
-	opstream << Game::leftkey;
+	opstream << gamestate.leftkey;
 	opstream << "\nRight key:\n";
-	opstream << Game::rightkey;
+	opstream << gamestate.rightkey;
 	opstream << "\nJump key:\n";
-	opstream << Game::jumpkey;
+	opstream << gamestate.jumpkey;
 	opstream << "\nCrouch key:\n";
-	opstream << Game::crouchkey;
+	opstream << gamestate.crouchkey;
 	opstream << "\nDraw key:\n";
-	opstream << Game::drawkey;
+	opstream << gamestate.drawkey;
 	opstream << "\nThrow key:\n";
-	opstream << Game::throwkey;
+	opstream << gamestate.throwkey;
 	opstream << "\nAttack key:\n";
-	opstream << Game::attackkey;
+	opstream << gamestate.attackkey;
 	opstream << "\nConsole key:\n";
 	opstream << gamestate.consolekey;
 	opstream << "\nDamage bar:\n";
@@ -166,7 +166,7 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nStereoMode:\n";
 	opstream << stereomode;
 	opstream << "\nStereoSeparation:\n";
-	opstream << stereoseparation;
+	opstream << gamestate.stereoseparation;
 	opstream << "\nStereoReverse:\n";
 	opstream << gamestate.stereoreverse;
 	opstream << "\n";
@@ -214,13 +214,13 @@ bool LoadSettings(GameState& gamestate)
 			}
 		}
 		else if (!strncmp(setting, "Fullscreen", 10)) {
-			ipstream >> fullscreen;
+			ipstream >> gamestate.fullscreen;
 		}
 		else if (!strncmp(setting, "Mouse sensitivity", 17)) {
-			ipstream >> usermousesensitivity;
+			ipstream >> gamestate.usermousesensitivity;
 		}
 		else if (!strncmp(setting, "Blur", 4)) {
-			ipstream >> ismotionblur;
+			ipstream >> gamestate.ismotionblur;
 		}
 		else if (!strncmp(setting, "Overall Detail", 14)) {
 			ipstream >> detail;
@@ -232,7 +232,7 @@ bool LoadSettings(GameState& gamestate)
 			ipstream >> gamestate.mousejump;
 		}
 		else if (!strncmp(setting, "Ambient sound", 13)) {
-			ipstream >> ambientsound;
+			ipstream >> gamestate.ambientsound;
 		}
 		else if (!strncmp(setting, "Blood", 5)) {
 			ipstream >> bloodtoggle;
@@ -244,7 +244,7 @@ bool LoadSettings(GameState& gamestate)
 			ipstream >> gamestate.foliage;
 		}
 		else if (!strncmp(setting, "Music", 5)) {
-			ipstream >> musictoggle;
+			ipstream >> gamestate.musictoggle;
 		}
 		else if (!strncmp(setting, "Trilinear", 9)) {
 			ipstream >> trilinear;
@@ -285,34 +285,34 @@ bool LoadSettings(GameState& gamestate)
 			ipstream >> gamestate.velocityblur;
 		}
 		else if (!strncmp(setting, "Volume", 6)) {
-			ipstream >> volume;
+			ipstream >> gamestate.volume;
 		}
 		else if (!strncmp(setting, "Forward key", 11)) {
-			ipstream >> Game::forwardkey;
+			ipstream >> gamestate.forwardkey;
 		}
 		else if (!strncmp(setting, "Back key", 8)) {
-			ipstream >> Game::backkey;
+			ipstream >> gamestate.backkey;
 		}
 		else if (!strncmp(setting, "Left key", 8)) {
-			ipstream >> Game::leftkey;
+			ipstream >> gamestate.leftkey;
 		}
 		else if (!strncmp(setting, "Right key", 9)) {
-			ipstream >> Game::rightkey;
+			ipstream >> gamestate.rightkey;
 		}
 		else if (!strncmp(setting, "Jump key", 8)) {
-			ipstream >> Game::jumpkey;
+			ipstream >> gamestate.jumpkey;
 		}
 		else if (!strncmp(setting, "Crouch key", 10)) {
-			ipstream >> Game::crouchkey;
+			ipstream >> gamestate.crouchkey;
 		}
 		else if (!strncmp(setting, "Draw key", 8)) {
-			ipstream >> Game::drawkey;
+			ipstream >> gamestate.drawkey;
 		}
 		else if (!strncmp(setting, "Throw key", 9)) {
-			ipstream >> Game::throwkey;
+			ipstream >> gamestate.throwkey;
 		}
 		else if (!strncmp(setting, "Attack key", 10)) {
-			ipstream >> Game::attackkey;
+			ipstream >> gamestate.attackkey;
 		}
 		else if (!strncmp(setting, "Console key", 11)) {
 			ipstream >> gamestate.consolekey;
@@ -326,7 +326,7 @@ bool LoadSettings(GameState& gamestate)
 			stereomode = (StereoMode)i;
 		}
 		else if (!strncmp(setting, "StereoSeparation", 16)) {
-			ipstream >> stereoseparation;
+			ipstream >> gamestate.stereoseparation;
 		}
 		else if (!strncmp(setting, "StereoReverse", 13)) {
 			ipstream >> gamestate.stereoreverse;

@@ -29,6 +29,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <json/value.h>
 
+struct GameState;
+
 class DialogScene
 {
 public:
@@ -58,7 +60,7 @@ public:
 	Dialog(FILE* tfile);
 	Dialog(Json::Value);
 	Dialog(int type, std::string filename);
-	void tick(int id);
+	void tick(int id, GameState& gamestate);
 	void play(PlaySoundCallback callback);
 	void save(FILE* tfile);
 	Json::Value save();

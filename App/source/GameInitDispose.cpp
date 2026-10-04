@@ -456,7 +456,7 @@ void FadeLoadingScreen(float howmuch)
 
 void Game::InitGame(GameState& gamestate)
 {
-	numchallengelevels = 14;
+	gamestate.numchallengelevels = 14;
 
 	Account::loadFile(Folders::getUserSavePath());
 
@@ -565,10 +565,10 @@ void Game::InitGame(GameState& gamestate)
 	// 
 	OPENAL_Init(44100, 32, 0, commandLineOptions[OPENALINFO]);
 
-	OPENAL_SetSFXMasterVolume((int)(volume * 255));
+	OPENAL_SetSFXMasterVolume((int)(gamestate.volume * 255));
 	loadAllSounds();
 
-	if (musictoggle) {
+	if (gamestate.musictoggle) {
 		emit_stream_np(stream_menutheme);
 	}
 
@@ -613,7 +613,7 @@ void Game::InitGame(GameState& gamestate)
 	Person::players.emplace_back(new Person(gamestate));
 }
 
-void Game::LoadScreenTexture()
+void Game::LoadScreenTexture(GameState& gamestate)
 {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -627,7 +627,7 @@ void Game::LoadScreenTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, kTextureSize, kTextureSize, 0);
+	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, gamestate.kTextureSize, gamestate.kTextureSize, 0);
 }
 
 //TODO: move LoadStuff() closer to GameTick.cpp to get rid of various vars shared in Game.hpp
@@ -659,15 +659,15 @@ void Game::LoadStuff(GameState& gamestate)
 
 	if (detail == 2) {
 		texdetail = 1;
-		kTextureSize = 1024;
+		gamestate.kTextureSize = 1024;
 	}
 	else if (detail == 1) {
 		texdetail = 2;
-		kTextureSize = 512;
+		gamestate.kTextureSize = 512;
 	}
 	else {
 		texdetail = 4;
-		kTextureSize = 256;
+		gamestate.kTextureSize = 256;
 	}
 
 	realtexdetail = texdetail;
@@ -715,7 +715,7 @@ void Game::LoadStuff(GameState& gamestate)
 
 	LoadingScreen(gamestate);
 
-	SetUpLighting();
+	SetUpLighting(gamestate);
 
 	fadestart = .6;
 	gravity = -10;
@@ -814,7 +814,7 @@ void Game::LoadStuff(GameState& gamestate)
 	LoadingScreen(gamestate);
 
 	if (!screentexture) {
-		LoadScreenTexture();
+		LoadScreenTexture(gamestate);
 	}
 
 	if (targetlevel != 7) {

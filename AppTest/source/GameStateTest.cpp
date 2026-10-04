@@ -6,9 +6,7 @@
 
 #include <type_traits>
 
-#include "GameGlobals.h"
 #include "GameState.hpp"
-#include "Globals.h"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
 {
@@ -530,27 +528,15 @@ TEST_CASE("tranche 3 GameState members are per instance", "[gamestate]")
 }
 
 // Tranche 4 covers the remaining scalar globals from App/include/Globals.h and
-// App/include/GameGlobals.h. Each member is asserted twice: once against the
-// live global it is being migrated from, and once against the literal the
-// global was initialised with. The first form is what makes the copy in
-// GameState observable rather than assumed - if the two ever drift apart the
-// comparison fails here, while the global is still around to compare against.
-// Once the globals are gone, the literal forms are what remain.
+// App/include/GameGlobals.h. Each member's default is pinned to the literal the
+// global it came from was initialised with, and its declared type to the type
+// that global declared.
 TEST_CASE("GameState tranche 4 members start at their historical global defaults", "[gamestate]")
 {
 	GameState s;
 
 	SECTION("keybinds")
 	{
-		REQUIRE(s.crouchkey == Game::crouchkey);
-		REQUIRE(s.jumpkey == Game::jumpkey);
-		REQUIRE(s.forwardkey == Game::forwardkey);
-		REQUIRE(s.backkey == Game::backkey);
-		REQUIRE(s.leftkey == Game::leftkey);
-		REQUIRE(s.rightkey == Game::rightkey);
-		REQUIRE(s.drawkey == Game::drawkey);
-		REQUIRE(s.throwkey == Game::throwkey);
-		REQUIRE(s.attackkey == Game::attackkey);
 		REQUIRE(s.crouchkey == 0);
 		REQUIRE(s.jumpkey == 0);
 		REQUIRE(s.forwardkey == 0);
@@ -564,9 +550,6 @@ TEST_CASE("GameState tranche 4 members start at their historical global defaults
 
 	SECTION("audio")
 	{
-		REQUIRE(s.volume == volume);
-		REQUIRE(s.musictoggle == musictoggle);
-		REQUIRE(s.ambientsound == ambientsound);
 		REQUIRE(s.volume == 0.0f);
 		REQUIRE(s.musictoggle == false);
 		REQUIRE(s.ambientsound == false);
@@ -574,10 +557,6 @@ TEST_CASE("GameState tranche 4 members start at their historical global defaults
 
 	SECTION("display settings")
 	{
-		REQUIRE(s.fullscreen == fullscreen);
-		REQUIRE(s.ismotionblur == ismotionblur);
-		REQUIRE(s.usermousesensitivity == usermousesensitivity);
-		REQUIRE(s.stereoseparation == stereoseparation);
 		REQUIRE(s.fullscreen == false);
 		REQUIRE(s.ismotionblur == false);
 		REQUIRE(s.usermousesensitivity == 0.0f);
@@ -589,18 +568,11 @@ TEST_CASE("GameState tranche 4 members start at their historical global defaults
 		// kTextureSize looks like a compile-time constant, but Game::LoadStuff
 		// assigns it from the runtime detail setting, so it is state and starts
 		// at zero rather than at any of the values it is later given.
-		REQUIRE(s.kTextureSize == kTextureSize);
 		REQUIRE(s.kTextureSize == 0);
 	}
 
 	SECTION("skybox")
 	{
-		REQUIRE(s.skyboxr == skyboxr);
-		REQUIRE(s.skyboxg == skyboxg);
-		REQUIRE(s.skyboxb == skyboxb);
-		REQUIRE(s.skyboxlightr == skyboxlightr);
-		REQUIRE(s.skyboxlightg == skyboxlightg);
-		REQUIRE(s.skyboxlightb == skyboxlightb);
 		REQUIRE(s.skyboxr == 0.0f);
 		REQUIRE(s.skyboxg == 0.0f);
 		REQUIRE(s.skyboxb == 0.0f);
@@ -611,62 +583,49 @@ TEST_CASE("GameState tranche 4 members start at their historical global defaults
 
 	SECTION("mouse look")
 	{
-		REQUIRE(s.deltah == Game::deltah);
-		REQUIRE(s.deltav == Game::deltav);
 		REQUIRE(s.deltah == 0.0f);
 		REQUIRE(s.deltav == 0.0f);
 	}
 
 	SECTION("world map")
 	{
-		REQUIRE(s.mapradius == Game::mapradius);
-		REQUIRE(s.maptype == maptype);
 		REQUIRE(s.mapradius == 0.0f);
 		REQUIRE(s.maptype == 0);
 	}
 
 	SECTION("editor camera")
 	{
-		REQUIRE(s.editoryaw == Game::editoryaw);
-		REQUIRE(s.editorpitch == Game::editorpitch);
 		REQUIRE(s.editoryaw == 0.0f);
 		REQUIRE(s.editorpitch == 0.0f);
 	}
 
 	SECTION("challenge progression")
 	{
-		REQUIRE(s.numchallengelevels == Game::numchallengelevels);
 		REQUIRE(s.numchallengelevels == 0);
 	}
 
 	SECTION("session start")
 	{
-		REQUIRE(s.gamestarted == gamestarted);
 		REQUIRE(s.gamestarted == false);
 	}
 
 	SECTION("camera wobble")
 	{
-		REQUIRE(s.woozy == woozy);
 		REQUIRE(s.woozy == 0.0f);
 	}
 
 	SECTION("smoke animation")
 	{
-		REQUIRE(s.smoketex == smoketex);
 		REQUIRE(s.smoketex == 0.0f);
 	}
 
 	SECTION("object culling")
 	{
-		REQUIRE(s.playerdist == playerdist);
 		REQUIRE(s.playerdist == 0.0f);
 	}
 
 	SECTION("tutorial gating")
 	{
-		REQUIRE(s.canattack == canattack);
-		REQUIRE(s.reversaltrain == reversaltrain);
 		REQUIRE(s.canattack == false);
 		REQUIRE(s.reversaltrain == false);
 	}
@@ -870,45 +829,5 @@ TEST_CASE("tranche 4 GameState members are per instance", "[gamestate]")
 		REQUIRE(std::is_same<decltype(a.playerdist), float>::value);
 		REQUIRE(std::is_same<decltype(a.canattack), bool>::value);
 		REQUIRE(std::is_same<decltype(a.reversaltrain), bool>::value);
-	}
-
-	SECTION("each member still has exactly the type the global declared")
-	{
-		REQUIRE(std::is_same<decltype(a.crouchkey), decltype(Game::crouchkey)>::value);
-		REQUIRE(std::is_same<decltype(a.jumpkey), decltype(Game::jumpkey)>::value);
-		REQUIRE(std::is_same<decltype(a.forwardkey), decltype(Game::forwardkey)>::value);
-		REQUIRE(std::is_same<decltype(a.backkey), decltype(Game::backkey)>::value);
-		REQUIRE(std::is_same<decltype(a.leftkey), decltype(Game::leftkey)>::value);
-		REQUIRE(std::is_same<decltype(a.rightkey), decltype(Game::rightkey)>::value);
-		REQUIRE(std::is_same<decltype(a.drawkey), decltype(Game::drawkey)>::value);
-		REQUIRE(std::is_same<decltype(a.throwkey), decltype(Game::throwkey)>::value);
-		REQUIRE(std::is_same<decltype(a.attackkey), decltype(Game::attackkey)>::value);
-		REQUIRE(std::is_same<decltype(a.volume), decltype(volume)>::value);
-		REQUIRE(std::is_same<decltype(a.musictoggle), decltype(musictoggle)>::value);
-		REQUIRE(std::is_same<decltype(a.ambientsound), decltype(ambientsound)>::value);
-		REQUIRE(std::is_same<decltype(a.fullscreen), decltype(fullscreen)>::value);
-		REQUIRE(std::is_same<decltype(a.ismotionblur), decltype(ismotionblur)>::value);
-		REQUIRE(std::is_same<decltype(a.usermousesensitivity), decltype(usermousesensitivity)>::value);
-		REQUIRE(std::is_same<decltype(a.stereoseparation), decltype(stereoseparation)>::value);
-		REQUIRE(std::is_same<decltype(a.kTextureSize), decltype(kTextureSize)>::value);
-		REQUIRE(std::is_same<decltype(a.skyboxr), decltype(skyboxr)>::value);
-		REQUIRE(std::is_same<decltype(a.skyboxg), decltype(skyboxg)>::value);
-		REQUIRE(std::is_same<decltype(a.skyboxb), decltype(skyboxb)>::value);
-		REQUIRE(std::is_same<decltype(a.skyboxlightr), decltype(skyboxlightr)>::value);
-		REQUIRE(std::is_same<decltype(a.skyboxlightg), decltype(skyboxlightg)>::value);
-		REQUIRE(std::is_same<decltype(a.skyboxlightb), decltype(skyboxlightb)>::value);
-		REQUIRE(std::is_same<decltype(a.deltah), decltype(Game::deltah)>::value);
-		REQUIRE(std::is_same<decltype(a.deltav), decltype(Game::deltav)>::value);
-		REQUIRE(std::is_same<decltype(a.mapradius), decltype(Game::mapradius)>::value);
-		REQUIRE(std::is_same<decltype(a.maptype), decltype(maptype)>::value);
-		REQUIRE(std::is_same<decltype(a.editoryaw), decltype(Game::editoryaw)>::value);
-		REQUIRE(std::is_same<decltype(a.editorpitch), decltype(Game::editorpitch)>::value);
-		REQUIRE(std::is_same<decltype(a.numchallengelevels), decltype(Game::numchallengelevels)>::value);
-		REQUIRE(std::is_same<decltype(a.gamestarted), decltype(gamestarted)>::value);
-		REQUIRE(std::is_same<decltype(a.woozy), decltype(woozy)>::value);
-		REQUIRE(std::is_same<decltype(a.smoketex), decltype(smoketex)>::value);
-		REQUIRE(std::is_same<decltype(a.playerdist), decltype(playerdist)>::value);
-		REQUIRE(std::is_same<decltype(a.canattack), decltype(canattack)>::value);
-		REQUIRE(std::is_same<decltype(a.reversaltrain), decltype(reversaltrain)>::value);
 	}
 }

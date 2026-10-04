@@ -45,7 +45,6 @@ enum StereoSide
 
 extern StereoMode stereomode;
 extern StereoMode newstereomode;
-extern float stereoseparation;
 
 bool CanInitStereo(StereoMode mode);
 void InitStereo(StereoMode mode, int contextWidth, int contextHeight);

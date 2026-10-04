@@ -298,7 +298,7 @@ void Menu::updateSettingsMenu(GameState& gamestate)
         sbuf += " (widescreen)";
     }
     setText(0, sbuf);
-    setText(14, fullscreen ? "Fullscreen: On" : "Fullscreen: Off");
+    setText(14, gamestate.fullscreen ? "Fullscreen: On" : "Fullscreen: Off");
     if (newdetail == 0) {
         setText(1, "Detail: Low");
     }
@@ -317,12 +317,12 @@ void Menu::updateSettingsMenu(GameState& gamestate)
     if (bloodtoggle == 2) {
         setText(2, "Blood: On, high detail (slower)");
     }
-    setText(4, ismotionblur ? "Blur Effects: Enabled (less compatible)" : "Blur Effects: Disabled (more compatible)");
+    setText(4, gamestate.ismotionblur ? "Blur Effects: Enabled (less compatible)" : "Blur Effects: Disabled (more compatible)");
     setText(5, decalstoggle ? "Decals: Enabled (slower)" : "Decals: Disabled");
-    setText(6, musictoggle ? "Music: Enabled" : "Music: Disabled");
+    setText(6, gamestate.musictoggle ? "Music: Enabled" : "Music: Disabled");
     setText(9, gamestate.invertmouse ? "Invert mouse: Yes" : "Invert mouse: No");
-    setText(10, std::string("Mouse Speed: ") + std::to_string(int(usermousesensitivity * 5)));
-    setText(11, std::string("Volume: ") + std::to_string(int(volume * 100)) + "%");
+    setText(10, std::string("Mouse Speed: ") + std::to_string(int(gamestate.usermousesensitivity * 5)));
+    setText(11, std::string("Volume: ") + std::to_string(int(gamestate.volume * 100)) + "%");
     setText(13, gamestate.showdamagebar ? "Damage Bar: On" : "Damage Bar: Off");
     if ((newdetail == detail) && (newscreenheight == (int)screenheight) && (newscreenwidth == (int)screenwidth)) {
         setText(8, "Back");
@@ -334,21 +334,21 @@ void Menu::updateSettingsMenu(GameState& gamestate)
 void Menu::updateStereoConfigMenu(GameState& gamestate)
 {
     setText(0, std::string("Stereo mode: ") + StereoModeName(newstereomode));
-    setText(1, std::string("Stereo separation: ") + std::to_string(stereoseparation));
+    setText(1, std::string("Stereo separation: ") + std::to_string(gamestate.stereoseparation));
     setText(2, std::string("Reverse stereo: ") + (gamestate.stereoreverse ? "Yes" : "No"));
 }
 
 void Menu::updateControlsMenu(GameState& gamestate)
 {
-    setText(0, (std::string) "Forwards: " + (keyselect == 0 ? "_" : Input::keyToChar(forwardkey)));
-    setText(1, (std::string) "Back: " + (keyselect == 1 ? "_" : Input::keyToChar(backkey)));
-    setText(2, (std::string) "Left: " + (keyselect == 2 ? "_" : Input::keyToChar(leftkey)));
-    setText(3, (std::string) "Right: " + (keyselect == 3 ? "_" : Input::keyToChar(rightkey)));
-    setText(4, (std::string) "Crouch: " + (keyselect == 4 ? "_" : Input::keyToChar(crouchkey)));
-    setText(5, (std::string) "Jump: " + (keyselect == 5 ? "_" : Input::keyToChar(jumpkey)));
-    setText(6, (std::string) "Draw: " + (keyselect == 6 ? "_" : Input::keyToChar(drawkey)));
-    setText(7, (std::string) "Throw: " + (keyselect == 7 ? "_" : Input::keyToChar(throwkey)));
-    setText(8, (std::string) "Attack: " + (keyselect == 8 ? "_" : Input::keyToChar(attackkey)));
+    setText(0, (std::string) "Forwards: " + (keyselect == 0 ? "_" : Input::keyToChar(gamestate.forwardkey)));
+    setText(1, (std::string) "Back: " + (keyselect == 1 ? "_" : Input::keyToChar(gamestate.backkey)));
+    setText(2, (std::string) "Left: " + (keyselect == 2 ? "_" : Input::keyToChar(gamestate.leftkey)));
+    setText(3, (std::string) "Right: " + (keyselect == 3 ? "_" : Input::keyToChar(gamestate.rightkey)));
+    setText(4, (std::string) "Crouch: " + (keyselect == 4 ? "_" : Input::keyToChar(gamestate.crouchkey)));
+    setText(5, (std::string) "Jump: " + (keyselect == 5 ? "_" : Input::keyToChar(gamestate.jumpkey)));
+    setText(6, (std::string) "Draw: " + (keyselect == 6 ? "_" : Input::keyToChar(gamestate.drawkey)));
+    setText(7, (std::string) "Throw: " + (keyselect == 7 ? "_" : Input::keyToChar(gamestate.throwkey)));
+    setText(8, (std::string) "Attack: " + (keyselect == 8 ? "_" : Input::keyToChar(gamestate.attackkey)));
     if (devtools) {
         setText(9, (std::string) "Console: " + (keyselect == 9 ? "_" : Input::keyToChar(gamestate.consolekey)));
     }
@@ -476,7 +476,7 @@ void Menu::Load(GameState& gamestate)
             addButton(2, "Insane", 10, 320);
             break;
         case 9:
-            for (int i = 0; i < numchallengelevels; i++) {
+            for (int i = 0; i < gamestate.numchallengelevels; i++) {
                std::string name = "Level ";
                 name += std::to_string(i + 1);
                 if (name.size() < 17) {
@@ -498,7 +498,7 @@ void Menu::Load(GameState& gamestate)
             }
 
             addButton(-1, "             High Score      Best Time", 10, 440);
-            addButton(numchallengelevels, "Back", 10, 10);
+            addButton(gamestate.numchallengelevels, "Back", 10, 10);
             break;
         case 10: {
             addLabel(0, campaignEndText[0], 80, 330);
@@ -587,7 +587,7 @@ void Menu::Tick(GameState& gamestate)
         gamestate.endgame = 2;
     }
     if (mainmenu == 18 && Input::isKeyPressed(MOUSEBUTTON_RIGHT) && selected == 1) {
-        stereoseparation -= 0.001;
+        gamestate.stereoseparation -= 0.001;
         updateStereoConfigMenu(gamestate);
     }
 
@@ -674,14 +674,14 @@ void Menu::Tick(GameState& gamestate)
                         }
                         break;
                     case 4:
-                        ismotionblur = !ismotionblur;
+                        gamestate.ismotionblur = !gamestate.ismotionblur;
                         break;
                     case 5:
                         decalstoggle = !decalstoggle;
                         break;
                     case 6:
-                        musictoggle = !musictoggle;
-                        if (musictoggle) {
+                        gamestate.musictoggle = !gamestate.musictoggle;
+                        if (gamestate.musictoggle) {
                             emit_stream_np(stream_menutheme);
                         } else {
                             pause_sound(leveltheme);
@@ -709,17 +709,17 @@ void Menu::Tick(GameState& gamestate)
                         gamestate.invertmouse = !gamestate.invertmouse;
                         break;
                     case 10:
-                        usermousesensitivity += .2;
-                        if (usermousesensitivity > 2) {
-                            usermousesensitivity = .2;
+                        gamestate.usermousesensitivity += .2;
+                        if (gamestate.usermousesensitivity > 2) {
+                            gamestate.usermousesensitivity = .2;
                         }
                         break;
                     case 11:
-                        volume += .1f;
-                        if (volume > 1.0001f) {
-                            volume = 0;
+                        gamestate.volume += .1f;
+                        if (gamestate.volume > 1.0001f) {
+                            gamestate.volume = 0;
                         }
-                        OPENAL_SetSFXMasterVolume((int)(volume * 255));
+                        OPENAL_SetSFXMasterVolume((int)(gamestate.volume * 255));
                         break;
                     case 12:
                         flash(gamestate);
@@ -731,7 +731,7 @@ void Menu::Tick(GameState& gamestate)
                         gamestate.showdamagebar = !gamestate.showdamagebar;
                         break;
                     case 14:
-                        toggleFullscreen();
+                        toggleFullscreen(gamestate);
                         break;
                 }
                 updateSettingsMenu(gamestate);
@@ -864,10 +864,10 @@ void Menu::Tick(GameState& gamestate)
                 mainmenu = 5;
                 break;
             case 9:
-                if (selected < numchallengelevels && selected <= Account::active().getProgress()) {
+                if (selected < gamestate.numchallengelevels && selected <= Account::active().getProgress()) {
                     startChallengeLevel(selected, gamestate);
                 }
-                if (selected == numchallengelevels) {
+                if (selected == gamestate.numchallengelevels) {
                     fireSound();
                     flash(gamestate);
                     mainmenu = 5;
@@ -882,7 +882,7 @@ void Menu::Tick(GameState& gamestate)
                 break;
             case 18:
                 if (selected == 1) {
-                    stereoseparation += 0.001;
+                    gamestate.stereoseparation += 0.001;
                 } else {
                     fireSound();
                     if (selected == 0) {
@@ -972,31 +972,31 @@ int setKeySelected_thread(void* data)
         fireSound();
         switch (keyselect) {
             case 0:
-                forwardkey = scancode;
+                gamestate.forwardkey = scancode;
                 break;
             case 1:
-                backkey = scancode;
+                gamestate.backkey = scancode;
                 break;
             case 2:
-                leftkey = scancode;
+                gamestate.leftkey = scancode;
                 break;
             case 3:
-                rightkey = scancode;
+                gamestate.rightkey = scancode;
                 break;
             case 4:
-                crouchkey = scancode;
+                gamestate.crouchkey = scancode;
                 break;
             case 5:
-                jumpkey = scancode;
+                gamestate.jumpkey = scancode;
                 break;
             case 6:
-                drawkey = scancode;
+                gamestate.drawkey = scancode;
                 break;
             case 7:
-                throwkey = scancode;
+                gamestate.throwkey = scancode;
                 break;
             case 8:
-                attackkey = scancode;
+                gamestate.attackkey = scancode;
                 break;
             case 9:
                 gamestate.consolekey = scancode;

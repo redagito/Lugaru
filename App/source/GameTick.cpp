@@ -226,7 +226,7 @@ void Screenshot(void)
 	save_screenshot(filename);
 }
 
-void Game::SetUpLighting()
+void Game::SetUpLighting(GameState& gamestate)
 {
 	if (environment == snowyenvironment) {
 		light.setColors(.65f, .65f, .7f, .4f, .4f, .44f);
@@ -241,13 +241,13 @@ void Game::SetUpLighting()
 		light.setColors(1.f, 1.f, 1.f, .4f, .4f, .4f);
 	}
 	float average;
-	average = (skyboxlightr + skyboxlightg + skyboxlightb) / 3;
-	light.color[0] *= (skyboxlightr + average) / 2;
-	light.color[1] *= (skyboxlightg + average) / 2;
-	light.color[2] *= (skyboxlightb + average) / 2;
-	light.ambient[0] *= (skyboxlightr + average) / 2;
-	light.ambient[1] *= (skyboxlightg + average) / 2;
-	light.ambient[2] *= (skyboxlightb + average) / 2;
+	average = (gamestate.skyboxlightr + gamestate.skyboxlightg + gamestate.skyboxlightb) / 3;
+	light.color[0] *= (gamestate.skyboxlightr + average) / 2;
+	light.color[1] *= (gamestate.skyboxlightg + average) / 2;
+	light.color[2] *= (gamestate.skyboxlightb + average) / 2;
+	light.ambient[0] *= (gamestate.skyboxlightr + average) / 2;
+	light.ambient[1] *= (gamestate.skyboxlightg + average) / 2;
+	light.ambient[2] *= (gamestate.skyboxlightb + average) / 2;
 }
 
 void Setenvironment(int which, GameState& gamestate)
@@ -264,7 +264,7 @@ void Setenvironment(int which, GameState& gamestate)
 	if (environment == snowyenvironment) {
 		windvector = 0;
 		windvector.z = 3;
-		if (ambientsound) {
+		if (gamestate.ambientsound) {
 			emit_stream_np(stream_wind);
 		}
 
@@ -302,7 +302,7 @@ void Setenvironment(int which, GameState& gamestate)
 		Object::rocktextureptr.load("Textures/BoulderDesert.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 		Object::boxtextureptr.load("Textures/DesertBox.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
-		if (ambientsound) {
+		if (gamestate.ambientsound) {
 			emit_stream_np(stream_desertambient);
 		}
 
@@ -335,7 +335,7 @@ void Setenvironment(int which, GameState& gamestate)
 		Object::rocktextureptr.load("Textures/Boulder.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 		Object::boxtextureptr.load("Textures/GrassBox.jpg", 1, trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
-		if (ambientsound) {
+		if (gamestate.ambientsound) {
 			emit_stream_np(stream_wind, 100.);
 		}
 
@@ -423,9 +423,9 @@ void Game::ResetBeforeLevelLoad(bool tutorial, GameState& gamestate)
 	bonustime = 1;
 
 	skyboxtexture = 1;
-	skyboxr = 1;
-	skyboxg = 1;
-	skyboxb = 1;
+	gamestate.skyboxr = 1;
+	gamestate.skyboxg = 1;
+	gamestate.skyboxb = 1;
 
 	gamestate.freeze = 0;
 	gamestate.winfreeze = 0;
@@ -482,7 +482,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	if (!gamestate.stillloading) {
 		gamestate.loadtime = 0;
 	}
-	gamestarted = 1;
+	gamestate.gamestarted = 1;
 
 	numenvsounds = 0;
 
@@ -528,10 +528,10 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 		indemo = 0;
 	}
 	if (mapvers >= 5) {
-		funpackf(tfile, "Bi", &maptype);
+		funpackf(tfile, "Bi", &gamestate.maptype);
 	}
 	else {
-		maptype = mapkilleveryone;
+		gamestate.maptype = mapkilleveryone;
 	}
 	if (mapvers >= 6) {
 		funpackf(tfile, "Bi", &hostile);
@@ -547,21 +547,21 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 		fadestart = .6;
 	}
 	if (mapvers >= 2) {
-		funpackf(tfile, "Bb Bf Bf Bf", &skyboxtexture, &skyboxr, &skyboxg, &skyboxb);
+		funpackf(tfile, "Bb Bf Bf Bf", &skyboxtexture, &gamestate.skyboxr, &gamestate.skyboxg, &gamestate.skyboxb);
 	}
 	else {
 		skyboxtexture = 1;
-		skyboxr = 1;
-		skyboxg = 1;
-		skyboxb = 1;
+		gamestate.skyboxr = 1;
+		gamestate.skyboxg = 1;
+		gamestate.skyboxb = 1;
 	}
 	if (mapvers >= 10) {
-		funpackf(tfile, "Bf Bf Bf", &skyboxlightr, &skyboxlightg, &skyboxlightb);
+		funpackf(tfile, "Bf Bf Bf", &gamestate.skyboxlightr, &gamestate.skyboxlightg, &gamestate.skyboxlightb);
 	}
 	else {
-		skyboxlightr = skyboxr;
-		skyboxlightg = skyboxg;
-		skyboxlightb = skyboxb;
+		gamestate.skyboxlightr = gamestate.skyboxr;
+		gamestate.skyboxlightg = gamestate.skyboxg;
+		gamestate.skyboxlightb = gamestate.skyboxb;
 	}
 	/* TODO - This should be done in an other way so that we can rebuild main player as well (so coords would need to be copied from old ones after rebuilding) */
 	if (stealthloading) {
@@ -700,9 +700,9 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	}
 	Game::LoadingScreen(gamestate);
 
-	funpackf(tfile, "Bf Bf Bf Bf", &mapcenter.x, &mapcenter.y, &mapcenter.z, &mapradius);
+	funpackf(tfile, "Bf Bf Bf Bf", &mapcenter.x, &mapcenter.y, &mapcenter.z, &gamestate.mapradius);
 
-	SetUpLighting();
+	SetUpLighting(gamestate);
 
 	if (!stealthloading) {
 		Object::AddObjectsToTerrain(environment, terrain, detail);
@@ -829,7 +829,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	Game::LoadingScreen(gamestate);
 
 	OPENAL_StopSound(OPENAL_ALL);
-	if (ambientsound) {
+	if (gamestate.ambientsound) {
 		if (environment == snowyenvironment) {
 			emit_stream_np(stream_wind);
 		}
@@ -869,7 +869,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	if (!gamestate.stillloading) {
 		gamestate.loadtime = 0;
 	}
-	gamestarted = 1;
+	gamestate.gamestarted = 1;
 
 	numenvsounds = 0;
 
@@ -906,18 +906,18 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	if (mapvers < 13) {
 		std::cerr << name << " has obsolete map version " << mapvers << std::endl;
 	}
-	maptype = map_data["map"].get("type", mapkilleveryone).asInt();
+	gamestate.maptype = map_data["map"].get("type", mapkilleveryone).asInt();
 	hostile = map_data["map"].get("hostile", 1).asInt();
 	viewdistance = map_data["map"].get("viewdistance", 100).asFloat();
 	fadestart = map_data["map"].get("fadestart", .6).asFloat();
 
 	skyboxtexture = map_data["map"]["skybox"].get("texture", true).asBool();
-	skyboxr = map_data["map"]["skybox"].get("r", 1).asFloat();
-	skyboxg = map_data["map"]["skybox"].get("g", 1).asFloat();
-	skyboxb = map_data["map"]["skybox"].get("b", 1).asFloat();
-	skyboxlightr = map_data["map"]["skybox"].get("lightr", skyboxr).asFloat();
-	skyboxlightg = map_data["map"]["skybox"].get("lightg", skyboxg).asFloat();
-	skyboxlightb = map_data["map"]["skybox"].get("lightb", skyboxb).asFloat();
+	gamestate.skyboxr = map_data["map"]["skybox"].get("r", 1).asFloat();
+	gamestate.skyboxg = map_data["map"]["skybox"].get("g", 1).asFloat();
+	gamestate.skyboxb = map_data["map"]["skybox"].get("b", 1).asFloat();
+	gamestate.skyboxlightr = map_data["map"]["skybox"].get("lightr", gamestate.skyboxr).asFloat();
+	gamestate.skyboxlightg = map_data["map"]["skybox"].get("lightg", gamestate.skyboxg).asFloat();
+	gamestate.skyboxlightb = map_data["map"]["skybox"].get("lightb", gamestate.skyboxb).asFloat();
 
 	Game::LoadingScreen(gamestate);
 
@@ -996,9 +996,9 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	Game::LoadingScreen(gamestate);
 
 	mapcenter = map_data["map"]["center"];
-	mapradius = map_data["map"]["radius"].asFloat();
+	gamestate.mapradius = map_data["map"]["radius"].asFloat();
 
-	SetUpLighting();
+	SetUpLighting(gamestate);
 
 	if (!stealthloading) {
 		Object::AddObjectsToTerrain(environment, terrain, detail);
@@ -1051,7 +1051,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	Game::LoadingScreen(gamestate);
 
 	OPENAL_StopSound(OPENAL_ALL);
-	if (ambientsound) {
+	if (gamestate.ambientsound) {
 		if (environment == snowyenvironment) {
 			emit_stream_np(stream_wind);
 		}
@@ -1094,7 +1094,7 @@ void Game::ProcessInput(GameState& gamestate)
 			mainmenu = 0; // Unpause
 		}
 		// Play menu theme
-		if (musictoggle && (mainmenu == 1 || mainmenu == 2)) {
+		if (gamestate.musictoggle && (mainmenu == 1 || mainmenu == 2)) {
 			OPENAL_SetFrequency(OPENAL_ALL);
 			emit_stream_np(stream_menutheme);
 			pause_sound(leveltheme);
@@ -1108,7 +1108,7 @@ void Game::ProcessInput(GameState& gamestate)
 
 	/* Challenge mode */
 	if (!campaign && !mainmenu) {
-		if ((Input::isKeyPressed(jumpkey) || Input::isKeyPressed(SDL_SCANCODE_SPACE))) {
+		if ((Input::isKeyPressed(gamestate.jumpkey) || Input::isKeyPressed(SDL_SCANCODE_SPACE))) {
 			if (gamestate.winfreeze) {
 				gamestate.winfreeze = 0;
 			}
@@ -1156,22 +1156,22 @@ void Game::ProcessInput(GameState& gamestate)
 
 	if (Input::isKeyDown(SDL_SCANCODE_F7)) {
 		if (Input::isKeyDown(SDL_SCANCODE_LSHIFT)) {
-			stereoseparation -= 0.001;
+			gamestate.stereoseparation -= 0.001;
 		}
 		else {
-			stereoseparation -= 0.010;
+			gamestate.stereoseparation -= 0.010;
 		}
-		printf("Stereo separation decreased to %f\n", stereoseparation);
+		printf("Stereo separation decreased to %f\n", gamestate.stereoseparation);
 	}
 
 	if (Input::isKeyDown(SDL_SCANCODE_F8)) {
 		if (Input::isKeyDown(SDL_SCANCODE_LSHIFT)) {
-			stereoseparation += 0.001;
+			gamestate.stereoseparation += 0.001;
 		}
 		else {
-			stereoseparation += 0.010;
+			gamestate.stereoseparation += 0.010;
 		}
-		printf("Stereo separation increased to %f\n", stereoseparation);
+		printf("Stereo separation increased to %f\n", gamestate.stereoseparation);
 	}
 
 	/* Devtools */
@@ -1528,7 +1528,7 @@ void Game::ProcessDevInput(GameState& gamestate)
 	// FIXME: Allow skipping levels in campaigns too
 	if (whichlevel != -2 && Input::isKeyPressed(SDL_SCANCODE_K) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !editorenabled) {
 		targetlevel++;
-		if (targetlevel > numchallengelevels - 1) {
+		if (targetlevel > gamestate.numchallengelevels - 1) {
 			targetlevel = 0;
 		}
 		gamestate.loading = 1;
@@ -1566,8 +1566,8 @@ void Game::ProcessDevInput(GameState& gamestate)
 				}
 
 				float tmpyaw, tmppitch;
-				tmpyaw = editoryaw;
-				tmppitch = editorpitch;
+				tmpyaw = gamestate.editoryaw;
+				tmppitch = gamestate.editorpitch;
 				if (tmpyaw < 0 || editortype == bushtype) {
 					tmpyaw = rand() % 360;
 				}
@@ -1577,7 +1577,7 @@ void Game::ProcessDevInput(GameState& gamestate)
 
 				Object::MakeObject(editortype, scenecoords, (int)tmpyaw - ((int)tmpyaw) % 30, (int)tmppitch, gamestate.editorsize, environment, terrain, gamestate.foliage, detail, [&]() {Game::LoadingScreen(gamestate); });
 				if (editortype == treetrunktype) {
-					Object::MakeObject(treeleavestype, scenecoords, rand() % 360 * (tmppitch < 2) + (int)editoryaw - ((int)editoryaw) % 30, editorpitch, gamestate.editorsize, environment, terrain, gamestate.foliage, detail, [&]() {Game::LoadingScreen(gamestate); });
+					Object::MakeObject(treeleavestype, scenecoords, rand() % 360 * (tmppitch < 2) + (int)gamestate.editoryaw - ((int)gamestate.editoryaw) % 30, gamestate.editorpitch, gamestate.editorsize, environment, terrain, gamestate.foliage, detail, [&]() {Game::LoadingScreen(gamestate); });
 				}
 			}
 		}
@@ -1761,38 +1761,38 @@ void Game::ProcessDevInput(GameState& gamestate)
 
 		/* Decrease yaw for next object */
 		if (Input::isKeyDown(SDL_SCANCODE_LEFT) && !Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			editoryaw -= multiplier * 100;
-			if (editoryaw < -.01) {
-				editoryaw = -.01;
+			gamestate.editoryaw -= multiplier * 100;
+			if (gamestate.editoryaw < -.01) {
+				gamestate.editoryaw = -.01;
 			}
 		}
 
 		/* Increase yaw for next object */
 		if (Input::isKeyDown(SDL_SCANCODE_RIGHT) && !Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			editoryaw += multiplier * 100;
+			gamestate.editoryaw += multiplier * 100;
 		}
 
 		/* Decrease pitch for next object */
 		if (Input::isKeyDown(SDL_SCANCODE_DOWN) && Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			editorpitch -= multiplier * 100;
-			if (editorpitch < -.01) {
-				editorpitch = -.01;
+			gamestate.editorpitch -= multiplier * 100;
+			if (gamestate.editorpitch < -.01) {
+				gamestate.editorpitch = -.01;
 			}
 		}
 
 		/* Increase pitch for next object */
 		if (Input::isKeyDown(SDL_SCANCODE_UP) && Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			editorpitch += multiplier * 100;
+			gamestate.editorpitch += multiplier * 100;
 		}
 
 		/* Decrease map radius */
 		if (Input::isKeyPressed(SDL_SCANCODE_LEFT) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			mapradius -= multiplier * 10;
+			gamestate.mapradius -= multiplier * 10;
 		}
 
 		/* Increase map radius */
 		if (Input::isKeyPressed(SDL_SCANCODE_RIGHT) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			mapradius += multiplier * 10;
+			gamestate.mapradius += multiplier * 10;
 		}
 	}
 }
@@ -2303,7 +2303,7 @@ void doAttacks(GameState& gamestate)
 	static int randattack;
 	static bool playerrealattackkeydown = 0;
 
-	if (!Input::isKeyDown(attackkey)) {
+	if (!Input::isKeyDown(gamestate.attackkey)) {
 		oldattackkey = 0;
 	}
 	if (oldattackkey) {
@@ -2313,7 +2313,7 @@ void doAttacks(GameState& gamestate)
 		playerrealattackkeydown = 0;
 	}
 	if (!oldattackkey) {
-		playerrealattackkeydown = Input::isKeyDown(attackkey);
+		playerrealattackkeydown = Input::isKeyDown(gamestate.attackkey);
 	}
 	if ((Person::players[0]->parriedrecently <= 0 ||
 		!Person::players[0]->hasWeapon()) &&
@@ -2323,9 +2323,9 @@ void doAttacks(GameState& gamestate)
 				Person::players[0]->lastattack != knifeslashstartanim &&
 				Person::players[0]->lastattack != staffhitanim &&
 				Person::players[0]->lastattack != staffspinhitanim))) {
-		Person::players[0]->attackkeydown = Input::isKeyDown(attackkey);
+		Person::players[0]->attackkeydown = Input::isKeyDown(gamestate.attackkey);
 	}
-	if (Input::isKeyDown(attackkey) &&
+	if (Input::isKeyDown(gamestate.attackkey) &&
 		!oldattackkey &&
 		!Person::players[0]->backkeydown) {
 		for (unsigned k = 0; k < Person::players.size(); k++) {
@@ -2446,7 +2446,7 @@ void doAttacks(GameState& gamestate)
 												!Person::players[k]->rightkeydown &&
 												!Person::players[k]->crouchkeydown &&
 												!attackweapon &&
-												!reversaltrain) {
+												!gamestate.reversaltrain) {
 												Person::players[k]->animTarget = winduppunchanim;
 												//upunch
 											}
@@ -3146,7 +3146,7 @@ void Game::Tick(GameState& gamestate)
 			gamestate.winfreeze = 0;
 			fireSound();
 			flash(gamestate);
-			if (musictoggle) {
+			if (gamestate.musictoggle) {
 				OPENAL_SetFrequency(OPENAL_ALL);
 				emit_stream_np(stream_menutheme);
 				pause_sound(leveltheme);
@@ -3204,7 +3204,7 @@ void Game::Tick(GameState& gamestate)
 			oldwinfreeze++;
 		}
 
-		if (!gamestate.freeze && !gamestate.winfreeze && !(mainmenu && gameon) && (gameon || !gamestarted)) {
+		if (!gamestate.freeze && !gamestate.winfreeze && !(mainmenu && gameon) && (gameon || !gamestate.gamestarted)) {
 
 			//dialogues
 			static float talkdelay = 0;
@@ -3216,12 +3216,12 @@ void Game::Tick(GameState& gamestate)
 
 			if (talkdelay <= 0 && !Dialog::inDialog() && Animation::animations[Person::players[0]->animTarget].height != highheight) {
 				for (unsigned i = 0; i < Dialog::dialogs.size(); i++) {
-					Dialog::dialogs[i].tick(i);
+					Dialog::dialogs[i].tick(i, gamestate);
 				}
 			}
 
 			windvar += multiplier;
-			smoketex += multiplier;
+			gamestate.smoketex += multiplier;
 			Tutorial::stagetime += multiplier;
 
 			//hotspots
@@ -3321,14 +3321,14 @@ void Game::Tick(GameState& gamestate)
 
 			//control keys
 			if (!Dialog::inDialog()) {
-				Person::players[0]->forwardkeydown = Input::isKeyDown(forwardkey);
-				Person::players[0]->leftkeydown = Input::isKeyDown(leftkey);
-				Person::players[0]->backkeydown = Input::isKeyDown(backkey);
-				Person::players[0]->rightkeydown = Input::isKeyDown(rightkey);
-				Person::players[0]->jumpkeydown = Input::isKeyDown(jumpkey);
-				Person::players[0]->crouchkeydown = Input::isKeyDown(crouchkey);
-				Person::players[0]->drawkeydown = Input::isKeyDown(drawkey);
-				Person::players[0]->throwkeydown = Input::isKeyDown(throwkey);
+				Person::players[0]->forwardkeydown = Input::isKeyDown(gamestate.forwardkey);
+				Person::players[0]->leftkeydown = Input::isKeyDown(gamestate.leftkey);
+				Person::players[0]->backkeydown = Input::isKeyDown(gamestate.backkey);
+				Person::players[0]->rightkeydown = Input::isKeyDown(gamestate.rightkey);
+				Person::players[0]->jumpkeydown = Input::isKeyDown(gamestate.jumpkey);
+				Person::players[0]->crouchkeydown = Input::isKeyDown(gamestate.crouchkey);
+				Person::players[0]->drawkeydown = Input::isKeyDown(gamestate.drawkey);
+				Person::players[0]->throwkeydown = Input::isKeyDown(gamestate.throwkey);
 			}
 			else {
 				Person::players[0]->forwardkeydown = 0;
@@ -3359,22 +3359,22 @@ void Game::Tick(GameState& gamestate)
 
 					flatfacing = DoRotation(flatfacing, 0, -yaw, 0);
 
-					if (Input::isKeyDown(forwardkey)) {
+					if (Input::isKeyDown(gamestate.forwardkey)) {
 						viewer += facing * multiplier * 4;
 					}
-					if (Input::isKeyDown(backkey)) {
+					if (Input::isKeyDown(gamestate.backkey)) {
 						viewer -= facing * multiplier * 4;
 					}
-					if (Input::isKeyDown(leftkey)) {
+					if (Input::isKeyDown(gamestate.leftkey)) {
 						viewer += DoRotation(flatfacing * multiplier, 0, 90, 0) * 4;
 					}
-					if (Input::isKeyDown(rightkey)) {
+					if (Input::isKeyDown(gamestate.rightkey)) {
 						viewer += DoRotation(flatfacing * multiplier, 0, -90, 0) * 4;
 					}
-					if (Input::isKeyDown(jumpkey)) {
+					if (Input::isKeyDown(gamestate.jumpkey)) {
 						viewer.y += multiplier * 4;
 					}
-					if (Input::isKeyDown(crouchkey)) {
+					if (Input::isKeyDown(gamestate.crouchkey)) {
 						viewer.y -= multiplier * 4;
 					}
 					if (Input::isKeyPressed(SDL_SCANCODE_1) ||
@@ -3507,7 +3507,7 @@ void Game::Tick(GameState& gamestate)
 					yaw = Dialog::currentScene().camerayaw;
 					pitch = Dialog::currentScene().camerapitch;
 					if (Dialog::dialoguetime > 0.5) {
-						if (Input::isKeyPressed(attackkey)) {
+						if (Input::isKeyPressed(gamestate.attackkey)) {
 							Dialog::indialogue++;
 							if (Dialog::indialogue < int(Dialog::currentDialog().scenes.size())) {
 								if (Dialog::currentScene().sound != 0) {
@@ -3598,7 +3598,7 @@ void Game::Tick(GameState& gamestate)
 					(Input::isKeyDown(SDL_SCANCODE_K) &&
 						Input::isKeyDown(SDL_SCANCODE_LALT) &&
 						devtools) ||
-					(Input::isKeyDown(jumpkey) &&
+					(Input::isKeyDown(gamestate.jumpkey) &&
 						!respawnkeydown &&
 						!oldattackkey &&
 						Person::players[0]->dead))) {
@@ -3606,7 +3606,7 @@ void Game::Tick(GameState& gamestate)
 				gamestate.loading = 1;
 				gamestate.leveltime = 5;
 			}
-			respawnkeydown = Input::isKeyDown(jumpkey);
+			respawnkeydown = Input::isKeyDown(gamestate.jumpkey);
 
 			static bool movekey;
 
@@ -4451,7 +4451,7 @@ void Game::Tick(GameState& gamestate)
 
 								if (gamestate.mousejump && i == 0 && devtools) {
 									if (!Person::players[i]->isLanding()) {
-										Person::players[i]->tempdeltav = deltav;
+										Person::players[i]->tempdeltav = gamestate.deltav;
 									}
 									if (Person::players[i]->tempdeltav < 0) {
 										Person::players[i]->velocity.y -= (float)(Person::players[i]->tempdeltav) / multiplier / 1000;
@@ -4472,7 +4472,7 @@ void Game::Tick(GameState& gamestate)
 								Person::players[i]->frameTarget = 2;
 								Person::players[i]->landhard = 0;
 								Person::players[i]->jumpstart = 1;
-								Person::players[i]->tempdeltav = deltav;
+								Person::players[i]->tempdeltav = gamestate.deltav;
 							}
 							if (Person::players[i]->animTarget == jumpupanim &&
 								(((!gamestate.floatjump &&
@@ -4637,12 +4637,12 @@ void Game::TickOnce(GameState& gamestate)
 		yaw += multiplier * 5;
 	}
 	else if (Dialog::directing || !Dialog::inDialog()) {
-		yaw += deltah * .7;
+		yaw += gamestate.deltah * .7;
 		if (gamestate.invertmouse) {
-			pitch -= deltav * .7;
+			pitch -= gamestate.deltav * .7;
 		}
 		else {
-			pitch += deltav * .7;
+			pitch += gamestate.deltav * .7;
 		}
 		if (pitch > 90) {
 			pitch = 90;
@@ -4717,7 +4717,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 			musicvolume[3] = 0;
 		}
 
-		if (musictoggle) {
+		if (gamestate.musictoggle) {
 			if (musictype != oldmusictype && musictype == stream_fighttheme) {
 				emit_sound_np(alarmsound);
 			}
@@ -4756,7 +4756,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 			musicvolume[2] = 128;
 		}
 
-		if (musictoggle) {
+		if (gamestate.musictoggle) {
 			if (musicvolume[0] > 0 && oldmusicvolume[0] <= 0) {
 				emit_stream_np(leveltheme, musicvolume[0]);
 			}
@@ -4848,17 +4848,17 @@ void Game::TickOnceAfter(GameState& gamestate)
 				}
 			}
 
-			if (alldead && !Person::players[0]->dead && maptype == mapkilleveryone) {
+			if (alldead && !Person::players[0]->dead && gamestate.maptype == mapkilleveryone) {
 				gamestate.changedelay = 1;
 				targetlevel = whichlevel + 1;
-				if (targetlevel > numchallengelevels - 1) {
+				if (targetlevel > gamestate.numchallengelevels - 1) {
 					targetlevel = 0;
 				}
 			}
 			if (winhotspot || windialogue) {
 				gamestate.changedelay = 0.1;
 				targetlevel = whichlevel + 1;
-				if (targetlevel > numchallengelevels - 1) {
+				if (targetlevel > gamestate.numchallengelevels - 1) {
 					targetlevel = 0;
 				}
 			}
@@ -4866,7 +4866,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 			if (Hotspot::killhotspot) {
 				gamestate.changedelay = 1;
 				targetlevel = whichlevel + 1;
-				if (targetlevel > numchallengelevels - 1) {
+				if (targetlevel > gamestate.numchallengelevels - 1) {
 					targetlevel = 0;
 				}
 			}
@@ -4933,13 +4933,13 @@ void Game::TickOnceAfter(GameState& gamestate)
 					whichlevel != -2 &&
 					!gamestate.loading &&
 					(Person::players[0]->dead ||
-						(alldead && maptype == mapkilleveryone) ||
+						(alldead && gamestate.maptype == mapkilleveryone) ||
 						(winhotspot) ||
 						(Hotspot::killhotspot))) {
 					gamestate.loading = 1;
 				}
 				if ((Person::players[0]->dead ||
-					(alldead && maptype == mapkilleveryone) ||
+					(alldead && gamestate.maptype == mapkilleveryone) ||
 					(winhotspot) ||
 					(windialogue) ||
 					(Hotspot::killhotspot)) &&
@@ -5084,12 +5084,12 @@ void Game::TickOnceAfter(GameState& gamestate)
 		if (camerashake > .8) {
 			camerashake = .8;
 		}
-		woozy += multiplier;
+		gamestate.woozy += multiplier;
 		if (Person::players[0]->dead) {
 			camerashake = 0;
 		}
 		if (Person::players[0]->dead) {
-			woozy = 0;
+			gamestate.woozy = 0;
 		}
 		camerashake -= multiplier * 2;
 		blackout -= multiplier * 2;

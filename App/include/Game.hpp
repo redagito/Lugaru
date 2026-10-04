@@ -56,7 +56,7 @@ namespace Game
 
 	void InitGame(GameState& gamestate);
 	void LoadStuff(GameState& gamestate);
-	void LoadScreenTexture();
+	void LoadScreenTexture(GameState& gamestate);
 	void LoadingScreen(GameState& gamestate);
 	int DrawGLScene(StereoSide side, GameState& gamestate);
 	void playdialoguescenesound();
@@ -75,7 +75,7 @@ namespace Game
 	void TickOnce(GameState& gamestate);
 	void TickOnceAfter(GameState& gamestate);
 
-	void SetUpLighting();
+	void SetUpLighting(GameState& gamestate);
 	GLvoid ReSizeGLScene(float fov, float near);
 
 	void fireSound(int sound = fireendsound);

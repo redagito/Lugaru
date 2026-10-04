@@ -47,9 +47,9 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 		stage++;
 		success = 0;
 		if (stage <= 1) {
-			canattack = 0;
+			gamestate.canattack = 0;
 			gamestate.cananger = 0;
-			reversaltrain = 0;
+			gamestate.reversaltrain = 0;
 		}
 		switch (stage) {
 		case 1:
@@ -135,7 +135,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			break;
 		case 27:
 			maxtime = 4;
-			reversaltrain = 1;
+			gamestate.reversaltrain = 1;
 			gamestate.cananger = 1;
 			Person::players[1]->aitype = attacktypecutoff;
 			break;
@@ -150,7 +150,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			break;
 		case 30:
 			maxtime = 4;
-			reversaltrain = 0;
+			gamestate.reversaltrain = 0;
 			gamestate.cananger = 0;
 			Person::players[1]->aitype = passivetype;
 			break;
@@ -164,12 +164,12 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 		case 33:
 			maxtime = 400;
 			gamestate.cananger = 1;
-			canattack = 1;
+			gamestate.canattack = 1;
 			Person::players[1]->aitype = attacktypecutoff;
 			break;
 		case 36:
 			maxtime = 2;
-			reversaltrain = 0;
+			gamestate.reversaltrain = 0;
 			gamestate.cananger = 0;
 			Person::players[1]->aitype = passivetype;
 			break;
@@ -178,12 +178,12 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			damagetaken = 0;
 			maxtime = 50;
 			gamestate.cananger = 1;
-			canattack = 1;
+			gamestate.canattack = 1;
 			Person::players[1]->aitype = attacktypecutoff;
 			break;
 		case 38:
 			maxtime = 4;
-			canattack = 0;
+			gamestate.canattack = 0;
 			gamestate.cananger = 0;
 			Person::players[1]->aitype = passivetype;
 			break;
@@ -225,7 +225,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			Person::players[1]->weaponids[0] = 0;
 
 			gamestate.cananger = 1;
-			canattack = 1;
+			gamestate.canattack = 1;
 			Person::players[1]->aitype = attacktypecutoff;
 
 			maxtime = 300;
@@ -289,7 +289,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 
 		} break;
 		case 48:
-			canattack = 0;
+			gamestate.canattack = 0;
 			gamestate.cananger = 0;
 			Person::players[1]->aitype = passivetype;
 
@@ -312,7 +312,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			}
 			break;
 		case 49:
-			canattack = 0;
+			gamestate.canattack = 0;
 			gamestate.cananger = 0;
 			Person::players[1]->aitype = passivetype;
 
@@ -376,7 +376,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 	if (stagetime < maxtime - 3) {
 		switch (stage) {
 		case 3:
-			if (Game::deltah || Game::deltav) {
+			if (gamestate.deltah || gamestate.deltav) {
 				success += timemultiplier;
 			}
 			break;
@@ -483,7 +483,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 		case 29:
 			if (Person::players[0]->escapednum == 2) {
 				success = 1;
-				reversaltrain = 0;
+				gamestate.reversaltrain = 0;
 				gamestate.cananger = 0;
 				Person::players[1]->aitype = passivetype;
 			}
@@ -500,7 +500,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 		case 35:
 			if (Animation::animations[Person::players[0]->animTarget].attack == reversal) {
 				success = 1;
-				reversaltrain = 0;
+				gamestate.reversaltrain = 0;
 				gamestate.cananger = 0;
 				Person::players[1]->aitype = passivetype;
 			}
@@ -569,22 +569,22 @@ void Tutorial::DrawTextInfo(GameState& gamestate)
 		string1 = "You can move the mouse to rotate the camera.";
 		break;
 	case 4:
-		string1 = std::string("Try using the ") + Input::keyToChar(Game::forwardkey);
-		string1 += std::string(", ") + Input::keyToChar(Game::leftkey);
-		string1 += std::string(", ") + Input::keyToChar(Game::backkey);
-		string1 += std::string(" and ") + Input::keyToChar(Game::rightkey) + " keys to move around.";
+		string1 = std::string("Try using the ") + Input::keyToChar(gamestate.forwardkey);
+		string1 += std::string(", ") + Input::keyToChar(gamestate.leftkey);
+		string1 += std::string(", ") + Input::keyToChar(gamestate.backkey);
+		string1 += std::string(" and ") + Input::keyToChar(gamestate.rightkey) + " keys to move around.";
 		string2 = "All movement is relative to the camera.";
 		break;
 	case 5:
-		string1 = std::string("Please press ") + Input::keyToChar(Game::jumpkey) + " to jump.";
+		string1 = std::string("Please press ") + Input::keyToChar(gamestate.jumpkey) + " to jump.";
 		string2 = "You can hold it longer to jump higher.";
 		break;
 	case 6:
-		string1 = std::string("You can press ") + Input::keyToChar(Game::crouchkey) + " to crouch.";
+		string1 = std::string("You can press ") + Input::keyToChar(gamestate.crouchkey) + " to crouch.";
 		string2 = "You can jump higher from a crouching position.";
 		break;
 	case 7:
-		string1 = std::string("While running, you can press ") + Input::keyToChar(Game::crouchkey) + " to roll.";
+		string1 = std::string("While running, you can press ") + Input::keyToChar(gamestate.crouchkey) + " to roll.";
 		break;
 	case 8:
 		string1 = "While crouching, you can sneak around silently";
@@ -598,7 +598,7 @@ void Tutorial::DrawTextInfo(GameState& gamestate)
 		string1 = "ADVANCED MOVEMENT:";
 		break;
 	case 11:
-		string1 = std::string("When you jump at a wall, you can hold ") + Input::keyToChar(Game::jumpkey) + " again";
+		string1 = std::string("When you jump at a wall, you can hold ") + Input::keyToChar(gamestate.jumpkey) + " again";
 		string2 = "during impact to perform a walljump.";
 		string3 = "Be sure to use the movement keys to press against the wall";
 		break;
@@ -614,7 +614,7 @@ void Tutorial::DrawTextInfo(GameState& gamestate)
 		string2 = "in the middle of the training area.";
 		break;
 	case 15:
-		string1 = std::string("Press ") + Input::keyToChar(Game::attackkey) + " to attack when you are near an enemy.";
+		string1 = std::string("Press ") + Input::keyToChar(gamestate.attackkey) + " to attack when you are near an enemy.";
 		string2 = "You can punch by standing still near an enemy and attacking.";
 		break;
 	case 16:
@@ -636,8 +636,8 @@ void Tutorial::DrawTextInfo(GameState& gamestate)
 		break;
 	case 20:
 		string1 = "Your most powerful individual attack is the rabbit kick.";
-		string2 = std::string("Run at the enemy while holding ") + Input::keyToChar(Game::attackkey) + ", and press";
-		string3 = std::string("the jump key (") + Input::keyToChar(Game::jumpkey) + ") to attack.";
+		string2 = std::string("Run at the enemy while holding ") + Input::keyToChar(gamestate.attackkey) + ", and press";
+		string3 = std::string("the jump key (") + Input::keyToChar(gamestate.jumpkey) + ") to attack.";
 		break;
 	case 21:
 		string1 = "This attack is devastating if timed correctly.";
@@ -661,7 +661,7 @@ void Tutorial::DrawTextInfo(GameState& gamestate)
 		break;
 	case 24:
 		string1 = "You can tackle enemies by running at them animal-style";
-		string2 = std::string("and pressing jump (") + Input::keyToChar(Game::jumpkey) + ") or attack (" + Input::keyToChar(Game::attackkey) + ").";
+		string2 = std::string("and pressing jump (") + Input::keyToChar(gamestate.jumpkey) + ") or attack (" + Input::keyToChar(gamestate.attackkey) + ").";
 		string3 = "This is especially useful when they are running away.";
 		break;
 	case 25:
@@ -677,7 +677,7 @@ void Tutorial::DrawTextInfo(GameState& gamestate)
 	case 28:
 		string1 = "If you attack, you will notice that the enemy now sometimes";
 		string2 = "catches your attack and uses it against you. Hold";
-		string3 = std::string("crouch (") + Input::keyToChar(Game::crouchkey) + ") after attacking to escape from reversals.";
+		string3 = std::string("crouch (") + Input::keyToChar(gamestate.crouchkey) + ") after attacking to escape from reversals.";
 		break;
 	case 29:
 		string1 = "Try escaping from two more reversals in a row.";
@@ -686,7 +686,7 @@ void Tutorial::DrawTextInfo(GameState& gamestate)
 		string1 = "Good!";
 		break;
 	case 31:
-		string1 = std::string("To reverse an attack, you must tap crouch (") + Input::keyToChar(Game::crouchkey) + ") during the";
+		string1 = std::string("To reverse an attack, you must tap crouch (") + Input::keyToChar(gamestate.crouchkey) + ") during the";
 		string2 = "enemy's attack. You must also be close to the enemy;";
 		string3 = "this is especially important against armed opponents.";
 		break;
@@ -721,11 +721,11 @@ void Tutorial::DrawTextInfo(GameState& gamestate)
 		break;
 	case 40:
 		string1 = "Stand, roll or handspring over the knife";
-		string2 = std::string("while pressing ") + Input::keyToChar(Game::throwkey) + " to pick it up.";
+		string2 = std::string("while pressing ") + Input::keyToChar(gamestate.throwkey) + " to pick it up.";
 		string3 = "You can crouch and press the same key to drop it again.";
 		break;
 	case 41:
-		string1 = std::string("You can equip and unequip weapons using the ") + Input::keyToChar(Game::drawkey) + " key.";
+		string1 = std::string("You can equip and unequip weapons using the ") + Input::keyToChar(gamestate.drawkey) + " key.";
 		string2 = "Sometimes it is best to keep them unequipped to";
 		string3 = "prevent enemies from taking them. ";
 		break;
@@ -762,7 +762,7 @@ void Tutorial::DrawTextInfo(GameState& gamestate)
 		string3 = "spin smash is slower and more powerful.";
 		break;
 	case 49:
-		string1 = std::string("When facing an enemy, you can throw the knife with ") + Input::keyToChar(Game::throwkey) + ".";
+		string1 = std::string("When facing an enemy, you can throw the knife with ") + Input::keyToChar(gamestate.throwkey) + ".";
 		string2 = "It is possible to throw the knife while flipping,";
 		string3 = "but it is very inaccurate.";
 		break;

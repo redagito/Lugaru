@@ -32,17 +32,19 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 extern int kContextWidth;
 extern int kContextHeight;
 
+struct GameState;
+
 // Video modes reported by SDL, as (width, height) pairs. Populated during
 // startup and consulted by the menu's resolution picker.
 extern std::set<std::pair<int, int>> resolutions;
 
 /** Toggles fullscreen mode on the main window. */
-void toggleFullscreen();
+void toggleFullscreen(GameState& gamestate);
 
 /**
  * Handles a single SDL event. Returns SDL_FALSE when the application should
  * quit, SDL_TRUE otherwise.
  */
-SDL_bool sdlEventProc(const SDL_Event& e);
+SDL_bool sdlEventProc(const SDL_Event& e, GameState& gamestate);
 
 #endif // _WINDOWCONTEXT_HPP_

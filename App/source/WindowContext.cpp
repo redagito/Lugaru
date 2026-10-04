@@ -21,6 +21,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "WindowContext.hpp"
 
 #include "GameGlobals.h"
+#include "GameState.hpp"
 #include "Globals.h"
 
 using namespace Game;
@@ -30,9 +31,9 @@ int kContextHeight = 0;
 
 std::set<std::pair<int, int>> resolutions;
 
-void toggleFullscreen()
+void toggleFullscreen(GameState& gamestate)
 {
-	fullscreen = !fullscreen;
+	gamestate.fullscreen = !gamestate.fullscreen;
 	Uint32 flags = SDL_GetWindowFlags(sdlwindow);
 	if (flags & SDL_WINDOW_FULLSCREEN) {
 		flags &= ~SDL_WINDOW_FULLSCREEN;
@@ -43,7 +44,7 @@ void toggleFullscreen()
 	SDL_SetWindowFullscreen(sdlwindow, flags);
 }
 
-SDL_bool sdlEventProc(const SDL_Event& e)
+SDL_bool sdlEventProc(const SDL_Event& e, GameState& gamestate)
 {
 	switch (e.type) {
 	case SDL_QUIT:
@@ -56,8 +57,8 @@ SDL_bool sdlEventProc(const SDL_Event& e)
 		break;
 
 	case SDL_MOUSEMOTION:
-		deltah += e.motion.xrel;
-		deltav += e.motion.yrel;
+		gamestate.deltah += e.motion.xrel;
+		gamestate.deltav += e.motion.yrel;
 		break;
 
 	case SDL_KEYDOWN:
@@ -71,7 +72,7 @@ SDL_bool sdlEventProc(const SDL_Event& e)
 			SDL_SetRelativeMouseMode(mode);
 		}
 		else if ((e.key.keysym.scancode == SDL_SCANCODE_RETURN) && (e.key.keysym.mod & KMOD_ALT)) {
-			toggleFullscreen();
+			toggleFullscreen(gamestate);
 		}
 		break;
 	}

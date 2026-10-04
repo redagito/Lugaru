@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Game.hpp"
 #include "GameGlobals.h"
+#include "GameState.hpp"
 #include "Globals.h"
 #include "Objects/Person.hpp"
 
@@ -195,7 +196,7 @@ DialogScene::DialogScene(std::ifstream& ipstream)
 	ipstream >> sound;
 }
 
-void Dialog::tick(int id)
+void Dialog::tick(int id, GameState& gamestate)
 {
 	unsigned playerId = type % 10;
 	bool special = (type > 9);
@@ -204,7 +205,7 @@ void Dialog::tick(int id)
 		(playerId < Person::players.size()) &&
 		(playerId > 0) &&
 		((gonethrough == 0) || !special) &&
-		(special || Input::isKeyPressed(Game::attackkey))) {
+		(special || Input::isKeyPressed(gamestate.attackkey))) {
 		if ((distsq(&Person::players[0]->coords, &Person::players[playerId]->coords) < 6) ||
 			(Person::players[playerId]->howactive >= typedead1) ||
 			(type > 40) && (type < 50)) {

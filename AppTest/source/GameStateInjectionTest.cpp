@@ -11,19 +11,34 @@
 #include "GameState.hpp"
 #include "Tutorial.hpp"
 #include "User/Settings.hpp"
+#include "Utils/Input.hpp"
 
 namespace
 {
 
-// Seeds for the thirteen GameState members DefaultSettings writes. Every member
-// is seeded with the opposite of the value DefaultSettings pins, so that the
-// assertions in the test below are all observations of a transition the function
-// actually made. That matters most for the eight flags DefaultSettings turns
-// off, because their pinned value is also the member's own starting value:
-// without a seed, asserting on those would pass even if DefaultSettings had
-// written nothing at all, or written to some other object entirely.
+// Seeds for the twenty-eight GameState members DefaultSettings writes. Every
+// member is seeded with the opposite of the value DefaultSettings pins, so that
+// the assertions in the test below are all observations of a transition the
+// function actually made. That matters most for the nine flags DefaultSettings
+// turns off, because their pinned value is also the member's own starting
+// value: without a seed, asserting on those would pass even if DefaultSettings
+// had written nothing at all, or written to some other object entirely.
+// `fullscreen` is the ninth of those, and is the sharpest case: its member
+// default is false and DefaultSettings pins false, so only seeding it to true
+// turns "assert it is false afterwards" into a real observation.
 const float kSeedGameSpeed = 0.5f;
 const unsigned short kSeedConsoleKey = 42;
+const unsigned short kSeedCrouchKey = 43;
+const unsigned short kSeedJumpKey = 44;
+const unsigned short kSeedForwardKey = 45;
+const unsigned short kSeedBackKey = 46;
+const unsigned short kSeedLeftKey = 47;
+const unsigned short kSeedRightKey = 48;
+const unsigned short kSeedDrawKey = 49;
+const unsigned short kSeedThrowKey = 50;
+const unsigned short kSeedAttackKey = 51;
+const float kSeedMouseSensitivity = 0.5f;
+const float kSeedVolume = 0.25f;
 
 void seedUnpinnedValues(GameState& gamestate)
 {
@@ -40,6 +55,21 @@ void seedUnpinnedValues(GameState& gamestate)
 	gamestate.immediate = true;
 	gamestate.velocityblur = true;
 	gamestate.consolekey = kSeedConsoleKey;
+	gamestate.ismotionblur = false;
+	gamestate.usermousesensitivity = kSeedMouseSensitivity;
+	gamestate.fullscreen = true;
+	gamestate.musictoggle = false;
+	gamestate.volume = kSeedVolume;
+	gamestate.ambientsound = false;
+	gamestate.crouchkey = kSeedCrouchKey;
+	gamestate.jumpkey = kSeedJumpKey;
+	gamestate.forwardkey = kSeedForwardKey;
+	gamestate.backkey = kSeedBackKey;
+	gamestate.leftkey = kSeedLeftKey;
+	gamestate.rightkey = kSeedRightKey;
+	gamestate.drawkey = kSeedDrawKey;
+	gamestate.throwkey = kSeedThrowKey;
+	gamestate.attackkey = kSeedAttackKey;
 }
 
 } // namespace
@@ -79,10 +109,10 @@ TEST_CASE("an injected GameState is the only instance a function writes to", "[g
 
 	DefaultSettings(injected);
 
-	// DefaultSettings writes thirteen GameState members, and every one of them
-	// lands on the instance it was handed. If it regressed to writing a hidden
-	// shared instance instead, all thirteen of these would still hold their seed
-	// values and fail here.
+	// DefaultSettings writes twenty-eight GameState members, and every one of
+	// them lands on the instance it was handed. If it regressed to writing a
+	// hidden shared instance instead, all twenty-eight of these would still
+	// hold their seed values and fail here.
 	REQUIRE(injected.floatjump == false);
 	REQUIRE(injected.autoslomo == true);
 	REQUIRE(injected.invertmouse == false);
@@ -96,6 +126,21 @@ TEST_CASE("an injected GameState is the only instance a function writes to", "[g
 	REQUIRE(injected.immediate == false);
 	REQUIRE(injected.velocityblur == false);
 	REQUIRE(injected.consolekey == SDL_SCANCODE_GRAVE);
+	REQUIRE(injected.ismotionblur == true);
+	REQUIRE(injected.usermousesensitivity == 1.0f);
+	REQUIRE(injected.fullscreen == false);
+	REQUIRE(injected.musictoggle == true);
+	REQUIRE(injected.volume == 0.8f);
+	REQUIRE(injected.ambientsound == true);
+	REQUIRE(injected.crouchkey == SDL_SCANCODE_LSHIFT);
+	REQUIRE(injected.jumpkey == SDL_SCANCODE_SPACE);
+	REQUIRE(injected.forwardkey == SDL_SCANCODE_W);
+	REQUIRE(injected.backkey == SDL_SCANCODE_S);
+	REQUIRE(injected.leftkey == SDL_SCANCODE_A);
+	REQUIRE(injected.rightkey == SDL_SCANCODE_D);
+	REQUIRE(injected.drawkey == SDL_SCANCODE_E);
+	REQUIRE(injected.throwkey == SDL_SCANCODE_Q);
+	REQUIRE(injected.attackkey == MOUSEBUTTON_LEFT);
 
 	// The point of injecting the object: a second, independently constructed
 	// GameState keeps every value it was seeded with, so nothing outside the
@@ -113,6 +158,21 @@ TEST_CASE("an injected GameState is the only instance a function writes to", "[g
 	REQUIRE(bystander.immediate == true);
 	REQUIRE(bystander.velocityblur == true);
 	REQUIRE(bystander.consolekey == kSeedConsoleKey);
+	REQUIRE(bystander.ismotionblur == false);
+	REQUIRE(bystander.usermousesensitivity == kSeedMouseSensitivity);
+	REQUIRE(bystander.fullscreen == true);
+	REQUIRE(bystander.musictoggle == false);
+	REQUIRE(bystander.volume == kSeedVolume);
+	REQUIRE(bystander.ambientsound == false);
+	REQUIRE(bystander.crouchkey == kSeedCrouchKey);
+	REQUIRE(bystander.jumpkey == kSeedJumpKey);
+	REQUIRE(bystander.forwardkey == kSeedForwardKey);
+	REQUIRE(bystander.backkey == kSeedBackKey);
+	REQUIRE(bystander.leftkey == kSeedLeftKey);
+	REQUIRE(bystander.rightkey == kSeedRightKey);
+	REQUIRE(bystander.drawkey == kSeedDrawKey);
+	REQUIRE(bystander.throwkey == kSeedThrowKey);
+	REQUIRE(bystander.attackkey == kSeedAttackKey);
 
 	SECTION("driving a different instance leaves the first alone")
 	{
@@ -123,7 +183,7 @@ TEST_CASE("an injected GameState is the only instance a function writes to", "[g
 
 		DefaultSettings(bystander);
 
-		// The call landed on all thirteen members of the instance it was given.
+		// The call landed on all twenty-eight members of the instance it was given.
 		REQUIRE(bystander.floatjump == false);
 		REQUIRE(bystander.autoslomo == true);
 		REQUIRE(bystander.invertmouse == false);
@@ -137,6 +197,21 @@ TEST_CASE("an injected GameState is the only instance a function writes to", "[g
 		REQUIRE(bystander.immediate == false);
 		REQUIRE(bystander.velocityblur == false);
 		REQUIRE(bystander.consolekey == SDL_SCANCODE_GRAVE);
+		REQUIRE(bystander.ismotionblur == true);
+		REQUIRE(bystander.usermousesensitivity == 1.0f);
+		REQUIRE(bystander.fullscreen == false);
+		REQUIRE(bystander.musictoggle == true);
+		REQUIRE(bystander.volume == 0.8f);
+		REQUIRE(bystander.ambientsound == true);
+		REQUIRE(bystander.crouchkey == SDL_SCANCODE_LSHIFT);
+		REQUIRE(bystander.jumpkey == SDL_SCANCODE_SPACE);
+		REQUIRE(bystander.forwardkey == SDL_SCANCODE_W);
+		REQUIRE(bystander.backkey == SDL_SCANCODE_S);
+		REQUIRE(bystander.leftkey == SDL_SCANCODE_A);
+		REQUIRE(bystander.rightkey == SDL_SCANCODE_D);
+		REQUIRE(bystander.drawkey == SDL_SCANCODE_E);
+		REQUIRE(bystander.throwkey == SDL_SCANCODE_Q);
+		REQUIRE(bystander.attackkey == MOUSEBUTTON_LEFT);
 
 		// ...and the instance that was not passed in kept every seeded value.
 		REQUIRE(injected.floatjump == true);
@@ -152,5 +227,20 @@ TEST_CASE("an injected GameState is the only instance a function writes to", "[g
 		REQUIRE(injected.immediate == true);
 		REQUIRE(injected.velocityblur == true);
 		REQUIRE(injected.consolekey == kSeedConsoleKey);
+		REQUIRE(injected.ismotionblur == false);
+		REQUIRE(injected.usermousesensitivity == kSeedMouseSensitivity);
+		REQUIRE(injected.fullscreen == true);
+		REQUIRE(injected.musictoggle == false);
+		REQUIRE(injected.volume == kSeedVolume);
+		REQUIRE(injected.ambientsound == false);
+		REQUIRE(injected.crouchkey == kSeedCrouchKey);
+		REQUIRE(injected.jumpkey == kSeedJumpKey);
+		REQUIRE(injected.forwardkey == kSeedForwardKey);
+		REQUIRE(injected.backkey == kSeedBackKey);
+		REQUIRE(injected.leftkey == kSeedLeftKey);
+		REQUIRE(injected.rightkey == kSeedRightKey);
+		REQUIRE(injected.drawkey == kSeedDrawKey);
+		REQUIRE(injected.throwkey == kSeedThrowKey);
+		REQUIRE(injected.attackkey == kSeedAttackKey);
 	}
 }

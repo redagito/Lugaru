@@ -28,7 +28,6 @@ namespace Game
 	extern int newscreenheight;
 
 	extern bool gameon;
-	extern float deltah, deltav;
 	extern float yaw, pitch;
 	extern SkyBox* skybox;
 	extern bool cameramode;
@@ -47,15 +46,12 @@ namespace Game
 	extern int musictype;
 
 	extern Vector3 mapcenter;
-	extern float mapradius;
 
 	extern Text* text;
 	extern Text* textmono;
 
 	extern bool editorenabled;
 	extern int editortype;
-	extern float editoryaw;
-	extern float editorpitch;
 
 	extern Vector3 pathpoint[30];
 	extern int numpathpoints;
@@ -63,14 +59,10 @@ namespace Game
 	extern int pathpointconnect[30][30];
 	extern int pathpointselected;
 
-	extern int numchallengelevels;
-
 	extern bool console;
 	extern std::string consoletext[15];
 
 	extern int targetlevel;
 
 	extern bool waiting;
-
-	extern unsigned short crouchkey, jumpkey, forwardkey, backkey, leftkey, rightkey, drawkey, throwkey, attackkey;
 }

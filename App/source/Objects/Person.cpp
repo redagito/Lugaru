@@ -2070,7 +2070,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
 			}
 		}
 		else {
-			if (!crouchtogglekeydown && Animation::animations[animTarget].attack == reversed && isPlayerControlled() && (escapednum < 2 || reversaltrain)) {
+			if (!crouchtogglekeydown && Animation::animations[animTarget].attack == reversed && isPlayerControlled() && (escapednum < 2 || gamestate.reversaltrain)) {
 				feint = 1;
 			}
 			if (!isFlip()) {
@@ -6796,7 +6796,7 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 				glDepthMask(0);
 				glEnable(GL_LIGHTING);
 				glEnable(GL_BLEND);
-				if (canattack && gamestate.cananger) {
+				if (gamestate.canattack && gamestate.cananger) {
 					if (Animation::animations[animTarget].attack == normalattack || Animation::animations[animTarget].attack == reversed) {
 						glDisable(GL_TEXTURE_2D);
 						glColor4f(1, 0, 0, 0.8);
@@ -6804,8 +6804,8 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 				}
 				glMatrixMode(GL_TEXTURE);
 				glPushMatrix();
-				glTranslatef(0, -smoketex, 0);
-				glTranslatef(-smoketex, 0, 0);
+				glTranslatef(0, -gamestate.smoketex, 0);
+				glTranslatef(-gamestate.smoketex, 0, 0);
 			}
 			if (playerdetail) {
 				if (!gamestate.showpoints) {
@@ -6835,7 +6835,7 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 					glDepthMask(0);
 					glEnable(GL_LIGHTING);
 					glEnable(GL_BLEND);
-					if (canattack && gamestate.cananger) {
+					if (gamestate.canattack && gamestate.cananger) {
 						if (Animation::animations[animTarget].attack == normalattack || Animation::animations[animTarget].attack == reversed) {
 							glDisable(GL_TEXTURE_2D);
 							glColor4f(1, 0, 0, 0.8);
@@ -6843,8 +6843,8 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 					}
 					glMatrixMode(GL_TEXTURE);
 					glPushMatrix();
-					glTranslatef(0, -smoketex * .6, 0);
-					glTranslatef(smoketex * .6, 0, 0);
+					glTranslatef(0, -gamestate.smoketex * .6, 0);
+					glTranslatef(gamestate.smoketex * .6, 0, 0);
 					if (playerdetail) {
 						if (!gamestate.showpoints) {
 							if (tutorialActive && (id != 0)) {
@@ -8387,7 +8387,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 					for (unsigned playerindex = 0; playerindex < Person::players.size(); playerindex++) {
 						if (playerindex != id && !Person::players[playerindex]->skeleton.free &&
 							Person::players[playerindex]->hasvictim &&
-							(tutorialActive && reversaltrain ||
+							(tutorialActive && gamestate.reversaltrain ||
 								rand() % 2 == 0 && difficulty == 2 ||
 								rand() % 4 == 0 && difficulty == 1 ||
 								rand() % 8 == 0 && difficulty == 0 ||
@@ -8449,7 +8449,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 				}
 
 				if (tutorialActive) {
-					if (!canattack) {
+					if (!gamestate.canattack) {
 						attackkeydown = 0;
 					}
 				}
