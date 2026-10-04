@@ -26,6 +26,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "CommandLine.hpp"
 #include "GameState.hpp"
 #include "Graphic/Texture.hpp"
+#include "LoadingClock.hpp"
 #include "Menu/Menu.hpp"
 #include "Utils/Folders.hpp"
 
@@ -147,6 +148,10 @@ void Game::LoadingScreen(GameState& gamestate)
 	}
 
 	static float loadprogress;
+	// The overlay's own wall-clock state. It is deliberately not the game-wide
+	// frame delta: this function is a progress callback, and the ramp and the
+	// flash must not depend on how the game loop happens to be paced.
+	static LoadingClock clock;
 	static AbsoluteTime frametime = { 0, 0 };
 	AbsoluteTime currTime = UpTime();
 	double deltaTime = (float)AbsoluteDeltaToDuration(currTime, frametime);
@@ -158,27 +163,43 @@ void Game::LoadingScreen(GameState& gamestate)
 		deltaTime /= 1000.0;
 	}
 
-	multiplier = deltaTime;
-	if (multiplier < .001) {
-		multiplier = .001;
+	const float step = (float)deltaTime;
+
+	// The very first call only takes a baseline. Measuring against a
+	// zero-initialised frametime would count the whole process uptime as this
+	// load's first frame.
+	if (!clock.primed()) {
+		clock.advance(0.0f);
+		frametime = currTime;
+		return;
 	}
 
-	if (multiplier > 10) {
-		multiplier = 10;
+	// The rest of the game zeroes gamestate.loadtime between levels. That is the
+	// signal that this load wants a fresh pulse, so drop the banked time and
+	// take a new baseline rather than counting the dead time since the last one.
+	if (gamestate.loadtime == 0.0f && clock.ramp() > 0.0f) {
+		clock.reset();
+		frametime = currTime;
+		return;
 	}
 
-	if (multiplier <= .05) return;
+	if (step <= .05f) return;
 
 	frametime = currTime; // reset for next time interval
 
-	// Devtools-only: trace what drives the loading overlay. The reported
-	// symptom (solid red instead of a black/red pulse) comes from either
-	// flashamount being pinned at 1, or loadprogress never leaving 100.
+	// Only redraws bank time, so frametime above advances by exactly the gap this
+	// redraw covers: a ramp takes a fixed amount of wall-clock time no matter how
+	// often the throttle skips a frame.
+	const float elapsed = clock.advance(step);
+
+	// Devtools-only: trace what drives the loading overlay. A correct trace now
+	// shows loadprogress climbing at a steady wall-clock rate and flashamount
+	// bleeding off instead of sitting pinned at 1.
 	if (devtools) {
 		static int tracecount = 0;
-		if (tracecount < 40 && (tracecount % 4) == 0) {
-			fprintf(stderr, "[loading] n=%d multiplier=%.4f loadtime=%.2f loadprogress=%.2f flashamount=%.3f\n",
-					tracecount, multiplier, gamestate.loadtime, loadprogress, flashamount);
+		if (tracecount < 400 && (tracecount % 10) == 0) {
+			fprintf(stderr, "[loading] n=%d elapsed=%.4f loadprogress=%.2f flashamount=%.3f\n",
+					tracecount, elapsed, clock.ramp(), flashamount);
 		}
 		tracecount++;
 	}
@@ -188,12 +209,12 @@ void Game::LoadingScreen(GameState& gamestate)
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	gamestate.loadtime += multiplier * 4;
-
-	loadprogress = gamestate.loadtime;
-	if (loadprogress > 100) {
-		loadprogress = 100;
-	}
+	// The ramp is paced by real seconds, so a full 0 -> 100 always takes
+	// LoadingClock::rampSeconds of wall-clock time however often the throttle
+	// skips a frame. gamestate.loadtime is kept in sync because the rest of the
+	// game zeroes it between levels.
+	loadprogress = clock.ramp();
+	gamestate.loadtime = loadprogress;
 
 	//Background
 
@@ -337,7 +358,7 @@ void Game::LoadingScreen(GameState& gamestate)
 			flashamount = 1;
 		}
 		if (flashdelay <= 0) {
-			flashamount -= multiplier;
+			flashamount = LoadingClock::decayFlash(flashamount, elapsed);
 		}
 		flashdelay--;
 		if (flashamount < 0) {
