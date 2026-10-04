@@ -37,6 +37,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 #include <string>
 
+struct GameState;
+
 #define passivetype 0
 #define guardtype 1
 #define searchtype 2
