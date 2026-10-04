@@ -161,7 +161,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 			tempvel.x = float(abs(rand() % 100) - 50) / 20;
 			tempvel.y = float(abs(rand() % 100) - 50) / 20;
 			tempvel.z = float(abs(rand() % 100) - 50) / 20;
-			Sprite::MakeSprite(splintersprite, position + (tippoint - position) * ((float)j - 8) / 32, tempvel * .5, 115 / 255, 73 / 255, 12 / 255, .1, 1, bloodtoggle);
+			Sprite::MakeSprite(splintersprite, position + (tippoint - position) * ((float)j - 8) / 32, tempvel * .5, 115 / 255, 73 / 255, 12 / 255, .1, 1, gamestate.bloodtoggle);
 		}
 		if (owner != -1) {
 			Person::players[owner]->weaponactive = -1;
@@ -236,7 +236,7 @@ Vector3 temppoint1, temppoint2;
 
 						bloody = 0;
 
-						Sprite::MakeSprite(cloudimpactsprite, position, velocity, 1, 1, 1, .8, .3, bloodtoggle);
+						Sprite::MakeSprite(cloudimpactsprite, position, velocity, 1, 1, 1, .8, .3, gamestate.bloodtoggle);
 					}
 					else {
 						physics = 1;
@@ -287,16 +287,16 @@ Vector3 temppoint1, temppoint2;
 							Person::players[j]->jointVel(neck) += velocity * 2;
 							Person::players[j]->jointVel(rightshoulder) += velocity * 2;
 							Person::players[j]->jointVel(leftshoulder) += velocity * 2;
-							if (bloodtoggle && !tutorialActive) {
-								Sprite::MakeSprite(cloudimpactsprite, footpoint, footvel, 1, 0, 0, .8, .3, bloodtoggle);
+							if (gamestate.bloodtoggle && !tutorialActive) {
+								Sprite::MakeSprite(cloudimpactsprite, footpoint, footvel, 1, 0, 0, .8, .3, gamestate.bloodtoggle);
 							}
 							if (tutorialActive) {
-								Sprite::MakeSprite(cloudimpactsprite, footpoint, footvel, 1, 1, 1, .8, .3, bloodtoggle);
+								Sprite::MakeSprite(cloudimpactsprite, footpoint, footvel, 1, 1, 1, .8, .3, gamestate.bloodtoggle);
 							}
 							footvel = tippoint - position;
 							Normalise(&footvel);
-							if (bloodtoggle && !tutorialActive) {
-								Sprite::MakeSprite(bloodflamesprite, footpoint, footvel * -1, 1, 0, 0, .6, 1, bloodtoggle);
+							if (gamestate.bloodtoggle && !tutorialActive) {
+								Sprite::MakeSprite(bloodflamesprite, footpoint, footvel * -1, 1, 0, 0, .6, 1, gamestate.bloodtoggle);
 							}
 
 							if (!tutorialActive) {
@@ -341,7 +341,7 @@ Vector3 temppoint1, temppoint2;
 					position.y = terrain.getHeight(position.x, position.z);
 				}
 
-				terrain.MakeDecal(shadowdecalpermanent, position, .06, .5, 0, environment);
+				terrain.MakeDecal(shadowdecalpermanent, position, .06, .5, 0, gamestate.environment);
 				normalrot = terrain.getNormal(position.x, position.z) * -1;
 				velocity = 0;
 				glMatrixMode(GL_MODELVIEW);
@@ -376,19 +376,19 @@ Vector3 temppoint1, temppoint2;
 
 				Vector3 terrainlight;
 				terrainlight = terrain.getLighting(position.x, position.z);
-				if (environment == snowyenvironment) {
-					if (distsq(position, viewer) < viewdistance * viewdistance / 4) {
-						Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x, terrainlight.y, terrainlight.z, .5, .7, bloodtoggle);
+				if (gamestate.environment == snowyenvironment) {
+					if (distsq(position, viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+						Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x, terrainlight.y, terrainlight.z, .5, .7, gamestate.bloodtoggle);
 					}
 				}
-				else if (environment == grassyenvironment) {
-					if (distsq(position, viewer) < viewdistance * viewdistance / 4) {
-						Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x * 90 / 255, terrainlight.y * 70 / 255, terrainlight.z * 8 / 255, .5, .5, bloodtoggle);
+				else if (gamestate.environment == grassyenvironment) {
+					if (distsq(position, viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+						Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x * 90 / 255, terrainlight.y * 70 / 255, terrainlight.z * 8 / 255, .5, .5, gamestate.bloodtoggle);
 					}
 				}
-				else if (environment == desertenvironment) {
-					if (distsq(position, viewer) < viewdistance * viewdistance / 4) {
-						Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x * 190 / 255, terrainlight.y * 170 / 255, terrainlight.z * 108 / 255, .5, .7, bloodtoggle);
+				else if (gamestate.environment == desertenvironment) {
+					if (distsq(position, viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+						Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x * 190 / 255, terrainlight.y * 170 / 255, terrainlight.z * 108 / 255, .5, .7, gamestate.bloodtoggle);
 					}
 				}
 
@@ -747,19 +747,19 @@ Vector3 temppoint1, temppoint2;
 					if (terrain.getOpacity(position.x, position.z) < .2) {
 						Vector3 terrainlight;
 						terrainlight = terrain.getLighting(position.x, position.z);
-						if (environment == snowyenvironment) {
-							if (distsq(&position, &viewer) < viewdistance * viewdistance / 4) {
-								Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x, terrainlight.y, terrainlight.z, .5, .7, bloodtoggle);
+						if (gamestate.environment == snowyenvironment) {
+							if (distsq(&position, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+								Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x, terrainlight.y, terrainlight.z, .5, .7, gamestate.bloodtoggle);
 							}
 						}
-						else if (environment == grassyenvironment) {
-							if (distsq(&position, &viewer) < viewdistance * viewdistance / 4) {
-								Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x * 90 / 255, terrainlight.y * 70 / 255, terrainlight.z * 8 / 255, .5, .5, bloodtoggle);
+						else if (gamestate.environment == grassyenvironment) {
+							if (distsq(&position, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+								Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x * 90 / 255, terrainlight.y * 70 / 255, terrainlight.z * 8 / 255, .5, .5, gamestate.bloodtoggle);
 							}
 						}
-						else if (environment == desertenvironment) {
-							if (distsq(&position, &viewer) < viewdistance * viewdistance / 4) {
-								Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x * 190 / 255, terrainlight.y * 170 / 255, terrainlight.z * 108 / 255, .5, .7, bloodtoggle);
+						else if (gamestate.environment == desertenvironment) {
+							if (distsq(&position, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+								Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x * 190 / 255, terrainlight.y * 170 / 255, terrainlight.z * 108 / 255, .5, .7, gamestate.bloodtoggle);
 							}
 						}
 					}
@@ -815,19 +815,19 @@ Vector3 temppoint1, temppoint2;
 					if (terrain.getOpacity(tippoint.x, tippoint.z) < .2) {
 						Vector3 terrainlight;
 						terrainlight = terrain.getLighting(tippoint.x, tippoint.z);
-						if (environment == snowyenvironment) {
-							if (distsq(&tippoint, &viewer) < viewdistance * viewdistance / 4) {
-								Sprite::MakeSprite(cloudsprite, tippoint, tipvelocity, terrainlight.x, terrainlight.y, terrainlight.z, .5, .7, bloodtoggle);
+						if (gamestate.environment == snowyenvironment) {
+							if (distsq(&tippoint, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+								Sprite::MakeSprite(cloudsprite, tippoint, tipvelocity, terrainlight.x, terrainlight.y, terrainlight.z, .5, .7, gamestate.bloodtoggle);
 							}
 						}
-						else if (environment == grassyenvironment) {
-							if (distsq(&tippoint, &viewer) < viewdistance * viewdistance / 4) {
-								Sprite::MakeSprite(cloudsprite, tippoint, tipvelocity, terrainlight.x * 90 / 255, terrainlight.y * 70 / 255, terrainlight.z * 8 / 255, .5, .5, bloodtoggle);
+						else if (gamestate.environment == grassyenvironment) {
+							if (distsq(&tippoint, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+								Sprite::MakeSprite(cloudsprite, tippoint, tipvelocity, terrainlight.x * 90 / 255, terrainlight.y * 70 / 255, terrainlight.z * 8 / 255, .5, .5, gamestate.bloodtoggle);
 							}
 						}
-						else if (environment == desertenvironment) {
-							if (distsq(&tippoint, &viewer) < viewdistance * viewdistance / 4) {
-								Sprite::MakeSprite(cloudsprite, tippoint, tipvelocity, terrainlight.x * 190 / 255, terrainlight.y * 170 / 255, terrainlight.z * 108 / 255, .5, .7, bloodtoggle);
+						else if (gamestate.environment == desertenvironment) {
+							if (distsq(&tippoint, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+								Sprite::MakeSprite(cloudsprite, tippoint, tipvelocity, terrainlight.x * 190 / 255, terrainlight.y * 170 / 255, terrainlight.z * 108 / 255, .5, .7, gamestate.bloodtoggle);
 							}
 						}
 					}
@@ -985,15 +985,15 @@ Vector3 temppoint1, temppoint2;
 		if (blooddrip > 5) {
 			blooddrip = 5;
 		}
-		if (blooddripdelay < 0 && bloodtoggle) {
+		if (blooddripdelay < 0 && gamestate.bloodtoggle) {
 			blooddripdelay = 1;
 			Vector3 bloodvel;
 			Vector3 bloodloc;
 			bloodloc = position + (tippoint - position) * .7;
 			bloodloc.y -= .05;
-			if (bloodtoggle) {
+			if (gamestate.bloodtoggle) {
 				bloodvel = 0;
-				Sprite::MakeSprite(bloodsprite, bloodloc, bloodvel, 1, 1, 1, .03, 1, bloodtoggle);
+				Sprite::MakeSprite(bloodsprite, bloodloc, bloodvel, 1, 1, 1, .03, 1, gamestate.bloodtoggle);
 			}
 		}
 	}
@@ -1012,7 +1012,7 @@ Vector3 temppoint1, temppoint2;
 					normalrot.y = 1;
 				}
 			}
-			Sprite::MakeSprite(weaponflamesprite, position + tippoint * (((float)abs(rand() % 100)) / 600 + .05), normalrot, 1, 1, 1, (.6 + (float)abs(rand() % 100) / 200 - .25) * 1 / 3, 1, bloodtoggle);
+			Sprite::MakeSprite(weaponflamesprite, position + tippoint * (((float)abs(rand() % 100)) / 600 + .05), normalrot, 1, 1, 1, (.6 + (float)abs(rand() % 100) / 200 - .25) * 1 / 3, 1, gamestate.bloodtoggle);
 			Sprite::setLastSpriteSpeed(4);
 			Sprite::setLastSpriteAlivetime(.3);
 		}
@@ -1027,7 +1027,7 @@ Vector3 temppoint1, temppoint2;
 			if (rand() % 50 == 0 && distsq(&position, &viewer) > 80) {
 				Vector3 shinepoint;
 				shinepoint = position + (tippoint - position) * (((float)abs(rand() % 100)) / 100);
-				Sprite::MakeSprite(weaponshinesprite, shinepoint, normalrot, 1, 1, 1, (.1 + (float)abs(rand() % 100) / 200 - .25) * 1 / 3 * sqrt(findDistance(&shinepoint, &viewer)), 1, bloodtoggle);
+				Sprite::MakeSprite(weaponshinesprite, shinepoint, normalrot, 1, 1, 1, (.1 + (float)abs(rand() % 100) / 200 - .25) * 1 / 3 * sqrt(findDistance(&shinepoint, &viewer)), 1, gamestate.bloodtoggle);
 				Sprite::setLastSpriteSpeed(4);
 				Sprite::setLastSpriteAlivetime(.3);
 			}
@@ -1045,7 +1045,7 @@ void Weapons::DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26
 	}
 }
 
-void Weapon::draw()
+void Weapon::draw(GameState& gamestate)
 {
 	static Vector3 terrainlight;
 	static GLfloat M[16];
@@ -1054,7 +1054,7 @@ void Weapon::draw()
 	if (!weaponBoundingSphereInFrustum)
 		return;
 
-	bool weaponWithinViewingDistance = distsq(&viewer, &position) < viewdistance * viewdistance;
+	bool weaponWithinViewingDistance = distsq(&viewer, &position) < gamestate.viewdistance * gamestate.viewdistance;
 	if (!weaponWithinViewingDistance)
 		return;
 
@@ -1073,7 +1073,7 @@ void Weapon::draw()
 	else {
 		if (Person::players[owner]->occluded < 25) {
 			if ((frustum.SphereInFrustum(Person::players[owner]->coords.x, Person::players[owner]->coords.y + Person::players[owner]->scale * 3, Person::players[owner]->coords.z, Person::players[owner]->scale * 8)
-				&& distsq(&viewer, &Person::players[owner]->coords) < viewdistance * viewdistance)
+				&& distsq(&viewer, &Person::players[owner]->coords) < gamestate.viewdistance * gamestate.viewdistance)
 				|| Person::players[owner]->skeleton.free == 3) {
 				draw = true;
 			}
@@ -1150,10 +1150,10 @@ void Weapon::draw()
 			glEnable(GL_LIGHTING);
 			switch (type) {
 			case knife:
-				if (!bloody || !bloodtoggle) {
+				if (!bloody || !gamestate.bloodtoggle) {
 					throwingknifemodel.drawdifftex(knifetextureptr);
 				}
-				if (bloodtoggle) {
+				if (gamestate.bloodtoggle) {
 					if (bloody == 1) {
 						throwingknifemodel.drawdifftex(lightbloodknifetextureptr);
 					}
@@ -1163,10 +1163,10 @@ void Weapon::draw()
 				}
 				break;
 			case sword:
-				if (!bloody || !bloodtoggle) {
+				if (!bloody || !gamestate.bloodtoggle) {
 					swordmodel.drawdifftex(swordtextureptr);
 				}
-				if (bloodtoggle) {
+				if (gamestate.bloodtoggle) {
 					if (bloody == 1) {
 						swordmodel.drawdifftex(lightbloodswordtextureptr);
 					}
@@ -1242,7 +1242,7 @@ void Weapon::thrown(Vector3 v, bool sethitsomething)
 	physics = 0;
 }
 
-void Weapons::Draw()
+void Weapons::Draw(GameState& gamestate)
 {
 	glAlphaFunc(GL_GREATER, 0.9);
 	glEnable(GL_TEXTURE_2D);
@@ -1252,6 +1252,6 @@ void Weapons::Draw()
 	glDepthMask(1);
 
 	for (std::vector<Weapon>::iterator weapon = weapons.begin(); weapon != weapons.end(); ++weapon) {
-		weapon->draw();
+		weapon->draw(gamestate);
 	}
 }

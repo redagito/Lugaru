@@ -70,7 +70,7 @@ public:
 	static void setText(int id, const std::string& newtext);
 	static void setText(int id, const std::string& newtext, int x, int y, int w, int h);
 	static int getSelected(int mousex, int mousey);
-	static void drawItems();
+	static void drawItems(GameState& gamestate);
 
 	static void Load(GameState& gamestate);
 	static void Tick(GameState& gamestate);
@@ -86,7 +86,7 @@ public:
 	static void startChallengeLevel(int challengelevel, GameState& gamestate);
 
 private:
-	static void handleFadeEffect();
+	static void handleFadeEffect(GameState& gamestate);
 
 	static std::vector<MenuItem> items;
 };

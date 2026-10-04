@@ -362,7 +362,7 @@ public:
     void changeCreatureType(person_type type, bool tutorialActive, GameState& gamestate);
 
     void CheckKick(Terrain& terrain, bool tutorialActive, bool inDialog, float multiplier, int whichjointstartarray[26], GameState& gamestate);
-    void CatchFire();
+    void CatchFire(GameState& gamestate);
     void DoBlood(float howmuch, int which, bool tutorialActive, GameState& gamestate);
     void DoBloodBig(float howmuch, int which, bool tutorialActive, GameState& gamestate);
     bool DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutorialActive, GameState& gamestate);
@@ -414,8 +414,8 @@ public:
 
     int SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrain, bool tutorialActive, bool inDialog, float mutliplier, int whichjointstartarray[26], GameState& gamestate);
     int DrawSkeleton(Terrain& terrain, bool tutorialActive, float multiplier, int whichjointstartarray[26], GameState& gamestate);
-    void Puff(int whichlabel);
-    void FootLand(bodypart whichfoot, float opacity, Terrain& terrain);
+    void Puff(int whichlabel, GameState& gamestate);
+    void FootLand(bodypart whichfoot, float opacity, Terrain& terrain, GameState& gamestate);
     void DoStuff(Terrain& terrain, bool tutorialActive, bool inDialog, float multiplier, int whichjointstartarray[26], GameState& gamestate);
     void setTargetAnimation(int);
     void DoAnimations(Terrain& terrain, bool tutorialActive, bool inDialog, float multiplier, int whichjointstartarray[26], GameState& gamestate);

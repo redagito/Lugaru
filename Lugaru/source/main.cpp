@@ -110,7 +110,7 @@ static Point gMidPoint;
 bool SetUp(GameState& gamestate)
 {
 	gamestate.cellophane = 0;
-	texdetail = 4;
+	gamestate.texdetail = 4;
 	gamestate.slomospeed = 0.25;
 	slomofreq = 8012;
 
@@ -232,12 +232,12 @@ bool SetUp(GameState& gamestate)
 	GLint height = kContextHeight;
 	gMidPoint.h = width / 2;
 	gMidPoint.v = height / 2;
-	screenwidth = width;
-	screenheight = height;
+	gamestate.screenwidth = width;
+	gamestate.screenheight = height;
 
-	gamestate.newdetail = detail;
-	gamestate.newscreenwidth = screenwidth;
-	gamestate.newscreenheight = screenheight;
+	gamestate.newdetail = gamestate.detail;
+	gamestate.newscreenwidth = gamestate.screenwidth;
+	gamestate.newscreenheight = gamestate.screenheight;
 
 	/* If saved resolution is not in the list, add it to the list (so that it’s selectable in the options) */
 	pair<int, int> startresolution(width, height);
@@ -253,7 +253,7 @@ bool SetUp(GameState& gamestate)
 static void DoMouse(GameState& gamestate)
 {
 
-	if (mainmenu || ((abs(gamestate.deltah) < 10 * gamestate.realmultiplier * 1000) && (abs(gamestate.deltav) < 10 * gamestate.realmultiplier * 1000))) {
+	if (gamestate.mainmenu || ((abs(gamestate.deltah) < 10 * gamestate.realmultiplier * 1000) && (abs(gamestate.deltav) < 10 * gamestate.realmultiplier * 1000))) {
 		gamestate.deltah *= gamestate.usermousesensitivity;
 		gamestate.deltav *= gamestate.usermousesensitivity;
 		gamestate.mousecoordh += gamestate.deltah;
@@ -337,17 +337,17 @@ void DoUpdate(GameState& gamestate)
 
 	gamestate.realmultiplier = multiplier;
 	multiplier *= gamestate.gamespeed;
-	if (difficulty == 1) {
+	if (gamestate.difficulty == 1) {
 		multiplier *= .9;
 	}
-	if (difficulty == 0) {
+	if (gamestate.difficulty == 0) {
 		multiplier *= .8;
 	}
 
 	if (gamestate.loading == 4) {
 		multiplier *= .00001;
 	}
-	if (gamestate.slomo && !mainmenu) {
+	if (gamestate.slomo && !gamestate.mainmenu) {
 		multiplier *= gamestate.slomospeed;
 	}
 	oldmult = multiplier;

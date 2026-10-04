@@ -22,28 +22,17 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 // TODO GET RID OF ALL OF THESE!
 
-int difficulty = 0;
 float multiplier = 0;
-float screenwidth = 0, screenheight = 0;
-float viewdistance = 0;
 Vector3 viewer;
 Vector3 viewerfacing;
-float fadestart = 0;
-int environment = 0;
 Light light;
 Terrain terrain;
 
 SDL_Window* sdlwindow;
 
-int detail = 0;
 Frustum frustum;
-float texdetail = 0;
-int bloodtoggle = 0;
-float camerashake = 0;
-bool trilinear;
 Weapons weapons;
 Vector3 windvector;
-int mainmenu = 0;
 int whichjointstartarray[26] = { 0 };
 int whichjointendarray[26] = { 0 };
 

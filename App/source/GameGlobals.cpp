@@ -13,10 +13,6 @@ namespace Game
 	GLuint screentexture2 = 0;
 	Texture Mainmenuitems[10];
 
-	int selected = 0;
-
-	float yaw = 0;
-	float pitch = 0;
 	SkyBox* skybox = NULL;
 
 	Model hawk;

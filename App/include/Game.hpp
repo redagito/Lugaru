@@ -76,7 +76,7 @@ namespace Game
 	void TickOnceAfter(GameState& gamestate);
 
 	void SetUpLighting(GameState& gamestate);
-	GLvoid ReSizeGLScene(float fov, float near);
+	GLvoid ReSizeGLScene(float fov, float near, GameState& gamestate);
 
 	void fireSound(int sound = fireendsound);
 

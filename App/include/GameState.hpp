@@ -38,6 +38,11 @@ struct GameState
 	float minscreenwidth = 640;
 	float minscreenheight = 480;
 
+	// how far the camera can see, and the fraction of that distance at which
+	// terrain and sprites start fading out
+	float viewdistance = 0;
+	float fadestart = 0;
+
 	// input
 	bool mousejump = false;
 	bool floatjump = false;
@@ -81,6 +86,9 @@ struct GameState
 	float changedelay = 0;
 	int oldenvironment = 0;
 
+	// which of the snowy, grassy and desert themes the level uses
+	int environment = 0;
+
 	// which level to switch to once the current one finishes
 	int targetlevel = 0;
 
@@ -107,6 +115,12 @@ struct GameState
 	bool damageeffects = false;
 	bool immediate = false;
 	bool decalstoggle = false;
+
+	// whether textures are filtered with trilinear mipmapping
+	bool trilinear = false;
+
+	// how much blood and blood decals are drawn: 0 off, 1 low detail, 2 high
+	int bloodtoggle = 0;
 
 	// devtools: console, level editor and debug info
 	bool devtools = false;
@@ -189,6 +203,13 @@ struct GameState
 	int newscreenwidth = 0;
 	int newscreenheight = 0;
 
+	// the resolution and detail those choices were applied to, and the skin
+	// texture resolution that detail asks the blood and decal code for
+	int detail = 0;
+	float screenwidth = 0;
+	float screenheight = 0;
+	float texdetail = 0;
+
 	// skybox tint, and the light it contributes
 	float skyboxr = 0;
 	float skyboxg = 0;
@@ -209,8 +230,16 @@ struct GameState
 	float editoryaw = 0;
 	float editorpitch = 0;
 
+	// camera orientation, which the player's own yaw and pitch are copied from
+	// and written back to
+	float yaw = 0;
+	float pitch = 0;
+
 	// challenge progression
 	int numchallengelevels = 0;
+
+	// difficulty the active account plays at: 0 easy, 1 medium, 2 insane
+	int difficulty = 0;
 
 	// session start
 	bool gamestarted = false;
@@ -227,6 +256,15 @@ struct GameState
 	// session control
 	int tryquit = 0;
 	int endgame = 0;
+
+	// which menu is showing; Menu::Load lists what each value means
+	int mainmenu = 0;
+
+	// which item of that menu is highlighted; -1 means none
+	int selected = 0;
+
+	// how far blood loss shakes the camera
+	float camerashake = 0;
 
 	// whether a game is in progress rather than sitting in the menus
 	bool gameon = false;

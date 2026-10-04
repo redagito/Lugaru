@@ -93,12 +93,12 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		}
 	}
 
-	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (gamestate.mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
 		tempmult = multiplier;
 		multiplier = 0;
 	}
 
-	if (!mainmenu) {
+	if (!gamestate.mainmenu) {
 		if (gamestate.editorenabled) {
 			numboundaries = gamestate.mapradius * 2;
 			if (numboundaries > 360) {
@@ -138,7 +138,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			if (gamestate.slomodelay < 0) {
 				gamestate.slomo = 0;
 			}
-			camerashake = 0;
+			gamestate.camerashake = 0;
 			changed = 1;
 		}
 		if ((!changed && !gamestate.slomo) || gamestate.loading) {
@@ -160,14 +160,14 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			}
 		}
 
-		if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
+		if (gamestate.freeze || gamestate.winfreeze || (gamestate.mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
 			drawmode = normalmode;
 		}
-		if ((gamestate.freeze || gamestate.winfreeze) && gamestate.ismotionblur && !mainmenu) {
+		if ((gamestate.freeze || gamestate.winfreeze) && gamestate.ismotionblur && !gamestate.mainmenu) {
 			drawmode = radialzoommode;
 		}
 
-		if (gamestate.winfreeze || mainmenu) {
+		if (gamestate.winfreeze || gamestate.mainmenu) {
 			drawmode = normalmode;
 		}
 
@@ -177,16 +177,16 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 		if (!texcoordwidth) {
 			texviewwidth = gamestate.kTextureSize;
-			if (texviewwidth > screenwidth) {
-				texviewwidth = screenwidth;
+			if (texviewwidth > gamestate.screenwidth) {
+				texviewwidth = gamestate.screenwidth;
 			}
 			texviewheight = gamestate.kTextureSize;
-			if (texviewheight > screenheight) {
-				texviewheight = screenheight;
+			if (texviewheight > gamestate.screenheight) {
+				texviewheight = gamestate.screenheight;
 			}
 
-			texcoordwidth = screenwidth / gamestate.kTextureSize;
-			texcoordheight = screenheight / gamestate.kTextureSize;
+			texcoordwidth = gamestate.screenwidth / gamestate.kTextureSize;
+			texcoordheight = gamestate.screenheight / gamestate.kTextureSize;
 			if (texcoordwidth > 1) {
 				texcoordwidth = 1;
 			}
@@ -201,7 +201,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		static Vector3 terrainlight;
 		static float distance;
 		if (drawmode == normalmode) {
-			Game::ReSizeGLScene(90, .1f);
+			Game::ReSizeGLScene(90, .1f, gamestate);
 		}
 		else {
 			glViewport(0, 0, texviewwidth, texviewheight);
@@ -225,17 +225,17 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		//camera effects
 		if (!gamestate.cameramode && !gamestate.freeze && !gamestate.winfreeze) {
 			//shake
-			glRotatef(float(rand() % 100) / 10 * camerashake /*+(gamestate.woozy*gamestate.woozy)/10*/, 0, 0, 1);
+			glRotatef(float(rand() % 100) / 10 * gamestate.camerashake /*+(gamestate.woozy*gamestate.woozy)/10*/, 0, 0, 1);
 			//sway
-			glRotatef(pitch + sin(gamestate.woozy / 2) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 1, 0, 0);
-			glRotatef(yaw + sin(gamestate.woozy) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 0, 1, 0);
+			glRotatef(gamestate.pitch + sin(gamestate.woozy / 2) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 1, 0, 0);
+			glRotatef(gamestate.yaw + sin(gamestate.woozy) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 0, 1, 0);
 		}
 		if (gamestate.cameramode || gamestate.freeze || gamestate.winfreeze) {
-			glRotatef(pitch, 1, 0, 0);
-			glRotatef(yaw, 0, 1, 0);
+			glRotatef(gamestate.pitch, 1, 0, 0);
+			glRotatef(gamestate.yaw, 0, 1, 0);
 		}
 
-		if (environment == desertenvironment) {
+		if (gamestate.environment == desertenvironment) {
 			glRotatef((float)(abs(rand() % 100)) / 3000 - 1, 1, 0, 0);
 			glRotatef((float)(abs(rand() % 100)) / 3000 - 1, 0, 1, 0);
 		}
@@ -254,15 +254,15 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			gamestate.blurness -= multiplier * 5;
 		}
 
-		if (environment == desertenvironment) {
-			if (detail == 2) {
+		if (gamestate.environment == desertenvironment) {
+			if (gamestate.detail == 2) {
 				glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, gamestate.blurness + .4);
 			}
 			glRotatef((float)(abs(rand() % 100)) / 1000, 1, 0, 0);
 			glRotatef((float)(abs(rand() % 100)) / 1000, 0, 1, 0);
 		}
 
-		skybox->draw(environment == desertenvironment, viewdistance, gamestate.blurness, gamestate.skyboxtexture, Vector3{ gamestate.skyboxr, gamestate.skyboxg, gamestate.skyboxb });
+		skybox->draw(gamestate.environment == desertenvironment, gamestate.viewdistance, gamestate.blurness, gamestate.skyboxtexture, Vector3{ gamestate.skyboxr, gamestate.skyboxg, gamestate.skyboxb });
 		glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, 0);
 		glPopMatrix();
 		glTranslatef(-viewer.x, -viewer.y, -viewer.z);
@@ -290,7 +290,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 							if (k != 0 && Tutorial::active) {
 								opacity = .2 + .2 * sin(gamestate.smoketex * 6 + i) - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
 							}
-							terrain.MakeDecal(shadowdecal, point, size, opacity, rotation, environment);
+							terrain.MakeDecal(shadowdecal, point, size, opacity, rotation, gamestate.environment);
 							for (unsigned int l = 0; l < terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
 								unsigned int j = terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
 								if (Object::objects[j]->position.y < Person::players[k]->coords.y || Object::objects[j]->type == tunneltype || Object::objects[j]->type == weirdtype) {
@@ -322,7 +322,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 							if (k != 0 && Tutorial::active) {
 								opacity = .2 + .2 * sin(gamestate.smoketex * 6 + i) - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
 							}
-							terrain.MakeDecal(shadowdecal, point, size, opacity * .7, rotation, environment);
+							terrain.MakeDecal(shadowdecal, point, size, opacity * .7, rotation, gamestate.environment);
 							for (unsigned int l = 0; l < terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
 								unsigned int j = terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
 								if (Object::objects[j]->position.y < Person::players[k]->coords.y || Object::objects[j]->type == tunneltype || Object::objects[j]->type == weirdtype) {
@@ -350,7 +350,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 					point = Person::players[k]->coords;
 					size = .7;
 					opacity = .4 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 5;
-					terrain.MakeDecal(shadowdecal, point, size, opacity * .7, rotation, environment);
+					terrain.MakeDecal(shadowdecal, point, size, opacity * .7, rotation, gamestate.environment);
 					for (unsigned int l = 0; l < terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
 						unsigned int j = terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
 						point = DoRotation(Person::players[k]->coords - Object::objects[j]->position, 0, -Object::objects[j]->yaw, 0);
@@ -371,13 +371,13 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		terraintexture.bind();
-		terrain.draw(0, viewer, viewdistance, fadestart, environment, frustum, gamestate.blurness);
+		terrain.draw(0, viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, frustum, gamestate.blurness);
 		terraintexture2.bind();
-		terrain.draw(1, viewer, viewdistance, fadestart, environment, frustum, gamestate.blurness);
+		terrain.draw(1, viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, frustum, gamestate.blurness);
 
 		if (gamestate.decalstoggle)
 		{
-			terrain.drawdecals(viewer, viewdistance, fadestart, multiplier);
+			terrain.drawdecals(viewer, gamestate.viewdistance, gamestate.fadestart, multiplier);
 		}
 
 		//Model
@@ -400,7 +400,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 					glEnable(GL_LIGHTING);
 					terrainlight = terrain.getLighting(Person::players[k]->coords.x, Person::players[k]->coords.z);
 					distance = distsq(&viewer, &Person::players[k]->coords);
-					distance = (viewdistance * viewdistance - (distance - (viewdistance * viewdistance * fadestart)) * (1 / (1 - fadestart))) / viewdistance / viewdistance;
+					distance = (gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance;
 					glColor4f(terrainlight.x, terrainlight.y, terrainlight.z, distance);
 					if (distance >= 1) {
 						glDisable(GL_BLEND);
@@ -439,7 +439,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		glPushMatrix();
 		glCullFace(GL_BACK);
 		glEnable(GL_TEXTURE_2D);
-		Object::Draw(gamestate.decalstoggle, multiplier, viewer, viewdistance, fadestart, environment, light, frustum, terrain, detail, gamestate.blurness, gamestate.windvar, gamestate.playerdist);
+		Object::Draw(gamestate.decalstoggle, multiplier, viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, light, frustum, terrain, gamestate.detail, gamestate.blurness, gamestate.windvar, gamestate.playerdist);
 		glPopMatrix();
 
 		//draw hawk
@@ -454,11 +454,11 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glRotatef(gamestate.hawkyaw, 0, 1, 0);
 			glTranslatef(25, 0, 0);
 			distance = distsq(&viewer, &realhawkcoords) * 1.2;
-			glColor4f(light.color[0], light.color[1], light.color[2], (viewdistance * viewdistance - (distance - (viewdistance * viewdistance * fadestart)) * (1 / (1 - fadestart))) / viewdistance / viewdistance);
-			if ((viewdistance * viewdistance - (distance - (viewdistance * viewdistance * fadestart)) * (1 / (1 - fadestart))) / viewdistance / viewdistance > 1) {
+			glColor4f(light.color[0], light.color[1], light.color[2], (gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance);
+			if ((gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance > 1) {
 				glColor4f(light.color[0], light.color[1], light.color[2], 1);
 			}
-			if ((viewdistance * viewdistance - (distance - (viewdistance * viewdistance * fadestart)) * (1 / (1 - fadestart))) / viewdistance / viewdistance > 0) {
+			if ((gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance > 0) {
 				hawk.drawdifftex(hawktexture);
 			}
 		}
@@ -474,7 +474,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				glEnable(GL_LIGHTING);
 				terrainlight = terrain.getLighting(Person::players[k]->coords.x, Person::players[k]->coords.z);
 				distance = distsq(&viewer, &Person::players[k]->coords);
-				distance = (viewdistance * viewdistance - (distance - (viewdistance * viewdistance * fadestart)) * (1 / (1 - fadestart))) / viewdistance / viewdistance;
+				distance = (gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance;
 				glColor4f(terrainlight.x, terrainlight.y, terrainlight.z, distance);
 				if (distance >= 1) {
 					glDisable(GL_BLEND);
@@ -505,7 +505,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 		glPushMatrix();
 		glEnable(GL_TEXTURE_2D);
-		weapons.Draw();
+		weapons.Draw(gamestate);
 		glPopMatrix();
 		glCullFace(GL_BACK);
 
@@ -516,7 +516,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 		glDepthMask(0);
 
-		Sprite::Draw(viewer, viewdistance, fadestart, environment, light, multiplier, gamestate.gravity, terrain, detail, viewerfacing, bloodtoggle, windvector, Tutorial::active, gamestate);
+		Sprite::Draw(viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, light, multiplier, gamestate.gravity, terrain, gamestate.detail, viewerfacing, gamestate.bloodtoggle, windvector, Tutorial::active, gamestate);
 
 		//waypoints, pathpoints in editor
 		if (gamestate.editorenabled) {
@@ -619,7 +619,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 						int i = 0;
 						while (!done) {
 							if (string[i] == '\n' || string[i] > 'z' || string[i] < ' ' || string[i] == '\0') {
-								text->glPrintOutlined(1, 1, 1, tutorialopac, screenwidth / 2 - 7.6 * (i - lastline) * screenwidth / 1024, screenheight / 16 + screenheight * 4 / 5 - 20 * screenwidth / 1024 * line, string, 1, 1.5 * screenwidth / 1024, screenwidth, screenheight, lastline, i);
+								text->glPrintOutlined(1, 1, 1, tutorialopac, gamestate.screenwidth / 2 - 7.6 * (i - lastline) * gamestate.screenwidth / 1024, gamestate.screenheight / 16 + gamestate.screenheight * 4 / 5 - 20 * gamestate.screenwidth / 1024 * line, string, 1, 1.5 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight, lastline, i);
 								lastline = i + 1;
 								line++;
 								if (string[i] == '\0') {
@@ -641,7 +641,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			}
 
 			/* Drawing dialogs */
-			if (Dialog::inDialog() && !mainmenu) {
+			if (Dialog::inDialog() && !gamestate.mainmenu) {
 				glDisable(GL_DEPTH_TEST);
 				glDisable(GL_CULL_FACE);
 				glDisable(GL_LIGHTING);
@@ -650,14 +650,14 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				glMatrixMode(GL_PROJECTION);
 				glPushMatrix();
 				glLoadIdentity();
-				glOrtho(0, screenwidth, 0, screenheight, -100, 100);
+				glOrtho(0, gamestate.screenwidth, 0, gamestate.screenheight, -100, 100);
 				glMatrixMode(GL_MODELVIEW);
 				glPushMatrix();
 				glLoadIdentity();
 				if (Dialog::currentScene().location == 1) {
-					glTranslatef(0, screenheight * 3 / 4, 0);
+					glTranslatef(0, gamestate.screenheight * 3 / 4, 0);
 				}
-				glScalef(screenwidth, screenheight / 4, 1);
+				glScalef(gamestate.screenwidth, gamestate.screenheight / 4, 1);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				glEnable(GL_BLEND);
 
@@ -683,12 +683,12 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				float startx;
 				float starty;
 
-				startx = screenwidth * 1 / 5;
+				startx = gamestate.screenwidth * 1 / 5;
 				if (Dialog::currentScene().location == 1) {
-					starty = screenheight / 16 + screenheight * 4 / 5;
+					starty = gamestate.screenheight / 16 + gamestate.screenheight * 4 / 5;
 				}
 				else {
-					starty = screenheight * 1 / 5 - screenheight / 16;
+					starty = gamestate.screenheight * 1 / 5 - gamestate.screenheight / 16;
 				}
 
 				/* Get speaker name, and remove potential '#' chars hardcoded in it. */
@@ -697,11 +697,11 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 				/* Print speaker name in dialog box. */
 				if (Dialog::currentScene().color[0] + Dialog::currentScene().color[1] + Dialog::currentScene().color[2] < 1.5) {
-					text->glPrintOutlined(0.7, 0.7, 0.7, tutorialopac, startx - 2 * 7.6 * string.size() * screenwidth / 1024, starty, string, 1, 1.4 * screenwidth / 1024, screenwidth, screenheight);
+					text->glPrintOutlined(0.7, 0.7, 0.7, tutorialopac, startx - 2 * 7.6 * string.size() * gamestate.screenwidth / 1024, starty, string, 1, 1.4 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight);
 				}
 				else {
 					glColor4f(0, 0, 0, tutorialopac);
-					text->glPrintOutline(startx - 2 * 7.6 * string.size() * screenwidth / 1024 - 4, starty - 4, string, 1, 1.4 * 1.25 * screenwidth / 1024, screenwidth, screenheight);
+					text->glPrintOutline(startx - 2 * 7.6 * string.size() * gamestate.screenwidth / 1024 - 4, starty - 4, string, 1, 1.4 * 1.25 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight);
 				}
 
 				/* Get dialog text, and remove potential '#' chars hardcoded in it.' */
@@ -716,11 +716,11 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				while (!done) {
 					if (string[i] == '\n' || string[i] > 'z' || string[i] < ' ' || string[i] == '\0') {
 						if (Dialog::currentScene().color[0] + Dialog::currentScene().color[1] + Dialog::currentScene().color[2] < 1.5) {
-							text->glPrintOutlined(1, 1, 1, tutorialopac, startx, starty - 20 * screenwidth / 1024 * line, string, 1, 1.4 * screenwidth / 1024, screenwidth, screenheight, lastline, i);
+							text->glPrintOutlined(1, 1, 1, tutorialopac, startx, starty - 20 * gamestate.screenwidth / 1024 * line, string, 1, 1.4 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight, lastline, i);
 						}
 						else {
 							glColor4f(0, 0, 0, tutorialopac);
-							text->glPrint(startx, starty - 20 * screenwidth / 1024 * line, string, 1, 1.4 * screenwidth / 1024, screenwidth, screenheight, lastline, i);
+							text->glPrint(startx, starty - 20 * gamestate.screenwidth / 1024 * line, string, 1, 1.4 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight, lastline, i);
 						}
 						lastline = i + 1;
 						line++;
@@ -735,7 +735,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				}
 			}
 
-			if (!Tutorial::active && !gamestate.winfreeze && !Dialog::inDialog() && !mainmenu) {
+			if (!Tutorial::active && !gamestate.winfreeze && !Dialog::inDialog() && !gamestate.mainmenu) {
 				if (campaign) {
 					if (gamestate.scoreadded) {
 						string = "Score: " + std::to_string(int(Account::active().getCampaignScore()));
@@ -757,12 +757,12 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 					glMatrixMode(GL_PROJECTION);
 					glPushMatrix();
 					glLoadIdentity();
-					glOrtho(0, screenwidth, 0, screenheight, -100, 100);
+					glOrtho(0, gamestate.screenwidth, 0, gamestate.screenheight, -100, 100);
 					glMatrixMode(GL_MODELVIEW);
 					glPushMatrix();
 					glLoadIdentity();
-					glTranslatef(15, screenheight * 17.5 / 20, 0);
-					glScalef(screenwidth / 3 + 20, screenheight / 20, 1);
+					glTranslatef(15, gamestate.screenheight * 17.5 / 20, 0);
+					glScalef(gamestate.screenwidth / 3 + 20, gamestate.screenheight / 20, 1);
 					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 					glEnable(GL_BLEND);
 					glColor4f(0.0, 0.4, 0.0, 0.7);
@@ -833,7 +833,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 			glColor4f(.5, .5, .5, 1);
 
-			if ((gamestate.texttoggle || gamestate.editorenabled) && gamestate.devtools && !mainmenu) {
+			if ((gamestate.texttoggle || gamestate.editorenabled) && gamestate.devtools && !gamestate.mainmenu) {
 				string = "The framespersecond is " + std::to_string(int(gamestate.fps));
 				text->glPrint(10, 30, string, 0, .8, 1024, 768);
 
@@ -908,7 +908,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 					string = "Player " + std::to_string(int(Person::players.size()) - 1) + ": numwaypoints: " + std::to_string(Person::players.back()->numwaypoints);
 					text->glPrint(10, 140, string, 0, .8, 1024, 768);
 				}
-				string = "Difficulty: " + std::to_string(difficulty);
+				string = "Difficulty: " + std::to_string(gamestate.difficulty);
 				text->glPrint(10, 240, string, 0, .8, 1024, 768);
 			}
 		}
@@ -922,11 +922,11 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
 			glLoadIdentity();
-			glOrtho(0, screenwidth, 0, screenheight, -100, 100);
+			glOrtho(0, gamestate.screenwidth, 0, gamestate.screenheight, -100, 100);
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadIdentity();
-			glScalef(screenwidth, screenheight, 1);
+			glScalef(gamestate.screenwidth, gamestate.screenheight, 1);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 			glColor4f(0, 0, 0, .5);
@@ -955,11 +955,11 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
 			glLoadIdentity();
-			glOrtho(0, screenwidth, 0, screenheight, -100, 100);
+			glOrtho(0, gamestate.screenwidth, 0, gamestate.screenheight, -100, 100);
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadIdentity();
-			glScalef(screenwidth, screenheight, 1);
+			glScalef(gamestate.screenwidth, gamestate.screenheight, 1);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 			if (Person::players[0]->dead) {
@@ -1019,11 +1019,11 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
 			glLoadIdentity();
-			glOrtho(0, screenwidth, 0, screenheight, -100, 100);
+			glOrtho(0, gamestate.screenwidth, 0, gamestate.screenheight, -100, 100);
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadIdentity();
-			glScalef(screenwidth, screenheight, 1);
+			glScalef(gamestate.screenwidth, gamestate.screenheight, 1);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 			glColor4f(gamestate.flashr, gamestate.flashg, gamestate.flashb, gamestate.flashamount);
@@ -1043,7 +1043,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glDepthMask(1);
 		}
 
-		if (difficulty < 2 && !Dialog::inDialog()) { // minimap
+		if (gamestate.difficulty < 2 && !Dialog::inDialog()) { // minimap
 			float mapviewdist = 20000;
 
 			glDisable(GL_DEPTH_TEST);
@@ -1059,11 +1059,11 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
 			glLoadIdentity();
-			glOrtho(0, screenwidth, 0, screenheight, -100, 100);
+			glOrtho(0, gamestate.screenwidth, 0, gamestate.screenheight, -100, 100);
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadIdentity();
-			glScalef((float)screenwidth / 2, (float)screenwidth / 2, 1);
+			glScalef((float)gamestate.screenwidth / 2, (float)gamestate.screenwidth / 2, 1);
 			glTranslatef(1.75, .25, 0);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
@@ -1210,11 +1210,11 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
 			glLoadIdentity();
-			glOrtho(0, screenwidth, 0, screenheight, -100, 100);
+			glOrtho(0, gamestate.screenwidth, 0, gamestate.screenheight, -100, 100);
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadIdentity();
-			glScalef(screenwidth, screenheight, 1);
+			glScalef(gamestate.screenwidth, gamestate.screenheight, 1);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 			glColor4f(0, 0, 0, .7);
@@ -1260,11 +1260,11 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
 			glLoadIdentity();
-			glOrtho(0, screenwidth, 0, screenheight, -100, 100);
+			glOrtho(0, gamestate.screenwidth, 0, gamestate.screenheight, -100, 100);
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadIdentity();
-			glScalef(screenwidth, screenheight, 1);
+			glScalef(gamestate.screenwidth, gamestate.screenheight, 1);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
 			glColor4f(0, 0, 0, .4);
@@ -1358,8 +1358,8 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		}
 
 		glClear(GL_DEPTH_BUFFER_BIT);
-		Game::ReSizeGLScene(90, .1f);
-		glViewport(0, 0, screenwidth, screenheight);
+		Game::ReSizeGLScene(90, .1f, gamestate);
+		glViewport(0, 0, gamestate.screenwidth, gamestate.screenheight);
 
 		if (drawmode != normalmode) {
 			glDisable(GL_DEPTH_TEST);
@@ -1380,11 +1380,11 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
 			glLoadIdentity();
-			glOrtho(0, screenwidth, 0, screenheight, -100, 100);
+			glOrtho(0, gamestate.screenwidth, 0, gamestate.screenheight, -100, 100);
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadIdentity();
-			glScalef((float)screenwidth / 2, (float)screenheight / 2, 1);
+			glScalef((float)gamestate.screenwidth / 2, (float)gamestate.screenheight / 2, 1);
 			glTranslatef(1, 1, 0);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND);
@@ -1586,21 +1586,21 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		}
 	}
 
-	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (gamestate.mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
 		multiplier = tempmult;
 	}
 
-	if (mainmenu) {
+	if (gamestate.mainmenu) {
 		DrawMenu(gamestate);
 	}
 
-	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (gamestate.mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
 		tempmult = multiplier;
 		multiplier = 0;
 	}
 
 	if (side == stereoRight || side == stereoCenter) {
-		if (drawmode != motionblurmode || mainmenu) {
+		if (drawmode != motionblurmode || gamestate.mainmenu) {
 			swap_gl_buffers();
 		}
 	}
@@ -1614,7 +1614,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		drawtoggle = 0;
 	}
 
-	if (gamestate.freeze || gamestate.winfreeze || (mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
+	if (gamestate.freeze || gamestate.winfreeze || (gamestate.mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
 		multiplier = tempmult;
 	}
 	//Jordan fixed your warning!
@@ -1629,7 +1629,7 @@ void DrawMenu(GameState& gamestate)
 	glDrawBuffer(GL_BACK);
 	glReadBuffer(GL_BACK);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	Game::ReSizeGLScene(90, .1f);
+	Game::ReSizeGLScene(90, .1f, gamestate);
 
 	//draw menu background
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -1643,13 +1643,13 @@ void DrawMenu(GameState& gamestate)
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0, screenwidth, 0, screenheight, -100, 100);
+	glOrtho(0, gamestate.screenwidth, 0, gamestate.screenheight, -100, 100);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
-	glTranslatef(screenwidth / 2, screenheight / 2, 0);
+	glTranslatef(gamestate.screenwidth / 2, gamestate.screenheight / 2, 0);
 	glPushMatrix();
-	glScalef((float)screenwidth / 2, (float)screenheight / 2, 1);
+	glScalef((float)gamestate.screenwidth / 2, (float)gamestate.screenheight / 2, 1);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_BLEND);
 	glColor4f(0, 0, 0, 1.0);
@@ -1693,7 +1693,7 @@ void DrawMenu(GameState& gamestate)
 	glLoadIdentity();
 	glEnable(GL_TEXTURE_2D);
 
-	Menu::drawItems();
+	Menu::drawItems(gamestate);
 
 	//draw mouse cursor
 	glMatrixMode(GL_PROJECTION);
@@ -1704,13 +1704,13 @@ void DrawMenu(GameState& gamestate)
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0, screenwidth, 0, screenheight, -100, 100);
+	glOrtho(0, gamestate.screenwidth, 0, gamestate.screenheight, -100, 100);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
-	glTranslatef(screenwidth / 2, screenheight / 2, 0);
+	glTranslatef(gamestate.screenwidth / 2, gamestate.screenheight / 2, 0);
 	glPushMatrix();
-	glScalef((float)screenwidth / 2, (float)screenheight / 2, 1);
+	glScalef((float)gamestate.screenwidth / 2, (float)gamestate.screenheight / 2, 1);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	glEnable(GL_TEXTURE_2D);
@@ -1720,8 +1720,8 @@ void DrawMenu(GameState& gamestate)
 	glPopMatrix();
 	if (!gamestate.waiting) { // hide the cursor while waiting for a key
 		glPushMatrix();
-		glTranslatef(gamestate.mousecoordh - screenwidth / 2, gamestate.mousecoordv * -1 + screenheight / 2, 0);
-		glScalef((float)screenwidth / 64, (float)screenwidth / 64, 1);
+		glTranslatef(gamestate.mousecoordh - gamestate.screenwidth / 2, gamestate.mousecoordv * -1 + gamestate.screenheight / 2, 0);
+		glScalef((float)gamestate.screenwidth / 64, (float)gamestate.screenwidth / 64, 1);
 		glTranslatef(1, -1, 0);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glColor4f(1, 1, 1, 1);
@@ -1764,11 +1764,11 @@ void DrawMenu(GameState& gamestate)
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
-		glOrtho(0, screenwidth, 0, screenheight, -100, 100);
+		glOrtho(0, gamestate.screenwidth, 0, gamestate.screenheight, -100, 100);
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
-		glScalef(screenwidth, screenheight, 1);
+		glScalef(gamestate.screenwidth, gamestate.screenheight, 1);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 		glColor4f(gamestate.flashr, gamestate.flashg, gamestate.flashb, gamestate.flashamount);

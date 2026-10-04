@@ -183,19 +183,18 @@ std::string join(const std::set<std::string>& names)
 // GameState already owns.
 const std::set<std::string> kPendingGlobals = {
 	// App/include/Globals.h
-	"difficulty", "multiplier",
-	"screenwidth", "screenheight", "viewdistance", "viewer", "viewerfacing",
-	"fadestart", "environment", "light", "terrain",
-	"sdlwindow", "detail", "frustum", "texdetail", "bloodtoggle",
-	"camerashake", "trilinear", "weapons",
-	"windvector", "mainmenu", "whichjointstartarray",
+	"multiplier",
+	"viewer", "viewerfacing",
+	"light", "terrain",
+	"sdlwindow", "frustum", "weapons",
+	"windvector", "whichjointstartarray",
 	"whichjointendarray", "stereomode",
 	"newstereomode",
 
 	// App/include/GameGlobals.h
 	"terraintexture", "terraintexture2", "loadscreentexture", "Mapcircletexture",
 	"Maparrowtexture", "Mapboxtexture", "cursortexture", "screentexture",
-	"screentexture2", "Mainmenuitems", "selected", "yaw", "pitch", "skybox",
+	"screentexture2", "Mainmenuitems", "skybox",
 	"hawk", "hawktexture", "hawkcoords", "realhawkcoords", "eye",
 	"cornea", "iris", "mapcenter", "text",
 	"textmono", "pathpoint", "numpathpoints",
@@ -243,7 +242,7 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 	{
 		// Without this, a parser that quietly matched nothing would leave every
 		// assertion above passing for the wrong reason.
-		REQUIRE(globals.size() == 54);
-		REQUIRE(members.size() == 123);
+		REQUIRE(globals.size() == 39);
+		REQUIRE(members.size() == 138);
 	}
 }

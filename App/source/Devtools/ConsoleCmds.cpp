@@ -119,7 +119,7 @@ static void set_noclothes(int pnum, const char*, GameState& gamestate)
 	Person::players[pnum]->clothestintb.clear();
 	Person::players[pnum]->skeleton.drawmodel.textureptr.load(
 		PersonType::types[Person::players[pnum]->creature].skins[Person::players[pnum]->whichskin], 1,
-		&Person::players[pnum]->skeleton.skinText[0], &Person::players[pnum]->skeleton.skinsize, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		&Person::players[pnum]->skeleton.skinText[0], &Person::players[pnum]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
 }
 
 static void set_clothes(int pnum, const char* args, GameState& gamestate)
@@ -211,8 +211,8 @@ void ch_save_json(const char* args, GameState& gamestate)
 
 	map_data["map"]["type"] = gamestate.maptype;
 	map_data["map"]["hostile"] = gamestate.hostile;
-	map_data["map"]["viewdistance"] = viewdistance;
-	map_data["map"]["fadestart"] = fadestart;
+	map_data["map"]["viewdistance"] = gamestate.viewdistance;
+	map_data["map"]["fadestart"] = gamestate.fadestart;
 
 	map_data["map"]["skybox"]["texture"] = gamestate.skyboxtexture;
 	map_data["map"]["skybox"]["r"] = gamestate.skyboxr;
@@ -224,7 +224,7 @@ void ch_save_json(const char* args, GameState& gamestate)
 
 	map_data["map"]["dialogs"] = Dialog::saveDialogs();
 
-	map_data["map"]["environment"] = environment;
+	map_data["map"]["environment"] = gamestate.environment;
 
 	for (unsigned int k = 0; k < Object::objects.size(); k++) {
 		map_data["map"]["objects"][k] = *Object::objects[k];
@@ -286,7 +286,7 @@ void ch_save(const char* args, GameState& gamestate)
 	fpackf(tfile, "Bi", mapvers);
 	fpackf(tfile, "Bi", gamestate.maptype);
 	fpackf(tfile, "Bi", gamestate.hostile);
-	fpackf(tfile, "Bf Bf", viewdistance, fadestart);
+	fpackf(tfile, "Bf Bf", gamestate.viewdistance, gamestate.fadestart);
 	fpackf(tfile, "Bb Bf Bf Bf", gamestate.skyboxtexture, gamestate.skyboxr, gamestate.skyboxg, gamestate.skyboxb);
 	fpackf(tfile, "Bf Bf Bf", gamestate.skyboxlightr, gamestate.skyboxlightg, gamestate.skyboxlightb);
 	fpackf(tfile, "Bf Bf Bf Bf Bf Bi", Person::players[0]->coords.x, Person::players[0]->coords.y, Person::players[0]->coords.z,
@@ -317,7 +317,7 @@ void ch_save(const char* args, GameState& gamestate)
 		fpackf(tfile, "Bf Bf Bf", Person::players[0]->clothestintr[k], Person::players[0]->clothestintg[k], Person::players[0]->clothestintb[k]);
 	}
 
-	fpackf(tfile, "Bi", environment);
+	fpackf(tfile, "Bi", gamestate.environment);
 
 	fpackf(tfile, "Bi", Object::objects.size());
 
@@ -557,12 +557,12 @@ void ch_wolfie(const char*, GameState& gamestate)
 
 void ch_lizardwolf(const char*, GameState& gamestate)
 {
-	Person::players[0]->skeleton.drawmodel.textureptr.load("Textures/FurWolfLizard.jpg", 1, &Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	Person::players[0]->skeleton.drawmodel.textureptr.load("Textures/FurWolfLizard.jpg", 1, &Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
 }
 
 void ch_darko(const char*, GameState& gamestate)
 {
-	Person::players[0]->skeleton.drawmodel.textureptr.load("Textures/FurDarko.jpg", 1, &Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	Person::players[0]->skeleton.drawmodel.textureptr.load("Textures/FurDarko.jpg", 1, &Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
 }
 
 void ch_sizemin(const char*, GameState&)
@@ -727,7 +727,7 @@ void ch_default(const char*, GameState& gamestate)
 	Person::players[0]->clothestintb.clear();
 	Person::players[0]->skeleton.drawmodel.textureptr.load(
 		PersonType::types[Person::players[0]->creature].skins[Person::players[0]->whichskin], 1,
-		&Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		&Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
 
 	gamestate.editoractive = typeactive;
 	Person::players[0]->immobile = 0;
@@ -766,14 +766,14 @@ void ch_mapgosomewhere(const char*, GameState& gamestate)
 	gamestate.maptype = mapgosomewhere;
 }
 
-void ch_viewdistance(const char* args, GameState&)
+void ch_viewdistance(const char* args, GameState& gamestate)
 {
-	viewdistance = atof(args) * 100;
+	gamestate.viewdistance = atof(args) * 100;
 }
 
-void ch_fadestart(const char* args, GameState&)
+void ch_fadestart(const char* args, GameState& gamestate)
 {
-	fadestart = atof(args);
+	gamestate.fadestart = atof(args);
 }
 
 void ch_slomo(const char* args, GameState& gamestate)

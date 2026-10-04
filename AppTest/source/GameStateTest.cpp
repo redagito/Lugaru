@@ -6,9 +6,7 @@
 
 #include <type_traits>
 
-#include "GameGlobals.h"
 #include "GameState.hpp"
-#include "Globals.h"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
 {
@@ -1113,97 +1111,178 @@ TEST_CASE("tranche 5 GameState members are per instance", "[gamestate]")
 	}
 }
 
-// Tranche 6 covers sixteen more scalar globals from App/include/Globals.h and
-// App/include/GameGlobals.h. These assertions read the globals themselves, which
-// is the whole point: the values are pinned here while the globals are still the
-// thing being read, so the literals below are observed rather than assumed. The
-// tranche that follows moves each of these into a GameState member and asserts
-// the same values against that member instead.
+// Tranche 6 covers fifteen more scalar globals from App/include/Globals.h and
+// App/include/GameGlobals.h. Each member's default is the literal the global it
+// came from was initialised with, and its declared type is the type that global
+// declared. Those literals were first pinned by reading the globals themselves,
+// while they were still around to be compared against.
 //
 // Types are pinned next to the values on purpose. A value comparison such as
 // `REQUIRE(x == 0)` holds just as happily for an int as for a float, so on its
 // own it would let a member change type unnoticed.
-TEST_CASE("the tranche 6 globals start at the values GameState will carry", "[gamestate]")
+TEST_CASE("GameState tranche 6 members start at their historical global defaults", "[gamestate]")
 {
+	GameState s;
+
 	SECTION("game difficulty")
 	{
-		REQUIRE(difficulty == 0);
+		REQUIRE(s.difficulty == 0);
 	}
 
 	SECTION("window resolution")
 	{
-		REQUIRE(screenwidth == 0.0f);
-		REQUIRE(screenheight == 0.0f);
+		REQUIRE(s.screenwidth == 0.0f);
+		REQUIRE(s.screenheight == 0.0f);
 	}
 
 	SECTION("view distance and fading")
 	{
-		REQUIRE(viewdistance == 0.0f);
-		REQUIRE(fadestart == 0.0f);
+		REQUIRE(s.viewdistance == 0.0f);
+		REQUIRE(s.fadestart == 0.0f);
 	}
 
 	SECTION("level theme")
 	{
-		REQUIRE(environment == 0);
+		REQUIRE(s.environment == 0);
 	}
 
 	SECTION("graphics detail")
 	{
-		REQUIRE(detail == 0);
+		REQUIRE(s.detail == 0);
 	}
 
 	SECTION("skin texture resolution")
 	{
-		REQUIRE(texdetail == 0.0f);
+		REQUIRE(s.texdetail == 0.0f);
 	}
 
 	SECTION("blood")
 	{
-		REQUIRE(bloodtoggle == 0);
+		REQUIRE(s.bloodtoggle == 0);
 	}
 
 	SECTION("camera shake")
 	{
-		REQUIRE(camerashake == 0.0f);
+		REQUIRE(s.camerashake == 0.0f);
 	}
 
 	SECTION("texture filtering")
 	{
-		REQUIRE(trilinear == false);
+		REQUIRE(s.trilinear == false);
 	}
 
 	SECTION("menu state")
 	{
-		REQUIRE(mainmenu == 0);
+		REQUIRE(s.mainmenu == 0);
 	}
 
 	SECTION("main menu highlight")
 	{
-		REQUIRE(Game::selected == 0);
+		REQUIRE(s.selected == 0);
 	}
 
 	SECTION("camera orientation")
 	{
-		REQUIRE(Game::yaw == 0.0f);
-		REQUIRE(Game::pitch == 0.0f);
+		REQUIRE(s.yaw == 0.0f);
+		REQUIRE(s.pitch == 0.0f);
 	}
 
 	SECTION("declared types are preserved from the migrated globals")
 	{
-		REQUIRE(std::is_same<decltype(difficulty), int>::value);
-		REQUIRE(std::is_same<decltype(screenwidth), float>::value);
-		REQUIRE(std::is_same<decltype(screenheight), float>::value);
-		REQUIRE(std::is_same<decltype(viewdistance), float>::value);
-		REQUIRE(std::is_same<decltype(fadestart), float>::value);
-		REQUIRE(std::is_same<decltype(environment), int>::value);
-		REQUIRE(std::is_same<decltype(detail), int>::value);
-		REQUIRE(std::is_same<decltype(texdetail), float>::value);
-		REQUIRE(std::is_same<decltype(bloodtoggle), int>::value);
-		REQUIRE(std::is_same<decltype(camerashake), float>::value);
-		REQUIRE(std::is_same<decltype(trilinear), bool>::value);
-		REQUIRE(std::is_same<decltype(mainmenu), int>::value);
-		REQUIRE(std::is_same<decltype(Game::selected), int>::value);
-		REQUIRE(std::is_same<decltype(Game::yaw), float>::value);
-		REQUIRE(std::is_same<decltype(Game::pitch), float>::value);
+		REQUIRE(std::is_same<decltype(s.difficulty), int>::value);
+		REQUIRE(std::is_same<decltype(s.screenwidth), float>::value);
+		REQUIRE(std::is_same<decltype(s.screenheight), float>::value);
+		REQUIRE(std::is_same<decltype(s.viewdistance), float>::value);
+		REQUIRE(std::is_same<decltype(s.fadestart), float>::value);
+		REQUIRE(std::is_same<decltype(s.environment), int>::value);
+		REQUIRE(std::is_same<decltype(s.detail), int>::value);
+		REQUIRE(std::is_same<decltype(s.texdetail), float>::value);
+		REQUIRE(std::is_same<decltype(s.bloodtoggle), int>::value);
+		REQUIRE(std::is_same<decltype(s.camerashake), float>::value);
+		REQUIRE(std::is_same<decltype(s.trilinear), bool>::value);
+		REQUIRE(std::is_same<decltype(s.mainmenu), int>::value);
+		REQUIRE(std::is_same<decltype(s.selected), int>::value);
+		REQUIRE(std::is_same<decltype(s.yaw), float>::value);
+		REQUIRE(std::is_same<decltype(s.pitch), float>::value);
+	}
+}
+
+TEST_CASE("tranche 6 GameState members are per instance", "[gamestate]")
+{
+	GameState a;
+	GameState b;
+
+	SECTION("writing one instance leaves the other at its defaults")
+	{
+		a.difficulty = 2;
+		a.screenwidth = 1920.0f;
+		a.screenheight = 1080.0f;
+		a.viewdistance = 250.0f;
+		a.fadestart = 0.6f;
+		a.environment = 2;
+		a.detail = 1;
+		a.texdetail = 4.0f;
+		a.bloodtoggle = 2;
+		a.camerashake = 0.8f;
+		a.trilinear = true;
+		a.mainmenu = 5;
+		a.selected = -1;
+		a.yaw = 137.0f;
+		a.pitch = -45.0f;
+
+		// Every one of the fifteen was seeded to a value its default does not
+		// hold, so each assertion below is an observation of a value the writer
+		// never touched rather than a restatement of the default.
+		REQUIRE(b.difficulty == 0);
+		REQUIRE(b.screenwidth == 0.0f);
+		REQUIRE(b.screenheight == 0.0f);
+		REQUIRE(b.viewdistance == 0.0f);
+		REQUIRE(b.fadestart == 0.0f);
+		REQUIRE(b.environment == 0);
+		REQUIRE(b.detail == 0);
+		REQUIRE(b.texdetail == 0.0f);
+		REQUIRE(b.bloodtoggle == 0);
+		REQUIRE(b.camerashake == 0.0f);
+		REQUIRE(b.trilinear == false);
+		REQUIRE(b.mainmenu == 0);
+		REQUIRE(b.selected == 0);
+		REQUIRE(b.yaw == 0.0f);
+		REQUIRE(b.pitch == 0.0f);
+	}
+
+	SECTION("a third instance also starts clean")
+	{
+		a.difficulty = 1;
+		a.screenwidth = 800.0f;
+		a.screenheight = 600.0f;
+		a.viewdistance = 100.0f;
+		a.fadestart = 0.75f;
+		a.environment = 1;
+		a.detail = 2;
+		a.texdetail = 2.0f;
+		a.bloodtoggle = 1;
+		a.camerashake = 0.4f;
+		a.trilinear = true;
+		a.mainmenu = 18;
+		a.selected = 3;
+		a.yaw = -90.0f;
+		a.pitch = 90.0f;
+
+		GameState c;
+		REQUIRE(c.difficulty == 0);
+		REQUIRE(c.screenwidth == 0.0f);
+		REQUIRE(c.screenheight == 0.0f);
+		REQUIRE(c.viewdistance == 0.0f);
+		REQUIRE(c.fadestart == 0.0f);
+		REQUIRE(c.environment == 0);
+		REQUIRE(c.detail == 0);
+		REQUIRE(c.texdetail == 0.0f);
+		REQUIRE(c.bloodtoggle == 0);
+		REQUIRE(c.camerashake == 0.0f);
+		REQUIRE(c.trilinear == false);
+		REQUIRE(c.mainmenu == 0);
+		REQUIRE(c.selected == 0);
+		REQUIRE(c.yaw == 0.0f);
+		REQUIRE(c.pitch == 0.0f);
 	}
 }

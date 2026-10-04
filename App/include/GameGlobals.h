@@ -20,9 +20,6 @@ namespace Game
 	extern GLuint screentexture2;
 	extern Texture Mainmenuitems[10];
 
-	extern int selected;
-
-	extern float yaw, pitch;
 	extern SkyBox* skybox;
 
 	extern Model hawk;

@@ -46,7 +46,7 @@ public:
 
     static void Load(bool usetrilinear, ProgressCallback callback);
 
-    void draw();
+    void draw(GameState& gamestate);
     void doStuff(int, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26], GameState& gamestate);
 
     int getType()
@@ -127,7 +127,7 @@ class Weapons
 public:
     std::vector<Weapon> weapons;
 
-    void Draw();
+    void Draw(GameState& gamestate);
     void DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye, GameState& gamestate);
 };
 

@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "GameGlobals.h"
 #include "Globals.h"
 #include "Game.hpp"
+#include "GameState.hpp"
 #include "Utils/Folders.hpp"
 
 #include "Utils/dirent.h"
@@ -93,10 +94,10 @@ void LoadCampaign(GameState& gamestate)
 
 	std::ifstream test(Folders::getResourcePath("Textures/" + Account::active().getCurrentCampaign() + "/World.png"));
 	if (test.good()) {
-		Game::Mainmenuitems[7].load("Textures/" + Account::active().getCurrentCampaign() + "/World.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Game::Mainmenuitems[7].load("Textures/" + Account::active().getCurrentCampaign() + "/World.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
 	}
 	else {
-		Game::Mainmenuitems[7].load("Textures/World.png", 0, trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Game::Mainmenuitems[7].load("Textures/World.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
 	}
 
 	if (Account::active().getCampaignChoicesMade() == 0) {

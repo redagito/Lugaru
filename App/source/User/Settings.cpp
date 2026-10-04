@@ -30,7 +30,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 void DefaultSettings(GameState& gamestate)
 {
-	detail = 2;
+	gamestate.detail = 2;
 	gamestate.ismotionblur = 1;
 	gamestate.usermousesensitivity = 1;
 	gamestate.newscreenwidth = kContextWidth = 1024;
@@ -40,10 +40,10 @@ void DefaultSettings(GameState& gamestate)
 	gamestate.autoslomo = 1;
 	gamestate.decalstoggle = true;
 	gamestate.invertmouse = 0;
-	bloodtoggle = 0;
+	gamestate.bloodtoggle = 0;
 	gamestate.foliage = 1;
 	gamestate.musictoggle = 1;
-	trilinear = 1;
+	gamestate.trilinear = 1;
 	gamestate.gamespeed = 1;
 	gamestate.damageeffects = 0;
 	gamestate.texttoggle = 1;
@@ -67,7 +67,7 @@ void DefaultSettings(GameState& gamestate)
 	gamestate.attackkey = MOUSEBUTTON_LEFT;
 	gamestate.consolekey = SDL_SCANCODE_GRAVE;
 
-	gamestate.newdetail = detail;
+	gamestate.newdetail = gamestate.detail;
 }
 
 void SaveSettings(GameState& gamestate)
@@ -79,10 +79,10 @@ void SaveSettings(GameState& gamestate)
 		gamestate.newdetail = 2;
 	}
 	if (gamestate.newscreenwidth < gamestate.minscreenwidth || gamestate.newscreenwidth > gamestate.maxscreenwidth) {
-		gamestate.newscreenwidth = screenwidth;
+		gamestate.newscreenwidth = gamestate.screenwidth;
 	}
 	if (gamestate.newscreenheight < gamestate.minscreenheight || gamestate.newscreenheight > gamestate.maxscreenheight) {
-		gamestate.newscreenheight = screenheight;
+		gamestate.newscreenheight = gamestate.screenheight;
 	}
 	errno = 0;
 	std::ofstream opstream(Folders::getConfigFilePath());
@@ -109,7 +109,7 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nAmbient sound:\n";
 	opstream << gamestate.ambientsound;
 	opstream << "\nBlood (0,1,2):\n";
-	opstream << bloodtoggle;
+	opstream << gamestate.bloodtoggle;
 	opstream << "\nAuto slomo:\n";
 	opstream << gamestate.autoslomo;
 	opstream << "\nFoliage:\n";
@@ -117,7 +117,7 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nMusic:\n";
 	opstream << gamestate.musictoggle;
 	opstream << "\nTrilinear:\n";
-	opstream << trilinear;
+	opstream << gamestate.trilinear;
 	opstream << "\nDecals(shadows,blood puddles,etc):\n";
 	opstream << gamestate.decalstoggle;
 	opstream << "\nInvert mouse:\n";
@@ -223,7 +223,7 @@ bool LoadSettings(GameState& gamestate)
 			ipstream >> gamestate.ismotionblur;
 		}
 		else if (!strncmp(setting, "Overall Detail", 14)) {
-			ipstream >> detail;
+			ipstream >> gamestate.detail;
 		}
 		else if (!strncmp(setting, "Floating jump", 13)) {
 			ipstream >> gamestate.floatjump;
@@ -235,7 +235,7 @@ bool LoadSettings(GameState& gamestate)
 			ipstream >> gamestate.ambientsound;
 		}
 		else if (!strncmp(setting, "Blood", 5)) {
-			ipstream >> bloodtoggle;
+			ipstream >> gamestate.bloodtoggle;
 		}
 		else if (!strncmp(setting, "Auto slomo", 10)) {
 			ipstream >> gamestate.autoslomo;
@@ -247,7 +247,7 @@ bool LoadSettings(GameState& gamestate)
 			ipstream >> gamestate.musictoggle;
 		}
 		else if (!strncmp(setting, "Trilinear", 9)) {
-			ipstream >> trilinear;
+			ipstream >> gamestate.trilinear;
 		}
 		else if (!strncmp(setting, "Decals", 6)) {
 			ipstream >> gamestate.decalstoggle;
@@ -351,19 +351,19 @@ bool LoadSettings(GameState& gamestate)
 
 	ipstream.close();
 
-	if (detail > 2) {
-		detail = 2;
+	if (gamestate.detail > 2) {
+		gamestate.detail = 2;
 	}
-	if (detail < 0) {
-		detail = 0;
+	if (gamestate.detail < 0) {
+		gamestate.detail = 0;
 	}
-	if (screenwidth < gamestate.minscreenwidth || screenwidth > gamestate.maxscreenwidth) {
-		screenwidth = 1024;
+	if (gamestate.screenwidth < gamestate.minscreenwidth || gamestate.screenwidth > gamestate.maxscreenwidth) {
+		gamestate.screenwidth = 1024;
 	}
-	if (screenheight < gamestate.minscreenheight || screenheight > gamestate.maxscreenheight) {
-		screenheight = 768;
+	if (gamestate.screenheight < gamestate.minscreenheight || gamestate.screenheight > gamestate.maxscreenheight) {
+		gamestate.screenheight = 768;
 	}
 
-	gamestate.newdetail = detail;
+	gamestate.newdetail = gamestate.detail;
 	return true;
 }
