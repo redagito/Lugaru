@@ -164,7 +164,7 @@ void SaveSettings(GameState& gamestate)
 	opstream << "\nDamage bar:\n";
 	opstream << gamestate.showdamagebar;
 	opstream << "\nStereoMode:\n";
-	opstream << stereomode;
+	opstream << gamestate.stereomode;
 	opstream << "\nStereoSeparation:\n";
 	opstream << gamestate.stereoseparation;
 	opstream << "\nStereoReverse:\n";
@@ -323,7 +323,7 @@ bool LoadSettings(GameState& gamestate)
 		else if (!strncmp(setting, "StereoMode", 10)) {
 			int i;
 			ipstream >> i;
-			stereomode = (StereoMode)i;
+			gamestate.stereomode = (StereoMode)i;
 		}
 		else if (!strncmp(setting, "StereoSeparation", 16)) {
 			ipstream >> gamestate.stereoseparation;

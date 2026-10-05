@@ -6,8 +6,6 @@
 
 #include <type_traits>
 
-#include "GameGlobals.h"
-#include "Globals.h"
 #include "GameState.hpp"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
@@ -1598,7 +1596,6 @@ TEST_CASE("tranche 9 GameState members are per instance", "[gamestate]")
 		}
 	}
 }
-
 // Tranche 10 covers the eight globals left over in App/include/Globals.h and
 // App/include/GameGlobals.h once every scalar has moved: six Vector3 and the two
 // StereoMode values. `viewer` and `viewerfacing` are the camera position and the
@@ -1608,94 +1605,208 @@ TEST_CASE("tranche 9 GameState members are per instance", "[gamestate]")
 // of the world map, and `stereomode` and `newstereomode` are the stereo mode in
 // use and the one the options menu is building up for the next restart.
 //
-// Three of the eight are declared inside namespace Game, so they are written
-// with that qualification here. Moving them into GameState drops the namespace
-// rather than moving it, so the assertions below are the last place the bare
-// name and the qualified name both have to mean the same object.
+// Three of the eight were declared inside namespace Game. Moving them into
+// GameState drops the namespace rather than moving it, so these assertions no
+// longer carry the `Game::` qualification the previous commit needed.
 //
-// The literals below are read from the globals themselves, while the globals are
-// still the thing being read, so they are observed rather than assumed. The
-// tranche that follows re-points these same assertions at the GameState members
-// and adds the per-instance isolation the move buys.
+// The values below are the ones the globals were observed to hold by the previous
+// commit, while they were still globals to be compared against, and the member
+// initialisers spell each one out rather than leaving it to Vector3's own default
+// member initialisers the way a bare `Vector3 viewer;` did. That matters because
+// a Vector3 that dropped `= 0.f` would then silently change the start of a
+// session, and a value comparison would be the only thing that noticed.
 //
-// Five of the six vectors were declared with no initialiser at all, so what they
-// started at was decided by Vector3's own default member initialisers rather than
-// by the globals header. That is worth observing once, from the globals, rather
-// than taking on trust, because the members spell the zeroing out explicitly and
-// a Vector3 that dropped those initialisers would then silently change the start
-// of a session.
-//
-// The two StereoMode values are the only pair here that shares a name: the
-// enums they are declared with also spell `stereoCount` and the enumerator names,
-// so those are pinned separately below. A member typed as the wrong one of the
-// two stereo globals would compare equal at `stereoNone` and nothing else would
-// notice.
-//
-// The declared types are pinned whole for the six vectors, and by value for the
-// two enums, because the test projects compile with /wd4244, which suppresses the
-// float-to-int conversion warning that would otherwise be the only hint that a
-// member had changed from Vector3 to something narrower.
-TEST_CASE("the tranche 10 globals start at the values GameState will carry", "[gamestate]")
+// The declared types are pinned next to the values, because the test projects
+// compile with /wd4244, which suppresses the float-to-int conversion warning that
+// would otherwise be the only hint that a member had changed from Vector3 to
+// something narrower. The two enums are pinned by value as well as by type: both
+// start at `stereoNone`, which is zero, so a member typed as the wrong one of the
+// two would satisfy a type check written against `int` and nothing else.
+TEST_CASE("GameState tranche 10 members start at their historical global defaults", "[gamestate]")
 {
+	GameState s;
+
 	SECTION("the camera sits at the origin until a level places it")
 	{
-		REQUIRE(viewer.x == 0.0f);
-		REQUIRE(viewer.y == 0.0f);
-		REQUIRE(viewer.z == 0.0f);
+		REQUIRE(s.viewer.x == 0.0f);
+		REQUIRE(s.viewer.y == 0.0f);
+		REQUIRE(s.viewer.z == 0.0f);
 	}
 
 	SECTION("the camera faces nowhere in particular yet")
 	{
-		REQUIRE(viewerfacing.x == 0.0f);
-		REQUIRE(viewerfacing.y == 0.0f);
-		REQUIRE(viewerfacing.z == 0.0f);
+		REQUIRE(s.viewerfacing.x == 0.0f);
+		REQUIRE(s.viewerfacing.y == 0.0f);
+		REQUIRE(s.viewerfacing.z == 0.0f);
 	}
 
 	SECTION("there is no wind until the level sets one")
 	{
-		REQUIRE(windvector.x == 0.0f);
-		REQUIRE(windvector.y == 0.0f);
-		REQUIRE(windvector.z == 0.0f);
+		REQUIRE(s.windvector.x == 0.0f);
+		REQUIRE(s.windvector.y == 0.0f);
+		REQUIRE(s.windvector.z == 0.0f);
 	}
 
 	SECTION("the hawk has nowhere to sit yet")
 	{
-		REQUIRE(Game::hawkcoords.x == 0.0f);
-		REQUIRE(Game::hawkcoords.y == 0.0f);
-		REQUIRE(Game::hawkcoords.z == 0.0f);
+		REQUIRE(s.hawkcoords.x == 0.0f);
+		REQUIRE(s.hawkcoords.y == 0.0f);
+		REQUIRE(s.hawkcoords.z == 0.0f);
 	}
 
 	SECTION("the hawk's swung-around position starts at the origin too")
 	{
-		REQUIRE(Game::realhawkcoords.x == 0.0f);
-		REQUIRE(Game::realhawkcoords.y == 0.0f);
-		REQUIRE(Game::realhawkcoords.z == 0.0f);
+		REQUIRE(s.realhawkcoords.x == 0.0f);
+		REQUIRE(s.realhawkcoords.y == 0.0f);
+		REQUIRE(s.realhawkcoords.z == 0.0f);
 	}
 
 	SECTION("the world map has no centre until one is read")
 	{
-		REQUIRE(Game::mapcenter.x == 0.0f);
-		REQUIRE(Game::mapcenter.y == 0.0f);
-		REQUIRE(Game::mapcenter.z == 0.0f);
+		REQUIRE(s.mapcenter.x == 0.0f);
+		REQUIRE(s.mapcenter.y == 0.0f);
+		REQUIRE(s.mapcenter.z == 0.0f);
 	}
 
 	SECTION("stereo starts off")
 	{
-		REQUIRE(stereomode == stereoNone);
-		REQUIRE(newstereomode == stereoNone);
-		REQUIRE(stereomode == 0);
-		REQUIRE(newstereomode == 0);
+		REQUIRE(s.stereomode == stereoNone);
+		REQUIRE(s.newstereomode == stereoNone);
+		REQUIRE(s.stereomode == 0);
+		REQUIRE(s.newstereomode == 0);
 	}
 
 	SECTION("declared types are preserved from the migrated globals")
 	{
-		REQUIRE(std::is_same<decltype(viewer), Vector3>::value);
-		REQUIRE(std::is_same<decltype(viewerfacing), Vector3>::value);
-		REQUIRE(std::is_same<decltype(windvector), Vector3>::value);
-		REQUIRE(std::is_same<decltype(Game::hawkcoords), Vector3>::value);
-		REQUIRE(std::is_same<decltype(Game::realhawkcoords), Vector3>::value);
-		REQUIRE(std::is_same<decltype(Game::mapcenter), Vector3>::value);
-		REQUIRE(std::is_same<decltype(stereomode), StereoMode>::value);
-		REQUIRE(std::is_same<decltype(newstereomode), StereoMode>::value);
+		REQUIRE(std::is_same<decltype(s.viewer), Vector3>::value);
+		REQUIRE(std::is_same<decltype(s.viewerfacing), Vector3>::value);
+		REQUIRE(std::is_same<decltype(s.windvector), Vector3>::value);
+		REQUIRE(std::is_same<decltype(s.hawkcoords), Vector3>::value);
+		REQUIRE(std::is_same<decltype(s.realhawkcoords), Vector3>::value);
+		REQUIRE(std::is_same<decltype(s.mapcenter), Vector3>::value);
+		REQUIRE(std::is_same<decltype(s.stereomode), StereoMode>::value);
+		REQUIRE(std::is_same<decltype(s.newstereomode), StereoMode>::value);
+	}
+}
+
+// Moving eight globals into GameState is only worth anything if two GameStates
+// stop sharing them, and for a Vector3 that is the whole property: six plain
+// members with no storage class of their own behave exactly like the globals they
+// replaced, so nothing above this line would notice if they still did.
+//
+// Every write below is seeded to a value the default does not hold, all three
+// axes each time. Seeding with zero, or with only one axis, would let the
+// assertions pass against members the writer never reached.
+TEST_CASE("tranche 10 GameState members are per instance", "[gamestate]")
+{
+	GameState a;
+	GameState b;
+
+	SECTION("writing one instance's vectors and modes leaves the other's at its defaults")
+	{
+		a.viewer = Vector3(1.5f, -2.25f, 3.75f);
+		a.viewerfacing = Vector3(-4.0f, 5.5f, -6.25f);
+		a.windvector = Vector3(7.0f, -8.5f, 9.75f);
+		a.hawkcoords = Vector3(-10.0f, 11.5f, -12.25f);
+		a.realhawkcoords = Vector3(13.0f, -14.5f, 15.75f);
+		a.mapcenter = Vector3(-16.0f, 17.5f, -18.25f);
+		a.stereomode = stereoAnaglyph;
+		a.newstereomode = stereoVerticalSplit;
+
+		REQUIRE(b.viewer.x == 0.0f);
+		REQUIRE(b.viewer.y == 0.0f);
+		REQUIRE(b.viewer.z == 0.0f);
+		REQUIRE(b.viewerfacing.x == 0.0f);
+		REQUIRE(b.viewerfacing.y == 0.0f);
+		REQUIRE(b.viewerfacing.z == 0.0f);
+		REQUIRE(b.windvector.x == 0.0f);
+		REQUIRE(b.windvector.y == 0.0f);
+		REQUIRE(b.windvector.z == 0.0f);
+		REQUIRE(b.hawkcoords.x == 0.0f);
+		REQUIRE(b.hawkcoords.y == 0.0f);
+		REQUIRE(b.hawkcoords.z == 0.0f);
+		REQUIRE(b.realhawkcoords.x == 0.0f);
+		REQUIRE(b.realhawkcoords.y == 0.0f);
+		REQUIRE(b.realhawkcoords.z == 0.0f);
+		REQUIRE(b.mapcenter.x == 0.0f);
+		REQUIRE(b.mapcenter.y == 0.0f);
+		REQUIRE(b.mapcenter.z == 0.0f);
+		REQUIRE(b.stereomode == stereoNone);
+		REQUIRE(b.newstereomode == stereoNone);
+	}
+
+	SECTION("a third instance also starts clean")
+	{
+		a.viewer = Vector3(100.0f, 200.0f, 300.0f);
+		a.viewerfacing = Vector3(-400.0f, 500.0f, -600.0f);
+		a.windvector = Vector3(700.0f, -800.0f, 900.0f);
+		a.hawkcoords = Vector3(-1000.0f, 1100.0f, -1200.0f);
+		a.realhawkcoords = Vector3(1300.0f, -1400.0f, 1500.0f);
+		a.mapcenter = Vector3(-1600.0f, 1700.0f, -1800.0f);
+		a.stereomode = stereoHorizontalInterlaced;
+		a.newstereomode = stereoOpenGL;
+
+		GameState c;
+		REQUIRE(c.viewer.x == 0.0f);
+		REQUIRE(c.viewer.y == 0.0f);
+		REQUIRE(c.viewer.z == 0.0f);
+		REQUIRE(c.viewerfacing.x == 0.0f);
+		REQUIRE(c.viewerfacing.y == 0.0f);
+		REQUIRE(c.viewerfacing.z == 0.0f);
+		REQUIRE(c.windvector.x == 0.0f);
+		REQUIRE(c.windvector.y == 0.0f);
+		REQUIRE(c.windvector.z == 0.0f);
+		REQUIRE(c.hawkcoords.x == 0.0f);
+		REQUIRE(c.hawkcoords.y == 0.0f);
+		REQUIRE(c.hawkcoords.z == 0.0f);
+		REQUIRE(c.realhawkcoords.x == 0.0f);
+		REQUIRE(c.realhawkcoords.y == 0.0f);
+		REQUIRE(c.realhawkcoords.z == 0.0f);
+		REQUIRE(c.mapcenter.x == 0.0f);
+		REQUIRE(c.mapcenter.y == 0.0f);
+		REQUIRE(c.mapcenter.z == 0.0f);
+		REQUIRE(c.stereomode == stereoNone);
+		REQUIRE(c.newstereomode == stereoNone);
+	}
+
+	SECTION("the eight vectors of one instance do not share storage")
+	{
+		// viewer and viewerfacing travel together, the two hawk positions are
+		// derived from one another every tick, and windvector is read by the same
+		// sprite pass that reads viewer. A member that pointed at one shared block
+		// would let any one write move the others, and every assertion above would
+		// still pass because all eight start at zero.
+		a.viewer = Vector3(1.0f, 2.0f, 3.0f);
+		a.viewerfacing = Vector3(11.0f, 12.0f, 13.0f);
+		a.windvector = Vector3(21.0f, 22.0f, 23.0f);
+		a.hawkcoords = Vector3(31.0f, 32.0f, 33.0f);
+		a.realhawkcoords = Vector3(41.0f, 42.0f, 43.0f);
+		a.mapcenter = Vector3(51.0f, 52.0f, 53.0f);
+
+		REQUIRE(a.viewer == Vector3(1.0f, 2.0f, 3.0f));
+		REQUIRE(a.viewerfacing == Vector3(11.0f, 12.0f, 13.0f));
+		REQUIRE(a.windvector == Vector3(21.0f, 22.0f, 23.0f));
+		REQUIRE(a.hawkcoords == Vector3(31.0f, 32.0f, 33.0f));
+		REQUIRE(a.realhawkcoords == Vector3(41.0f, 42.0f, 43.0f));
+		REQUIRE(a.mapcenter == Vector3(51.0f, 52.0f, 53.0f));
+
+		REQUIRE(b.viewer == Vector3(0.0f, 0.0f, 0.0f));
+		REQUIRE(b.viewerfacing == Vector3(0.0f, 0.0f, 0.0f));
+		REQUIRE(b.windvector == Vector3(0.0f, 0.0f, 0.0f));
+		REQUIRE(b.hawkcoords == Vector3(0.0f, 0.0f, 0.0f));
+		REQUIRE(b.realhawkcoords == Vector3(0.0f, 0.0f, 0.0f));
+		REQUIRE(b.mapcenter == Vector3(0.0f, 0.0f, 0.0f));
+	}
+
+	SECTION("declared types are preserved from the migrated globals")
+	{
+		REQUIRE(std::is_same<decltype(a.viewer), Vector3>::value);
+		REQUIRE(std::is_same<decltype(a.viewerfacing), Vector3>::value);
+		REQUIRE(std::is_same<decltype(a.windvector), Vector3>::value);
+		REQUIRE(std::is_same<decltype(a.hawkcoords), Vector3>::value);
+		REQUIRE(std::is_same<decltype(a.realhawkcoords), Vector3>::value);
+		REQUIRE(std::is_same<decltype(a.mapcenter), Vector3>::value);
+		REQUIRE(std::is_same<decltype(a.stereomode), StereoMode>::value);
+		REQUIRE(std::is_same<decltype(a.newstereomode), StereoMode>::value);
 	}
 }

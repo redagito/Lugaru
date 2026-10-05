@@ -22,8 +22,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 // TODO GET RID OF ALL OF THESE!
 
-Vector3 viewer;
-Vector3 viewerfacing;
 Light light;
 Terrain terrain;
 
@@ -31,7 +29,3 @@ SDL_Window* sdlwindow;
 
 Frustum frustum;
 Weapons weapons;
-Vector3 windvector;
-
-StereoMode stereomode = stereoNone;
-StereoMode newstereomode = stereoNone;

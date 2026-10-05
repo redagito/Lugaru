@@ -72,7 +72,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 	std::string string;
 	static int drawmode = 0;
 
-	if (stereomode == stereoAnaglyph) {
+	if (gamestate.stereomode == stereoAnaglyph) {
 		switch (side) {
 		case stereoLeft:
 			glColorMask(0.0, 1.0, 1.0, 1.0);
@@ -87,8 +87,8 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 	else {
 		glColorMask(1.0, 1.0, 1.0, 1.0);
 
-		if (stereomode == stereoHorizontalInterlaced ||
-			stereomode == stereoVerticalInterlaced) {
+		if (gamestate.stereomode == stereoHorizontalInterlaced ||
+			gamestate.stereomode == stereoVerticalInterlaced) {
 			glStencilFunc(side == stereoLeft ? GL_NOTEQUAL : GL_EQUAL, 0x01, 0x01);
 		}
 	}
@@ -107,7 +107,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			for (int i = 0; i < numboundaries; i++) {
 				boundary[i] = 0;
 				boundary[i].z = 1;
-				boundary[i] = mapcenter + DoRotation(boundary[i] * gamestate.mapradius, 0, i * (360 / ((float)(numboundaries))), 0);
+				boundary[i] = gamestate.mapcenter + DoRotation(boundary[i] * gamestate.mapradius, 0, i * (360 / ((float)(numboundaries))), 0);
 			}
 		}
 
@@ -265,7 +265,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		skybox->draw(gamestate.environment == desertenvironment, gamestate.viewdistance, gamestate.blurness, gamestate.skyboxtexture, Vector3{ gamestate.skyboxr, gamestate.skyboxg, gamestate.skyboxb });
 		glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, 0);
 		glPopMatrix();
-		glTranslatef(-viewer.x, -viewer.y, -viewer.z);
+		glTranslatef(-gamestate.viewer.x, -gamestate.viewer.y, -gamestate.viewer.z);
 
 		// Get matrices for frustum
 
@@ -371,13 +371,13 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		terraintexture.bind();
-		terrain.draw(0, viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, frustum, gamestate.blurness);
+		terrain.draw(0, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, frustum, gamestate.blurness);
 		terraintexture2.bind();
-		terrain.draw(1, viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, frustum, gamestate.blurness);
+		terrain.draw(1, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, frustum, gamestate.blurness);
 
 		if (gamestate.decalstoggle)
 		{
-			terrain.drawdecals(viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.multiplier);
+			terrain.drawdecals(gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.multiplier);
 		}
 
 		//Model
@@ -399,7 +399,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 					glEnable(GL_BLEND);
 					glEnable(GL_LIGHTING);
 					terrainlight = terrain.getLighting(Person::players[k]->coords.x, Person::players[k]->coords.z);
-					distance = distsq(&viewer, &Person::players[k]->coords);
+					distance = distsq(&gamestate.viewer, &Person::players[k]->coords);
 					distance = (gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance;
 					glColor4f(terrainlight.x, terrainlight.y, terrainlight.z, distance);
 					if (distance >= 1) {
@@ -410,10 +410,10 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 						checkpoint.y += 1;
 						int i = -1;
 						if (Person::players[k]->occluded != 0) {
-							i = Object::checkcollide(viewer, checkpoint, Person::players[k]->lastoccluded, terrain);
+							i = Object::checkcollide(gamestate.viewer, checkpoint, Person::players[k]->lastoccluded, terrain);
 						}
 						if (i == -1) {
-							i = Object::checkcollide(viewer, checkpoint, terrain);
+							i = Object::checkcollide(gamestate.viewer, checkpoint, terrain);
 						}
 						if (i != -1) {
 							Person::players[k]->occluded += 1;
@@ -431,7 +431,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		}
 
 		if (!gamestate.cameramode && gamestate.musictype == stream_fighttheme) {
-			gamestate.playerdist = distsqflat(&Person::players[0]->coords, &viewer);
+			gamestate.playerdist = distsqflat(&Person::players[0]->coords, &gamestate.viewer);
 		}
 		else {
 			gamestate.playerdist = -100;
@@ -439,21 +439,21 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		glPushMatrix();
 		glCullFace(GL_BACK);
 		glEnable(GL_TEXTURE_2D);
-		Object::Draw(gamestate.decalstoggle, gamestate.multiplier, viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, light, frustum, terrain, gamestate.detail, gamestate.blurness, gamestate.windvar, gamestate.playerdist);
+		Object::Draw(gamestate.decalstoggle, gamestate.multiplier, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, light, frustum, terrain, gamestate.detail, gamestate.blurness, gamestate.windvar, gamestate.playerdist);
 		glPopMatrix();
 
 		//draw hawk
 		glPushMatrix();
-		if (frustum.SphereInFrustum(realhawkcoords.x + hawk.boundingspherecenter.x, realhawkcoords.y + hawk.boundingspherecenter.y, realhawkcoords.z + hawk.boundingspherecenter.z, 2)) {
+		if (frustum.SphereInFrustum(gamestate.realhawkcoords.x + hawk.boundingspherecenter.x, gamestate.realhawkcoords.y + hawk.boundingspherecenter.y, gamestate.realhawkcoords.z + hawk.boundingspherecenter.z, 2)) {
 			glAlphaFunc(GL_GREATER, 0.0001f);
 			glDepthMask(1);
 			glDisable(GL_CULL_FACE);
 			glDisable(GL_LIGHTING);
 			glEnable(GL_BLEND);
-			glTranslatef(hawkcoords.x, hawkcoords.y, hawkcoords.z);
+			glTranslatef(gamestate.hawkcoords.x, gamestate.hawkcoords.y, gamestate.hawkcoords.z);
 			glRotatef(gamestate.hawkyaw, 0, 1, 0);
 			glTranslatef(25, 0, 0);
-			distance = distsq(&viewer, &realhawkcoords) * 1.2;
+			distance = distsq(&gamestate.viewer, &gamestate.realhawkcoords) * 1.2;
 			glColor4f(light.color[0], light.color[1], light.color[2], (gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance);
 			if ((gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance > 1) {
 				glColor4f(light.color[0], light.color[1], light.color[2], 1);
@@ -473,7 +473,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				glEnable(GL_BLEND);
 				glEnable(GL_LIGHTING);
 				terrainlight = terrain.getLighting(Person::players[k]->coords.x, Person::players[k]->coords.z);
-				distance = distsq(&viewer, &Person::players[k]->coords);
+				distance = distsq(&gamestate.viewer, &Person::players[k]->coords);
 				distance = (gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance;
 				glColor4f(terrainlight.x, terrainlight.y, terrainlight.z, distance);
 				if (distance >= 1) {
@@ -484,10 +484,10 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 					checkpoint.y += 1;
 					int i = -1;
 					if (Person::players[k]->occluded != 0) {
-						i = Object::checkcollide(viewer, checkpoint, Person::players[k]->lastoccluded, terrain);
+						i = Object::checkcollide(gamestate.viewer, checkpoint, Person::players[k]->lastoccluded, terrain);
 					}
 					if (i == -1) {
-						i = Object::checkcollide(viewer, checkpoint, terrain);
+						i = Object::checkcollide(gamestate.viewer, checkpoint, terrain);
 					}
 					if (i != -1) {
 						Person::players[k]->occluded += 1;
@@ -516,7 +516,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 		glDepthMask(0);
 
-		Sprite::Draw(viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, light, gamestate.multiplier, gamestate.gravity, terrain, gamestate.detail, viewerfacing, gamestate.bloodtoggle, windvector, Tutorial::active, gamestate);
+		Sprite::Draw(gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, light, gamestate.multiplier, gamestate.gravity, terrain, gamestate.detail, gamestate.viewerfacing, gamestate.bloodtoggle, gamestate.windvector, Tutorial::active, gamestate);
 
 		//waypoints, pathpoints in editor
 		if (gamestate.editorenabled) {
@@ -634,7 +634,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 					}
 					else if ((Hotspot::hotspots[closest].type >= 20) && (Dialog::dialogs[Hotspot::hotspots[closest].type - 20].gonethrough == 0)) {
 						Dialog::whichdialogue = Hotspot::hotspots[closest].type - 20;
-						Dialog::currentDialog().play([]() { Game::playdialoguescenesound(); });
+						Dialog::currentDialog().play([&gamestate]() { Game::playdialoguescenesound(gamestate); });
 						Dialog::currentDialog().gonethrough++;
 					}
 				}

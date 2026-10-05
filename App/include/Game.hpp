@@ -59,7 +59,7 @@ namespace Game
 	void LoadScreenTexture(GameState& gamestate);
 	void LoadingScreen(GameState& gamestate);
 	int DrawGLScene(StereoSide side, GameState& gamestate);
-	void playdialoguescenesound();
+	void playdialoguescenesound(GameState& gamestate);
 	int findClosestPlayer();
 	void ResetBeforeLevelLoad(bool tutorial, GameState& gamestate);
 	bool LoadLevel(int which, GameState& gamestate);

@@ -84,13 +84,13 @@ int musicselected = 0;
 
 static_assert(rabbittype == 0 && wolftype == 1);
 
-void Game::playdialoguescenesound()
+void Game::playdialoguescenesound(GameState& gamestate)
 {
 	Vector3 temppos;
 	temppos = Person::players.at(Dialog::currentScene().participantfocus)->coords;
-	temppos = temppos - viewer;
+	temppos = temppos - gamestate.viewer;
 	Normalise(&temppos);
-	temppos += viewer;
+	temppos += gamestate.viewer;
 
 	int sound = -1;
 	switch (Dialog::currentScene().sound) {
@@ -262,8 +262,8 @@ void Setenvironment(int which, GameState& gamestate)
 	pause_sound(stream_desertambient);
 
 	if (gamestate.environment == snowyenvironment) {
-		windvector = 0;
-		windvector.z = 3;
+		gamestate.windvector = 0;
+		gamestate.windvector.z = 3;
 		if (gamestate.ambientsound) {
 			emit_stream_np(stream_wind);
 		}
@@ -295,8 +295,8 @@ void Setenvironment(int which, GameState& gamestate)
 		gamestate.texdetail = temptexdetail;
 	}
 	else if (gamestate.environment == desertenvironment) {
-		windvector = 0;
-		windvector.z = 2;
+		gamestate.windvector = 0;
+		gamestate.windvector.z = 2;
 		Object::treetextureptr.load("Textures/DesertTree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
 		Object::bushtextureptr.load("Textures/BushDesert.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
 		Object::rocktextureptr.load("Textures/BoulderDesert.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
@@ -328,8 +328,8 @@ void Setenvironment(int which, GameState& gamestate)
 		gamestate.texdetail = temptexdetail;
 	}
 	else if (gamestate.environment == grassyenvironment) {
-		windvector = 0;
-		windvector.z = 2;
+		gamestate.windvector = 0;
+		gamestate.windvector.z = 2;
 		Object::treetextureptr.load("Textures/Tree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
 		Object::bushtextureptr.load("Textures/Bush.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
 		Object::rocktextureptr.load("Textures/Boulder.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
@@ -700,7 +700,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	}
 	Game::LoadingScreen(gamestate);
 
-	funpackf(tfile, "Bf Bf Bf Bf", &mapcenter.x, &mapcenter.y, &mapcenter.z, &gamestate.mapradius);
+	funpackf(tfile, "Bf Bf Bf Bf", &gamestate.mapcenter.x, &gamestate.mapcenter.y, &gamestate.mapcenter.z, &gamestate.mapradius);
 
 	SetUpLighting(gamestate);
 
@@ -823,8 +823,8 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	cameraloc.y += 5;
 	gamestate.yaw = Person::players[0]->yaw;
 
-	hawkcoords = Person::players[0]->coords;
-	hawkcoords.y += 30;
+	gamestate.hawkcoords = Person::players[0]->coords;
+	gamestate.hawkcoords.y += 30;
 
 	Game::LoadingScreen(gamestate);
 
@@ -995,7 +995,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 
 	Game::LoadingScreen(gamestate);
 
-	mapcenter = map_data["map"]["center"];
+	gamestate.mapcenter = map_data["map"]["center"];
 	gamestate.mapradius = map_data["map"]["radius"].asFloat();
 
 	SetUpLighting(gamestate);
@@ -1045,8 +1045,8 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	cameraloc.y += 5;
 	gamestate.yaw = Person::players[0]->yaw;
 
-	hawkcoords = Person::players[0]->coords;
-	hawkcoords.y += 30;
+	gamestate.hawkcoords = Person::players[0]->coords;
+	gamestate.hawkcoords.y += 30;
 
 	Game::LoadingScreen(gamestate);
 
@@ -3307,7 +3307,7 @@ void Game::Tick(GameState& gamestate)
 					Vector3 footvel, footpoint;
 
 					footvel = 0;
-					footpoint = viewer + viewerfacing * 6;
+					footpoint = gamestate.viewer + gamestate.viewerfacing * 6;
 					footpoint.y += ((float)abs(rand() % 1200)) / 100 - 6;
 					footpoint.x += ((float)abs(rand() % 1200)) / 100 - 6;
 					footpoint.z += ((float)abs(rand() % 1200)) / 100 - 6;
@@ -3360,22 +3360,22 @@ void Game::Tick(GameState& gamestate)
 					flatfacing = DoRotation(flatfacing, 0, -gamestate.yaw, 0);
 
 					if (Input::isKeyDown(gamestate.forwardkey)) {
-						viewer += facing * gamestate.multiplier * 4;
+						gamestate.viewer += facing * gamestate.multiplier * 4;
 					}
 					if (Input::isKeyDown(gamestate.backkey)) {
-						viewer -= facing * gamestate.multiplier * 4;
+						gamestate.viewer -= facing * gamestate.multiplier * 4;
 					}
 					if (Input::isKeyDown(gamestate.leftkey)) {
-						viewer += DoRotation(flatfacing * gamestate.multiplier, 0, 90, 0) * 4;
+						gamestate.viewer += DoRotation(flatfacing * gamestate.multiplier, 0, 90, 0) * 4;
 					}
 					if (Input::isKeyDown(gamestate.rightkey)) {
-						viewer += DoRotation(flatfacing * gamestate.multiplier, 0, -90, 0) * 4;
+						gamestate.viewer += DoRotation(flatfacing * gamestate.multiplier, 0, -90, 0) * 4;
 					}
 					if (Input::isKeyDown(gamestate.jumpkey)) {
-						viewer.y += gamestate.multiplier * 4;
+						gamestate.viewer.y += gamestate.multiplier * 4;
 					}
 					if (Input::isKeyDown(gamestate.crouchkey)) {
-						viewer.y -= gamestate.multiplier * 4;
+						gamestate.viewer.y -= gamestate.multiplier * 4;
 					}
 					if (Input::isKeyPressed(SDL_SCANCODE_1) ||
 						Input::isKeyPressed(SDL_SCANCODE_2) ||
@@ -3436,13 +3436,13 @@ void Game::Tick(GameState& gamestate)
 							Dialog::directing = false;
 							gamestate.cameramode = 0;
 						}
-						Dialog::currentScene().camera = viewer;
+						Dialog::currentScene().camera = gamestate.viewer;
 						Dialog::currentScene().camerayaw = gamestate.yaw;
 						Dialog::currentScene().camerapitch = gamestate.pitch;
 						Dialog::indialogue++;
 						if (Dialog::indialogue < int(Dialog::currentDialog().scenes.size())) {
 							if (Dialog::currentScene().sound != 0) {
-								playdialoguescenesound();
+								playdialoguescenesound(gamestate);
 							}
 						}
 
@@ -3502,8 +3502,8 @@ void Game::Tick(GameState& gamestate)
 				}
 				if (!Dialog::directing) {
 					pause_sound(whooshsound);
-					viewer = Dialog::currentScene().camera;
-					viewer.y = max((double)viewer.y, terrain.getHeight(viewer.x, viewer.z) + .1);
+					gamestate.viewer = Dialog::currentScene().camera;
+					gamestate.viewer.y = max((double)gamestate.viewer.y, terrain.getHeight(gamestate.viewer.x, gamestate.viewer.z) + .1);
 					gamestate.yaw = Dialog::currentScene().camerayaw;
 					gamestate.pitch = Dialog::currentScene().camerapitch;
 					if (Dialog::dialoguetime > 0.5) {
@@ -3511,7 +3511,7 @@ void Game::Tick(GameState& gamestate)
 							Dialog::indialogue++;
 							if (Dialog::indialogue < int(Dialog::currentDialog().scenes.size())) {
 								if (Dialog::currentScene().sound != 0) {
-									playdialoguescenesound();
+									playdialoguescenesound(gamestate);
 									if (Dialog::currentScene().sound == -5) {
 										Hotspot::hotspots.emplace_back(Person::players[0]->coords, -1, 10.f);
 									}
@@ -3560,13 +3560,13 @@ void Game::Tick(GameState& gamestate)
 
 			Dialog::dialoguetime += gamestate.multiplier;
 			gamestate.hawkyaw += gamestate.multiplier * 25;
-			realhawkcoords = 0;
-			realhawkcoords.x = 25;
-			realhawkcoords = DoRotation(realhawkcoords, 0, gamestate.hawkyaw, 0) + hawkcoords;
+			gamestate.realhawkcoords = 0;
+			gamestate.realhawkcoords.x = 25;
+			gamestate.realhawkcoords = DoRotation(gamestate.realhawkcoords, 0, gamestate.hawkyaw, 0) + gamestate.hawkcoords;
 			gamestate.hawkcalldelay -= gamestate.multiplier / 2;
 
 			if (gamestate.hawkcalldelay <= 0) {
-				emit_sound_at(hawksound, realhawkcoords);
+				emit_sound_at(hawksound, gamestate.realhawkcoords);
 
 				gamestate.hawkcalldelay = 16 + abs(rand() % 8);
 			}
@@ -4593,13 +4593,13 @@ void Game::Tick(GameState& gamestate)
 
 			//3d sound
 			static float gLoc[3];
-			gLoc[0] = viewer.x;
-			gLoc[1] = viewer.y;
-			gLoc[2] = viewer.z;
+			gLoc[0] = gamestate.viewer.x;
+			gLoc[1] = gamestate.viewer.y;
+			gLoc[2] = gamestate.viewer.z;
 			static float vel[3];
-			vel[0] = (viewer.x - oldviewer.x) / gamestate.multiplier;
-			vel[1] = (viewer.y - oldviewer.y) / gamestate.multiplier;
-			vel[2] = (viewer.z - oldviewer.z) / gamestate.multiplier;
+			vel[0] = (gamestate.viewer.x - oldviewer.x) / gamestate.multiplier;
+			vel[1] = (gamestate.viewer.y - oldviewer.y) / gamestate.multiplier;
+			vel[2] = (gamestate.viewer.z - oldviewer.z) / gamestate.multiplier;
 
 			//Set orientation with forward and up vectors
 			static Vector3 upvector;
@@ -4626,7 +4626,7 @@ void Game::Tick(GameState& gamestate)
 			OPENAL_3D_Listener_SetAttributes(&gLoc[0], &vel[0], ori[0], ori[1], ori[2], ori[3], ori[4], ori[5]);
 			OPENAL_Update();
 
-			oldviewer = viewer;
+			oldviewer = gamestate.viewer;
 		}
 	}
 }
@@ -5010,7 +5010,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 
 	facing = DoRotation(facing, -gamestate.pitch, 0, 0);
 	facing = DoRotation(facing, 0, 0 - gamestate.yaw, 0);
-	viewerfacing = facing;
+	gamestate.viewerfacing = facing;
 
 	if (!gamestate.cameramode) {
 		if ((Animation::animations[Person::players[0]->animTarget].attack != 3 && Animation::animations[Person::players[0]->animCurrent].attack != 3) || Person::players[0]->skeleton.free) {
@@ -5056,27 +5056,27 @@ void Game::TickOnceAfter(GameState& gamestate)
 			if (cameradist > 2.3) {
 				cameradist = 2.3;
 			}
-			viewer = cameraloc - facing * cameradist;
-			colviewer = viewer;
+			gamestate.viewer = cameraloc - facing * cameradist;
+			colviewer = gamestate.viewer;
 			coltarget = cameraloc;
 			Object::SphereCheckPossible(&colviewer, findDistance(&colviewer, &coltarget), terrain);
 			for (unsigned int j = 0; j < terrain.patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz].size(); j++) {
 				unsigned int i = terrain.patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz][j];
-				colviewer = viewer;
+				colviewer = gamestate.viewer;
 				coltarget = cameraloc;
 				if (Object::objects[i]->model.LineCheckPossible(&colviewer, &coltarget, &col, &Object::objects[i]->position, &Object::objects[i]->yaw) != -1) {
-					viewer = col;
+					gamestate.viewer = col;
 				}
 			}
 			for (unsigned int j = 0; j < terrain.patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz].size(); j++) {
 				unsigned int i = terrain.patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz][j];
-				colviewer = viewer;
+				colviewer = gamestate.viewer;
 				if (Object::objects[i]->model.SphereCheck(&colviewer, .15, &col, &Object::objects[i]->position, &Object::objects[i]->yaw) != -1) {
-					viewer = colviewer;
+					gamestate.viewer = colviewer;
 				}
 			}
-			cameradist = findDistance(&viewer, &target);
-			viewer.y = max((double)viewer.y, terrain.getHeight(viewer.x, viewer.z) + .6);
+			cameradist = findDistance(&gamestate.viewer, &target);
+			gamestate.viewer.y = max((double)gamestate.viewer.y, terrain.getHeight(gamestate.viewer.x, gamestate.viewer.z) + .6);
 			if (cameraloc.y < terrain.getHeight(cameraloc.x, cameraloc.z)) {
 				cameraloc.y = terrain.getHeight(cameraloc.x, cameraloc.z);
 			}
@@ -5100,9 +5100,9 @@ void Game::TickOnceAfter(GameState& gamestate)
 			gamestate.blackout = 0;
 		}
 		if (gamestate.camerashake) {
-			viewer.x += (float)(rand() % 100) * .0005 * gamestate.camerashake;
-			viewer.y += (float)(rand() % 100) * .0005 * gamestate.camerashake;
-			viewer.z += (float)(rand() % 100) * .0005 * gamestate.camerashake;
+			gamestate.viewer.x += (float)(rand() % 100) * .0005 * gamestate.camerashake;
+			gamestate.viewer.y += (float)(rand() % 100) * .0005 * gamestate.camerashake;
+			gamestate.viewer.z += (float)(rand() % 100) * .0005 * gamestate.camerashake;
 		}
 	}
 }

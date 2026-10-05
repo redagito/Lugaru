@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Graphic/Stereo.hpp"
 #include "Math/Vector3.hpp"
 
 // GameState replaces globals previously declared in App/include/Globals.h and
@@ -252,6 +253,35 @@ struct GameState
 	// and written back to
 	float yaw = 0;
 	float pitch = 0;
+
+	// where the camera is, and the direction it faces. Together these are what
+	// every culled, faded or wind-blown thing in the world is measured against,
+	// so the two move as one: a facing with no position behind it describes
+	// nothing.
+	Vector3 viewer = {};
+	Vector3 viewerfacing = {};
+
+	// the wind the loose sprites are blown by
+	Vector3 windvector = {};
+
+	// where the hawk perches, and where that perch ends up once the hawk has been
+	// swung round its own axis. GameTick derives the second from the first plus
+	// hawkyaw every tick, and the draw code tests only the second, so a hawk
+	// whose perch moved without the derived position following would be culled
+	// by a camera that can see it.
+	Vector3 hawkcoords = {};
+	Vector3 realhawkcoords = {};
+
+	// the middle of the world map: what the boundary ring is drawn around, and
+	// what the map is centred on when it is written out
+	Vector3 mapcenter = {};
+
+	// the stereo mode the renderer is using, and the one the options menu is
+	// building up for the next restart. The menu copies the first into the second
+	// on entry, walks the second forward one mode at a time, and only commits it
+	// back to the first once the renderer has agreed to initialise it.
+	StereoMode stereomode = stereoNone;
+	StereoMode newstereomode = stereoNone;
 
 	// challenge progression
 	int numchallengelevels = 0;

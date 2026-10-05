@@ -24,14 +24,10 @@ namespace Game
 
 	extern Model hawk;
 	extern Texture hawktexture;
-	extern Vector3 hawkcoords;
-	extern Vector3 realhawkcoords;
 
 	extern Model eye;
 	extern Model cornea;
 	extern Model iris;
-
-	extern Vector3 mapcenter;
 
 	extern Text* text;
 	extern Text* textmono;

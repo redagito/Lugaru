@@ -251,7 +251,7 @@ void ch_save_json(const char* args, GameState& gamestate)
 		}
 	}
 
-	map_data["map"]["center"] = mapcenter;
+	map_data["map"]["center"] = gamestate.mapcenter;
 	map_data["map"]["radius"] = gamestate.mapradius;
 
 	Json::StreamWriterBuilder builder;
@@ -390,7 +390,7 @@ void ch_save(const char* args, GameState& gamestate)
 		}
 	}
 
-	fpackf(tfile, "Bf Bf Bf Bf", mapcenter.x, mapcenter.y, mapcenter.z, gamestate.mapradius);
+	fpackf(tfile, "Bf Bf Bf Bf", gamestate.mapcenter.x, gamestate.mapcenter.y, gamestate.mapcenter.z, gamestate.mapradius);
 
 	fclose(tfile);
 }
@@ -733,7 +733,7 @@ void ch_default(const char*, GameState& gamestate)
 	Person::players[0]->immobile = 0;
 }
 
-void ch_play(const char* args, GameState&)
+void ch_play(const char* args, GameState& gamestate)
 {
 	int dlg;
 	sscanf(args, "%d", &dlg);
@@ -743,7 +743,7 @@ void ch_play(const char* args, GameState&)
 		return;
 	}
 
-	Dialog::currentDialog().play([]() { Game::playdialoguescenesound(); });
+	Dialog::currentDialog().play([&gamestate]() { Game::playdialoguescenesound(gamestate); });
 }
 
 void ch_mapkilleveryone(const char*, GameState& gamestate)

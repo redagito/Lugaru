@@ -377,17 +377,17 @@ Vector3 temppoint1, temppoint2;
 				Vector3 terrainlight;
 				terrainlight = terrain.getLighting(position.x, position.z);
 				if (gamestate.environment == snowyenvironment) {
-					if (distsq(position, viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+					if (distsq(position, gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 						Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x, terrainlight.y, terrainlight.z, .5, .7, gamestate.bloodtoggle);
 					}
 				}
 				else if (gamestate.environment == grassyenvironment) {
-					if (distsq(position, viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+					if (distsq(position, gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 						Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x * 90 / 255, terrainlight.y * 70 / 255, terrainlight.z * 8 / 255, .5, .5, gamestate.bloodtoggle);
 					}
 				}
 				else if (gamestate.environment == desertenvironment) {
-					if (distsq(position, viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+					if (distsq(position, gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 						Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x * 190 / 255, terrainlight.y * 170 / 255, terrainlight.z * 108 / 255, .5, .7, gamestate.bloodtoggle);
 					}
 				}
@@ -748,17 +748,17 @@ Vector3 temppoint1, temppoint2;
 						Vector3 terrainlight;
 						terrainlight = terrain.getLighting(position.x, position.z);
 						if (gamestate.environment == snowyenvironment) {
-							if (distsq(&position, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+							if (distsq(&position, &gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 								Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x, terrainlight.y, terrainlight.z, .5, .7, gamestate.bloodtoggle);
 							}
 						}
 						else if (gamestate.environment == grassyenvironment) {
-							if (distsq(&position, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+							if (distsq(&position, &gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 								Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x * 90 / 255, terrainlight.y * 70 / 255, terrainlight.z * 8 / 255, .5, .5, gamestate.bloodtoggle);
 							}
 						}
 						else if (gamestate.environment == desertenvironment) {
-							if (distsq(&position, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+							if (distsq(&position, &gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 								Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x * 190 / 255, terrainlight.y * 170 / 255, terrainlight.z * 108 / 255, .5, .7, gamestate.bloodtoggle);
 							}
 						}
@@ -816,17 +816,17 @@ Vector3 temppoint1, temppoint2;
 						Vector3 terrainlight;
 						terrainlight = terrain.getLighting(tippoint.x, tippoint.z);
 						if (gamestate.environment == snowyenvironment) {
-							if (distsq(&tippoint, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+							if (distsq(&tippoint, &gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 								Sprite::MakeSprite(cloudsprite, tippoint, tipvelocity, terrainlight.x, terrainlight.y, terrainlight.z, .5, .7, gamestate.bloodtoggle);
 							}
 						}
 						else if (gamestate.environment == grassyenvironment) {
-							if (distsq(&tippoint, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+							if (distsq(&tippoint, &gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 								Sprite::MakeSprite(cloudsprite, tippoint, tipvelocity, terrainlight.x * 90 / 255, terrainlight.y * 70 / 255, terrainlight.z * 8 / 255, .5, .5, gamestate.bloodtoggle);
 							}
 						}
 						else if (gamestate.environment == desertenvironment) {
-							if (distsq(&tippoint, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+							if (distsq(&tippoint, &gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 								Sprite::MakeSprite(cloudsprite, tippoint, tipvelocity, terrainlight.x * 190 / 255, terrainlight.y * 170 / 255, terrainlight.z * 108 / 255, .5, .7, gamestate.bloodtoggle);
 							}
 						}
@@ -1024,10 +1024,10 @@ Vector3 temppoint1, temppoint2;
 			flamedelay = .020;
 			flamedelay -= gamestate.multiplier;
 			normalrot = 0;
-			if (rand() % 50 == 0 && distsq(&position, &viewer) > 80) {
+			if (rand() % 50 == 0 && distsq(&position, &gamestate.viewer) > 80) {
 				Vector3 shinepoint;
 				shinepoint = position + (tippoint - position) * (((float)abs(rand() % 100)) / 100);
-				Sprite::MakeSprite(weaponshinesprite, shinepoint, normalrot, 1, 1, 1, (.1 + (float)abs(rand() % 100) / 200 - .25) * 1 / 3 * sqrt(findDistance(&shinepoint, &viewer)), 1, gamestate.bloodtoggle);
+				Sprite::MakeSprite(weaponshinesprite, shinepoint, normalrot, 1, 1, 1, (.1 + (float)abs(rand() % 100) / 200 - .25) * 1 / 3 * sqrt(findDistance(&shinepoint, &gamestate.viewer)), 1, gamestate.bloodtoggle);
 				Sprite::setLastSpriteSpeed(4);
 				Sprite::setLastSpriteAlivetime(.3);
 			}
@@ -1054,7 +1054,7 @@ void Weapon::draw(GameState& gamestate)
 	if (!weaponBoundingSphereInFrustum)
 		return;
 
-	bool weaponWithinViewingDistance = distsq(&viewer, &position) < gamestate.viewdistance * gamestate.viewdistance;
+	bool weaponWithinViewingDistance = distsq(&gamestate.viewer, &position) < gamestate.viewdistance * gamestate.viewdistance;
 	if (!weaponWithinViewingDistance)
 		return;
 
@@ -1073,7 +1073,7 @@ void Weapon::draw(GameState& gamestate)
 	else {
 		if (Person::players[owner]->occluded < 25) {
 			if ((frustum.SphereInFrustum(Person::players[owner]->coords.x, Person::players[owner]->coords.y + Person::players[owner]->scale * 3, Person::players[owner]->coords.z, Person::players[owner]->scale * 8)
-				&& distsq(&viewer, &Person::players[owner]->coords) < gamestate.viewdistance * gamestate.viewdistance)
+				&& distsq(&gamestate.viewer, &Person::players[owner]->coords) < gamestate.viewdistance * gamestate.viewdistance)
 				|| Person::players[owner]->skeleton.free == 3) {
 				draw = true;
 			}

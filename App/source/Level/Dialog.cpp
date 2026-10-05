@@ -210,7 +210,7 @@ void Dialog::tick(int id, GameState& gamestate)
 			(Person::players[playerId]->howactive >= typedead1) ||
 			(type > 40) && (type < 50)) {
 			whichdialogue = id;
-			play([]() { Game::playdialoguescenesound();  });
+			play([&gamestate]() { Game::playdialoguescenesound(gamestate);  });
 			dialoguetime = 0;
 			gonethrough++;
 		}

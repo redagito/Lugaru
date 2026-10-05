@@ -373,18 +373,15 @@ std::vector<SlotOccurrence> findSaveSlot(const char* path, const std::string& na
 // GameState already owns.
 const std::set<std::string> kPendingGlobals = {
 	// App/include/Globals.h
-	"viewer", "viewerfacing",
 	"light", "terrain",
 	"sdlwindow", "frustum", "weapons",
-	"windvector", "stereomode",
-	"newstereomode",
 
 	// App/include/GameGlobals.h
 	"terraintexture", "terraintexture2", "loadscreentexture", "Mapcircletexture",
 	"Maparrowtexture", "Mapboxtexture", "cursortexture", "screentexture",
 	"screentexture2", "Mainmenuitems", "skybox",
-	"hawk", "hawktexture", "hawkcoords", "realhawkcoords", "eye",
-	"cornea", "iris", "mapcenter", "text",
+	"hawk", "hawktexture", "eye",
+	"cornea", "iris", "text",
 	"textmono", "consoletext",
 };
 
@@ -429,8 +426,8 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 	{
 		// Without this, a parser that quietly matched nothing would leave every
 		// assertion above passing for the wrong reason.
-		REQUIRE(globals.size() == 32);
-		REQUIRE(members.size() == 145);
+		REQUIRE(globals.size() == 24);
+		REQUIRE(members.size() == 153);
 	}
 }
 

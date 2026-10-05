@@ -43,9 +43,6 @@ enum StereoSide
     stereoRight = 1
 };
 
-extern StereoMode stereomode;
-extern StereoMode newstereomode;
-
 bool CanInitStereo(StereoMode mode);
 void InitStereo(StereoMode mode, int contextWidth, int contextHeight);
 const std::string StereoModeName(StereoMode mode);

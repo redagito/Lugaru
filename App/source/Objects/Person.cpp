@@ -1940,7 +1940,7 @@ void Person::FootLand(bodypart whichfoot, float opacity, Terrain& terrainref, Ga
 		if (opacity > 1) {
 			footvel = 0;
 			footpoint = DoRotation(jointPos(whichfoot), 0, yaw, 0) * scale + coords;
-			if (distsq(&footpoint, &viewer)) {
+			if (distsq(&footpoint, &gamestate.viewer)) {
 				Sprite::MakeSprite(cloudsprite, footpoint, footvel, 1, 1, 1, .5, .2 * opacity, gamestate.bloodtoggle);
 			}
 		}
@@ -1952,7 +1952,7 @@ void Person::FootLand(bodypart whichfoot, float opacity, Terrain& terrainref, Ga
 			footpoint = DoRotation(jointPos(whichfoot), 0, yaw, 0) * scale + coords;
 			footpoint.y = terrainref.getHeight(footpoint.x, footpoint.z);
 			terrainlight = terrainref.getLighting(footpoint.x, footpoint.z);
-			if (distsq(&footpoint, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+			if (distsq(&footpoint, &gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 				if (gamestate.environment == snowyenvironment) {
 					Sprite::MakeSprite(cloudsprite, footpoint, footvel * .6, terrainlight.x, terrainlight.y, terrainlight.z, .5, .7 * opacity, gamestate.bloodtoggle);
 					if (gamestate.detail == 2) {
@@ -1976,7 +1976,7 @@ void Person::FootLand(bodypart whichfoot, float opacity, Terrain& terrainref, Ga
 				footvel.y = .8;
 			}
 			footpoint = DoRotation(jointPos(whichfoot), 0, yaw, 0) * scale + coords;
-			if (distsq(&footpoint, &viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
+			if (distsq(&footpoint, &gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 				Sprite::MakeSprite(cloudsprite, footpoint, footvel * .6, 1, 1, 1, .5, .2 * opacity, gamestate.bloodtoggle);
 			}
 		}
@@ -4764,7 +4764,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 		}
 	}
 
-	if (texupdatedelay < 0 && bleeding > 0 && gamestate.bloodtoggle == 2 && distsq(&viewer, &coords) < 9) {
+	if (texupdatedelay < 0 && bleeding > 0 && gamestate.bloodtoggle == 2 && distsq(&gamestate.viewer, &coords) < 9) {
 		texupdatedelay = .12;
 
 		bloodsize = 5 - gamestate.realtexdetail;
@@ -5196,7 +5196,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 			}
 		}
 
-		if ((id == 0 || distsq(&coords, &viewer) < 50) && gamestate.autoslomo) {
+		if ((id == 0 || distsq(&coords, &gamestate.viewer) < 50) && gamestate.autoslomo) {
 			gamestate.slomo = 1;
 			gamestate.slomodelay = .2;
 		}
@@ -6393,7 +6393,7 @@ static void IKHelper(Person* p, float interp, Terrain& terrainref, bool tutorial
 int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemultiplier, int jointstartarray[26], GameState& gamestate)
 {
 	int oldplayerdetail;
-	if ((frustum.SphereInFrustum(coords.x, coords.y + scale * 3, coords.z, scale * 8) && distsq(&viewer, &coords) < gamestate.viewdistance * gamestate.viewdistance) || skeleton.free == 3) {
+	if ((frustum.SphereInFrustum(coords.x, coords.y + scale * 3, coords.z, scale * 8) && distsq(&gamestate.viewer, &coords) < gamestate.viewdistance * gamestate.viewdistance) || skeleton.free == 3) {
 		if (onterrain && (isIdle() || isCrouch() || wasIdle() || wasCrouch()) && !skeleton.free) {
 			calcrot = 1;
 		}
@@ -6419,13 +6419,13 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 		}
 		oldplayerdetail = playerdetail;
 		playerdetail = 0;
-		if (distsq(&viewer, &coords) < gamestate.viewdistance * gamestate.viewdistance / 32 && gamestate.detail == 2) {
+		if (distsq(&gamestate.viewer, &coords) < gamestate.viewdistance * gamestate.viewdistance / 32 && gamestate.detail == 2) {
 			playerdetail = 1;
 		}
-		if (distsq(&viewer, &coords) < gamestate.viewdistance * gamestate.viewdistance / 128 && gamestate.detail == 1) {
+		if (distsq(&gamestate.viewer, &coords) < gamestate.viewdistance * gamestate.viewdistance / 128 && gamestate.detail == 1) {
 			playerdetail = 1;
 		}
-		if (distsq(&viewer, &coords) < gamestate.viewdistance * gamestate.viewdistance / 256 && (gamestate.detail != 1 && gamestate.detail != 2)) {
+		if (distsq(&gamestate.viewer, &coords) < gamestate.viewdistance * gamestate.viewdistance / 256 && (gamestate.detail != 1 && gamestate.detail != 2)) {
 			playerdetail = 1;
 		}
 		if (id == 0) {
@@ -6711,7 +6711,7 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 			}
 		}
 		framemult = .01;
-		updatedelaychange = -framemult * 4 * (45 - findDistance(&viewer, &coords) * 1);
+		updatedelaychange = -framemult * 4 * (45 - findDistance(&gamestate.viewer, &coords) * 1);
 		if (updatedelaychange > -gamestate.realmultiplier * 30) {
 			updatedelaychange = -gamestate.realmultiplier * 30;
 		}
@@ -6766,7 +6766,7 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 		}
 
 		terrainlight = terrainref.getLighting(coords.x, coords.z);
-		distance = distsq(&viewer, &coords);
+		distance = distsq(&gamestate.viewer, &coords);
 		distance = (gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance;
 		if (distance > 1) {
 			distance = 1;
@@ -7767,7 +7767,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 							if (j != 0) {
 								smelldistance = 100;
 							}
-							windsmell = windvector;
+							windsmell = gamestate.windvector;
 							Normalise(&windsmell);
 							windsmell = windsmell * 2 + Person::players[j]->coords;
 							if (distsq(&coords, &windsmell) < smelldistance && !gamestate.editorenabled) {

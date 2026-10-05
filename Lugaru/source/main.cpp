@@ -54,7 +54,7 @@ using namespace std;
 
 // --------------------------------------------------------------------------
 
-void initGL()
+void initGL(GameState& gamestate)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 	swap_gl_buffers();
@@ -94,12 +94,12 @@ void initGL()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glAlphaFunc(GL_GREATER, 0.5f);
 
-	if (CanInitStereo(stereomode)) {
-		InitStereo(stereomode, kContextWidth, kContextHeight);
+	if (CanInitStereo(gamestate.stereomode)) {
+		InitStereo(gamestate.stereomode, kContextWidth, kContextHeight);
 	}
 	else {
 		fprintf(stderr, "Failed to initialize stereo, disabling.\n");
-		stereomode = stereoNone;
+		gamestate.stereomode = stereoNone;
 	}
 }
 
@@ -226,7 +226,7 @@ bool SetUp(GameState& gamestate)
 		SDL_SetRelativeMouseMode(SDL_TRUE);
 	}
 
-	initGL();
+	initGL(gamestate);
 
 	GLint width = kContextWidth;
 	GLint height = kContextHeight;
@@ -363,7 +363,7 @@ void DoUpdate(GameState& gamestate)
 	gamestate.multiplier = oldmult;
 
 	TickOnceAfter(gamestate);
-	if (stereomode == stereoNone) {
+	if (gamestate.stereomode == stereoNone) {
 		DrawGLScene(stereoCenter, gamestate);
 	}
 	else {

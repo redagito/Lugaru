@@ -333,7 +333,7 @@ void Menu::updateSettingsMenu(GameState& gamestate)
 
 void Menu::updateStereoConfigMenu(GameState& gamestate)
 {
-    setText(0, std::string("Stereo mode: ") + StereoModeName(newstereomode));
+    setText(0, std::string("Stereo mode: ") + StereoModeName(gamestate.newstereomode));
     setText(1, std::string("Stereo separation: ") + std::to_string(gamestate.stereoseparation));
     setText(2, std::string("Reverse stereo: ") + (gamestate.stereoreverse ? "Yes" : "No"));
 }
@@ -723,7 +723,7 @@ void Menu::Tick(GameState& gamestate)
                         break;
                     case 12:
                         flash(gamestate);
-                        newstereomode = stereomode;
+                        gamestate.newstereomode = gamestate.stereomode;
                         gamestate.mainmenu = 18;
                         gamestate.keyselect = -1;
                         break;
@@ -886,12 +886,12 @@ void Menu::Tick(GameState& gamestate)
                 } else {
                     fireSound();
                     if (gamestate.selected == 0) {
-                        newstereomode = (StereoMode)(newstereomode + 1);
-                        while (!CanInitStereo(newstereomode)) {
-                            printf("Failed to initialize mode %s (%i)\n", StereoModeName(newstereomode).c_str(), newstereomode);
-                            newstereomode = (StereoMode)(newstereomode + 1);
-                            if (newstereomode >= stereoCount) {
-                                newstereomode = stereoNone;
+                        gamestate.newstereomode = (StereoMode)(gamestate.newstereomode + 1);
+                        while (!CanInitStereo(gamestate.newstereomode)) {
+                            printf("Failed to initialize mode %s (%i)\n", StereoModeName(gamestate.newstereomode).c_str(), gamestate.newstereomode);
+                            gamestate.newstereomode = (StereoMode)(gamestate.newstereomode + 1);
+                            if (gamestate.newstereomode >= stereoCount) {
+                                gamestate.newstereomode = stereoNone;
                             }
                         }
                     } else if (gamestate.selected == 2) {
@@ -900,8 +900,8 @@ void Menu::Tick(GameState& gamestate)
                         flash(gamestate);
                         gamestate.mainmenu = 3;
 
-                        stereomode = newstereomode;
-                        InitStereo(stereomode, kContextWidth, kContextHeight);
+                        gamestate.stereomode = gamestate.newstereomode;
+                        InitStereo(gamestate.stereomode, kContextWidth, kContextHeight);
                     }
                 }
                 updateStereoConfigMenu(gamestate);

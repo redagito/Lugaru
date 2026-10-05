@@ -699,7 +699,7 @@ void Game::LoadStuff(GameState& gamestate)
 	gamestate.pitch = 0;
 	ReSizeGLScene(90, .01, gamestate);
 
-	viewer = 0;
+	gamestate.viewer = 0;
 
 	//Set up distant light
 	light.color[0] = .95;
@@ -723,17 +723,17 @@ void Game::LoadStuff(GameState& gamestate)
 	gamestate.texscale = .2 / megascale / viewdistdetail;
 	terrain.scale = 3 * megascale * viewdistdetail;
 
-	viewer.x = terrain.size / 2 * terrain.scale;
-	viewer.z = terrain.size / 2 * terrain.scale;
+	gamestate.viewer.x = terrain.size / 2 * terrain.scale;
+	gamestate.viewer.z = terrain.size / 2 * terrain.scale;
 
 	hawk.load("Models/Hawk.solid", [&]() { LoadingScreen(gamestate); });
 	hawk.Scale(.03, .03, .03);
 	hawk.Rotate(90, 1, 1);
 	hawk.CalculateNormals(0, [&]() { LoadingScreen(gamestate); });
 	hawk.ScaleNormals(-1, -1, -1);
-	hawkcoords.x = terrain.size / 2 * terrain.scale - 5 - 7;
-	hawkcoords.z = terrain.size / 2 * terrain.scale - 5 - 7;
-	hawkcoords.y = terrain.getHeight(hawkcoords.x, hawkcoords.z) + 25;
+	gamestate.hawkcoords.x = terrain.size / 2 * terrain.scale - 5 - 7;
+	gamestate.hawkcoords.z = terrain.size / 2 * terrain.scale - 5 - 7;
+	gamestate.hawkcoords.y = terrain.getHeight(gamestate.hawkcoords.x, gamestate.hawkcoords.z) + 25;
 
 	eye.load("Models/Eye.solid", [&]() { Game::LoadingScreen(gamestate); });
 	eye.Scale(.03, .03, .03);
