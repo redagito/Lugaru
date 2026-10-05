@@ -61,7 +61,6 @@ public:
     Texture footprinttexture;
     Texture bodyprinttexture;
     Texture breaktexture;
-    Texture terraintexture;
     short size;
 
     std::vector<unsigned int> patchobjects[subdivision][subdivision];
