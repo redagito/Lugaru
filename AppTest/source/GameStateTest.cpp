@@ -6,6 +6,7 @@
 
 #include <type_traits>
 
+#include "Globals.h"
 #include "GameState.hpp"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
@@ -1465,5 +1466,56 @@ TEST_CASE("tranche 8 GameState members are per instance", "[gamestate]")
 				REQUIRE(c.pathpointconnect[i][k] == 0);
 			}
 		}
+	}
+}
+
+// Tranche 9 covers the two skeletal joint tables, `whichjointstartarray` and
+// `whichjointendarray`. Together they describe the skeleton: row i names the two
+// joints one bone spans, the one it starts from and the one it ends at. They are
+// only ever meaningful as a pair - a start index with no end index alongside it
+// describes nothing - so they are pinned as one group and move as one group.
+//
+// The values below are read from the globals themselves, while the globals are
+// still the thing being read, so the literals are observed rather than assumed.
+// The tranche that follows re-points these same assertions at the GameState
+// members and adds the per-instance isolation the move buys.
+//
+// All 26 rows of both tables are read rather than a sample. The globals are
+// initialised `= { 0 }`, which zeroes the whole array, so a one-element check
+// would be satisfied by an initialiser that zeroed only element 0 - and this
+// table is built by 52 assignments in Game::InitGame that leave nothing to fall
+// back on if the declared extent and the written extent ever disagree.
+//
+// The declared types are pinned whole, extent included, as `int[26]`. The extent
+// is the whole contract of these tables: Skeleton::DoConstraints loops to 26
+// without consulting a stored count, so a 25-element table would be read out of
+// bounds by a member that kept the same values and looked correct at index 0.
+//
+// This tranche is also where the asymmetry goes. DoConstraints received the start
+// table as a parameter while reaching for the end table as a global, so the leaf
+// had two read paths for one piece of data. The next tranche gives both tables to
+// GameState and threads both through that parameter list.
+TEST_CASE("the tranche 9 skeletal joint tables start at the values GameState will carry", "[gamestate]")
+{
+	SECTION("no bone starts at a joint yet")
+	{
+		for (int i = 0; i < 26; i++) {
+			INFO("joint row " << i);
+			REQUIRE(whichjointstartarray[i] == 0);
+		}
+	}
+
+	SECTION("no bone ends at a joint yet")
+	{
+		for (int i = 0; i < 26; i++) {
+			INFO("joint row " << i);
+			REQUIRE(whichjointendarray[i] == 0);
+		}
+	}
+
+	SECTION("declared types are preserved from the migrated globals")
+	{
+		REQUIRE(std::is_same<decltype(whichjointstartarray), int[26]>::value);
+		REQUIRE(std::is_same<decltype(whichjointendarray), int[26]>::value);
 	}
 }
