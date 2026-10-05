@@ -1,8 +1,10 @@
 # Findings
 
 Known issues found during the C++23 / warnings-as-errors / global-state work that are
-**not yet fixed**. Line numbers are as of commit `c26dc97`; they will drift as the code
-changes, so prefer the surrounding code over the line number.
+**not yet fixed**, plus a couple that have since been fixed and are kept for the record
+(those say so in their status line). Line numbers are as of commit `c26dc97`, corrected
+against the tree at `c81ff20`; they will drift as the code changes, so prefer the
+surrounding code over the line number.
 
 Each entry records what was actually observed versus what is reasoned. Nothing here has
 been reproduced at runtime.
@@ -41,13 +43,14 @@ guard, matching `GameTick.cpp:1675`.
 ## 2. Key-capture thread: unsynchronised handshake, and an exception path that skips the join
 
 **Severity:** medium (use-after-free on the exception path; formally UB on the handshake)
-**Status:** confirmed by reading code; not reproduced at runtime; no test coverage
+**Status:** confirmed by reading code; not reproduced at runtime; no test coverage. The join
+hole in 2c is now closed by an RAII guard; 2a and 2b are still open.
 
 The entire project has exactly **one** thread. There are no mutexes, atomics, or condition
 variables anywhere in the tree:
 
 ```
-App/source/Menu/Menu.cpp:1032   SDL_CreateThread(setKeySelected_thread, NULL, &gamestate)
+App/source/Menu/Menu.cpp:1055   keyselectthread = SDL_CreateThread(setKeySelected_thread, NULL, args)
 ```
 
 It exists for one interaction: clicking a keybind in the options menu parks the main loop
@@ -58,36 +61,56 @@ Three separate problems:
 ### 2a. The `waiting` flag is a handshake, not a synchronisation primitive
 
 `setKeySelected_thread` writes `gamestate.keyselect` and `gamestate.waiting`
-(`Menu.cpp:1008-1009`); the main thread polls them. They are plain non-atomic members, so
+(`Menu.cpp:1028-1029`); the main thread polls them. They are plain non-atomic members, so
 this is undefined behaviour by the standard even where it behaves correctly in practice on
 x86/ARM. The flag write happens before the thread exits and `joinKeySelectThread` creates
 a happens-before edge, which is why it works today - but nothing enforces the ordering
 during the window the main thread is actually polling.
 
-### 2b. The thread calls `Menu::Load`, which touches shared state
+### 2b. The thread calls `Menu::Load`, which mutates the shared menu item list
 
-`Menu::Load(gamestate)` at `Menu.cpp:1010` writes `gamestate.mainmenu = 0` (`Menu.cpp:539`),
-racing the main thread's `Menu::Tick`. It also mutates the function-local `static
-Menu::items` vector (`MenuItem::effectfade`), which `Menu::handleFadeEffect` reads.
+`Menu::Load(gamestate, assets)` at `Menu.cpp:1030` is the last thing the thread does. It
+clears and rebuilds the file-static `Menu::items` vector (`Menu.cpp:58`), which
+`Menu::handleFadeEffect` (`Menu.cpp:169-184`) walks and mutates on the main thread, and for
+`mainmenu == 5` it calls `LoadCampaign` (`Menu.cpp:421`), which rewrites the global
+`campaignlevels` and `campaignEndText`.
+
+An earlier version of this finding claimed `Menu::Load` writes `gamestate.mainmenu = 0`.
+That is wrong: `Menu::Load` spans `Menu.cpp:375-521` and contains no write to any
+`GameState` member. The line it was citing, `Menu.cpp:541`, is inside
+`Menu::startChallengeLevel` (`Menu.cpp:523`), a different function that the thread never
+calls. What races is the item vector, not `mainmenu`.
 
 In practice the main thread is parked on `waiting` while the thread runs, so this does not
 manifest - but that is a consequence of the handshake, not a design.
 
 ### 2c. An exception unwinds past the join, leaving a dangling reference
 
-`Lugaru/source/main.cpp:616` calls `Menu::joinKeySelectThread()`, but the enclosing `catch
-(const std::exception&)` at `main.cpp:626` is reached by an exception thrown while the
-thread is still alive. The thread holds `GameState&` referring to the stack object
-declared at `main.cpp:552`, which is destroyed as the stack unwinds. The thread is then
-left holding a dangling reference and is never joined.
+The thread holds a `GameState&` and a `GameAssets&`, so it must be joined before either
+object is destroyed. `Lugaru/source/main.cpp:630` does that explicitly, but the enclosing
+`catch (const std::exception&)` at `main.cpp:640` is reached by an exception thrown while
+the thread is still alive, and that path never passes the join at `:630`.
+
+`GameState gamestate` (`main.cpp:554`) and `GameAssets assets` (`main.cpp:560`) are stack
+objects, so on unwind `assets` is destroyed first and `gamestate` second. The thread's
+references are therefore dangling from the moment `assets` begins to destruct, for the
+whole of its destructor. That window is long: `~GameAssets` destroys the two fonts, each a
+`glDeleteLists` (`Graphics/source/Graphic/Text.cpp:140`), and then the skybox and its 18
+`Texture` members (8 singles plus `Mainmenuitems[10]`), each of which can drop the last
+reference to a `TextureRes` and so run a `glDeleteTextures`
+(`Graphics/source/Graphic/Texture.cpp:106-110`). Before commit `d70a1a9` the textures were
+still globals, so the only work in that destructor was the two fonts.
 
 This is the same class of bug that was already fixed once in `Menu.cpp` (the thread was not
 being joined at all); this is the remaining path.
 
-**Suggested fix:** make `waiting` and `keyselect` `std::atomic`; guarantee the join on every
-exit path (scope guard, or move the join so the `catch` cannot bypass it); and decide
-whether `Menu::Load` needs to run on the thread at all, or whether the thread could set a
-flag and let the main thread do the menu reload.
+**Suggested fix:** make `waiting` and `keyselect` `std::atomic`; and decide whether
+`Menu::Load` needs to run on the thread at all, or whether the thread could set a flag and
+let the main thread do the menu reload. The join guarantee is no longer on this list: it is
+now an RAII guard, `JoinKeySelectThreadOnExit` (`main.cpp:486`), declared after both objects
+at `main.cpp:567` and therefore destroyed before them on every exit path out of the block -
+fall-through, early return, or unwind. The explicit join at `:630` stays because
+`deleteGame` deletes GL objects the thread would otherwise still be reading.
 
 ---
 
@@ -182,7 +205,26 @@ manual playtesting, and findings like 1 should be treated as "never exercised" r
 
 ---
 
-## 8. Process note: subagent self-reports need auditing
+## 8. `Terrain::terraintexture` was a dead member that shadowed a migrated name
+
+**Severity:** low (no runtime effect; a trap for the next reader)
+**Status:** fixed - the member has been deleted
+
+`Terrain` carried a `Texture terraintexture;` member that nothing read or wrote. Verified
+before removal: no `terrain.terraintexture` and no `->terraintexture` anywhere in the tree,
+and the only remaining `terraintexture` uses after commit `d70a1a9` are the
+`assets.terraintexture` calls in `App/source/GameTick.cpp` and `App/source/GameDraw.cpp`,
+which go through `GameAssets`.
+
+It was already dead before the textures moved, but the migration turned it into a hazard.
+Once `terraintexture` was a member of `GameAssets`, this declaration was the only bare
+occurrence of the name in production code, so `rg terraintexture` lands on it first and a
+reviewer can easily attribute the `GameAssets` wiring to `Terrain`, or reintroduce the
+member. It also cost every `Terrain` instance a `shared_ptr`.
+
+---
+
+## 9. Process note: subagent self-reports need auditing
 
 Not a code issue, but recorded because it affected how much a verification pass could be
 trusted.
