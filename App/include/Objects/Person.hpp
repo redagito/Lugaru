@@ -361,7 +361,7 @@ public:
 
     void changeCreatureType(person_type type, bool tutorialActive, GameState& gamestate);
 
-    void CheckKick(Terrain& terrain, bool tutorialActive, bool inDialog, float multiplier, int whichjointstartarray[26], GameState& gamestate);
+    void CheckKick(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
     void CatchFire(GameState& gamestate);
     void DoBlood(float howmuch, int which, bool tutorialActive, GameState& gamestate);
     void DoBloodBig(float howmuch, int which, bool tutorialActive, GameState& gamestate);
@@ -403,8 +403,8 @@ public:
 
     bool isWallJump() { return animation_bits[animTarget] & ab_walljump; }
     void Reverse(bool tutorialActive, GameState& gamestate);
-    void DoDamage(float howmuch, Terrain& terrain, bool tutorialActive, bool inDialog, float multiplier, int whichjointstartarray[26], GameState& gamestate);
-    void DoHead(float multiplier, GameState& gamestate);
+    void DoDamage(float howmuch, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
+    void DoHead(float timemultiplier, GameState& gamestate);
     void DoMipmaps()
     {
         skeleton.drawmodel.textureptr.bind();
@@ -412,21 +412,21 @@ public:
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, skeleton.skinsize, skeleton.skinsize, 0, GL_RGB, GL_UNSIGNED_BYTE, &skeleton.skinText[0]);
     }
 
-    int SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrain, bool tutorialActive, bool inDialog, float mutliplier, int whichjointstartarray[26], GameState& gamestate);
-    int DrawSkeleton(Terrain& terrain, bool tutorialActive, float multiplier, int whichjointstartarray[26], GameState& gamestate);
+    int SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
+    int DrawSkeleton(Terrain& terrain, bool tutorialActive, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
     void Puff(int whichlabel, GameState& gamestate);
     void FootLand(bodypart whichfoot, float opacity, Terrain& terrain, GameState& gamestate);
-    void DoStuff(Terrain& terrain, bool tutorialActive, bool inDialog, float multiplier, int whichjointstartarray[26], GameState& gamestate);
+    void DoStuff(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
     void setTargetAnimation(int);
-    void DoAnimations(Terrain& terrain, bool tutorialActive, bool inDialog, float multiplier, int whichjointstartarray[26], GameState& gamestate);
-    void RagDoll(bool checkcollision, Terrain& terrain, bool tutorialActive, bool inDialog, float multiplier, int whichjointstartarray[26], GameState& gamestate);
+    void DoAnimations(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
+    void RagDoll(bool checkcollision, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
 
     void takeWeapon(int weaponId);
 
     bool addClothes(const int& clothesId, GameState& gamestate);
     void addClothes(GameState& gamestate);
 
-    void doAI(const Terrain& terrain, bool tutorialActive, bool inDialog, float multiplier, GameState& gamestate);
+    void doAI(const Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, GameState& gamestate);
 
     bool catchKnife();
 
