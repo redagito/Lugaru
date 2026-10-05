@@ -798,8 +798,8 @@ void ch_skytint(const char* args, GameState& gamestate)
 
 	SetUpLighting(gamestate);
 
-	terrain.DoShadows(Tutorial::active, gamestate.texscale, light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
-	Object::DoShadows(gamestate.skyboxtexture, light, terrain);
+	terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
 }
 
 void ch_skylight(const char* args, GameState& gamestate)
@@ -808,8 +808,8 @@ void ch_skylight(const char* args, GameState& gamestate)
 
 	SetUpLighting(gamestate);
 
-	terrain.DoShadows(Tutorial::active, gamestate.texscale, light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
-	Object::DoShadows(gamestate.skyboxtexture, light, terrain);
+	terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
 }
 
 void ch_skybox(const char*, GameState& gamestate)
@@ -818,6 +818,6 @@ void ch_skybox(const char*, GameState& gamestate)
 
 	SetUpLighting(gamestate);
 
-	terrain.DoShadows(Tutorial::active, gamestate.texscale, light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
-	Object::DoShadows(gamestate.skyboxtexture, light, terrain);
+	terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
 }

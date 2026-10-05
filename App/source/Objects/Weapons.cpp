@@ -1050,7 +1050,7 @@ void Weapon::draw(GameState& gamestate)
 	static Vector3 terrainlight;
 	static GLfloat M[16];
 
-	bool weaponBoundingSphereInFrustum = frustum.SphereInFrustum(position.x, position.y, position.z, 1);
+	bool weaponBoundingSphereInFrustum = gamestate.frustum.SphereInFrustum(position.x, position.y, position.z, 1);
 	if (!weaponBoundingSphereInFrustum)
 		return;
 
@@ -1072,7 +1072,7 @@ void Weapon::draw(GameState& gamestate)
 	}
 	else {
 		if (Person::players[owner]->occluded < 25) {
-			if ((frustum.SphereInFrustum(Person::players[owner]->coords.x, Person::players[owner]->coords.y + Person::players[owner]->scale * 3, Person::players[owner]->coords.z, Person::players[owner]->scale * 8)
+			if ((gamestate.frustum.SphereInFrustum(Person::players[owner]->coords.x, Person::players[owner]->coords.y + Person::players[owner]->scale * 3, Person::players[owner]->coords.z, Person::players[owner]->scale * 8)
 				&& distsq(&gamestate.viewer, &Person::players[owner]->coords) < gamestate.viewdistance * gamestate.viewdistance)
 				|| Person::players[owner]->skeleton.free == 3) {
 				draw = true;

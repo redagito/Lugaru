@@ -239,7 +239,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glRotatef((float)(abs(rand() % 100)) / 3000 - 1, 1, 0, 0);
 			glRotatef((float)(abs(rand() % 100)) / 3000 - 1, 0, 1, 0);
 		}
-		SetUpLight(&light, 0);
+		SetUpLight(&gamestate.light, 0);
 		glPushMatrix();
 
 		//heat blur effect in desert
@@ -273,7 +273,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		float mvmatrix[16];
 		glGetFloatv(GL_PROJECTION_MATRIX, projmatrix);
 		glGetFloatv(GL_MODELVIEW_MATRIX, mvmatrix);
-		frustum.SetFrustum(projmatrix, mvmatrix);
+		gamestate.frustum.SetFrustum(projmatrix, mvmatrix);
 
 		//make shadow decals on terrain and Object::objects
 		static Vector3 point;
@@ -281,7 +281,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		rotation = 0;
 		for (unsigned int k = 0; k < Person::players.size(); k++) {
 			if (!Person::players[k]->skeleton.free && Person::players[k]->playerdetail && Person::players[k]->howactive < typesleeping) {
-				if (frustum.SphereInFrustum(Person::players[k]->coords.x, Person::players[k]->coords.y + Person::players[k]->scale * 3, Person::players[k]->coords.z, Person::players[k]->scale * 7) && Person::players[k]->occluded < 25) {
+				if (gamestate.frustum.SphereInFrustum(Person::players[k]->coords.x, Person::players[k]->coords.y + Person::players[k]->scale * 3, Person::players[k]->coords.z, Person::players[k]->scale * 7) && Person::players[k]->occluded < 25) {
 					for (unsigned int i = 0; i < Person::players[k]->skeleton.joints.size(); i++) {
 						if (Person::players[k]->skeleton.joints[i].label == leftknee || Person::players[k]->skeleton.joints[i].label == rightknee || Person::players[k]->skeleton.joints[i].label == groin) {
 							point = DoRotation(Person::players[k]->skeleton.joints[i].position, 0, Person::players[k]->yaw, 0) * Person::players[k]->scale + Person::players[k]->coords;
@@ -308,7 +308,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				}
 			}
 			if ((Person::players[k]->skeleton.free || Person::players[k]->howactive >= typesleeping) && Person::players[k]->playerdetail) {
-				if (frustum.SphereInFrustum(Person::players[k]->coords.x, Person::players[k]->coords.y, Person::players[k]->coords.z, Person::players[k]->scale * 5) && Person::players[k]->occluded < 25) {
+				if (gamestate.frustum.SphereInFrustum(Person::players[k]->coords.x, Person::players[k]->coords.y, Person::players[k]->coords.z, Person::players[k]->scale * 5) && Person::players[k]->occluded < 25) {
 					for (unsigned i = 0; i < Person::players[k]->skeleton.joints.size(); i++) {
 						if (Person::players[k]->skeleton.joints[i].label == leftknee || Person::players[k]->skeleton.joints[i].label == rightknee || Person::players[k]->skeleton.joints[i].label == groin || Person::players[k]->skeleton.joints[i].label == leftelbow || Person::players[k]->skeleton.joints[i].label == rightelbow || Person::players[k]->skeleton.joints[i].label == neck) {
 							if (Person::players[k]->skeleton.free) {
@@ -346,7 +346,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			}
 
 			if (!Person::players[k]->playerdetail) {
-				if (frustum.SphereInFrustum(Person::players[k]->coords.x, Person::players[k]->coords.y, Person::players[k]->coords.z, Person::players[k]->scale * 5)) {
+				if (gamestate.frustum.SphereInFrustum(Person::players[k]->coords.x, Person::players[k]->coords.y, Person::players[k]->coords.z, Person::players[k]->scale * 5)) {
 					point = Person::players[k]->coords;
 					size = .7;
 					opacity = .4 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 5;
@@ -371,9 +371,9 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		terraintexture.bind();
-		terrain.draw(0, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, frustum, gamestate.blurness);
+		terrain.draw(0, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.frustum, gamestate.blurness);
 		terraintexture2.bind();
-		terrain.draw(1, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, frustum, gamestate.blurness);
+		terrain.draw(1, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.frustum, gamestate.blurness);
 
 		if (gamestate.decalstoggle)
 		{
@@ -439,12 +439,12 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 		glPushMatrix();
 		glCullFace(GL_BACK);
 		glEnable(GL_TEXTURE_2D);
-		Object::Draw(gamestate.decalstoggle, gamestate.multiplier, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, light, frustum, terrain, gamestate.detail, gamestate.blurness, gamestate.windvar, gamestate.playerdist);
+		Object::Draw(gamestate.decalstoggle, gamestate.multiplier, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.light, gamestate.frustum, terrain, gamestate.detail, gamestate.blurness, gamestate.windvar, gamestate.playerdist);
 		glPopMatrix();
 
 		//draw hawk
 		glPushMatrix();
-		if (frustum.SphereInFrustum(gamestate.realhawkcoords.x + hawk.boundingspherecenter.x, gamestate.realhawkcoords.y + hawk.boundingspherecenter.y, gamestate.realhawkcoords.z + hawk.boundingspherecenter.z, 2)) {
+		if (gamestate.frustum.SphereInFrustum(gamestate.realhawkcoords.x + hawk.boundingspherecenter.x, gamestate.realhawkcoords.y + hawk.boundingspherecenter.y, gamestate.realhawkcoords.z + hawk.boundingspherecenter.z, 2)) {
 			glAlphaFunc(GL_GREATER, 0.0001f);
 			glDepthMask(1);
 			glDisable(GL_CULL_FACE);
@@ -454,9 +454,9 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glRotatef(gamestate.hawkyaw, 0, 1, 0);
 			glTranslatef(25, 0, 0);
 			distance = distsq(&gamestate.viewer, &gamestate.realhawkcoords) * 1.2;
-			glColor4f(light.color[0], light.color[1], light.color[2], (gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance);
+			glColor4f(gamestate.light.color[0], gamestate.light.color[1], gamestate.light.color[2], (gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance);
 			if ((gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance > 1) {
-				glColor4f(light.color[0], light.color[1], light.color[2], 1);
+				glColor4f(gamestate.light.color[0], gamestate.light.color[1], gamestate.light.color[2], 1);
 			}
 			if ((gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance > 0) {
 				hawk.drawdifftex(hawktexture);
@@ -516,7 +516,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 		glDepthMask(0);
 
-		Sprite::Draw(gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, light, gamestate.multiplier, gamestate.gravity, terrain, gamestate.detail, gamestate.viewerfacing, gamestate.bloodtoggle, gamestate.windvector, Tutorial::active, gamestate);
+		Sprite::Draw(gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.light, gamestate.multiplier, gamestate.gravity, terrain, gamestate.detail, gamestate.viewerfacing, gamestate.bloodtoggle, gamestate.windvector, Tutorial::active, gamestate);
 
 		//waypoints, pathpoints in editor
 		if (gamestate.editorenabled) {

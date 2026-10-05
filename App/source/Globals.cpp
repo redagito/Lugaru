@@ -22,10 +22,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 // TODO GET RID OF ALL OF THESE!
 
-Light light;
 Terrain terrain;
 
 SDL_Window* sdlwindow;
 
-Frustum frustum;
 Weapons weapons;

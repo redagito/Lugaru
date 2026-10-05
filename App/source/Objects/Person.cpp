@@ -6393,7 +6393,7 @@ static void IKHelper(Person* p, float interp, Terrain& terrainref, bool tutorial
 int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemultiplier, int jointstartarray[26], GameState& gamestate)
 {
 	int oldplayerdetail;
-	if ((frustum.SphereInFrustum(coords.x, coords.y + scale * 3, coords.z, scale * 8) && distsq(&gamestate.viewer, &coords) < gamestate.viewdistance * gamestate.viewdistance) || skeleton.free == 3) {
+	if ((gamestate.frustum.SphereInFrustum(coords.x, coords.y + scale * 3, coords.z, scale * 8) && distsq(&gamestate.viewer, &coords) < gamestate.viewdistance * gamestate.viewdistance) || skeleton.free == 3) {
 		if (onterrain && (isIdle() || isCrouch() || wasIdle() || wasCrouch()) && !skeleton.free) {
 			calcrot = 1;
 		}

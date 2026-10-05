@@ -229,25 +229,25 @@ void Screenshot(void)
 void Game::SetUpLighting(GameState& gamestate)
 {
 	if (gamestate.environment == snowyenvironment) {
-		light.setColors(.65f, .65f, .7f, .4f, .4f, .44f);
+		gamestate.light.setColors(.65f, .65f, .7f, .4f, .4f, .44f);
 	}
 	if (gamestate.environment == desertenvironment) {
-		light.setColors(.95f, .95f, .95f, .4f, .35f, .3f);
+		gamestate.light.setColors(.95f, .95f, .95f, .4f, .35f, .3f);
 	}
 	if (gamestate.environment == grassyenvironment) {
-		light.setColors(.95f, .95f, 1.f, .4f, .4f, .44f);
+		gamestate.light.setColors(.95f, .95f, 1.f, .4f, .4f, .44f);
 	}
 	if (!gamestate.skyboxtexture) {
-		light.setColors(1.f, 1.f, 1.f, .4f, .4f, .4f);
+		gamestate.light.setColors(1.f, 1.f, 1.f, .4f, .4f, .4f);
 	}
 	float average;
 	average = (gamestate.skyboxlightr + gamestate.skyboxlightg + gamestate.skyboxlightb) / 3;
-	light.color[0] *= (gamestate.skyboxlightr + average) / 2;
-	light.color[1] *= (gamestate.skyboxlightg + average) / 2;
-	light.color[2] *= (gamestate.skyboxlightb + average) / 2;
-	light.ambient[0] *= (gamestate.skyboxlightr + average) / 2;
-	light.ambient[1] *= (gamestate.skyboxlightg + average) / 2;
-	light.ambient[2] *= (gamestate.skyboxlightb + average) / 2;
+	gamestate.light.color[0] *= (gamestate.skyboxlightr + average) / 2;
+	gamestate.light.color[1] *= (gamestate.skyboxlightg + average) / 2;
+	gamestate.light.color[2] *= (gamestate.skyboxlightb + average) / 2;
+	gamestate.light.ambient[0] *= (gamestate.skyboxlightr + average) / 2;
+	gamestate.light.ambient[1] *= (gamestate.skyboxlightg + average) / 2;
+	gamestate.light.ambient[2] *= (gamestate.skyboxlightb + average) / 2;
 }
 
 void Setenvironment(int which, GameState& gamestate)
@@ -706,9 +706,9 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 
 	if (!gamestate.stealthloading) {
 		Object::AddObjectsToTerrain(gamestate.environment, terrain, gamestate.detail);
-		terrain.DoShadows(Tutorial::active, gamestate.texscale, light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+		terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
 		Game::LoadingScreen(gamestate);
-		Object::DoShadows(gamestate.skyboxtexture, light, terrain);
+		Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
 		Game::LoadingScreen(gamestate);
 	}
 
@@ -1002,9 +1002,9 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 
 	if (!gamestate.stealthloading) {
 		Object::AddObjectsToTerrain(gamestate.environment, terrain, gamestate.detail);
-		terrain.DoShadows(Tutorial::active, gamestate.texscale, light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+		terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
 		Game::LoadingScreen(gamestate);
-		Object::DoShadows(gamestate.skyboxtexture, light, terrain);
+		Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
 		Game::LoadingScreen(gamestate);
 	}
 

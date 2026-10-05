@@ -702,16 +702,16 @@ void Game::LoadStuff(GameState& gamestate)
 	gamestate.viewer = 0;
 
 	//Set up distant light
-	light.color[0] = .95;
-	light.color[1] = .95;
-	light.color[2] = 1;
-	light.ambient[0] = .2;
-	light.ambient[1] = .2;
-	light.ambient[2] = .24;
-	light.location.x = 1;
-	light.location.y = 1;
-	light.location.z = -.2;
-	Normalise(&light.location);
+	gamestate.light.color[0] = .95;
+	gamestate.light.color[1] = .95;
+	gamestate.light.color[2] = 1;
+	gamestate.light.ambient[0] = .2;
+	gamestate.light.ambient[1] = .2;
+	gamestate.light.ambient[2] = .24;
+	gamestate.light.location.x = 1;
+	gamestate.light.location.y = 1;
+	gamestate.light.location.z = -.2;
+	Normalise(&gamestate.light.location);
 
 	LoadingScreen(gamestate);
 

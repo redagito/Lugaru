@@ -6,8 +6,6 @@
 
 #include <SDL.h>
 
-extern Light light;
 extern Terrain terrain;
 extern SDL_Window* sdlwindow;
-extern Frustum frustum;
 extern Weapons weapons;

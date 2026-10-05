@@ -1,6 +1,8 @@
 #pragma once
 
+#include "Environment/Lights.hpp"
 #include "Graphic/Stereo.hpp"
+#include "Math/Frustum.hpp"
 #include "Math/Vector3.hpp"
 
 // GameState replaces globals previously declared in App/include/Globals.h and
@@ -263,6 +265,15 @@ struct GameState
 
 	// the wind the loose sprites are blown by
 	Vector3 windvector = {};
+
+	// the one distant light every sprite, object and terrain patch is shaded by.
+	// SetUpLight uploads it to a numbered GL light slot; Game::SetUpLighting
+	// recolours it from the skybox tint on every level load.
+	Light light = {};
+
+	// the six planes of the view volume, rebuilt from the projection and
+	// modelview matrices once per frame and read by everything culled or faded.
+	Frustum frustum = {};
 
 	// where the hawk perches, and where that perch ends up once the hawk has been
 	// swung round its own axis. GameTick derives the second from the first plus

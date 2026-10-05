@@ -1810,3 +1810,111 @@ TEST_CASE("tranche 10 GameState members are per instance", "[gamestate]")
 		REQUIRE(std::is_same<decltype(a.newstereomode), StereoMode>::value);
 	}
 }
+
+TEST_CASE("GameState tranche 11 members start at their historical global defaults", "[gamestate]")
+{
+	// light and frustum were the first non-scalar members. Both are plain data -
+	// Light is a GLint, two float[3]s, an int and a Vector3; Frustum is one
+	// float[6][4] - so neither needs a GL context to hold, and GameState stays
+	// trivially copyable and trivially destructible.
+	GameState s;
+
+	SECTION("the distant light starts black")
+	{
+		REQUIRE(s.light.color[0] == 0.0f);
+		REQUIRE(s.light.color[1] == 0.0f);
+		REQUIRE(s.light.color[2] == 0.0f);
+		REQUIRE(s.light.ambient[0] == 0.0f);
+		REQUIRE(s.light.ambient[1] == 0.0f);
+		REQUIRE(s.light.ambient[2] == 0.0f);
+		REQUIRE(s.light.location == Vector3(0.0f, 0.0f, 0.0f));
+		REQUIRE(s.light.type == 0);
+		REQUIRE(s.light.attach == 0);
+	}
+
+	SECTION("all six frustum planes start at zero")
+	{
+		for (int plane = 0; plane < 6; plane++) {
+			INFO("frustum plane " << plane);
+			for (int component = 0; component < 4; component++) {
+				REQUIRE(s.frustum.frustum[plane][component] == 0.0f);
+			}
+		}
+	}
+
+	SECTION("declared types are preserved from the migrated globals")
+	{
+		REQUIRE(std::is_same<decltype(s.light), Light>::value);
+		REQUIRE(std::is_same<decltype(s.frustum), Frustum>::value);
+	}
+}
+
+TEST_CASE("GameState tranche 11 members are per instance", "[gamestate]")
+{
+	GameState a;
+	GameState b;
+	GameState c;
+
+	a.light.color[0] = .95f;
+	a.light.color[1] = .95f;
+	a.light.color[2] = 1.0f;
+	a.light.ambient[0] = .2f;
+	a.light.location = Vector3(1.0f, 1.0f, -.2f);
+	a.light.attach = 3;
+	for (int plane = 0; plane < 6; plane++) {
+		for (int component = 0; component < 4; component++) {
+			a.frustum.frustum[plane][component] = static_cast<float>(plane * 4 + component + 1);
+		}
+	}
+
+	SECTION("the second instance still holds its own light")
+	{
+		REQUIRE(b.light.color[0] == 0.0f);
+		REQUIRE(b.light.color[1] == 0.0f);
+		REQUIRE(b.light.color[2] == 0.0f);
+		REQUIRE(b.light.ambient[0] == 0.0f);
+		REQUIRE(b.light.location == Vector3(0.0f, 0.0f, 0.0f));
+		REQUIRE(b.light.attach == 0);
+	}
+
+	SECTION("the second instance still holds its own frustum")
+	{
+		for (int plane = 0; plane < 6; plane++) {
+			INFO("frustum plane " << plane);
+			for (int component = 0; component < 4; component++) {
+				REQUIRE(b.frustum.frustum[plane][component] == 0.0f);
+			}
+		}
+	}
+
+	SECTION("the light and the frustum of one instance do not share storage")
+	{
+		// They are adjacent members of the same struct, so a distinct fill per
+		// member is what proves they are two objects rather than one aliased
+		// buffer. Writing matching values into both and checking for zero could
+		// not tell the difference.
+		b.frustum.frustum[0][0] = 99.0f;
+		REQUIRE(a.frustum.frustum[0][0] == 1.0f);
+		REQUIRE(b.frustum.frustum[0][0] == 99.0f);
+		REQUIRE(b.light.color[0] == 0.0f);
+	}
+
+	SECTION("driving a different instance leaves the first alone")
+	{
+		b.light.color[0] = .5f;
+		b.light.location = Vector3(3.0f, 4.0f, 5.0f);
+		b.frustum.frustum[2][3] = -7.0f;
+
+		REQUIRE(a.light.color[0] == .95f);
+		REQUIRE(a.light.location == Vector3(1.0f, 1.0f, -.2f));
+		REQUIRE(a.frustum.frustum[2][3] == 12.0f);
+	}
+
+	SECTION("a third instance starts clean")
+	{
+		REQUIRE(c.light.color[0] == 0.0f);
+		REQUIRE(c.light.attach == 0);
+		REQUIRE(c.frustum.frustum[0][0] == 0.0f);
+		REQUIRE(c.frustum.frustum[2][3] == 0.0f);
+	}
+}
