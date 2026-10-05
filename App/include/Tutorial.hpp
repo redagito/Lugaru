@@ -21,6 +21,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _TUTORIAL_HPP_
 #define _TUTORIAL_HPP_
 
+struct GameAssets;
 struct GameState;
 
 class Tutorial
@@ -32,7 +33,7 @@ public:
     static float maxtime;
 
     static void Do(float timemultiplier, bool bloodtoggleflag, GameState& gamestate);
-    static void DrawTextInfo(GameState& gamestate);
+    static void DrawTextInfo(GameState& gamestate, GameAssets& assets);
     static void DoStuff(float timemultiplier, bool bloodtoggleflag, GameState& gamestate);
 
 private:

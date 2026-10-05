@@ -371,7 +371,9 @@ std::vector<SlotOccurrence> findSaveSlot(const char* path, const std::string& na
 // have to stop growing, and it has to stop holding any name that GameState
 // already owns. The window handle is absent on purpose: it is not pending
 // migration, it now lives in WindowContext.cpp, which WindowOwnershipTest.cpp
-// checks.
+// checks. skybox, text and textmono are absent for the same kind of reason:
+// they are owned by GameAssets and passed by reference, which
+// AssetOwnershipTest.cpp checks.
 const std::set<std::string> kPendingGlobals = {
 	// App/include/Globals.h
 	"terrain",
@@ -380,10 +382,10 @@ const std::set<std::string> kPendingGlobals = {
 	// App/include/GameGlobals.h
 	"terraintexture", "terraintexture2", "loadscreentexture", "Mapcircletexture",
 	"Maparrowtexture", "Mapboxtexture", "cursortexture", "screentexture",
-	"screentexture2", "Mainmenuitems", "skybox",
+	"screentexture2", "Mainmenuitems",
 	"hawk", "hawktexture", "eye",
-	"cornea", "iris", "text",
-	"textmono", "consoletext",
+	"cornea", "iris",
+	"consoletext",
 };
 
 } // namespace
@@ -427,7 +429,7 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 	{
 		// Without this, a parser that quietly matched nothing would leave every
 		// assertion above passing for the wrong reason.
-		REQUIRE(globals.size() == 21);
+		REQUIRE(globals.size() == 18);
 		REQUIRE(members.size() == 155);
 	}
 }

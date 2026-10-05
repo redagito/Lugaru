@@ -20,17 +20,12 @@ namespace Game
 	extern GLuint screentexture2;
 	extern Texture Mainmenuitems[10];
 
-	extern SkyBox* skybox;
-
 	extern Model hawk;
 	extern Texture hawktexture;
 
 	extern Model eye;
 	extern Model cornea;
 	extern Model iris;
-
-	extern Text* text;
-	extern Text* textmono;
 
 	extern std::string consoletext[15];
 }

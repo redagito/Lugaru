@@ -13,17 +13,12 @@ namespace Game
 	GLuint screentexture2 = 0;
 	Texture Mainmenuitems[10];
 
-	SkyBox* skybox = NULL;
-
 	Model hawk;
 	Texture hawktexture;
 
 	Model eye;
 	Model cornea;
 	Model iris;
-
-	Text* text = NULL;
-	Text* textmono = NULL;
 
 	std::string consoletext[15] = {};
 }

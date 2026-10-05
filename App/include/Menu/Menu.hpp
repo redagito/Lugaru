@@ -26,6 +26,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Graphic/Texture.hpp"
 
+struct GameAssets;
 struct GameState;
 
 struct MenuItem
@@ -70,10 +71,10 @@ public:
 	static void setText(int id, const std::string& newtext);
 	static void setText(int id, const std::string& newtext, int x, int y, int w, int h);
 	static int getSelected(int mousex, int mousey);
-	static void drawItems(GameState& gamestate);
+	static void drawItems(GameState& gamestate, GameAssets& assets);
 
 	static void Load(GameState& gamestate);
-	static void Tick(GameState& gamestate);
+	static void Tick(GameState& gamestate, GameAssets& assets);
 	static void updateSettingsMenu(GameState& gamestate);
 	static void updateStereoConfigMenu(GameState& gamestate);
 	static void updateControlsMenu(GameState& gamestate);
@@ -83,7 +84,7 @@ public:
 	 * Must be called before the GameState that thread references is destroyed.
 	 */
 	static void joinKeySelectThread();
-	static void startChallengeLevel(int challengelevel, GameState& gamestate);
+	static void startChallengeLevel(int challengelevel, GameState& gamestate, GameAssets& assets);
 
 private:
 	static void handleFadeEffect(GameState& gamestate);

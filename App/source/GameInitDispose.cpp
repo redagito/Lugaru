@@ -24,6 +24,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Animation/Animation.hpp"
 #include "Audio/openal_wrapper.hpp"
 #include "CommandLine.hpp"
+#include "GameAssets.hpp"
 #include "GameState.hpp"
 #include "Graphic/Texture.hpp"
 #include "LoadingClock.hpp"
@@ -79,19 +80,8 @@ void Dispose(GameState& gamestate)
 	OPENAL_Close();
 }
 
-void Game::newGame()
-{
-	text = new Text();
-	textmono = new Text();
-	skybox = new SkyBox();
-}
-
 void Game::deleteGame(GameState& gamestate)
 {
-	delete skybox;
-	delete text;
-	delete textmono;
-
 	glDeleteTextures(1, &screentexture);
 	glDeleteTextures(1, &screentexture2);
 
@@ -455,7 +445,7 @@ void FadeLoadingScreen(float howmuch, GameState& gamestate)
 	swap_gl_buffers(mainWindow());
 }
 
-void Game::InitGame(GameState& gamestate)
+void Game::InitGame(GameState& gamestate, GameAssets& assets)
 {
 	gamestate.numchallengelevels = 14;
 
@@ -545,10 +535,10 @@ void Game::InitGame(GameState& gamestate)
 
 	int temptexdetail = gamestate.texdetail;
 	gamestate.texdetail = 1;
-	text->LoadFontTexture("Textures/Font.png", gamestate.trilinear, [&]() { Game::LoadingScreen(gamestate); });
-	text->BuildFont();
-	textmono->LoadFontTexture("Textures/FontMono.png", gamestate.trilinear, [&]() { Game::LoadingScreen(gamestate); });
-	textmono->BuildFont();
+	assets.text.LoadFontTexture("Textures/Font.png", gamestate.trilinear, [&]() { Game::LoadingScreen(gamestate); });
+	assets.text.BuildFont();
+	assets.textmono.LoadFontTexture("Textures/FontMono.png", gamestate.trilinear, [&]() { Game::LoadingScreen(gamestate); });
+	assets.textmono.BuildFont();
 	gamestate.texdetail = temptexdetail;
 
 	FadeLoadingScreen(10, gamestate);
@@ -633,7 +623,7 @@ void Game::LoadScreenTexture(GameState& gamestate)
 
 //TODO: move LoadStuff() closer to GameTick.cpp to get rid of various vars shared in Game.hpp
 /* Loads models and textures which only needs to be loaded once */
-void Game::LoadStuff(GameState& gamestate)
+void Game::LoadStuff(GameState& gamestate, GameAssets& assets)
 {
 	float temptexdetail;
 	float viewdistdetail;
@@ -649,10 +639,10 @@ void Game::LoadStuff(GameState& gamestate)
 
 	temptexdetail = gamestate.texdetail;
 	gamestate.texdetail = 1;
-	text->LoadFontTexture("Textures/Font.png", gamestate.trilinear, [&]() { Game::LoadingScreen(gamestate); });
-	text->BuildFont();
-	textmono->LoadFontTexture("Textures/FontMono.png", gamestate.trilinear, [&]() { Game::LoadingScreen(gamestate); });
-	textmono->BuildFont();
+	assets.text.LoadFontTexture("Textures/Font.png", gamestate.trilinear, [&]() { Game::LoadingScreen(gamestate); });
+	assets.text.BuildFont();
+	assets.textmono.LoadFontTexture("Textures/FontMono.png", gamestate.trilinear, [&]() { Game::LoadingScreen(gamestate); });
+	assets.textmono.BuildFont();
 	gamestate.texdetail = temptexdetail;
 
 	viewdistdetail = 2;

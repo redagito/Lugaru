@@ -19,6 +19,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Game.hpp"
+#include "GameAssets.hpp"
 #include "GameGlobals.h"
 #include "GameState.hpp"
 #include "Globals.h"
@@ -107,7 +108,7 @@ void initGL(GameState& gamestate)
 
 static Point gMidPoint;
 
-bool SetUp(GameState& gamestate)
+bool SetUp(GameState& gamestate, GameAssets& assets)
 {
 	gamestate.cellophane = 0;
 	gamestate.texdetail = 4;
@@ -234,7 +235,7 @@ bool SetUp(GameState& gamestate)
 		resolutions.insert(startresolution);
 	}
 
-	InitGame(gamestate);
+	InitGame(gamestate, assets);
 
 	return true;
 }
@@ -306,7 +307,7 @@ void DoFrameRate(GameState& gamestate, int update)
 	}
 }
 
-void DoUpdate(GameState& gamestate)
+void DoUpdate(GameState& gamestate, GameAssets& assets)
 {
 	static float sps = 200;
 	static int count;
@@ -347,17 +348,17 @@ void DoUpdate(GameState& gamestate)
 	TickOnce(gamestate);
 
 	for (int i = 0; i < count; i++) {
-		Tick(gamestate);
+		Tick(gamestate, assets);
 	}
 	gamestate.multiplier = oldmult;
 
-	TickOnceAfter(gamestate);
+	TickOnceAfter(gamestate, assets);
 	if (gamestate.stereomode == stereoNone) {
-		DrawGLScene(stereoCenter, gamestate);
+		DrawGLScene(stereoCenter, gamestate, assets);
 	}
 	else {
-		DrawGLScene(stereoLeft, gamestate);
-		DrawGLScene(stereoRight, gamestate);
+		DrawGLScene(stereoLeft, gamestate, assets);
+		DrawGLScene(stereoRight, gamestate, assets);
 	}
 }
 
@@ -535,9 +536,13 @@ int main(int argc, char** argv)
 			// it by reference; nothing else constructs one.
 			GameState gamestate;
 
-			newGame();
+			// The owner of the GL-backed helpers, for the same reason and by the
+			// same rule: one per process, passed by reference to everything that
+			// draws or loads. Its destructor deletes GL objects, so it has to
+			// outlive every frame and go out of scope before SDL_Quit below.
+			GameAssets assets;
 
-			if (!SetUp(gamestate)) {
+			if (!SetUp(gamestate, assets)) {
 				delete[] commandLineOptionsBuffer;
 				return 42;
 			}
@@ -553,10 +558,10 @@ int main(int argc, char** argv)
 
 			if (commandLineOptions[CMD].count() > 0) {
 				gamestate.devtools = true;
-				Menu::startChallengeLevel(1, gamestate);
+				Menu::startChallengeLevel(1, gamestate, assets);
 				for (option::Option* opt = commandLineOptions[CMD]; opt; opt = opt->next()) {
 					if (opt->arg && (strlen(opt->arg) > 0)) {
-						cmd_dispatch(opt->arg, gamestate);
+						cmd_dispatch(opt->arg, gamestate, assets);
 					}
 				}
 			}
@@ -581,13 +586,13 @@ int main(int argc, char** argv)
 					}
 
 					// game
-					DoUpdate(gamestate);
+					DoUpdate(gamestate, assets);
 				}
 				else {
 					if (gameFocused) {
 						// allow game chance to pause
 						gameFocused = false;
-						DoUpdate(gamestate);
+						DoUpdate(gamestate, assets);
 					}
 
 					// game is not in focus, give CPU time to other apps by waiting for messages instead of 'peeking'

@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Audio/AudioState.hpp"
 #include "Game.hpp"
+#include "GameAssets.hpp"
 #include "GameState.hpp"
 #include "Level/Dialog.hpp"
 #include "Level/Hotspot.hpp"
@@ -171,14 +172,14 @@ static void list_clothes(int pnum)
 
 /* Console commands themselves */
 
-void ch_quit(const char*, GameState& gamestate)
+void ch_quit(const char*, GameState& gamestate, GameAssets&)
 {
 	gamestate.tryquit = 1;
 }
 
-void ch_map(const char* args, GameState& gamestate)
+void ch_map(const char* args, GameState& gamestate, GameAssets& assets)
 {
-	if (!LoadLevel(args, false, gamestate)) {
+	if (!LoadLevel(args, false, gamestate, assets)) {
 		// FIXME: Reduce code duplication with GameTick (should come from a Console class)
 		for (int k = 14; k >= 1; k--) {
 			consoletext[k] = consoletext[k - 1];
@@ -190,7 +191,7 @@ void ch_map(const char* args, GameState& gamestate)
 	campaign = 0;
 }
 
-void ch_save_json(const char* args, GameState& gamestate)
+void ch_save_json(const char* args, GameState& gamestate, GameAssets&)
 {
 	std::string map_path = Folders::getUserDataPath() + "/Maps";
 	Folders::makeDirectory(map_path);
@@ -263,13 +264,13 @@ void ch_save_json(const char* args, GameState& gamestate)
 	map_file.close();
 }
 
-void ch_convert_to_json(const char* args, GameState& gamestate)
+void ch_convert_to_json(const char* args, GameState& gamestate, GameAssets& assets)
 {
-	ch_map(args, gamestate);
-	ch_save_json(args, gamestate);
+	ch_map(args, gamestate, assets);
+	ch_save_json(args, gamestate, assets);
 }
 
-void ch_save(const char* args, GameState& gamestate)
+void ch_save(const char* args, GameState& gamestate, GameAssets&)
 {
 	std::string map_path = Folders::getUserDataPath() + "/Maps";
 	Folders::makeDirectory(map_path);
@@ -395,47 +396,47 @@ void ch_save(const char* args, GameState& gamestate)
 	fclose(tfile);
 }
 
-void ch_tint(const char* args, GameState&)
+void ch_tint(const char* args, GameState&, GameAssets&)
 {
 	sscanf(args, "%f%f%f", &tintr, &tintg, &tintb);
 }
 
-void ch_tintr(const char* args, GameState&)
+void ch_tintr(const char* args, GameState&, GameAssets&)
 {
 	tintr = atof(args);
 }
 
-void ch_tintg(const char* args, GameState&)
+void ch_tintg(const char* args, GameState&, GameAssets&)
 {
 	tintg = atof(args);
 }
 
-void ch_tintb(const char* args, GameState&)
+void ch_tintb(const char* args, GameState&, GameAssets&)
 {
 	tintb = atof(args);
 }
 
-void ch_speed(const char* args, GameState&)
+void ch_speed(const char* args, GameState&, GameAssets&)
 {
 	Person::players[0]->speedmult = atof(args);
 }
 
-void ch_strength(const char* args, GameState&)
+void ch_strength(const char* args, GameState&, GameAssets&)
 {
 	Person::players[0]->power = atof(args);
 }
 
-void ch_power(const char* args, GameState&)
+void ch_power(const char* args, GameState&, GameAssets&)
 {
 	Person::players[0]->power = atof(args);
 }
 
-void ch_size(const char* args, GameState&)
+void ch_size(const char* args, GameState&, GameAssets&)
 {
 	Person::players[0]->scale = atof(args) * .2;
 }
 
-void ch_sizenear(const char* args, GameState&)
+void ch_sizenear(const char* args, GameState&, GameAssets&)
 {
 	int closest = findClosestPlayer();
 	if (closest >= 0) {
@@ -443,12 +444,12 @@ void ch_sizenear(const char* args, GameState&)
 	}
 }
 
-void ch_proportion(const char* args, GameState&)
+void ch_proportion(const char* args, GameState&, GameAssets&)
 {
 	set_proportion(0, args);
 }
 
-void ch_proportionnear(const char* args, GameState&)
+void ch_proportionnear(const char* args, GameState&, GameAssets&)
 {
 	int closest = findClosestPlayer();
 	if (closest >= 0) {
@@ -456,12 +457,12 @@ void ch_proportionnear(const char* args, GameState&)
 	}
 }
 
-void ch_protection(const char* args, GameState&)
+void ch_protection(const char* args, GameState&, GameAssets&)
 {
 	set_protection(0, args);
 }
 
-void ch_protectionnear(const char* args, GameState&)
+void ch_protectionnear(const char* args, GameState&, GameAssets&)
 {
 	int closest = findClosestPlayer();
 	if (closest >= 0) {
@@ -469,12 +470,12 @@ void ch_protectionnear(const char* args, GameState&)
 	}
 }
 
-void ch_armor(const char* args, GameState&)
+void ch_armor(const char* args, GameState&, GameAssets&)
 {
 	set_armor(0, args);
 }
 
-void ch_armornear(const char* args, GameState&)
+void ch_armornear(const char* args, GameState&, GameAssets&)
 {
 	int closest = findClosestPlayer();
 	if (closest >= 0) {
@@ -482,23 +483,23 @@ void ch_armornear(const char* args, GameState&)
 	}
 }
 
-void ch_protectionreset(const char*, GameState&)
+void ch_protectionreset(const char*, GameState&, GameAssets&)
 {
 	set_protection(0, "1 1 1");
 	set_armor(0, "1 1 1");
 }
 
-void ch_metal(const char* args, GameState&)
+void ch_metal(const char* args, GameState&, GameAssets&)
 {
 	set_metal(0, args);
 }
 
-void ch_noclothes(const char* args, GameState& gamestate)
+void ch_noclothes(const char* args, GameState& gamestate, GameAssets&)
 {
 	set_noclothes(0, args, gamestate);
 }
 
-void ch_noclothesnear(const char* args, GameState& gamestate)
+void ch_noclothesnear(const char* args, GameState& gamestate, GameAssets&)
 {
 	int closest = findClosestPlayer();
 	if (closest >= 0) {
@@ -506,12 +507,12 @@ void ch_noclothesnear(const char* args, GameState& gamestate)
 	}
 }
 
-void ch_clothes(const char* args, GameState& gamestate)
+void ch_clothes(const char* args, GameState& gamestate, GameAssets&)
 {
 	set_clothes(0, args, gamestate);
 }
 
-void ch_clothesnear(const char* args, GameState& gamestate)
+void ch_clothesnear(const char* args, GameState& gamestate, GameAssets&)
 {
 	int closest = findClosestPlayer();
 	if (closest >= 0) {
@@ -519,12 +520,12 @@ void ch_clothesnear(const char* args, GameState& gamestate)
 	}
 }
 
-void ch_clotheslist(const char*, GameState&)
+void ch_clotheslist(const char*, GameState&, GameAssets&)
 {
 	list_clothes(0);
 }
 
-void ch_clotheslistnear(const char*, GameState&)
+void ch_clotheslistnear(const char*, GameState&, GameAssets&)
 {
 	int closest = findClosestPlayer();
 	if (closest >= 0) {
@@ -532,40 +533,40 @@ void ch_clotheslistnear(const char*, GameState&)
 	}
 }
 
-void ch_belt(const char*, GameState&)
+void ch_belt(const char*, GameState&, GameAssets&)
 {
 	Person::players[0]->skeleton.clothes = !Person::players[0]->skeleton.clothes;
 }
 
-void ch_cellophane(const char*, GameState& gamestate)
+void ch_cellophane(const char*, GameState& gamestate, GameAssets&)
 {
 	gamestate.cellophane = !gamestate.cellophane;
 }
 
-void ch_funnybunny(const char*, GameState& gamestate)
+void ch_funnybunny(const char*, GameState& gamestate, GameAssets&)
 {
 	Person::players[0]->changeCreatureType(rabbittype, Tutorial::active, gamestate);
 	Person::players[0]->headless = 0;
 	set_proportion(0, "1 1 1 1");
 }
 
-void ch_wolfie(const char*, GameState& gamestate)
+void ch_wolfie(const char*, GameState& gamestate, GameAssets&)
 {
 	Person::players[0]->changeCreatureType(wolftype, Tutorial::active, gamestate);
 	set_proportion(0, "1 1 1 1");
 }
 
-void ch_lizardwolf(const char*, GameState& gamestate)
+void ch_lizardwolf(const char*, GameState& gamestate, GameAssets&)
 {
 	Person::players[0]->skeleton.drawmodel.textureptr.load("Textures/FurWolfLizard.jpg", 1, &Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
 }
 
-void ch_darko(const char*, GameState& gamestate)
+void ch_darko(const char*, GameState& gamestate, GameAssets&)
 {
 	Person::players[0]->skeleton.drawmodel.textureptr.load("Textures/FurDarko.jpg", 1, &Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
 }
 
-void ch_sizemin(const char*, GameState&)
+void ch_sizemin(const char*, GameState&, GameAssets&)
 {
 	for (unsigned i = 1; i < Person::players.size(); i++) {
 		if (Person::players[i]->scale < 0.8 * 0.2) {
@@ -574,17 +575,17 @@ void ch_sizemin(const char*, GameState&)
 	}
 }
 
-void ch_tutorial(const char* args, GameState&)
+void ch_tutorial(const char* args, GameState&, GameAssets&)
 {
 	Tutorial::active = atoi(args);
 }
 
-void ch_hostile(const char* args, GameState& gamestate)
+void ch_hostile(const char* args, GameState& gamestate, GameAssets&)
 {
 	gamestate.hostile = atoi(args);
 }
 
-void ch_type(const char* args, GameState& gamestate)
+void ch_type(const char* args, GameState& gamestate, GameAssets&)
 {
 	int n = sizeof(editortypenames) / sizeof(editortypenames[0]);
 	for (int i = 0; i < n; i++) {
@@ -595,7 +596,7 @@ void ch_type(const char* args, GameState& gamestate)
 	}
 }
 
-void ch_path(const char* args, GameState& gamestate)
+void ch_path(const char* args, GameState& gamestate, GameAssets&)
 {
 	unsigned int n = sizeof(pathtypenames) / sizeof(pathtypenames[0]);
 	for (unsigned int i = 0; i < n; i++) {
@@ -606,7 +607,7 @@ void ch_path(const char* args, GameState& gamestate)
 	}
 }
 
-void ch_hs(const char* args, GameState&)
+void ch_hs(const char* args, GameState&, GameAssets&)
 {
 	float size;
 	int type, shift;
@@ -617,7 +618,7 @@ void ch_hs(const char* args, GameState&)
 	Hotspot::hotspots.back().text = std::string(args + shift);
 }
 
-void ch_dialog(const char* args, GameState&)
+void ch_dialog(const char* args, GameState&, GameAssets&)
 {
 	int type;
 	char buf1[32];
@@ -632,7 +633,7 @@ void ch_dialog(const char* args, GameState&)
 	Dialog::whichdialogue = Dialog::dialogs.size();
 }
 
-void ch_fixdialog(const char* args, GameState&)
+void ch_fixdialog(const char* args, GameState&, GameAssets&)
 {
 	char buf1[32];
 	int whichdlg = 0;
@@ -643,7 +644,7 @@ void ch_fixdialog(const char* args, GameState&)
 	Dialog::dialogs[whichdlg] = Dialog(Dialog::dialogs[whichdlg].type, filename);
 }
 
-void ch_fixtype(const char* args, GameState&)
+void ch_fixtype(const char* args, GameState&, GameAssets&)
 {
 	int whichdlg = 0;
 	int type = 0;
@@ -651,13 +652,13 @@ void ch_fixtype(const char* args, GameState&)
 	Dialog::dialogs[whichdlg].type = type;
 }
 
-void ch_fixrotation(const char*, GameState&)
+void ch_fixrotation(const char*, GameState&, GameAssets&)
 {
 	int playerId = Dialog::currentScene().participantfocus;
 	Dialog::currentDialog().participantyaw[playerId] = Person::players[playerId]->yaw;
 }
 
-void ch_ddialog(const char* args, GameState&)
+void ch_ddialog(const char* args, GameState&, GameAssets&)
 {
 	if (Dialog::dialogs.empty() || Dialog::inDialog()) {
 		return;
@@ -680,31 +681,31 @@ void ch_ddialog(const char* args, GameState&)
 	Dialog::dialogs.erase(Dialog::dialogs.begin() + dlg);
 }
 
-void ch_dhs(const char*, GameState&)
+void ch_dhs(const char*, GameState&, GameAssets&)
 {
 	if (!Hotspot::hotspots.empty()) {
 		Hotspot::hotspots.pop_back();
 	}
 }
 
-void ch_immobile(const char*, GameState&)
+void ch_immobile(const char*, GameState&, GameAssets&)
 {
 	Person::players[0]->immobile = 1;
 }
 
-void ch_allimmobile(const char*, GameState&)
+void ch_allimmobile(const char*, GameState&, GameAssets&)
 {
 	for (unsigned i = 1; i < Person::players.size(); i++) {
 		Person::players[i]->immobile = 1;
 	}
 }
 
-void ch_mobile(const char*, GameState&)
+void ch_mobile(const char*, GameState&, GameAssets&)
 {
 	Person::players[0]->immobile = 0;
 }
 
-void ch_default(const char*, GameState& gamestate)
+void ch_default(const char*, GameState& gamestate, GameAssets&)
 {
 	Person::players[0]->armorhead = 1;
 	Person::players[0]->armorhigh = 1;
@@ -733,7 +734,7 @@ void ch_default(const char*, GameState& gamestate)
 	Person::players[0]->immobile = 0;
 }
 
-void ch_play(const char* args, GameState& gamestate)
+void ch_play(const char* args, GameState& gamestate, GameAssets&)
 {
 	int dlg;
 	sscanf(args, "%d", &dlg);
@@ -746,49 +747,49 @@ void ch_play(const char* args, GameState& gamestate)
 	Dialog::currentDialog().play([&gamestate]() { Game::playdialoguescenesound(gamestate); });
 }
 
-void ch_mapkilleveryone(const char*, GameState& gamestate)
+void ch_mapkilleveryone(const char*, GameState& gamestate, GameAssets&)
 {
 	gamestate.maptype = mapkilleveryone;
 }
 
-void ch_mapkillmost(const char*, GameState& gamestate)
+void ch_mapkillmost(const char*, GameState& gamestate, GameAssets&)
 {
 	gamestate.maptype = mapkillmost;
 }
 
-void ch_mapkillsomeone(const char*, GameState& gamestate)
+void ch_mapkillsomeone(const char*, GameState& gamestate, GameAssets&)
 {
 	gamestate.maptype = mapkillsomeone;
 }
 
-void ch_mapgosomewhere(const char*, GameState& gamestate)
+void ch_mapgosomewhere(const char*, GameState& gamestate, GameAssets&)
 {
 	gamestate.maptype = mapgosomewhere;
 }
 
-void ch_viewdistance(const char* args, GameState& gamestate)
+void ch_viewdistance(const char* args, GameState& gamestate, GameAssets&)
 {
 	gamestate.viewdistance = atof(args) * 100;
 }
 
-void ch_fadestart(const char* args, GameState& gamestate)
+void ch_fadestart(const char* args, GameState& gamestate, GameAssets&)
 {
 	gamestate.fadestart = atof(args);
 }
 
-void ch_slomo(const char* args, GameState& gamestate)
+void ch_slomo(const char* args, GameState& gamestate, GameAssets&)
 {
 	gamestate.slomospeed = atof(args);
 	gamestate.slomo = !gamestate.slomo;
 	gamestate.slomodelay = 1000;
 }
 
-void ch_slofreq(const char* args, GameState&)
+void ch_slofreq(const char* args, GameState&, GameAssets&)
 {
 	slomofreq = atof(args);
 }
 
-void ch_skytint(const char* args, GameState& gamestate)
+void ch_skytint(const char* args, GameState& gamestate, GameAssets&)
 {
 	sscanf(args, "%f%f%f", &gamestate.skyboxr, &gamestate.skyboxg, &gamestate.skyboxb);
 
@@ -802,7 +803,7 @@ void ch_skytint(const char* args, GameState& gamestate)
 	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
 }
 
-void ch_skylight(const char* args, GameState& gamestate)
+void ch_skylight(const char* args, GameState& gamestate, GameAssets&)
 {
 	sscanf(args, "%f%f%f", &gamestate.skyboxlightr, &gamestate.skyboxlightg, &gamestate.skyboxlightb);
 
@@ -812,7 +813,7 @@ void ch_skylight(const char* args, GameState& gamestate)
 	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
 }
 
-void ch_skybox(const char*, GameState& gamestate)
+void ch_skybox(const char*, GameState& gamestate, GameAssets&)
 {
 	gamestate.skyboxtexture = !gamestate.skyboxtexture;
 

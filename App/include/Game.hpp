@@ -46,34 +46,34 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #define NB_CAMPAIGN_MENU_ITEM 7
 
+struct GameAssets;
 struct GameState;
 
 namespace Game 
 {
 
-	void newGame();
 	void deleteGame(GameState& gamestate);
 
-	void InitGame(GameState& gamestate);
-	void LoadStuff(GameState& gamestate);
+	void InitGame(GameState& gamestate, GameAssets& assets);
+	void LoadStuff(GameState& gamestate, GameAssets& assets);
 	void LoadScreenTexture(GameState& gamestate);
 	void LoadingScreen(GameState& gamestate);
-	int DrawGLScene(StereoSide side, GameState& gamestate);
+	int DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets);
 	void playdialoguescenesound(GameState& gamestate);
 	int findClosestPlayer();
 	void ResetBeforeLevelLoad(bool tutorial, GameState& gamestate);
-	bool LoadLevel(int which, GameState& gamestate);
-	bool LoadLevel(const std::string& name, bool tutorial, GameState& gamestate);
-	bool LoadJsonLevel(const std::string& name, bool tutorial, GameState& gamestate);
+	bool LoadLevel(int which, GameState& gamestate, GameAssets& assets);
+	bool LoadLevel(const std::string& name, bool tutorial, GameState& gamestate, GameAssets& assets);
+	bool LoadJsonLevel(const std::string& name, bool tutorial, GameState& gamestate, GameAssets& assets);
 
-	void cmd_dispatch(const std::string cmd, GameState& gamestate);
+	void cmd_dispatch(const std::string cmd, GameState& gamestate, GameAssets& assets);
 
-	void ProcessInput(GameState& gamestate);
-	void ProcessDevInput(GameState& gamestate);
+	void ProcessInput(GameState& gamestate, GameAssets& assets);
+	void ProcessDevInput(GameState& gamestate, GameAssets& assets);
 
-	void Tick(GameState& gamestate);
+	void Tick(GameState& gamestate, GameAssets& assets);
 	void TickOnce(GameState& gamestate);
-	void TickOnceAfter(GameState& gamestate);
+	void TickOnceAfter(GameState& gamestate, GameAssets& assets);
 
 	void SetUpLighting(GameState& gamestate);
 	GLvoid ReSizeGLScene(float fov, float near, GameState& gamestate);

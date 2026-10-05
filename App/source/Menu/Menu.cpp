@@ -21,6 +21,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Menu/Menu.hpp"
 
 #include "Game.hpp"
+#include "GameAssets.hpp"
 #include "GameGlobals.h"
 #include "GameState.hpp"
 #include "Globals.h"
@@ -181,7 +182,7 @@ void Menu::handleFadeEffect(GameState& gamestate)
     }
 }
 
-void Menu::drawItems(GameState& gamestate)
+void Menu::drawItems(GameState& gamestate, GameAssets& assets)
 {
     handleFadeEffect(gamestate);
     glEnable(GL_TEXTURE_2D);
@@ -237,20 +238,20 @@ void Menu::drawItems(GameState& gamestate)
             case MenuItem::BUTTON:
                 glColor4f(it->r, it->g, it->b, 1);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                Game::text->glPrint(it->x, it->y, it->text.c_str(), 0, 1, 640, 480);
+                assets.text.glPrint(it->x, it->y, it->text.c_str(), 0, 1, 640, 480);
                 if (it->type != MenuItem::LABEL) {
                     //mouseover highlight
                     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
                     for (int i = 0; i < 15; i++) {
                         if (1 - ((float)i) / 15 - (1 - it->effectfade) > 0) {
                             glColor4f(it->r, it->g, it->b, (1 - ((float)i) / 10 - (1 - it->effectfade)) * .25);
-                            Game::text->glPrint(it->x - ((float)i), it->y, it->text.c_str(), 0, 1 + ((float)i) / 70, 640, 480);
+                            assets.text.glPrint(it->x - ((float)i), it->y, it->text.c_str(), 0, 1 + ((float)i) / 70, 640, 480);
                         }
                     }
                 }
                 break;
             case MenuItem::MAPLABEL:
-                Game::text->glPrintOutlined(0.9, 0, 0, 1, it->x, it->y, it->text.c_str(), 0, 0.6, 640, 480);
+                assets.text.glPrintOutlined(0.9, 0, 0, 1, it->x, it->y, it->text.c_str(), 0, 0.6, 640, 480);
                 break;
             case MenuItem::MAPLINE: {
                 Vector3 linestart;
@@ -518,7 +519,7 @@ void Menu::Load(GameState& gamestate)
     }
 }
 
-void Menu::startChallengeLevel(int challengelevel, GameState& gamestate)
+void Menu::startChallengeLevel(int challengelevel, GameState& gamestate, GameAssets& assets)
 {
     fireSound();
     flash(gamestate);
@@ -529,11 +530,11 @@ void Menu::startChallengeLevel(int challengelevel, GameState& gamestate)
     gamestate.loadtime = 0;
     gamestate.targetlevel = challengelevel;
     if (gamestate.firstLoadDone) {
-        TickOnceAfter(gamestate);
+        TickOnceAfter(gamestate, assets);
     } else {
-        LoadStuff(gamestate);
+        LoadStuff(gamestate, assets);
     }
-    LoadLevel(challengelevel, gamestate);
+    LoadLevel(challengelevel, gamestate, assets);
     campaign = 0;
 
     gamestate.mainmenu = 0;
@@ -541,7 +542,7 @@ void Menu::startChallengeLevel(int challengelevel, GameState& gamestate)
     pause_sound(stream_menutheme);
 }
 
-void Menu::Tick(GameState& gamestate)
+void Menu::Tick(GameState& gamestate, GameAssets& assets)
 {
     //escape key pressed
     if (Input::isKeyPressed(SDL_SCANCODE_ESCAPE) &&
@@ -762,15 +763,15 @@ void Menu::Tick(GameState& gamestate)
                     gamestate.loadtime = 0;
                     gamestate.targetlevel = 7;
                     if (gamestate.firstLoadDone) {
-                        TickOnceAfter(gamestate);
+                        TickOnceAfter(gamestate, assets);
                     } else {
-                        LoadStuff(gamestate);
+                        LoadStuff(gamestate, assets);
                     }
                     gamestate.whichchoice = gamestate.selected - NB_CAMPAIGN_MENU_ITEM - Account::active().getCampaignChoicesMade();
                     actuallevel = (Account::active().getCampaignChoicesMade() > 0 ? campaignlevels[Account::active().getCampaignChoicesMade() - 1].nextlevel[gamestate.whichchoice] : 0);
                     gamestate.visibleloading = true;
                     gamestate.stillloading = 1;
-                    LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate);
+                    LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate, assets);
                     campaign = 1;
                     gamestate.mainmenu = 0;
                     gamestate.gameon = 1;
@@ -784,11 +785,11 @@ void Menu::Tick(GameState& gamestate)
                         gamestate.loadtime = 0;
                         gamestate.targetlevel = -1;
                         if (gamestate.firstLoadDone) {
-                            TickOnceAfter(gamestate);
+                            TickOnceAfter(gamestate, assets);
                         } else {
-                            LoadStuff(gamestate);
+                            LoadStuff(gamestate, assets);
                         }
-                        LoadLevel(-1, gamestate);
+                        LoadLevel(-1, gamestate, assets);
 
                         gamestate.mainmenu = 0;
                         gamestate.gameon = 1;
@@ -865,7 +866,7 @@ void Menu::Tick(GameState& gamestate)
                 break;
             case 9:
                 if (gamestate.selected < gamestate.numchallengelevels && gamestate.selected <= Account::active().getProgress()) {
-                    startChallengeLevel(gamestate.selected, gamestate);
+                    startChallengeLevel(gamestate.selected, gamestate, assets);
                 }
                 if (gamestate.selected == gamestate.numchallengelevels) {
                     fireSound();

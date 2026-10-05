@@ -29,6 +29,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Audio/AudioState.hpp"
 #include "Audio/openal_wrapper.hpp"
 #include "Devtools/ConsoleCmds.hpp"
+#include "GameAssets.hpp"
 #include "GameState.hpp"
 #include "Level/Awards.hpp"
 #include "Level/Campaign.hpp"
@@ -198,14 +199,14 @@ static int findClosestObject()
 	return closest;
 }
 
-void Game::cmd_dispatch(const std::string cmd, GameState& gamestate)
+void Game::cmd_dispatch(const std::string cmd, GameState& gamestate, GameAssets& assets)
 {
 	int i, n_cmds = sizeof(cmd_names) / sizeof(cmd_names[0]);
 
 	for (i = 0; i < n_cmds; i++) {
 		if (cmd.substr(0, cmd.find(' ')) == std::string(cmd_names[i])) {
 			std::cout << "|" << cmd.substr(cmd.find(' ') + 1) << "|" << std::endl;
-			cmd_handlers[i](cmd.substr(cmd.find(' ') + 1).c_str(), gamestate);
+			cmd_handlers[i](cmd.substr(cmd.find(' ') + 1).c_str(), gamestate, assets);
 			break;
 		}
 	}
@@ -250,7 +251,7 @@ void Game::SetUpLighting(GameState& gamestate)
 	gamestate.light.ambient[2] *= (gamestate.skyboxlightb + average) / 2;
 }
 
-void Setenvironment(int which, GameState& gamestate)
+void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 {
 	float temptexdetail;
 	gamestate.environment = which;
@@ -285,7 +286,7 @@ void Setenvironment(int which, GameState& gamestate)
 		if (gamestate.texdetail > 1) {
 			gamestate.texdetail = 4;
 		}
-		skybox->load("Textures/Skybox(snow)/Front.jpg",
+		assets.skybox.load("Textures/Skybox(snow)/Front.jpg",
 			"Textures/Skybox(snow)/Left.jpg",
 			"Textures/Skybox(snow)/Back.jpg",
 			"Textures/Skybox(snow)/Right.jpg",
@@ -318,7 +319,7 @@ void Setenvironment(int which, GameState& gamestate)
 		if (gamestate.texdetail > 1) {
 			gamestate.texdetail = 4;
 		}
-		skybox->load("Textures/Skybox(sand)/Front.jpg",
+		assets.skybox.load("Textures/Skybox(sand)/Front.jpg",
 			"Textures/Skybox(sand)/Left.jpg",
 			"Textures/Skybox(sand)/Back.jpg",
 			"Textures/Skybox(sand)/Right.jpg",
@@ -351,7 +352,7 @@ void Setenvironment(int which, GameState& gamestate)
 		if (gamestate.texdetail > 1) {
 			gamestate.texdetail = 4;
 		}
-		skybox->load("Textures/Skybox(grass)/Front.jpg",
+		assets.skybox.load("Textures/Skybox(grass)/Front.jpg",
 			"Textures/Skybox(grass)/Left.jpg",
 			"Textures/Skybox(grass)/Back.jpg",
 			"Textures/Skybox(grass)/Right.jpg",
@@ -371,21 +372,21 @@ void Setenvironment(int which, GameState& gamestate)
 	gamestate.texdetail = temptexdetail;
 }
 
-bool Game::LoadLevel(int which, GameState& gamestate)
+bool Game::LoadLevel(int which, GameState& gamestate, GameAssets& assets)
 {
 	gamestate.stealthloading = 0;
 	whichlevel = which;
 
 	if (which == -1) {
-		return LoadLevel("tutorial", true, gamestate);
+		return LoadLevel("tutorial", true, gamestate, assets);
 	}
 	else if (which >= 0 && which <= 15) {
 		char buf[32];
 		sprintf(buf, "map%d", which + 1); // challenges
-		return LoadLevel(buf, false, gamestate);
+		return LoadLevel(buf, false, gamestate, assets);
 	}
 	else {
-		return LoadLevel("mapsave", false, gamestate);
+		return LoadLevel("mapsave", false, gamestate, assets);
 	}
 }
 
@@ -457,9 +458,9 @@ void Game::ResetBeforeLevelLoad(bool tutorial, GameState& gamestate)
 	gamestate.changedelay = 0;
 }
 
-bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestate)
+bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestate, GameAssets& assets)
 {
-	if (LoadJsonLevel(name, tutorial, gamestate)) {
+	if (LoadJsonLevel(name, tutorial, gamestate, assets)) {
 		// Try JSON loading first, binary is fallback
 		return true;
 	}
@@ -628,7 +629,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	funpackf(tfile, "Bi", &gamestate.environment);
 
 	if (gamestate.environment != gamestate.oldenvironment) {
-		Setenvironment(gamestate.environment, gamestate);
+		Setenvironment(gamestate.environment, gamestate, assets);
 	}
 	gamestate.oldenvironment = gamestate.environment;
 
@@ -852,7 +853,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	return true;
 }
 
-bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& gamestate)
+bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& gamestate, GameAssets& assets)
 {
 	const std::string level_path = Folders::getResourcePath("Maps/" + name + ".json");
 	if (!Folders::file_exists(level_path)) {
@@ -927,7 +928,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	gamestate.environment = map_data["map"]["environment"].asInt();
 
 	if (gamestate.environment != gamestate.oldenvironment) {
-		Setenvironment(gamestate.environment, gamestate);
+		Setenvironment(gamestate.environment, gamestate, assets);
 	}
 	gamestate.oldenvironment = gamestate.environment;
 
@@ -1078,7 +1079,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
  * Gameplay-related input processing is still done in Game::Tick() for now
  * as it is tightly coupled to the game logic.
  */
-void Game::ProcessInput(GameState& gamestate)
+void Game::ProcessInput(GameState& gamestate, GameAssets& assets)
 {
 	/* Pump SDL input events */
 	Input::Tick();
@@ -1190,12 +1191,12 @@ void Game::ProcessInput(GameState& gamestate)
 
 		/* Other devtools, disabled when the console is shown */
 		if (!gamestate.console) {
-			ProcessDevInput(gamestate);
+			ProcessDevInput(gamestate, assets);
 		}
 	}
 }
 
-void Game::ProcessDevInput(GameState& gamestate)
+void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 {
 	if (!gamestate.devtools || gamestate.mainmenu || gamestate.console) {
 		return;
@@ -1236,7 +1237,7 @@ void Game::ProcessDevInput(GameState& gamestate)
 			if (gamestate.environment > 2) {
 				gamestate.environment = 0;
 			}
-			Setenvironment(gamestate.environment, gamestate);
+			Setenvironment(gamestate.environment, gamestate, assets);
 		}
 
 		/* Camera mode */
@@ -3110,13 +3111,13 @@ void doPlayerCollisions(GameState& gamestate)
 	}
 }
 
-void Game::Tick(GameState& gamestate)
+void Game::Tick(GameState& gamestate, GameAssets& assets)
 {
 	static Vector3 facing, flatfacing;
 	static int target;
 
 	/* Pump SDL input events and process non-gameplay related ones */
-	ProcessInput(gamestate);
+	ProcessInput(gamestate, assets);
 
 	/*
 	Values of gamestate.mainmenu :
@@ -3156,7 +3157,7 @@ void Game::Tick(GameState& gamestate)
 	}
 
 	if (gamestate.mainmenu) {
-		Menu::Tick(gamestate);
+		Menu::Tick(gamestate, assets);
 	}
 
 	if (!gamestate.mainmenu) {
@@ -3176,7 +3177,7 @@ void Game::Tick(GameState& gamestate)
 			inputText(consoletext[0], &gamestate.consoleselected, gamestate);
 			if (!gamestate.waiting) {
 				if (!consoletext[0].empty()) {
-					cmd_dispatch(consoletext[0], gamestate);
+					cmd_dispatch(consoletext[0], gamestate, assets);
 					for (int k = 14; k >= 1; k--) {
 						consoletext[k] = consoletext[k - 1];
 					}
@@ -4653,7 +4654,7 @@ void Game::TickOnce(GameState& gamestate)
 	}
 }
 
-void Game::TickOnceAfter(GameState& gamestate)
+void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets)
 {
 	// TODO Holds state?
 	static Vector3 colviewer;
@@ -4912,7 +4913,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 						startbonustotal = bonustotal;
 					}
 
-					LoadLevel(gamestate.targetlevel, gamestate);
+					LoadLevel(gamestate.targetlevel, gamestate, assets);
 					fireSound();
 
 					gamestate.loading = 3;
@@ -4923,7 +4924,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 
 					fireSound(firestartsound);
 
-					LoadLevel(campaignlevels[Account::active().getCampaignChoicesMade()].mapname.c_str(), false, gamestate);
+					LoadLevel(campaignlevels[Account::active().getCampaignChoicesMade()].mapname.c_str(), false, gamestate, assets);
 
 					fireSound();
 
@@ -4981,13 +4982,13 @@ void Game::TickOnceAfter(GameState& gamestate)
 					gamestate.loadtime = 0;
 					gamestate.targetlevel = 7;
 					if (!gamestate.firstLoadDone) {
-						LoadStuff(gamestate);
+						LoadStuff(gamestate, assets);
 					}
 					gamestate.whichchoice = 0;
 					actuallevel = campaignlevels[actuallevel].nextlevel.front();
 					gamestate.visibleloading = true;
 					gamestate.stillloading = 1;
-					LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate);
+					LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate, assets);
 					campaign = 1;
 					gamestate.mainmenu = 0;
 					gamestate.gameon = 1;

@@ -26,6 +26,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 // Game
 #include "Game.hpp"
+#include "GameAssets.hpp"
 #include "GameGlobals.h"
 #include "GameState.hpp"
 #include "Globals.h"
@@ -549,7 +550,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 	}
 }
 
-void Tutorial::DrawTextInfo(GameState& gamestate)
+void Tutorial::DrawTextInfo(GameState& gamestate, GameAssets& assets)
 {
 	std::string string1 = " ";
 	std::string string2 = " ";
@@ -784,17 +785,17 @@ void Tutorial::DrawTextInfo(GameState& gamestate)
 		opacity = 0;
 	}
 
-	Game::text->glPrintOutlined(1, 1, 1, opacity, gamestate.screenwidth / 2 - 7.6 * string1.size() * gamestate.screenwidth / 1024, gamestate.screenheight / 16 + gamestate.screenheight * 4 / 5, string1, 1, 1.5 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight);
-	Game::text->glPrintOutlined(1, 1, 1, opacity, gamestate.screenwidth / 2 - 7.6 * string2.size() * gamestate.screenwidth / 1024, gamestate.screenheight / 16 + gamestate.screenheight * 4 / 5 - 20 * gamestate.screenwidth / 1024, string2, 1, 1.5 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight);
-	Game::text->glPrintOutlined(1, 1, 1, opacity, gamestate.screenwidth / 2 - 7.6 * string3.size() * gamestate.screenwidth / 1024, gamestate.screenheight / 16 + gamestate.screenheight * 4 / 5 - 40 * gamestate.screenwidth / 1024, string3, 1, 1.5 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight);
+	assets.text.glPrintOutlined(1, 1, 1, opacity, gamestate.screenwidth / 2 - 7.6 * string1.size() * gamestate.screenwidth / 1024, gamestate.screenheight / 16 + gamestate.screenheight * 4 / 5, string1, 1, 1.5 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight);
+	assets.text.glPrintOutlined(1, 1, 1, opacity, gamestate.screenwidth / 2 - 7.6 * string2.size() * gamestate.screenwidth / 1024, gamestate.screenheight / 16 + gamestate.screenheight * 4 / 5 - 20 * gamestate.screenwidth / 1024, string2, 1, 1.5 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight);
+	assets.text.glPrintOutlined(1, 1, 1, opacity, gamestate.screenwidth / 2 - 7.6 * string3.size() * gamestate.screenwidth / 1024, gamestate.screenheight / 16 + gamestate.screenheight * 4 / 5 - 40 * gamestate.screenwidth / 1024, string3, 1, 1.5 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight);
 
 	string1 = "Press 'tab' to skip to the next item.";
 	string2 = "Press escape at any time to";
 	string3 = "pause or exit the tutorial.";
 
-	Game::text->glPrintOutlined(0.5, 0.5, 0.5, 1, gamestate.screenwidth / 2 - 7.6 * string1.size() * gamestate.screenwidth / 1024 * .8, 0 + gamestate.screenheight * 1 / 10, string1, 1, 1.5 * gamestate.screenwidth / 1024 * .8, gamestate.screenwidth, gamestate.screenheight);
-	Game::text->glPrintOutlined(0.5, 0.5, 0.5, 1, gamestate.screenwidth / 2 - 7.6 * string2.size() * gamestate.screenwidth / 1024 * .8, 0 + gamestate.screenheight * 1 / 10 - 20 * .8 * gamestate.screenwidth / 1024, string2, 1, 1.5 * gamestate.screenwidth / 1024 * .8, gamestate.screenwidth, gamestate.screenheight);
-	Game::text->glPrintOutlined(0.5, 0.5, 0.5, 1, gamestate.screenwidth / 2 - 7.6 * string3.size() * gamestate.screenwidth / 1024 * .8, 0 + gamestate.screenheight * 1 / 10 - 40 * .8 * gamestate.screenwidth / 1024, string3, 1, 1.5 * gamestate.screenwidth / 1024 * .8, gamestate.screenwidth, gamestate.screenheight);
+	assets.text.glPrintOutlined(0.5, 0.5, 0.5, 1, gamestate.screenwidth / 2 - 7.6 * string1.size() * gamestate.screenwidth / 1024 * .8, 0 + gamestate.screenheight * 1 / 10, string1, 1, 1.5 * gamestate.screenwidth / 1024 * .8, gamestate.screenwidth, gamestate.screenheight);
+	assets.text.glPrintOutlined(0.5, 0.5, 0.5, 1, gamestate.screenwidth / 2 - 7.6 * string2.size() * gamestate.screenwidth / 1024 * .8, 0 + gamestate.screenheight * 1 / 10 - 20 * .8 * gamestate.screenwidth / 1024, string2, 1, 1.5 * gamestate.screenwidth / 1024 * .8, gamestate.screenwidth, gamestate.screenheight);
+	assets.text.glPrintOutlined(0.5, 0.5, 0.5, 1, gamestate.screenwidth / 2 - 7.6 * string3.size() * gamestate.screenwidth / 1024 * .8, 0 + gamestate.screenheight * 1 / 10 - 40 * .8 * gamestate.screenwidth / 1024, string3, 1, 1.5 * gamestate.screenwidth / 1024 * .8, gamestate.screenwidth, gamestate.screenheight);
 }
 
 void Tutorial::DoStuff(float timemultiplier, bool bloodtoggleflag, GameState& gamestate)

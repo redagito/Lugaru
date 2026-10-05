@@ -18,17 +18,19 @@ You should have received a copy of the GNU General Public License
 along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+struct GameAssets;
 struct GameState;
 
 /*
  * The command table is generated from ConsoleCmds.def and is dispatched by
  * Game::cmd_dispatch, which is the seam that hands the caller-injected
- * GameState down to the commands that write it. Commands that never touch
- * GameState leave the parameter unnamed, so their bodies are unchanged.
+ * GameState and GameAssets down to the commands that write or draw through
+ * them. Commands that never touch GameState leave the parameter unnamed, so
+ * their bodies are unchanged.
  */
-typedef void (*console_handler)(const char* args, GameState& gamestate);
+typedef void (*console_handler)(const char* args, GameState& gamestate, GameAssets& assets);
 
-#define DECLARE_COMMAND(cmd) void ch_##cmd(const char* args, GameState& gamestate);
+#define DECLARE_COMMAND(cmd) void ch_##cmd(const char* args, GameState& gamestate, GameAssets& assets);
 #include "ConsoleCmds.def"
 #undef DECLARE_COMMAND
 

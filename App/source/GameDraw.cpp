@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "GameGlobals.h"
 
 #include "Audio/openal_wrapper.hpp"
+#include "GameAssets.hpp"
 #include "GameState.hpp"
 #include "Level/Awards.hpp"
 #include "Level/Dialog.hpp"
@@ -60,10 +61,10 @@ void Game::flash(GameState& gamestate, float amount, int delay) // shouldn't be 
 	gamestate.flashdelay = delay;
 }
 
-void DrawMenu(GameState& gamestate);
+void DrawMenu(GameState& gamestate, GameAssets& assets);
 
 /*********************> DrawGLScene() <*****/
-int Game::DrawGLScene(StereoSide side, GameState& gamestate)
+int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 {
 	static float texcoordwidth, texcoordheight;
 	static float texviewwidth, texviewheight;
@@ -263,7 +264,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glRotatef((float)(abs(rand() % 100)) / 1000, 0, 1, 0);
 		}
 
-		skybox->draw(gamestate.environment == desertenvironment, gamestate.viewdistance, gamestate.blurness, gamestate.skyboxtexture, Vector3{ gamestate.skyboxr, gamestate.skyboxg, gamestate.skyboxb });
+		assets.skybox.draw(gamestate.environment == desertenvironment, gamestate.viewdistance, gamestate.blurness, gamestate.skyboxtexture, Vector3{ gamestate.skyboxr, gamestate.skyboxg, gamestate.skyboxb });
 		glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, 0);
 		glPopMatrix();
 		glTranslatef(-gamestate.viewer.x, -gamestate.viewer.y, -gamestate.viewer.z);
@@ -571,17 +572,17 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 					else {
 						bonus_name = "Excellent!"; // When does this happen?
 					}
-					text->glPrintOutlined(1, 0, 0, 1 - bonustime, 1024 / 2 - 10 * strlen(bonus_name), 768 / 16 + 768 * 4 / 5, bonus_name, 1, 2, 1024, 768);
+					assets.text.glPrintOutlined(1, 0, 0, 1 - bonustime, 1024 / 2 - 10 * strlen(bonus_name), 768 / 16 + 768 * 4 / 5, bonus_name, 1, 2, 1024, 768);
 
 					string = std::to_string(bonusvalue);
-					text->glPrintOutlined(1, 0, 0, 1 - bonustime, 1024 / 2 - 10 * string.size(), 768 / 16 - 20 + 768 * 4 / 5, string, 1, 2 * .8, 1024, 768);
+					assets.text.glPrintOutlined(1, 0, 0, 1 - bonustime, 1024 / 2 - 10 * string.size(), 768 / 16 - 20 + 768 * 4 / 5, string, 1, 2 * .8, 1024, 768);
 
 					glColor4f(.5, .5, .5, 1);
 				}
 			}
 
 			if (Tutorial::active) {
-				Tutorial::DrawTextInfo(gamestate);
+				Tutorial::DrawTextInfo(gamestate, assets);
 			}
 
 			//Hot spots
@@ -620,7 +621,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 						int i = 0;
 						while (!done) {
 							if (string[i] == '\n' || string[i] > 'z' || string[i] < ' ' || string[i] == '\0') {
-								text->glPrintOutlined(1, 1, 1, tutorialopac, gamestate.screenwidth / 2 - 7.6 * (i - lastline) * gamestate.screenwidth / 1024, gamestate.screenheight / 16 + gamestate.screenheight * 4 / 5 - 20 * gamestate.screenwidth / 1024 * line, string, 1, 1.5 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight, lastline, i);
+								assets.text.glPrintOutlined(1, 1, 1, tutorialopac, gamestate.screenwidth / 2 - 7.6 * (i - lastline) * gamestate.screenwidth / 1024, gamestate.screenheight / 16 + gamestate.screenheight * 4 / 5 - 20 * gamestate.screenwidth / 1024 * line, string, 1, 1.5 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight, lastline, i);
 								lastline = i + 1;
 								line++;
 								if (string[i] == '\0') {
@@ -698,11 +699,11 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 				/* Print speaker name in dialog box. */
 				if (Dialog::currentScene().color[0] + Dialog::currentScene().color[1] + Dialog::currentScene().color[2] < 1.5) {
-					text->glPrintOutlined(0.7, 0.7, 0.7, tutorialopac, startx - 2 * 7.6 * string.size() * gamestate.screenwidth / 1024, starty, string, 1, 1.4 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight);
+					assets.text.glPrintOutlined(0.7, 0.7, 0.7, tutorialopac, startx - 2 * 7.6 * string.size() * gamestate.screenwidth / 1024, starty, string, 1, 1.4 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight);
 				}
 				else {
 					glColor4f(0, 0, 0, tutorialopac);
-					text->glPrintOutline(startx - 2 * 7.6 * string.size() * gamestate.screenwidth / 1024 - 4, starty - 4, string, 1, 1.4 * 1.25 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight);
+					assets.text.glPrintOutline(startx - 2 * 7.6 * string.size() * gamestate.screenwidth / 1024 - 4, starty - 4, string, 1, 1.4 * 1.25 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight);
 				}
 
 				/* Get dialog text, and remove potential '#' chars hardcoded in it.' */
@@ -717,11 +718,11 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				while (!done) {
 					if (string[i] == '\n' || string[i] > 'z' || string[i] < ' ' || string[i] == '\0') {
 						if (Dialog::currentScene().color[0] + Dialog::currentScene().color[1] + Dialog::currentScene().color[2] < 1.5) {
-							text->glPrintOutlined(1, 1, 1, tutorialopac, startx, starty - 20 * gamestate.screenwidth / 1024 * line, string, 1, 1.4 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight, lastline, i);
+							assets.text.glPrintOutlined(1, 1, 1, tutorialopac, startx, starty - 20 * gamestate.screenwidth / 1024 * line, string, 1, 1.4 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight, lastline, i);
 						}
 						else {
 							glColor4f(0, 0, 0, tutorialopac);
-							text->glPrint(startx, starty - 20 * gamestate.screenwidth / 1024 * line, string, 1, 1.4 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight, lastline, i);
+							assets.text.glPrint(startx, starty - 20 * gamestate.screenwidth / 1024 * line, string, 1, 1.4 * gamestate.screenwidth / 1024, gamestate.screenwidth, gamestate.screenheight, lastline, i);
 						}
 						lastline = i + 1;
 						line++;
@@ -748,7 +749,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				else {
 					string = "Score: " + std::to_string(int(bonustotal));
 				}
-				text->glPrintOutlined(1, 0, 0, 1, 1024 / 40, 768 / 16 + 768 * 14 / 16, string, 1, 1.5, 1024, 768);
+				assets.text.glPrintOutlined(1, 0, 0, 1, 1024 / 40, 768 / 16 + 768 * 14 / 16, string, 1, 1.5, 1024, 768);
 				if (gamestate.showdamagebar) {
 					glDisable(GL_DEPTH_TEST);
 					glDisable(GL_CULL_FACE);
@@ -828,7 +829,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 					// writing the numbers :
 					string = "Damages : " + std::to_string(int(Person::players[0]->damage)) + "/" + std::to_string(int(Person::players[0]->damagetolerance)) + " (" + std::to_string(int(Person::players[0]->bloodloss)) + ")";
-					text->glPrintOutlined(1, 0, 0, 1, 1024 / 40, 768 / 16 + 768 * 14 / 16 - 40, string, 1, 1.5, 1024, 768);
+					assets.text.glPrintOutlined(1, 0, 0, 1, 1024 / 40, 768 / 16 + 768 * 14 / 16 - 40, string, 1, 1.5, 1024, 768);
 				}
 			}
 
@@ -836,7 +837,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 			if ((gamestate.texttoggle || gamestate.editorenabled) && gamestate.devtools && !gamestate.mainmenu) {
 				string = "The framespersecond is " + std::to_string(int(gamestate.fps));
-				text->glPrint(10, 30, string, 0, .8, 1024, 768);
+				assets.text.glPrint(10, 30, string, 0, .8, 1024, 768);
 
 				if (gamestate.editorenabled) {
 					string = "Map editor enabled.";
@@ -844,26 +845,26 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				else {
 					string = "Map editor disabled.";
 				}
-				text->glPrint(10, 60, string, 0, .8, 1024, 768);
+				assets.text.glPrint(10, 60, string, 0, .8, 1024, 768);
 				if (gamestate.editorenabled) {
 					string = "Object size: " + std::to_string(gamestate.editorsize);
-					text->glPrint(10, 75, string, 0, .8, 1024, 768);
+					assets.text.glPrint(10, 75, string, 0, .8, 1024, 768);
 					if (gamestate.editoryaw >= 0) {
 						string = "Object yaw: " + std::to_string(gamestate.editoryaw);
 					}
 					else {
 						string = "Object yaw: Random";
 					}
-					text->glPrint(10, 90, string, 0, .8, 1024, 768);
+					assets.text.glPrint(10, 90, string, 0, .8, 1024, 768);
 					if (gamestate.editorpitch >= 0) {
 						string = "Object pitch: " + std::to_string(gamestate.editorpitch);
 					}
 					else {
 						string = "Object pitch: Random";
 					}
-					text->glPrint(10, 105, string, 0, .8, 1024, 768);
+					assets.text.glPrint(10, 105, string, 0, .8, 1024, 768);
 					string = "Object type: " + std::to_string(gamestate.editortype);
-					text->glPrint(10, 120, string, 0, .8, 1024, 768);
+					assets.text.glPrint(10, 120, string, 0, .8, 1024, 768);
 					switch (gamestate.editortype) {
 					case boxtype:
 						string = "(box)";
@@ -902,15 +903,15 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 						string = "(fire)";
 						break;
 					}
-					text->glPrint(130, 120, string, 0, .8, 1024, 768);
+					assets.text.glPrint(130, 120, string, 0, .8, 1024, 768);
 
 					string = "Numplayers: " + std::to_string(Person::players.size());
-					text->glPrint(10, 155, string, 0, .8, 1024, 768);
+					assets.text.glPrint(10, 155, string, 0, .8, 1024, 768);
 					string = "Player " + std::to_string(int(Person::players.size()) - 1) + ": numwaypoints: " + std::to_string(Person::players.back()->numwaypoints);
-					text->glPrint(10, 140, string, 0, .8, 1024, 768);
+					assets.text.glPrint(10, 140, string, 0, .8, 1024, 768);
 				}
 				string = "Difficulty: " + std::to_string(gamestate.difficulty);
-				text->glPrint(10, 240, string, 0, .8, 1024, 768);
+				assets.text.glPrint(10, 240, string, 0, .8, 1024, 768);
 			}
 		}
 
@@ -1246,7 +1247,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				glEnable(GL_TEXTURE_2D);
 				glColor4f(1, 1, 1, 1);
 				string = "Loading...";
-				text->glPrint(1024 / 2 - 90, 768 / 2, string, 1, 2, 1024, 768);
+				assets.text.glPrint(1024 / 2 - 90, 768 / 2, string, 1, 2, 1024, 768);
 			}
 			gamestate.loading = 2;
 			drawmode = normalmode;
@@ -1295,13 +1296,13 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			glEnable(GL_TEXTURE_2D);
 			glColor4f(1, 1, 1, 1);
 			string = "Level Cleared!";
-			text->glPrintOutlined(1024 / 2 - string.size() * 10, 768 * 7 / 8, string, 1, 2, 1024, 768);
+			assets.text.glPrintOutlined(1024 / 2 - string.size() * 10, 768 * 7 / 8, string, 1, 2, 1024, 768);
 
 			string = "Score:     " + std::to_string(int(bonustotal - startbonustotal));
-			text->glPrintOutlined(1024 / 30, 768 * 6 / 8, string, 1, 2, 1024, 768);
+			assets.text.glPrintOutlined(1024 / 30, 768 * 6 / 8, string, 1, 2, 1024, 768);
 
 			string = "Press Escape to return to menu or Space to continue";
-			text->glPrintOutlined(640 / 2 - string.size() * 5, 480 * 1 / 16, string, 1, 1, 640, 480);
+			assets.text.glPrintOutlined(640 / 2 - string.size() * 5, 480 * 1 / 16, string, 1, 1, 640, 480);
 
 			int wontime = (int)round(gamestate.wonleveltime);
 			string = "Time:      " + std::to_string(int((wontime - wontime % 60) / 60));
@@ -1309,14 +1310,14 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				string += "0";
 			}
 			string += std::to_string(int(wontime % 60));
-			text->glPrintOutlined(1024 / 30, 768 * 6 / 8 - 40, string, 1, 2, 1024, 768);
+			assets.text.glPrintOutlined(1024 / 30, 768 * 6 / 8 - 40, string, 1, 2, 1024, 768);
 
 			//Awards
 			int awards[award_count];
 			int numawards = award_awards(awards);
 
 			for (int i = 0; i < numawards && i < 6; i++) {
-				text->glPrintOutlined(1024 / 30, 768 * 6 / 8 - 90 - 40 * i, award_names[awards[i]], 1, 2, 1024, 768);
+				assets.text.glPrintOutlined(1024 / 30, 768 * 6 / 8 - 90 - 40 * i, award_names[awards[i]], 1, 2, 1024, 768);
 			}
 		}
 
@@ -1577,12 +1578,12 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 			if (gamestate.consoleselected >= 60) {
 				offset = gamestate.consoleselected - 60;
 			}
-			textmono->glPrint(10, 30, " ]", 0, 1, 1024, 768);
+			assets.textmono.glPrint(10, 30, " ]", 0, 1, 1024, 768);
 			if (gamestate.consoleblink) {
-				textmono->glPrint(30 + (float)gamestate.consoleselected * 10 - offset * 10, 30, "_", 0, 1, 1024, 768);
+				assets.textmono.glPrint(30 + (float)gamestate.consoleselected * 10 - offset * 10, 30, "_", 0, 1, 1024, 768);
 			}
 			for (unsigned i = 0; i < 15; i++) {
-				textmono->glPrint(30 - offset * 10, 30 + i * 20, consoletext[i], 0, 1, 1024, 768);
+				assets.textmono.glPrint(30 - offset * 10, 30 + i * 20, consoletext[i], 0, 1, 1024, 768);
 			}
 		}
 	}
@@ -1592,7 +1593,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 	}
 
 	if (gamestate.mainmenu) {
-		DrawMenu(gamestate);
+		DrawMenu(gamestate, assets);
 	}
 
 	if (gamestate.freeze || gamestate.winfreeze || (gamestate.mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
@@ -1622,7 +1623,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 	return 0;
 }
 
-void DrawMenu(GameState& gamestate)
+void DrawMenu(GameState& gamestate, GameAssets& assets)
 {
 	// !!! FIXME: hack: clamp framerate in menu so text input works correctly on fast systems.
 	SDL_Delay(15);
@@ -1694,7 +1695,7 @@ void DrawMenu(GameState& gamestate)
 	glLoadIdentity();
 	glEnable(GL_TEXTURE_2D);
 
-	Menu::drawItems(gamestate);
+	Menu::drawItems(gamestate, assets);
 
 	//draw mouse cursor
 	glMatrixMode(GL_PROJECTION);
