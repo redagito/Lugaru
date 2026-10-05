@@ -6,6 +6,7 @@
 
 #include <type_traits>
 
+#include "GameGlobals.h"
 #include "GameState.hpp"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
@@ -1330,5 +1331,69 @@ TEST_CASE("tranche 7 GameState members are per instance", "[gamestate]")
 
 		GameState c;
 		REQUIRE(c.multiplier == 0.0f);
+	}
+}
+
+// Tranche 8 covers the four globals that together hold the editor's pathfinding
+// waypoint graph: `numpathpoints`, `pathpoint`, `numpathpointconnect` and
+// `pathpointconnect`. They index each other - the connect counts and the connect
+// table are both keyed by a path point, and the table's entries are indices back
+// into the point list - so they are pinned here as one group and move as one
+// group. Splitting them would leave the graph half in each place.
+//
+// The values below are read from the globals themselves, while the globals are
+// still the thing being read, so the literals are observed rather than assumed.
+// The tranche that follows re-points these same assertions at the GameState
+// members and adds the per-instance isolation the move buys.
+//
+// `pathpoint` is declared with no initialiser, unlike its two siblings which say
+// `= {}`. It still starts all zeroes, because Vector3 gives x, y and z default
+// member initialisers, so default-constructing the array runs them for every
+// element. That is pinned here by reading all thirty points rather than being
+// taken on trust, because a member written as a bare `Vector3 pathpoint[30];`
+// would have kept the same values by a different mechanism - and a member
+// written as an array of default-initialised Vector3 would not compile at all.
+//
+// The declared types are pinned whole, extent included: `Vector3[30]`,
+// `int[30]` and `int[30][30]`. A comparison of values cannot tell a
+// thirty-element array from a thirty-one-element one whose last element is never
+// read, and the connect table's second extent is the difference between 900 ints
+// and a map that silently reads past what was written.
+TEST_CASE("the tranche 8 pathfinding globals start at the values GameState will carry", "[gamestate]")
+{
+	SECTION("no path points exist yet")
+	{
+		REQUIRE(Game::numpathpoints == 0);
+	}
+
+	SECTION("every path point starts at the origin")
+	{
+		for (int i = 0; i < 30; i++) {
+			INFO("path point " << i);
+			REQUIRE(Game::pathpoint[i].x == 0.0f);
+			REQUIRE(Game::pathpoint[i].y == 0.0f);
+			REQUIRE(Game::pathpoint[i].z == 0.0f);
+		}
+	}
+
+	SECTION("no path point is connected to anything")
+	{
+		for (int i = 0; i < 30; i++) {
+			INFO("path point " << i);
+			REQUIRE(Game::numpathpointconnect[i] == 0);
+
+			for (int k = 0; k < 30; k++) {
+				INFO("path point " << i << " link " << k);
+				REQUIRE(Game::pathpointconnect[i][k] == 0);
+			}
+		}
+	}
+
+	SECTION("declared types are preserved from the migrated globals")
+	{
+		REQUIRE(std::is_same<decltype(Game::numpathpoints), int>::value);
+		REQUIRE(std::is_same<decltype(Game::pathpoint), Vector3[30]>::value);
+		REQUIRE(std::is_same<decltype(Game::numpathpointconnect), int[30]>::value);
+		REQUIRE(std::is_same<decltype(Game::pathpointconnect), int[30][30]>::value);
 	}
 }
