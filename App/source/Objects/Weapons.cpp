@@ -146,7 +146,7 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 	Vector3 closestswordpoint;
 	float tempmult = 0;
 
-	if (multiplier <= 0) {
+	if (gamestate.multiplier <= 0) {
 		return;
 	}
 
@@ -185,8 +185,8 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 	oldposition = position;
 	oldtippoint = tippoint;
 	if (owner == -1 && (velocity.x || velocity.y || velocity.z) && !physics) { // if the weapon is flying
-		position += velocity * multiplier;
-		tippoint += velocity * multiplier;
+		position += velocity * gamestate.multiplier;
+		tippoint += velocity * gamestate.multiplier;
 		whichpatchx = position.x / (terrain.size / subdivision * terrain.scale);
 		whichpatchz = position.z / (terrain.size / subdivision * terrain.scale);
 		if (whichpatchx > 0 && whichpatchz > 0 && whichpatchx < subdivision && whichpatchz < subdivision) {
@@ -241,8 +241,8 @@ Vector3 temppoint1, temppoint2;
 					else {
 						physics = 1;
 						firstfree = 1;
-						position -= velocity * multiplier;
-						tippoint -= velocity * multiplier;
+						position -= velocity * gamestate.multiplier;
+						tippoint -= velocity * gamestate.multiplier;
 						tipvelocity = velocity;
 					}
 				}
@@ -282,7 +282,7 @@ Vector3 temppoint1, temppoint2;
 
 							Person::players[j]->weaponids[Person::players[j]->num_weapons - 1] = i;
 
-							Person::players[j]->RagDoll(0, terrain, tutorialActive, inDialog, multiplier, jointstartarray, gamestate);
+							Person::players[j]->RagDoll(0, terrain, tutorialActive, inDialog, gamestate.multiplier, jointstartarray, gamestate);
 							Person::players[j]->jointVel(abdomen) += velocity * 2;
 							Person::players[j]->jointVel(neck) += velocity * 2;
 							Person::players[j]->jointVel(rightshoulder) += velocity * 2;
@@ -397,13 +397,13 @@ Vector3 temppoint1, temppoint2;
 			else {
 				physics = 1;
 				firstfree = 1;
-				position -= velocity * multiplier;
-				tippoint -= velocity * multiplier;
+				position -= velocity * gamestate.multiplier;
+				tippoint -= velocity * gamestate.multiplier;
 				tipvelocity = velocity;
 			}
 		}
 		if (velocity.x != 0 || velocity.z != 0 || velocity.y != 0) {
-			velocity.y += gamestate.gravity * multiplier;
+			velocity.y += gamestate.gravity * gamestate.multiplier;
 
 			Vector3 temppoint1, temppoint2;
 			float rotationdistance;
@@ -434,13 +434,13 @@ Vector3 temppoint1, temppoint2;
 	Vector3 oldmid;
 	Vector3 oldmid2;
 
-	tempmult = multiplier;
-	multiplier /= 10;
+	tempmult = gamestate.multiplier;
+	gamestate.multiplier /= 10;
 	for (int l = 0; l < 10; l++) {
 		if (owner == -1 && (velocity.x || velocity.y || velocity.z) && physics) {
 			//move
-			position += velocity * multiplier;
-			tippoint += tipvelocity * multiplier;
+			position += velocity * gamestate.multiplier;
+			tippoint += tipvelocity * gamestate.multiplier;
 
 			//Length constrain
 			midp = (position * mass + tippoint * tipmass) / (mass + tipmass);
@@ -450,8 +450,8 @@ Vector3 temppoint1, temppoint2;
 			newpoint2 = midp + vel * length * (mass / (mass + tipmass));
 			if (!gamestate.freeze) {
 				if (freetime > .04) {
-					velocity = velocity + (newpoint1 - position) / multiplier;
-					tipvelocity = tipvelocity + (newpoint2 - tippoint) / multiplier;
+					velocity = velocity + (newpoint1 - position) / gamestate.multiplier;
+					tipvelocity = tipvelocity + (newpoint2 - tippoint) / gamestate.multiplier;
 				}
 			}
 			position = newpoint1;
@@ -937,8 +937,8 @@ Vector3 temppoint1, temppoint2;
 				tippoint += (mid - oldmid) * 20;
 			}
 			//Gravity
-			velocity.y += gamestate.gravity * multiplier;
-			tipvelocity.y += gamestate.gravity * multiplier;
+			velocity.y += gamestate.gravity * gamestate.multiplier;
+			tipvelocity.y += gamestate.gravity * gamestate.multiplier;
 
 			//Rotation
 			Vector3 temppoint1, temppoint2;
@@ -965,7 +965,7 @@ Vector3 temppoint1, temppoint2;
 
 			//Stop moving
 			if (magnitudeSquared(&velocity) < .3 && magnitudeSquared(&tipvelocity) < .3 && hitsomething) {
-				freetime += multiplier;
+				freetime += gamestate.multiplier;
 			}
 
 			if (freetime > .4) {
@@ -975,10 +975,10 @@ Vector3 temppoint1, temppoint2;
 			firstfree = 0;
 		}
 	}
-	multiplier = tempmult;
+	gamestate.multiplier = tempmult;
 	if (blooddrip && bloody) {
-		blooddripdelay -= blooddrip * multiplier / 2;
-		blooddrip -= multiplier;
+		blooddripdelay -= blooddrip * gamestate.multiplier / 2;
+		blooddrip -= gamestate.multiplier;
 		if (blooddrip < 0) {
 			blooddrip = 0;
 		}
@@ -998,10 +998,10 @@ Vector3 temppoint1, temppoint2;
 		}
 	}
 	if (onfire) {
-		flamedelay -= multiplier;
+		flamedelay -= gamestate.multiplier;
 		if (onfire && flamedelay <= 0) {
 			flamedelay = .020;
-			flamedelay -= multiplier;
+			flamedelay -= gamestate.multiplier;
 			normalrot = 0;
 			if (owner != -1) {
 				normalrot = Person::players[owner]->velocity;
@@ -1019,10 +1019,10 @@ Vector3 temppoint1, temppoint2;
 	}
 
 	if (!onfire && owner == -1 && type != staff) {
-		flamedelay -= multiplier;
+		flamedelay -= gamestate.multiplier;
 		if (flamedelay <= 0) {
 			flamedelay = .020;
-			flamedelay -= multiplier;
+			flamedelay -= gamestate.multiplier;
 			normalrot = 0;
 			if (rand() % 50 == 0 && distsq(&position, &viewer) > 80) {
 				Vector3 shinepoint;

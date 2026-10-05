@@ -1260,7 +1260,7 @@ void Game::ProcessDevInput(GameState& gamestate)
 
 		/* Ragdoll */
 		if (Input::isKeyPressed(SDL_SCANCODE_N)) {
-			Person::players[0]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+			Person::players[0]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 			emit_sound_at(whooshsound, Person::players[0]->coords, 128.);
 		}
 
@@ -1313,7 +1313,7 @@ void Game::ProcessDevInput(GameState& gamestate)
 			}
 
 			if (closest >= 0) {
-				Person::players[closest]->yaw += multiplier * 50;
+				Person::players[closest]->yaw += gamestate.multiplier * 50;
 				Person::players[closest]->targetyaw = Person::players[closest]->yaw;
 			}
 		}
@@ -1419,7 +1419,7 @@ void Game::ProcessDevInput(GameState& gamestate)
 				if (Person::players[closest]->skeleton.free == 2) {
 					Person::players[closest]->skeleton.free = 0;
 				}
-				Person::players[closest]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+				Person::players[closest]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 				Person::players[closest]->dead = 2;
 				Person::players[closest]->headless = 1;
 				Person::players[closest]->DoBloodBig(3, 165, Tutorial::active, gamestate);
@@ -1495,12 +1495,12 @@ void Game::ProcessDevInput(GameState& gamestate)
 						continue;
 					}
 					if (distsq(&Person::players[j]->coords, &Person::players[closest]->coords) < 25) {
-						Person::players[j]->DoDamage((25 - distsq(&Person::players[j]->coords, &Person::players[closest]->coords)) * 60, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+						Person::players[j]->DoDamage((25 - distsq(&Person::players[j]->coords, &Person::players[closest]->coords)) * 60, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 						if (Person::players[j]->skeleton.free == 2) {
 							Person::players[j]->skeleton.free = 1;
 						}
 						Person::players[j]->skeleton.longdead = 0;
-						Person::players[j]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+						Person::players[j]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 						for (unsigned i = 0; i < Person::players[j]->skeleton.joints.size(); i++) {
 							temppos = Person::players[j]->skeleton.joints[i].position + Person::players[j]->coords;
 							if (distsq(&temppos, &Person::players[closest]->coords) < 25) {
@@ -1513,8 +1513,8 @@ void Game::ProcessDevInput(GameState& gamestate)
 					}
 				}
 
-				Person::players[closest]->DoDamage(10000, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
-				Person::players[closest]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+				Person::players[closest]->DoDamage(10000, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
+				Person::players[closest]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 				Person::players[closest]->dead = 2;
 				Person::players[closest]->coords = 20;
 				Person::players[closest]->skeleton.free = 2;
@@ -1748,7 +1748,7 @@ void Game::ProcessDevInput(GameState& gamestate)
 
 		/* Decrease size for next object */
 		if (Input::isKeyDown(SDL_SCANCODE_DOWN) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			gamestate.editorsize -= multiplier;
+			gamestate.editorsize -= gamestate.multiplier;
 			if (gamestate.editorsize < .1) {
 				gamestate.editorsize = .1;
 			}
@@ -1756,12 +1756,12 @@ void Game::ProcessDevInput(GameState& gamestate)
 
 		/* Increase size for next object */
 		if (Input::isKeyDown(SDL_SCANCODE_UP) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			gamestate.editorsize += multiplier;
+			gamestate.editorsize += gamestate.multiplier;
 		}
 
 		/* Decrease yaw for next object */
 		if (Input::isKeyDown(SDL_SCANCODE_LEFT) && !Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			gamestate.editoryaw -= multiplier * 100;
+			gamestate.editoryaw -= gamestate.multiplier * 100;
 			if (gamestate.editoryaw < -.01) {
 				gamestate.editoryaw = -.01;
 			}
@@ -1769,12 +1769,12 @@ void Game::ProcessDevInput(GameState& gamestate)
 
 		/* Increase yaw for next object */
 		if (Input::isKeyDown(SDL_SCANCODE_RIGHT) && !Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			gamestate.editoryaw += multiplier * 100;
+			gamestate.editoryaw += gamestate.multiplier * 100;
 		}
 
 		/* Decrease pitch for next object */
 		if (Input::isKeyDown(SDL_SCANCODE_DOWN) && Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			gamestate.editorpitch -= multiplier * 100;
+			gamestate.editorpitch -= gamestate.multiplier * 100;
 			if (gamestate.editorpitch < -.01) {
 				gamestate.editorpitch = -.01;
 			}
@@ -1782,17 +1782,17 @@ void Game::ProcessDevInput(GameState& gamestate)
 
 		/* Increase pitch for next object */
 		if (Input::isKeyDown(SDL_SCANCODE_UP) && Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			gamestate.editorpitch += multiplier * 100;
+			gamestate.editorpitch += gamestate.multiplier * 100;
 		}
 
 		/* Decrease map radius */
 		if (Input::isKeyPressed(SDL_SCANCODE_LEFT) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			gamestate.mapradius -= multiplier * 10;
+			gamestate.mapradius -= gamestate.multiplier * 10;
 		}
 
 		/* Increase map radius */
 		if (Input::isKeyPressed(SDL_SCANCODE_RIGHT) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			gamestate.mapradius += multiplier * 10;
+			gamestate.mapradius += gamestate.multiplier * 10;
 		}
 	}
 }
@@ -1905,7 +1905,7 @@ void doAerialAcrobatics(GameState& gamestate)
 		Person::players[k]->turnspeed = 500;
 
 		if (Person::players[k]->shouldTurnTowardTarget()) {
-			Person::players[k]->yaw = stepTowardf(Person::players[k]->yaw, Person::players[k]->targetyaw, multiplier * Person::players[k]->turnspeed);
+			Person::players[k]->yaw = stepTowardf(Person::players[k]->yaw, Person::players[k]->targetyaw, gamestate.multiplier * Person::players[k]->turnspeed);
 		}
 
 		if (Person::players[k]->isStop() ||
@@ -1920,14 +1920,14 @@ void doAerialAcrobatics(GameState& gamestate)
 				Person::players[k]->animTarget != rabbitkickanim &&
 				(Person::players[k]->animTarget != crouchstabanim || Person::players[k]->hasvictim) &&
 				(Person::players[k]->animTarget != swordgroundstabanim || Person::players[k]->hasvictim))) {
-			Person::players[k]->yaw = stepTowardf(Person::players[k]->yaw, Person::players[k]->targetyaw, multiplier * Person::players[k]->turnspeed * 2);
+			Person::players[k]->yaw = stepTowardf(Person::players[k]->yaw, Person::players[k]->targetyaw, gamestate.multiplier * Person::players[k]->turnspeed * 2);
 		}
 
 		if (Person::players[k]->animTarget == sneakanim && Person::players[k]->animCurrent != sneakanim) {
-			Person::players[k]->yaw = stepTowardf(Person::players[k]->yaw, Person::players[k]->targetyaw, multiplier * Person::players[k]->turnspeed * 4);
+			Person::players[k]->yaw = stepTowardf(Person::players[k]->yaw, Person::players[k]->targetyaw, gamestate.multiplier * Person::players[k]->turnspeed * 4);
 		}
 
-		Person::players[k]->DoStuff(terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+		Person::players[k]->DoStuff(terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 		if (Person::players[k]->immobile && k != 0) {
 			Person::players[k]->coords = Person::players[k]->realoldcoords;
 		}
@@ -1947,7 +1947,7 @@ void doAerialAcrobatics(GameState& gamestate)
 			if (Person::players[k]->collide > 1) {
 				Person::players[k]->collide = 1;
 			}
-			Person::players[k]->collide -= multiplier * 30;
+			Person::players[k]->collide -= gamestate.multiplier * 30;
 
 			//clip to terrain
 			Person::players[k]->coords.y = max(Person::players[k]->coords.y, terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z));
@@ -1970,7 +1970,7 @@ void doAerialAcrobatics(GameState& gamestate)
 						Person::players[k]->coords.y > terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z) - .1) {
 						Person::players[k]->coords.y = terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z);
 					}
-					if (Person::players[k]->SphereCheck(&lowpoint, 1.3, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate) != -1) {
+					if (Person::players[k]->SphereCheck(&lowpoint, 1.3, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate) != -1) {
 						flatfacing = lowpoint - Person::players[k]->coords;
 						Person::players[k]->coords = lowpoint;
 						Person::players[k]->coords.y -= 1.3;
@@ -2090,7 +2090,7 @@ void doAerialAcrobatics(GameState& gamestate)
 						if (Person::players[k]->animTarget == jumpdownanim || Person::players[k]->isFlip()) {
 							//flipped into a rock
 							if (Person::players[k]->isFlip() && Person::players[k]->targetFrame().label == 7) {
-								Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+								Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 							}
 
 							if (Person::players[k]->animTarget == jumpupanim) {
@@ -2128,7 +2128,7 @@ void doAerialAcrobatics(GameState& gamestate)
 					lowpoint = Person::players[k]->coords;
 					lowpoint.y += 1.35;
 					if (Object::objects[i]->type != rocktype) {
-						if (Person::players[k]->SphereCheck(&lowpoint, 1.33, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate) != -1) {
+						if (Person::players[k]->SphereCheck(&lowpoint, 1.33, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate) != -1) {
 							if (Person::players[k]->animTarget != jumpupanim &&
 								Person::players[k]->animTarget != jumpdownanim &&
 								Person::players[k]->onterrain) {
@@ -2281,7 +2281,7 @@ void doAerialAcrobatics(GameState& gamestate)
 							Person::players[k]->frameTarget > 6)) {
 						//stagger off ledge (?)
 						if (Person::players[k]->animTarget == staggerbackhighanim || Person::players[k]->animTarget == staggerbackhardanim) {
-							Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+							Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 						}
 						Person::players[k]->setTargetAnimation(jumpdownanim);
 
@@ -2963,8 +2963,8 @@ void doPlayerCollisions(GameState& gamestate)
 																		Person::players[l]->velocity = Person::players[0]->velocity;
 																		Person::players[l]->skeleton.free = 0;
 																		Person::players[l]->yaw = 0;
-																		Person::players[l]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
-																		Person::players[l]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+																		Person::players[l]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
+																		Person::players[l]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 																		gamestate.camerashake += .3;
 																		Person::players[l]->skeleton.longdead = 0;
 																		Person::players[0]->lastcollide = 1;
@@ -2997,16 +2997,16 @@ void doPlayerCollisions(GameState& gamestate)
 																					emit_sound_at(heavyimpactsound, Person::players[i]->coords);
 																				}
 
-																				Person::players[i]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+																				Person::players[i]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 																				if (Person::players[i]->damage > Person::players[i]->damagetolerance - magnitudeSquared(&rotatetarget) / 4 && !Person::players[i]->dead) {
 																					award_bonus(0, aimbonus);
 																				}
-																				Person::players[i]->DoDamage(magnitudeSquared(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
-																				Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+																				Person::players[i]->DoDamage(magnitudeSquared(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
+																				Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 																				if (Person::players[k]->damage > Person::players[k]->damagetolerance - magnitudeSquared(&rotatetarget) / 4 && !Person::players[k]->dead) {
 																					award_bonus(0, aimbonus); // Huh, again?
 																				}
-																				Person::players[k]->DoDamage(magnitudeSquared(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+																				Person::players[k]->DoDamage(magnitudeSquared(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 
 																				for (unsigned j = 0; j < Person::players[i]->skeleton.joints.size(); j++) {
 																					Person::players[i]->skeleton.joints[j].velocity = Person::players[i]->skeleton.joints[j].velocity / 5 + Person::players[k]->velocity;
@@ -3067,8 +3067,8 @@ void doPlayerCollisions(GameState& gamestate)
 																					Person::players[i]->velocity = Person::players[k]->velocity;
 																					Person::players[k]->velocity = Person::players[k]->velocity * -.5;
 																					Person::players[k]->velocity.y = Person::players[i]->velocity.y;
-																					Person::players[i]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
-																					Person::players[i]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+																					Person::players[i]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
+																					Person::players[i]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 																					Person::players[k]->lastcollide = 1;
 																					award_bonus(k, AboveBonus);
 																				}
@@ -3082,8 +3082,8 @@ void doPlayerCollisions(GameState& gamestate)
 																					Person::players[k]->velocity = Person::players[i]->velocity;
 																					Person::players[i]->velocity = Person::players[i]->velocity * -.3;
 																					Person::players[i]->velocity.y = Person::players[k]->velocity.y;
-																					Person::players[k]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
-																					Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+																					Person::players[k]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
+																					Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 																					Person::players[i]->lastcollide = 1;
 																					award_bonus(i, AboveBonus);
 																				}
@@ -3091,8 +3091,8 @@ void doPlayerCollisions(GameState& gamestate)
 																		}
 																	}
 																}
-																Person::players[i]->CheckKick(terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
-																Person::players[k]->CheckKick(terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+																Person::players[i]->CheckKick(terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
+																Person::players[k]->CheckKick(terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 															}
 														}
 													}
@@ -3161,13 +3161,13 @@ void Game::Tick(GameState& gamestate)
 
 	if (!gamestate.mainmenu) {
 		if (gamestate.hostile == 1) {
-			gamestate.hostiletime += multiplier;
+			gamestate.hostiletime += gamestate.multiplier;
 		}
 		else {
 			gamestate.hostiletime = 0;
 		}
 		if (!gamestate.winfreeze) {
-			gamestate.leveltime += multiplier;
+			gamestate.leveltime += gamestate.multiplier;
 		}
 
 		if (gamestate.console) {
@@ -3185,7 +3185,7 @@ void Game::Tick(GameState& gamestate)
 				}
 			}
 
-			gamestate.consoleblinkdelay -= multiplier;
+			gamestate.consoleblinkdelay -= gamestate.multiplier;
 			if (gamestate.consoleblinkdelay <= 0) {
 				gamestate.consoleblinkdelay = .3;
 				gamestate.consoleblink = !gamestate.consoleblink;
@@ -3212,7 +3212,7 @@ void Game::Tick(GameState& gamestate)
 			if (Dialog::inDialog()) {
 				talkdelay = 1;
 			}
-			talkdelay -= multiplier;
+			talkdelay -= gamestate.multiplier;
 
 			if (talkdelay <= 0 && !Dialog::inDialog() && Animation::animations[Person::players[0]->animTarget].height != highheight) {
 				for (unsigned i = 0; i < Dialog::dialogs.size(); i++) {
@@ -3220,9 +3220,9 @@ void Game::Tick(GameState& gamestate)
 				}
 			}
 
-			gamestate.windvar += multiplier;
-			gamestate.smoketex += multiplier;
-			Tutorial::stagetime += multiplier;
+			gamestate.windvar += gamestate.multiplier;
+			gamestate.smoketex += gamestate.multiplier;
+			Tutorial::stagetime += gamestate.multiplier;
 
 			//hotspots
 			static float hotspotvisual[40];
@@ -3230,7 +3230,7 @@ void Game::Tick(GameState& gamestate)
 				Vector3 hotspotsprite;
 				if (gamestate.editorenabled) {
 					for (unsigned i = 0; i < Hotspot::hotspots.size(); i++) {
-						hotspotvisual[i] -= multiplier / 320;
+						hotspotvisual[i] -= gamestate.multiplier / 320;
 					}
 				}
 
@@ -3255,7 +3255,7 @@ void Game::Tick(GameState& gamestate)
 
 			//Tutorial
 			if (Tutorial::active) {
-				Tutorial::Do(multiplier, gamestate.bloodtoggle, gamestate);
+				Tutorial::Do(gamestate.multiplier, gamestate.bloodtoggle, gamestate);
 			}
 
 			//bonuses
@@ -3294,11 +3294,11 @@ void Game::Tick(GameState& gamestate)
 				}
 				bonustotal += bonusvalue;
 			}
-			bonustime += multiplier;
+			bonustime += gamestate.multiplier;
 
 			//snow effects
 			if (gamestate.environment == snowyenvironment) {
-				gamestate.precipdelay -= multiplier;
+				gamestate.precipdelay -= gamestate.multiplier;
 				while (gamestate.precipdelay < 0) {
 					gamestate.precipdelay += .04;
 					if (!gamestate.detail) {
@@ -3360,22 +3360,22 @@ void Game::Tick(GameState& gamestate)
 					flatfacing = DoRotation(flatfacing, 0, -gamestate.yaw, 0);
 
 					if (Input::isKeyDown(gamestate.forwardkey)) {
-						viewer += facing * multiplier * 4;
+						viewer += facing * gamestate.multiplier * 4;
 					}
 					if (Input::isKeyDown(gamestate.backkey)) {
-						viewer -= facing * multiplier * 4;
+						viewer -= facing * gamestate.multiplier * 4;
 					}
 					if (Input::isKeyDown(gamestate.leftkey)) {
-						viewer += DoRotation(flatfacing * multiplier, 0, 90, 0) * 4;
+						viewer += DoRotation(flatfacing * gamestate.multiplier, 0, 90, 0) * 4;
 					}
 					if (Input::isKeyDown(gamestate.rightkey)) {
-						viewer += DoRotation(flatfacing * multiplier, 0, -90, 0) * 4;
+						viewer += DoRotation(flatfacing * gamestate.multiplier, 0, -90, 0) * 4;
 					}
 					if (Input::isKeyDown(gamestate.jumpkey)) {
-						viewer.y += multiplier * 4;
+						viewer.y += gamestate.multiplier * 4;
 					}
 					if (Input::isKeyDown(gamestate.crouchkey)) {
-						viewer.y -= multiplier * 4;
+						viewer.y -= gamestate.multiplier * 4;
 					}
 					if (Input::isKeyPressed(SDL_SCANCODE_1) ||
 						Input::isKeyPressed(SDL_SCANCODE_2) ||
@@ -3558,12 +3558,12 @@ void Game::Tick(GameState& gamestate)
 				Person::players[0]->jumptogglekeydown = 1;
 			}
 
-			Dialog::dialoguetime += multiplier;
-			gamestate.hawkyaw += multiplier * 25;
+			Dialog::dialoguetime += gamestate.multiplier;
+			gamestate.hawkyaw += gamestate.multiplier * 25;
 			realhawkcoords = 0;
 			realhawkcoords.x = 25;
 			realhawkcoords = DoRotation(realhawkcoords, 0, gamestate.hawkyaw, 0) + hawkcoords;
-			gamestate.hawkcalldelay -= multiplier / 2;
+			gamestate.hawkcalldelay -= gamestate.multiplier / 2;
 
 			if (gamestate.hawkcalldelay <= 0) {
 				emit_sound_at(hawksound, realhawkcoords);
@@ -3586,7 +3586,7 @@ void Game::Tick(GameState& gamestate)
 			for (unsigned k = 0; k < Person::players.size(); k++) {
 				if (!isnormal(Person::players[k]->coords.x) || !isnormal(Person::players[k]->coords.y) || !isnormal(Person::players[k]->coords.z)) {
 					if (!isnormal(Person::players[k]->coords.x) || !isnormal(Person::players[k]->coords.y) || !isnormal(Person::players[k]->coords.z)) {
-						Person::players[k]->DoDamage(1000, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+						Person::players[k]->DoDamage(1000, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 					}
 				}
 			}
@@ -3728,7 +3728,7 @@ void Game::Tick(GameState& gamestate)
 						Person::players[i]->avoidcollided = 0;
 					}
 
-					Person::players[i]->doAI(terrain, Tutorial::active, Dialog::inDialog(), multiplier, gamestate);
+					Person::players[i]->doAI(terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate);
 
 					if (Animation::animations[Person::players[i]->animTarget].attack == reversed) {
 						//Person::players[i]->targetyaw=Person::players[i]->yaw;
@@ -3759,8 +3759,8 @@ void Game::Tick(GameState& gamestate)
 					if (Person::players[i]->collided > 1) {
 						Person::players[i]->collided = 1;
 					}
-					Person::players[i]->collided -= multiplier * 4;
-					Person::players[i]->whichdirectiondelay -= multiplier;
+					Person::players[i]->collided -= gamestate.multiplier * 4;
+					Person::players[i]->whichdirectiondelay -= gamestate.multiplier;
 					if (Person::players[i]->avoidcollided < -.3 || Person::players[i]->whichdirectiondelay <= 0) {
 						Person::players[i]->avoidcollided = -.3;
 						Person::players[i]->whichdirection = abs(rand() % 2);
@@ -3769,10 +3769,10 @@ void Game::Tick(GameState& gamestate)
 					if (Person::players[i]->avoidcollided > 1) {
 						Person::players[i]->avoidcollided = 1;
 					}
-					Person::players[i]->avoidcollided -= multiplier / 4;
+					Person::players[i]->avoidcollided -= gamestate.multiplier / 4;
 					if (!Person::players[i]->skeleton.free) {
-						Person::players[i]->stunned -= multiplier;
-						Person::players[i]->surprised -= multiplier;
+						Person::players[i]->stunned -= gamestate.multiplier;
+						Person::players[i]->surprised -= gamestate.multiplier;
 					}
 					if (i != 0 && Person::players[i]->surprised <= 0 &&
 						Person::players[i]->aitype == attacktypecutoff &&
@@ -3952,7 +3952,7 @@ void Game::Tick(GameState& gamestate)
 																		weapons.weapons[k].blooddrip = 5;
 																		Person::players[i]->victim->weaponstuck = -1;
 																		Person::players[i]->victim->bloodloss += 2000;
-																		Person::players[i]->victim->DoDamage(2000, terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+																		Person::players[i]->victim->DoDamage(2000, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 																	}
 																}
 																if (Person::players[i]->victim->num_weapons > 0) {
@@ -4284,7 +4284,7 @@ void Game::Tick(GameState& gamestate)
 								Person::players[i]->jumpclimb = 1;
 							}
 							if (Person::players[i]->animTarget == jumpupanim || Person::players[i]->animTarget == jumpdownanim || Person::players[i]->isFlip()) {
-								Person::players[i]->velocity += absflatfacing * 5 * multiplier;
+								Person::players[i]->velocity += absflatfacing * 5 * gamestate.multiplier;
 							}
 							Person::players[i]->forwardstogglekeydown = 1;
 							movekey = 1;
@@ -4310,7 +4310,7 @@ void Game::Tick(GameState& gamestate)
 								Person::players[i]->frameTarget = 0;
 							}
 							if (Person::players[i]->animTarget == jumpupanim || Person::players[i]->animTarget == jumpdownanim || Person::players[i]->isFlip()) {
-								Person::players[i]->velocity += DoRotation(absflatfacing * 5 * multiplier, 0, -90, 0);
+								Person::players[i]->velocity += DoRotation(absflatfacing * 5 * gamestate.multiplier, 0, -90, 0);
 							}
 							Person::players[i]->targetyaw -= 90;
 							if (Person::players[i]->forwardkeydown) {
@@ -4342,7 +4342,7 @@ void Game::Tick(GameState& gamestate)
 								Person::players[i]->frameTarget = 0;
 							}
 							if (Person::players[i]->animTarget == jumpupanim || Person::players[i]->animTarget == jumpdownanim || Person::players[i]->isFlip()) {
-								Person::players[i]->velocity -= DoRotation(absflatfacing * 5 * multiplier, 0, -90, 0);
+								Person::players[i]->velocity -= DoRotation(absflatfacing * 5 * gamestate.multiplier, 0, -90, 0);
 							}
 							Person::players[i]->targetyaw += 90;
 							if (Person::players[i]->forwardkeydown) {
@@ -4374,7 +4374,7 @@ void Game::Tick(GameState& gamestate)
 								Person::players[i]->frameTarget = 0;
 							}
 							if (Person::players[i]->animTarget == jumpupanim || Person::players[i]->animTarget == jumpdownanim || Person::players[i]->isFlip()) {
-								Person::players[i]->velocity -= absflatfacing * 5 * multiplier;
+								Person::players[i]->velocity -= absflatfacing * 5 * gamestate.multiplier;
 							}
 							if (Person::players[i]->animTarget == hanganim) {
 								Person::players[i]->animCurrent = jumpdownanim;
@@ -4454,7 +4454,7 @@ void Game::Tick(GameState& gamestate)
 										Person::players[i]->tempdeltav = gamestate.deltav;
 									}
 									if (Person::players[i]->tempdeltav < 0) {
-										Person::players[i]->velocity.y -= (float)(Person::players[i]->tempdeltav) / multiplier / 1000;
+										Person::players[i]->velocity.y -= (float)(Person::players[i]->tempdeltav) / gamestate.multiplier / 1000;
 									}
 								}
 
@@ -4479,17 +4479,17 @@ void Game::Tick(GameState& gamestate)
 									!gamestate.editorenabled) ||
 									!gamestate.devtools) ||
 									!Person::players[i]->isPlayerControlled())) {
-								if (Person::players[i]->jumppower > multiplier * 6) {
-									Person::players[i]->velocity.y += multiplier * 6;
-									Person::players[i]->jumppower -= multiplier * 6;
+								if (Person::players[i]->jumppower > gamestate.multiplier * 6) {
+									Person::players[i]->velocity.y += gamestate.multiplier * 6;
+									Person::players[i]->jumppower -= gamestate.multiplier * 6;
 								}
-								if (Person::players[i]->jumppower <= multiplier * 6) {
+								if (Person::players[i]->jumppower <= gamestate.multiplier * 6) {
 									Person::players[i]->velocity.y += Person::players[i]->jumppower;
 									Person::players[i]->jumppower = 0;
 								}
 							}
 							if (((gamestate.floatjump || gamestate.editorenabled) && gamestate.devtools) && i == 0) {
-								Person::players[i]->velocity.y += multiplier * 30;
+								Person::players[i]->velocity.y += gamestate.multiplier * 30;
 							}
 						}
 
@@ -4550,9 +4550,9 @@ void Game::Tick(GameState& gamestate)
 					if (Person::players[k]->jumppower < 0 && !Person::players[k]->jumpkeydown) {
 						Person::players[k]->jumppower = 0;
 					}
-					Person::players[k]->jumppower += multiplier * 7;
+					Person::players[k]->jumppower += gamestate.multiplier * 7;
 					if (Person::players[k]->isCrouch()) {
-						Person::players[k]->jumppower += multiplier * 7;
+						Person::players[k]->jumppower += gamestate.multiplier * 7;
 					}
 					if (Person::players[k]->jumppower > 5) {
 						Person::players[k]->jumppower = 5;
@@ -4563,22 +4563,22 @@ void Game::Tick(GameState& gamestate)
 					Person::players[k]->targettilt = (Person::players[k]->yaw - Person::players[k]->targetyaw) / 4;
 				}
 
-				Person::players[k]->tilt = stepTowardf(Person::players[k]->tilt, Person::players[k]->targettilt, multiplier * 150);
-				Person::players[k]->grabdelay -= multiplier;
+				Person::players[k]->tilt = stepTowardf(Person::players[k]->tilt, Person::players[k]->targettilt, gamestate.multiplier * 150);
+				Person::players[k]->grabdelay -= gamestate.multiplier;
 			}
 
 			//do animations
 			for (unsigned k = 0; k < Person::players.size(); k++) {
-				Person::players[k]->DoAnimations(terrain, Tutorial::active, Dialog::inDialog(), multiplier, whichjointstartarray, gamestate);
+				Person::players[k]->DoAnimations(terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, whichjointstartarray, gamestate);
 				Person::players[k]->whichpatchx = Person::players[k]->coords.x / (terrain.size / subdivision * terrain.scale);
 				Person::players[k]->whichpatchz = Person::players[k]->coords.z / (terrain.size / subdivision * terrain.scale);
 			}
 
 			//do stuff
-			Object::DoStuff(gamestate.bloodtoggle, multiplier);
+			Object::DoStuff(gamestate.bloodtoggle, gamestate.multiplier);
 
 			for (int j = numenvsounds - 1; j >= 0; j--) {
-				envsoundlife[j] -= multiplier;
+				envsoundlife[j] -= gamestate.multiplier;
 				if (envsoundlife[j] < 0) {
 					numenvsounds--;
 					envsoundlife[j] = envsoundlife[numenvsounds];
@@ -4588,7 +4588,7 @@ void Game::Tick(GameState& gamestate)
 			OPENAL_SetFrequency(OPENAL_ALL, gamestate.slomo);
 
 			if (Tutorial::active) {
-				Tutorial::DoStuff(multiplier, gamestate.bloodtoggle, gamestate);
+				Tutorial::DoStuff(gamestate.multiplier, gamestate.bloodtoggle, gamestate);
 			}
 
 			//3d sound
@@ -4597,9 +4597,9 @@ void Game::Tick(GameState& gamestate)
 			gLoc[1] = viewer.y;
 			gLoc[2] = viewer.z;
 			static float vel[3];
-			vel[0] = (viewer.x - oldviewer.x) / multiplier;
-			vel[1] = (viewer.y - oldviewer.y) / multiplier;
-			vel[2] = (viewer.z - oldviewer.z) / multiplier;
+			vel[0] = (viewer.x - oldviewer.x) / gamestate.multiplier;
+			vel[1] = (viewer.y - oldviewer.y) / gamestate.multiplier;
+			vel[2] = (viewer.z - oldviewer.z) / gamestate.multiplier;
 
 			//Set orientation with forward and up vectors
 			static Vector3 upvector;
@@ -4634,7 +4634,7 @@ void Game::Tick(GameState& gamestate)
 void Game::TickOnce(GameState& gamestate)
 {
 	if (gamestate.mainmenu) {
-		gamestate.yaw += multiplier * 5;
+		gamestate.yaw += gamestate.multiplier * 5;
 	}
 	else if (Dialog::directing || !Dialog::inDialog()) {
 		gamestate.yaw += gamestate.deltah * .7;
@@ -4703,7 +4703,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 		}
 
 		if (oldmusictype == stream_fighttheme && gamestate.musictype != stream_fighttheme) {
-			unseendelay -= multiplier;
+			unseendelay -= gamestate.multiplier;
 			if (unseendelay > 0) {
 				gamestate.musictype = stream_fighttheme;
 			}
@@ -4725,22 +4725,22 @@ void Game::TickOnceAfter(GameState& gamestate)
 		musicselected = gamestate.musictype;
 
 		if (musicselected == leveltheme) {
-			musicvolume[0] += multiplier * 450;
+			musicvolume[0] += gamestate.multiplier * 450;
 		}
 		else {
-			musicvolume[0] -= multiplier * 450;
+			musicvolume[0] -= gamestate.multiplier * 450;
 		}
 		if (musicselected == stream_fighttheme) {
-			musicvolume[1] += multiplier * 450;
+			musicvolume[1] += gamestate.multiplier * 450;
 		}
 		else {
-			musicvolume[1] -= multiplier * 450;
+			musicvolume[1] -= gamestate.multiplier * 450;
 		}
 		if (musicselected == stream_menutheme) {
-			musicvolume[2] += multiplier * 450;
+			musicvolume[2] += gamestate.multiplier * 450;
 		}
 		else {
-			musicvolume[2] -= multiplier * 450;
+			musicvolume[2] -= gamestate.multiplier * 450;
 		}
 
 		for (int i = 0; i < 3; i++) {
@@ -4898,7 +4898,7 @@ void Game::TickOnceAfter(GameState& gamestate)
 
 			if (!gamestate.editorenabled && gamestate.gameon && !gamestate.mainmenu) {
 				if (gamestate.changedelay != -999) {
-					gamestate.changedelay -= multiplier / 7;
+					gamestate.changedelay -= gamestate.multiplier / 7;
 				}
 				if (Person::players[0]->dead) {
 					gamestate.targetlevel = whichlevel;
@@ -5037,22 +5037,22 @@ void Game::TickOnceAfter(GameState& gamestate)
 				target.y += 1.4;
 			}
 			coltarget = target - cameraloc;
-			if (magnitudeSquared(&coltarget) < multiplier * multiplier * 400) {
+			if (magnitudeSquared(&coltarget) < gamestate.multiplier * gamestate.multiplier * 400) {
 				cameraloc = target;
 			}
 			else {
 				Normalise(&coltarget);
 				if (Person::players[0]->animTarget != hanganim && Person::players[0]->animTarget != climbanim && Person::players[0]->animCurrent != climbanim && Person::players[0]->currentoffset.x == 0) {
-					cameraloc = cameraloc + coltarget * multiplier * cameraspeed;
+					cameraloc = cameraloc + coltarget * gamestate.multiplier * cameraspeed;
 				}
 				else {
-					cameraloc = cameraloc + coltarget * multiplier * 8;
+					cameraloc = cameraloc + coltarget * gamestate.multiplier * 8;
 				}
 			}
 			if (gamestate.editorenabled) {
 				cameraloc = target;
 			}
-			cameradist += multiplier * 5;
+			cameradist += gamestate.multiplier * 5;
 			if (cameradist > 2.3) {
 				cameradist = 2.3;
 			}
@@ -5084,15 +5084,15 @@ void Game::TickOnceAfter(GameState& gamestate)
 		if (gamestate.camerashake > .8) {
 			gamestate.camerashake = .8;
 		}
-		gamestate.woozy += multiplier;
+		gamestate.woozy += gamestate.multiplier;
 		if (Person::players[0]->dead) {
 			gamestate.camerashake = 0;
 		}
 		if (Person::players[0]->dead) {
 			gamestate.woozy = 0;
 		}
-		gamestate.camerashake -= multiplier * 2;
-		gamestate.blackout -= multiplier * 2;
+		gamestate.camerashake -= gamestate.multiplier * 2;
+		gamestate.blackout -= gamestate.multiplier * 2;
 		if (gamestate.camerashake < 0) {
 			gamestate.camerashake = 0;
 		}

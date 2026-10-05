@@ -7,7 +7,6 @@
 #include <type_traits>
 
 #include "GameState.hpp"
-#include "Globals.h"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
 {
@@ -1288,29 +1287,48 @@ TEST_CASE("tranche 6 GameState members are per instance", "[gamestate]")
 	}
 }
 
-// Tranche 7 covers one global, `multiplier`: the per-tick time scale. Its
-// default is pinned here by reading the global itself, while the global is
-// still the thing being read, so the literal below is observed rather than
-// assumed. The tranche that follows moves it into a GameState member sitting
-// beside realmultiplier and asserts the same value against that member.
+// Tranche 7 covers one global, `multiplier`: the per-tick time scale. The
+// member's default is the literal the global it came from was initialised
+// with, and its declared type is the type that global declared. That literal
+// was first pinned by reading the global itself, while it was still around to
+// be compared against.
 //
 // The type is pinned alongside the value because a comparison such as
 // `REQUIRE(x == 0)` holds just as happily for an int as for a float, and the
 // test projects compile with /wd4244, which suppresses the float-to-int
 // conversion warning that would otherwise be the only hint of a type slip.
-//
-// The name is also a widespread parameter name elsewhere in the codebase, so
-// this test deliberately refers to the global unqualified: it is the only
-// place in the test project where the bare identifier means the global.
-TEST_CASE("the tranche 7 multiplier global starts at the value GameState will carry", "[gamestate]")
+TEST_CASE("GameState tranche 7 members start at their historical global defaults", "[gamestate]")
 {
+	GameState s;
+
 	SECTION("per-tick time scale")
 	{
-		REQUIRE(multiplier == 0.0f);
+		REQUIRE(s.multiplier == 0.0f);
 	}
 
-	SECTION("declared type is preserved from the migrated global")
+	SECTION("declared types are preserved from the migrated globals")
 	{
-		REQUIRE(std::is_same<decltype(multiplier), float>::value);
+		REQUIRE(std::is_same<decltype(s.multiplier), float>::value);
+	}
+}
+
+TEST_CASE("tranche 7 GameState members are per instance", "[gamestate]")
+{
+	GameState a;
+	GameState b;
+
+	SECTION("writing one instance leaves the other at its defaults")
+	{
+		a.multiplier = 0.016f;
+
+		REQUIRE(b.multiplier == 0.0f);
+	}
+
+	SECTION("a third instance also starts clean")
+	{
+		a.multiplier = 0.5f;
+
+		GameState c;
+		REQUIRE(c.multiplier == 0.0f);
 	}
 }

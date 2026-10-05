@@ -6,7 +6,6 @@
 
 #include <SDL.h>
 
-extern float multiplier;
 extern Vector3 viewer;
 extern Vector3 viewerfacing;
 extern Light light;

@@ -273,7 +273,7 @@ static void DoMouse(GameState& gamestate)
 	}
 }
 
-void DoFrameRate(int update)
+void DoFrameRate(GameState& gamestate, int update)
 {
 	static long frames = 0;
 
@@ -289,12 +289,12 @@ void DoFrameRate(int update)
 		deltaTime /= 1000.0;
 	}
 
-	multiplier = deltaTime;
-	if (multiplier < .001) {
-		multiplier = .001;
+	gamestate.multiplier = deltaTime;
+	if (gamestate.multiplier < .001) {
+		gamestate.multiplier = .001;
 	}
-	if (multiplier > 10) {
-		multiplier = 10;
+	if (gamestate.multiplier > 10) {
+		gamestate.multiplier = 10;
 	}
 	if (update) {
 		frametime = currTime; // reset for next time interval
@@ -323,35 +323,35 @@ void DoUpdate(GameState& gamestate)
 	static int count;
 	static float oldmult;
 
-	DoFrameRate(1);
-	if (multiplier > .6) {
-		multiplier = .6;
+	DoFrameRate(gamestate, 1);
+	if (gamestate.multiplier > .6) {
+		gamestate.multiplier = .6;
 	}
 
-	gamestate.fps = 1 / multiplier;
+	gamestate.fps = 1 / gamestate.multiplier;
 
-	count = multiplier * sps;
+	count = gamestate.multiplier * sps;
 	if (count < 2) {
 		count = 2;
 	}
 
-	gamestate.realmultiplier = multiplier;
-	multiplier *= gamestate.gamespeed;
+	gamestate.realmultiplier = gamestate.multiplier;
+	gamestate.multiplier *= gamestate.gamespeed;
 	if (gamestate.difficulty == 1) {
-		multiplier *= .9;
+		gamestate.multiplier *= .9;
 	}
 	if (gamestate.difficulty == 0) {
-		multiplier *= .8;
+		gamestate.multiplier *= .8;
 	}
 
 	if (gamestate.loading == 4) {
-		multiplier *= .00001;
+		gamestate.multiplier *= .00001;
 	}
 	if (gamestate.slomo && !gamestate.mainmenu) {
-		multiplier *= gamestate.slomospeed;
+		gamestate.multiplier *= gamestate.slomospeed;
 	}
-	oldmult = multiplier;
-	multiplier /= (float)count;
+	oldmult = gamestate.multiplier;
+	gamestate.multiplier /= (float)count;
 
 	DoMouse(gamestate);
 
@@ -360,7 +360,7 @@ void DoUpdate(GameState& gamestate)
 	for (int i = 0; i < count; i++) {
 		Tick(gamestate);
 	}
-	multiplier = oldmult;
+	gamestate.multiplier = oldmult;
 
 	TickOnceAfter(gamestate);
 	if (stereomode == stereoNone) {

@@ -168,12 +168,12 @@ void Menu::handleFadeEffect(GameState& gamestate)
 {
     for (std::vector<MenuItem>::iterator it = items.begin(); it != items.end(); it++) {
         if (it->id == gamestate.selected) {
-            it->effectfade += multiplier * 5;
+            it->effectfade += gamestate.multiplier * 5;
             if (it->effectfade > 1) {
                 it->effectfade = 1;
             }
         } else {
-            it->effectfade -= multiplier * 5;
+            it->effectfade -= gamestate.multiplier * 5;
             if (it->effectfade < 0) {
                 it->effectfade = 0;
             }
@@ -931,7 +931,7 @@ void Menu::Tick(GameState& gamestate)
             Load(gamestate);
         }
 
-        newuserblinkdelay -= multiplier;
+        newuserblinkdelay -= gamestate.multiplier;
         if (newuserblinkdelay <= 0) {
             newuserblinkdelay = .3;
             newuserblink = !newuserblink;

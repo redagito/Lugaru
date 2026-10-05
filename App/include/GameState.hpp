@@ -59,6 +59,11 @@ struct GameState
 	float slomospeed = 0;
 	float fps = 0;
 	float realmultiplier = 0;
+
+	// the time scale the current tick is simulated with, after gamespeed, slow
+	// motion and difficulty have been folded into it. realmultiplier above is
+	// the same interval before those are applied.
+	float multiplier = 0;
 	float hostiletime = 0;
 
 	// campaign choice

@@ -183,7 +183,6 @@ std::string join(const std::set<std::string>& names)
 // GameState already owns.
 const std::set<std::string> kPendingGlobals = {
 	// App/include/Globals.h
-	"multiplier",
 	"viewer", "viewerfacing",
 	"light", "terrain",
 	"sdlwindow", "frustum", "weapons",
@@ -242,7 +241,7 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 	{
 		// Without this, a parser that quietly matched nothing would leave every
 		// assertion above passing for the wrong reason.
-		REQUIRE(globals.size() == 39);
-		REQUIRE(members.size() == 138);
+		REQUIRE(globals.size() == 38);
+		REQUIRE(members.size() == 139);
 	}
 }
