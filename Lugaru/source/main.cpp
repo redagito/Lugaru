@@ -476,6 +476,23 @@ static inline void chdirToAppPath(const char* argv0)
 }
 #endif
 
+namespace
+{
+
+// Joins the key-capture thread when the enclosing scope ends, however it ends:
+// falling off the bottom, an early return, or an exception unwinding past it.
+// The thread holds references to gamestate and to assets, so it must not outlive
+// either, and destruction is the only thing on every one of those paths.
+struct JoinKeySelectThreadOnExit
+{
+	~JoinKeySelectThreadOnExit()
+	{
+		Menu::joinKeySelectThread();
+	}
+};
+
+} // namespace
+
 int main(int argc, char** argv)
 {
 	argc -= (argc > 0);
@@ -542,6 +559,13 @@ int main(int argc, char** argv)
 			// outlive every frame and go out of scope before SDL_Quit below.
 			GameAssets assets;
 
+			// Declared after both objects the thread references, so it is
+			// destroyed before either of them: the join cannot be skipped by the
+			// early return below or by an exception unwinding out of this block.
+			// It does not run before CleanUp(), so ~GameAssets still deletes its
+			// GL objects with a current context.
+			JoinKeySelectThreadOnExit joinKeySelectThread;
+
 			if (!SetUp(gamestate, assets)) {
 				delete[] commandLineOptionsBuffer;
 				return 42;
@@ -600,8 +624,9 @@ int main(int argc, char** argv)
 				}
 			}
 
-			// The key-capture thread holds references to gamestate and to assets,
-			// so it must be joined before either goes out of scope below.
+			// Joined here rather than left to the guard above, because deleteGame
+			// deletes GL objects the thread would be reading. The guard is what
+			// covers the paths that never reach this line.
 			Menu::joinKeySelectThread();
 
 			deleteGame(gamestate, assets);
