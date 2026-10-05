@@ -67,7 +67,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 	static float texcoordwidth, texcoordheight;
 	static float texviewwidth, texviewheight;
 	static Vector3 checkpoint;
-	static float tempmult;
+	float tempmult = 0;
 	float tutorialopac;
 	std::string string;
 	static int drawmode = 0;

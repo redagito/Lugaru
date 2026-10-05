@@ -28,6 +28,9 @@ target_compile_definitions(${PROJECT_NAME}
 	# runtime. Hand it their real location rather than letting it guess one from
 	# whatever working directory ctest was configured with.
 	PRIVATE LUGARU_APP_INCLUDE_DIR="${CMAKE_SOURCE_DIR}/App/include"
+	# The same guard reads App/source/GameDraw.cpp to check where the renderer's
+	# multiplier save slot lives.
+	PRIVATE LUGARU_APP_SOURCE_DIR="${CMAKE_SOURCE_DIR}/App/source"
 )
 
 target_include_directories(${PROJECT_NAME}

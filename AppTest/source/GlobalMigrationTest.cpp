@@ -63,6 +63,38 @@ bool isIdentifier(const std::string& text)
 	});
 }
 
+// Every whole-word occurrence of `name` in `text`. Used so that a search cannot
+// match inside a longer name: `static` must not be found in `staticassert`, and
+// `tempmult` must not be found in `tempmultiplier`.
+std::vector<std::string::size_type> wholeWordPositions(const std::string& text, const std::string& name)
+{
+	std::vector<std::string::size_type> found;
+
+	for (std::string::size_type at = text.find(name); at != std::string::npos;
+	     at = text.find(name, at + 1)) {
+		const bool startsWord = at == 0 ||
+		                        (text[at - 1] != '_' && std::isalpha(static_cast<unsigned char>(text[at - 1])) == 0);
+		const std::string::size_type after = at + name.size();
+		const bool endsWord = after == text.size() ||
+		                      (text[after] != '_' && std::isalnum(static_cast<unsigned char>(text[after])) == 0);
+		if (startsWord && endsWord) {
+			found.push_back(at);
+		}
+	}
+
+	return found;
+}
+
+// The leading identifier of a line, which is how a statement `tempmult = ...`
+// is told apart from a declarator such as `float tempmult = ...` that happens
+// to sit on the same line as its assignment.
+std::string firstWord(const std::string& code)
+{
+	const std::string text = trim(code);
+	const std::string::size_type space = text.find_first_of(" \t(");
+	return space == std::string::npos ? text : text.substr(0, space);
+}
+
 // Pulls the declared names out of everything after a declaration's type: the
 // shapes that occur are "float yaw, pitch", "int pathpointconnect[30][30]" and
 // "SDL_Window* sdlwindow". Anything from the terminating semicolon on is not
@@ -164,15 +196,173 @@ std::set<std::string> gameStateMembers()
 
 	return names;
 }
-
-std::string join(const std::set<std::string>& names)
+template <typename Names>
+std::string join(const Names& names)
 {
 	std::string joined;
 	for (const std::string& name : names) {
 		joined += (joined.empty() ? "" : ", ");
 		joined += name;
 	}
+
 	return joined;
+}
+
+// Where the renderer keeps the multiplier it borrows.
+//
+// DrawGLScene zeroes gamestate.multiplier for the two stretches of the frame
+// that must not run on the game's time scale - the stretches around the menu
+// call and around the post-swap physics - and puts the value back afterwards.
+// The scratch slot it borrows into is per-call state, the same way the identical
+// slot is in Weapons.cpp and Sprite.cpp. What this scan is for is the storage
+// class, not the arithmetic: a slot with static storage duration is one value
+// for the whole process, so a second GameState would share it and the migration
+// would stop guaranteeing per-instance isolation the moment a frame is drawn.
+
+const char* const kGameDrawSource = LUGARU_APP_SOURCE_DIR "/GameDraw.cpp";
+const char* const kSaveSlotName = "tempmult";
+
+// Blanks out everything on a line that is not code - // comments, /* */
+// comments, and string and character literals - padding with spaces so that
+// what is left keeps its original columns. Without the blanking, a brace or an
+// equals sign inside a comment or a literal would move the brace count and the
+// assignment split below.
+std::string codeOnly(const std::string& line, bool& inBlockComment)
+{
+	std::string code;
+
+	for (std::string::size_type i = 0; i < line.size();) {
+		if (inBlockComment) {
+			if (line.compare(i, 2, "*/") == 0) {
+				inBlockComment = false;
+				i += 2;
+			}
+			else {
+				++i;
+			}
+			continue;
+		}
+
+		if (line.compare(i, 2, "//") == 0) {
+			break;
+		}
+		if (line.compare(i, 2, "/*") == 0) {
+			inBlockComment = true;
+			i += 2;
+			continue;
+		}
+		if (line[i] == '"' || line[i] == '\'') {
+			const char quote = line[i];
+			++i;
+			while (i < line.size() && line[i] != quote) {
+				i += line[i] == '\\' ? 2 : 1;
+			}
+			if (i < line.size()) {
+				++i;
+			}
+			continue;
+		}
+
+		code += line[i];
+		++i;
+	}
+
+	code.resize(line.size(), ' ');
+	return code;
+}
+
+// The first '=' on a line that assigns rather than compares, ignoring any
+// assignment nested inside brackets or parentheses, or npos if the line only
+// compares. Literals are already blanked by codeOnly.
+std::string::size_type topLevelAssign(const std::string& code)
+{
+	int brackets = 0;
+
+	for (std::string::size_type i = 0; i < code.size(); ++i) {
+		if (code[i] == '(' || code[i] == '[') {
+			++brackets;
+			continue;
+		}
+		if (code[i] == ')' || code[i] == ']') {
+			--brackets;
+			continue;
+		}
+		if (code[i] != '=' || brackets != 0) {
+			continue;
+		}
+
+		const char before = i == 0 ? '\0' : code[i - 1];
+		const char after = i + 1 == code.size() ? '\0' : code[i + 1];
+		if (before == '=' || before == '!' || before == '<' || before == '>' ||
+		    before == '+' || before == '-' || before == '*' || before == '/' ||
+		    before == '%' || before == '&' || before == '|' || before == '^' ||
+		    after == '=' || after == '>') {
+			continue;
+		}
+
+		return i;
+	}
+
+	return std::string::npos;
+}
+
+// One appearance of the save slot, and what the surrounding code does with it.
+struct SlotOccurrence
+{
+	int line = 0;          // 1-based, the way an editor would show it
+	int depth = 0;         // enclosing braces at the point the line was reached
+	bool declaration = false;
+	bool write = false;
+	bool read = false;
+	bool hasStatic = false;
+};
+
+// Every whole-word appearance of the save slot in one source file, split into
+// the three shapes it can take: the declaration, the two lines that store a
+// value into it, and the two lines that take one back out.
+std::vector<SlotOccurrence> findSaveSlot(const char* path, const std::string& name)
+{
+	std::vector<SlotOccurrence> found;
+
+	int depth = 0;
+	bool inBlockComment = false;
+	int lineNumber = 0;
+
+	for (const std::string& raw : readLines(path)) {
+		++lineNumber;
+		const std::string code = codeOnly(raw, inBlockComment);
+
+		for (const std::string::size_type at : wholeWordPositions(code, name)) {
+			SlotOccurrence occurrence;
+			occurrence.line = lineNumber;
+			occurrence.depth = depth;
+			occurrence.hasStatic = !wholeWordPositions(code, "static").empty();
+
+			const std::string::size_type assign = topLevelAssign(code);
+			if (assign != std::string::npos && at > assign) {
+				occurrence.read = true;
+			}
+			else if (firstWord(code) == name) {
+				occurrence.write = true;
+			}
+			else {
+				occurrence.declaration = true;
+			}
+
+			found.push_back(occurrence);
+		}
+
+		for (const char c : code) {
+			if (c == '{') {
+				++depth;
+			}
+			else if (c == '}') {
+				--depth;
+			}
+		}
+	}
+
+	return found;
 }
 
 // The globals still pending migration, reviewed one by one. Every scalar here
@@ -243,5 +433,56 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 		// assertion above passing for the wrong reason.
 		REQUIRE(globals.size() == 38);
 		REQUIRE(members.size() == 139);
+	}
+}
+
+TEST_CASE("the renderer's multiplier save slot is per call, not per process", "[gamestate][migration]")
+{
+	// A file-scope `static` here would still behave identically for a single
+	// GameState, which is why the slot could survive the migration unnoticed. What
+	// it would not survive is a second instance: the slot is one value for the
+	// whole process, so whichever GameState drew last would hand the other's
+	// multiplier back. DrawGLScene's per-instance isolation has to hold here too,
+	// and the way to hold it is that the slot has no static storage duration -
+	// the same shape Weapons.cpp and Sprite.cpp already use for theirs.
+	const std::vector<SlotOccurrence> slot = findSaveSlot(kGameDrawSource, kSaveSlotName);
+
+	SECTION("the slot is declared once, inside a function, with no static storage")
+	{
+		std::vector<std::string> offenders;
+		for (const SlotOccurrence& occurrence : slot) {
+			if (!occurrence.declaration) {
+				continue;
+			}
+			if (occurrence.depth < 1 || occurrence.hasStatic) {
+				offenders.push_back("line " + std::to_string(occurrence.line) +
+				                    " at brace depth " + std::to_string(occurrence.depth) +
+				                    (occurrence.hasStatic ? ", static" : ""));
+			}
+		}
+
+		INFO("shared save slots: " << join(offenders));
+		REQUIRE(offenders.empty());
+	}
+
+	SECTION("the save and restore pairs are still balanced")
+	{
+		// This is the property that makes the slot safe to give a fresh lifetime
+		// each call: it is only ever read back after the same call has stored into
+		// it. Two stores and two takes means neither store is left dangling, so
+		// nothing reads a slot that no live store filled.
+		int writes = 0;
+		int reads = 0;
+		int declarations = 0;
+		for (const SlotOccurrence& occurrence : slot) {
+			writes += occurrence.write ? 1 : 0;
+			reads += occurrence.read ? 1 : 0;
+			declarations += occurrence.declaration ? 1 : 0;
+		}
+
+		INFO("declarations: " << declarations << ", stores: " << writes << ", takes: " << reads);
+		REQUIRE(declarations == 1);
+		REQUIRE(writes == 2);
+		REQUIRE(reads == 2);
 	}
 }
