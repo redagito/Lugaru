@@ -955,7 +955,12 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets)
 // GameState, which it writes the captured key into, and the owner of the menu
 // textures, which Menu::Load reads. It gets this record on the heap and deletes
 // it on the way out. Both pointers stay valid because joinKeySelectThread()
-// runs before either object leaves scope.
+// runs before either object leaves scope. Anonymous, so neither name can collide
+// with another translation unit's: an ODR violation would be diagnosed as one
+// symbol quietly replacing another rather than as a redeclaration error.
+namespace
+{
+
 struct KeySelectArgs
 {
     GameState* gamestate;
@@ -1025,6 +1030,8 @@ int setKeySelected_thread(void* data)
     Menu::Load(gamestate, assets);
     return 0;
 }
+
+} // namespace
 
 // The key-capture thread holds a reference to the caller's GameState and to its
 // GameAssets, so its handle is retained and must be joined before either goes
