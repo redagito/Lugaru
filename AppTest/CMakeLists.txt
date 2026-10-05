@@ -31,6 +31,9 @@ target_compile_definitions(${PROJECT_NAME}
 	# The same guard reads App/source/GameDraw.cpp to check where the renderer's
 	# multiplier save slot lives.
 	PRIVATE LUGARU_APP_SOURCE_DIR="${CMAKE_SOURCE_DIR}/App/source"
+	# The asset ownership guard scans Lugaru/source as well: main.cpp is the other
+	# place that owns a GameAssets, and it is not under App.
+	PRIVATE LUGARU_LUGARU_SOURCE_DIR="${CMAKE_SOURCE_DIR}/Lugaru/source"
 )
 
 target_include_directories(${PROJECT_NAME}

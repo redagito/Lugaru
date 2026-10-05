@@ -46,6 +46,17 @@ const char* const kIncludeDir = LUGARU_APP_INCLUDE_DIR;
 const char* const kGameAssetsHeader = LUGARU_APP_INCLUDE_DIR "/GameAssets.hpp";
 const char* const kGameGlobalsSource = LUGARU_APP_SOURCE_DIR "/GameGlobals.cpp";
 
+// The .cpp trees, where a shared owner is just as easy to reintroduce as in a
+// header and much easier to hide: a file-scope static has no declaration
+// anywhere else to grep for, and the accessor can be one line in a file nobody
+// reads. App/source and Lugaru/source are both listed because the reverted
+// Light& light = SharedLight() anti-pattern lived in App/source, and main.cpp -
+// the other place that owns a GameAssets - is not in App.
+const char* const kSourceDirs[] = {
+	LUGARU_APP_SOURCE_DIR,
+	LUGARU_LUGARU_SOURCE_DIR,
+};
+
 // The eleven names that used to be declared extern in GameGlobals.h and defined
 // in GameGlobals.cpp. Each is paired with the declaration it has as a GameAssets
 // member, because "is it a member" is a different, weaker question than "is it
@@ -103,30 +114,71 @@ std::vector<std::string::size_type> wholeWordPositions(const std::string& text, 
 	return found;
 }
 
-// Every header in App/include, so a declaration added somewhere this file has
-// never heard of is still caught. Returns the paths it managed to read.
-std::vector<std::filesystem::path> readAllHeaders()
+// Every file under `root` whose extension is one of `extensions`, so a
+// declaration added somewhere this file has never heard of is still caught.
+// Returns the paths it managed to read, sorted so a failure names them in a
+// stable order.
+std::vector<std::filesystem::path> readAllFiles(const char* root, const std::vector<std::string>& extensions)
 {
 	std::vector<std::filesystem::path> paths;
 	std::error_code error;
 
 	for (const std::filesystem::directory_entry& entry :
-	     std::filesystem::recursive_directory_iterator(kIncludeDir, error)) {
+	     std::filesystem::recursive_directory_iterator(root, error)) {
 		if (!entry.is_regular_file(error)) {
 			continue;
 		}
 		const std::string extension = entry.path().extension().string();
-		if (extension == ".h" || extension == ".hpp") {
+		if (std::find(extensions.begin(), extensions.end(), extension) != extensions.end()) {
 			paths.push_back(entry.path());
 		}
 	}
 
 	if (error) {
-		FAIL("could not walk " << kIncludeDir << ": " << error.message());
+		FAIL("could not walk " << root << ": " << error.message());
 	}
 
 	std::sort(paths.begin(), paths.end());
 	return paths;
+}
+
+// Every header in App/include.
+std::vector<std::filesystem::path> readAllHeaders()
+{
+	return readAllFiles(kIncludeDir, { ".h", ".hpp" });
+}
+
+// Every implementation file in the .cpp trees.
+std::vector<std::filesystem::path> readAllSources()
+{
+	std::vector<std::filesystem::path> paths;
+	for (const char* root : kSourceDirs) {
+		const std::vector<std::filesystem::path> found = readAllFiles(root, { ".c", ".cpp", ".h", ".hpp" });
+		paths.insert(paths.end(), found.begin(), found.end());
+	}
+	std::sort(paths.begin(), paths.end());
+	return paths;
+}
+
+// The files among `paths` that hold shared storage for the owner: a static
+// instance, or a name that hands one back. Whole-word throughout, so
+// staticassert and a comment do not trip it.
+std::vector<std::string> sharedOwnerFiles(const std::vector<std::filesystem::path>& paths)
+{
+	std::vector<std::string> offenders;
+
+	for (const std::filesystem::path& path : paths) {
+		const std::string text = readText(path.string().c_str());
+		const bool shares = !wholeWordPositions(text, "static GameAssets").empty() ||
+		                    !wholeWordPositions(text, "SharedAssets").empty() ||
+		                    !wholeWordPositions(text, "sharedAssets").empty() ||
+		                    !wholeWordPositions(text, "gameAssets()").empty();
+		if (shares) {
+			offenders.push_back(path.string());
+		}
+	}
+
+	return offenders;
 }
 
 template <typename Paths>
@@ -231,23 +283,30 @@ TEST_CASE("nothing reaches the three objects behind a shared accessor", "[assets
 	// A static owner behind a SharedAssets()-style getter is the same global as
 	// the one just removed, only better hidden: it compiles, it is unreachable by
 	// grep for the names, and every frame still shares one instance. The owner has
-	// to arrive as a parameter, so no header may declare shared storage for it or
-	// a function that hands one back.
-	std::vector<std::string> offenders;
+	// to arrive as a parameter, so no file may declare shared storage for it or
+	// hand one back.
+	SECTION("no header declares shared storage for it")
+	{
+		const std::vector<std::string> offenders = sharedOwnerFiles(readAllHeaders());
 
-	for (const std::filesystem::path& path : readAllHeaders()) {
-		const std::string text = readText(path.string().c_str());
-		const bool shares = wholeWordPositions(text, "static GameAssets").size() != 0 ||
-		                    wholeWordPositions(text, "SharedAssets").size() != 0 ||
-		                    wholeWordPositions(text, "sharedAssets").size() != 0 ||
-		                    wholeWordPositions(text, "gameAssets()").size() != 0;
-		if (shares) {
-			offenders.push_back(path.filename().string());
-		}
+		INFO("headers exposing a shared owner: " << joinPaths(offenders));
+		REQUIRE(offenders.empty());
 	}
 
-	INFO("headers exposing a shared owner: " << joinPaths(offenders));
-	REQUIRE(offenders.empty());
+	SECTION("no source file declares shared storage for it")
+	{
+		// Headers are where the old external storage was declared, so a header scan
+		// is where the audit looked. A file-scope static and its one-line accessor
+		// need no header at all, though, and that is exactly how the reverted
+		// Light& light = SharedLight() was written.
+		const std::vector<std::filesystem::path> sources = readAllSources();
+		REQUIRE(sources.size() > 20);
+
+		const std::vector<std::string> offenders = sharedOwnerFiles(sources);
+
+		INFO("sources exposing a shared owner: " << joinPaths(offenders));
+		REQUIRE(offenders.empty());
+	}
 }
 
 TEST_CASE("GameGlobals.cpp no longer defines the three objects", "[assets][architecture]")
