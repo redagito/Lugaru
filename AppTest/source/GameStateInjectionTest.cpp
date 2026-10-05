@@ -16,7 +16,7 @@
 namespace
 {
 
-// Seeds for the thirty-three GameState members DefaultSettings writes. Every
+// Seeds for the thirty-six GameState members DefaultSettings writes. Every
 // member is seeded with the opposite of the value DefaultSettings pins, so that
 // the assertions in the test below are all observations of a transition the
 // function actually made. That matters most for the ten flags DefaultSettings
@@ -26,6 +26,9 @@ namespace
 // `fullscreen` and `devtools` are two of those, and are the sharpest cases: each
 // member default is false and DefaultSettings pins false, so only seeding one to
 // true turns "assert it is false afterwards" into a real observation.
+// `bloodtoggle` is that same hazard in a member that is not a flag: it is an int
+// tri-state whose own default is 0 and whose pinned value is also 0, so it needs
+// a non-zero seed or "assert it is 0 afterwards" would hold either way.
 const float kSeedGameSpeed = 0.5f;
 const unsigned short kSeedConsoleKey = 42;
 const unsigned short kSeedCrouchKey = 43;
@@ -39,6 +42,8 @@ const unsigned short kSeedThrowKey = 50;
 const unsigned short kSeedAttackKey = 51;
 const float kSeedMouseSensitivity = 0.5f;
 const float kSeedVolume = 0.25f;
+const int kSeedBloodToggle = 2;
+const int kSeedDetail = -1;
 const int kSeedNewDetail = -1;
 const int kSeedNewScreenWidth = -1;
 const int kSeedNewScreenHeight = -1;
@@ -65,7 +70,10 @@ void seedUnpinnedValues(GameState& gamestate)
 	gamestate.volume = kSeedVolume;
 	gamestate.ambientsound = false;
 	gamestate.decalstoggle = false;
+	gamestate.trilinear = false;
+	gamestate.bloodtoggle = kSeedBloodToggle;
 	gamestate.devtools = true;
+	gamestate.detail = kSeedDetail;
 	gamestate.newdetail = kSeedNewDetail;
 	gamestate.newscreenwidth = kSeedNewScreenWidth;
 	gamestate.newscreenheight = kSeedNewScreenHeight;
@@ -117,9 +125,9 @@ TEST_CASE("an injected GameState is the only instance a function writes to", "[g
 
 	DefaultSettings(injected);
 
-	// DefaultSettings writes thirty-three GameState members, and every one of
+	// DefaultSettings writes thirty-six GameState members, and every one of
 	// them lands on the instance it was handed. If it regressed to writing a
-	// hidden shared instance instead, all thirty-three of these would still
+	// hidden shared instance instead, all thirty-six of these would still
 	// hold their seed values and fail here.
 	REQUIRE(injected.floatjump == false);
 	REQUIRE(injected.autoslomo == true);
@@ -141,7 +149,10 @@ TEST_CASE("an injected GameState is the only instance a function writes to", "[g
 	REQUIRE(injected.volume == 0.8f);
 	REQUIRE(injected.ambientsound == true);
 	REQUIRE(injected.decalstoggle == true);
+	REQUIRE(injected.trilinear == true);
+	REQUIRE(injected.bloodtoggle == 0);
 	REQUIRE(injected.devtools == false);
+	REQUIRE(injected.detail == 2);
 	REQUIRE(injected.newdetail == 2);
 	REQUIRE(injected.newscreenwidth == 1024);
 	REQUIRE(injected.newscreenheight == 768);
@@ -178,7 +189,10 @@ TEST_CASE("an injected GameState is the only instance a function writes to", "[g
 	REQUIRE(bystander.volume == kSeedVolume);
 	REQUIRE(bystander.ambientsound == false);
 	REQUIRE(bystander.decalstoggle == false);
+	REQUIRE(bystander.trilinear == false);
+	REQUIRE(bystander.bloodtoggle == kSeedBloodToggle);
 	REQUIRE(bystander.devtools == true);
+	REQUIRE(bystander.detail == kSeedDetail);
 	REQUIRE(bystander.newdetail == kSeedNewDetail);
 	REQUIRE(bystander.newscreenwidth == kSeedNewScreenWidth);
 	REQUIRE(bystander.newscreenheight == kSeedNewScreenHeight);
@@ -201,7 +215,7 @@ TEST_CASE("an injected GameState is the only instance a function writes to", "[g
 
 		DefaultSettings(bystander);
 
-		// The call landed on all thirty-three members of the instance it was given.
+		// The call landed on all thirty-six members of the instance it was given.
 		REQUIRE(bystander.floatjump == false);
 		REQUIRE(bystander.autoslomo == true);
 		REQUIRE(bystander.invertmouse == false);
@@ -222,7 +236,10 @@ TEST_CASE("an injected GameState is the only instance a function writes to", "[g
 		REQUIRE(bystander.volume == 0.8f);
 		REQUIRE(bystander.ambientsound == true);
 		REQUIRE(bystander.decalstoggle == true);
+		REQUIRE(bystander.trilinear == true);
+		REQUIRE(bystander.bloodtoggle == 0);
 		REQUIRE(bystander.devtools == false);
+		REQUIRE(bystander.detail == 2);
 		REQUIRE(bystander.newdetail == 2);
 		REQUIRE(bystander.newscreenwidth == 1024);
 		REQUIRE(bystander.newscreenheight == 768);
@@ -257,7 +274,10 @@ TEST_CASE("an injected GameState is the only instance a function writes to", "[g
 		REQUIRE(injected.volume == kSeedVolume);
 		REQUIRE(injected.ambientsound == false);
 		REQUIRE(injected.decalstoggle == false);
+		REQUIRE(injected.trilinear == false);
+		REQUIRE(injected.bloodtoggle == kSeedBloodToggle);
 		REQUIRE(injected.devtools == true);
+		REQUIRE(injected.detail == kSeedDetail);
 		REQUIRE(injected.newdetail == kSeedNewDetail);
 		REQUIRE(injected.newscreenwidth == kSeedNewScreenWidth);
 		REQUIRE(injected.newscreenheight == kSeedNewScreenHeight);
