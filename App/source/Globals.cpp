@@ -32,8 +32,6 @@ SDL_Window* sdlwindow;
 Frustum frustum;
 Weapons weapons;
 Vector3 windvector;
-int whichjointstartarray[26] = { 0 };
-int whichjointendarray[26] = { 0 };
 
 StereoMode stereomode = stereoNone;
 StereoMode newstereomode = stereoNone;

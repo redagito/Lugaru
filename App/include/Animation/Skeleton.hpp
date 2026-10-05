@@ -78,7 +78,7 @@ public:
 	bool freefall;
 
 	void FindForwards();
-	float DoConstraints(Vector3* coords, float* scale, bool tutorialActive, bool bloodtoggle, float timemultiplier, Terrain& terrain, int environment, float camerashake, bool freeze, int detail, int whichjointstartarray[26]);
+	float DoConstraints(Vector3* coords, float* scale, bool tutorialActive, bool bloodtoggle, float timemultiplier, Terrain& terrain, int environment, float camerashake, bool freeze, int detail, int whichjointstartarray[26], int whichjointendarray[26]);
 	void DoGravity(float* scale, float timemultiplier, float gravity);
 	void FindRotationMuscle(int which, int animation);
 	void Load(const std::string& fileName, const std::string& lowfileName, const std::string& clothesfileName, 

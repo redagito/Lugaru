@@ -460,83 +460,83 @@ void Game::InitGame(GameState& gamestate)
 
 	Account::loadFile(Folders::getUserSavePath());
 
-	whichjointstartarray[0] = righthip;
-	whichjointendarray[0] = rightfoot;
+	gamestate.whichjointstartarray[0] = righthip;
+	gamestate.whichjointendarray[0] = rightfoot;
 
-	whichjointstartarray[1] = righthip;
-	whichjointendarray[1] = rightankle;
+	gamestate.whichjointstartarray[1] = righthip;
+	gamestate.whichjointendarray[1] = rightankle;
 
-	whichjointstartarray[2] = righthip;
-	whichjointendarray[2] = rightknee;
+	gamestate.whichjointstartarray[2] = righthip;
+	gamestate.whichjointendarray[2] = rightknee;
 
-	whichjointstartarray[3] = rightknee;
-	whichjointendarray[3] = rightankle;
+	gamestate.whichjointstartarray[3] = rightknee;
+	gamestate.whichjointendarray[3] = rightankle;
 
-	whichjointstartarray[4] = rightankle;
-	whichjointendarray[4] = rightfoot;
+	gamestate.whichjointstartarray[4] = rightankle;
+	gamestate.whichjointendarray[4] = rightfoot;
 
-	whichjointstartarray[5] = lefthip;
-	whichjointendarray[5] = leftfoot;
+	gamestate.whichjointstartarray[5] = lefthip;
+	gamestate.whichjointendarray[5] = leftfoot;
 
-	whichjointstartarray[6] = lefthip;
-	whichjointendarray[6] = leftankle;
+	gamestate.whichjointstartarray[6] = lefthip;
+	gamestate.whichjointendarray[6] = leftankle;
 
-	whichjointstartarray[7] = lefthip;
-	whichjointendarray[7] = leftknee;
+	gamestate.whichjointstartarray[7] = lefthip;
+	gamestate.whichjointendarray[7] = leftknee;
 
-	whichjointstartarray[8] = leftknee;
-	whichjointendarray[8] = leftankle;
+	gamestate.whichjointstartarray[8] = leftknee;
+	gamestate.whichjointendarray[8] = leftankle;
 
-	whichjointstartarray[9] = leftankle;
-	whichjointendarray[9] = leftfoot;
+	gamestate.whichjointstartarray[9] = leftankle;
+	gamestate.whichjointendarray[9] = leftfoot;
 
-	whichjointstartarray[10] = abdomen;
-	whichjointendarray[10] = rightshoulder;
+	gamestate.whichjointstartarray[10] = abdomen;
+	gamestate.whichjointendarray[10] = rightshoulder;
 
-	whichjointstartarray[11] = abdomen;
-	whichjointendarray[11] = rightelbow;
+	gamestate.whichjointstartarray[11] = abdomen;
+	gamestate.whichjointendarray[11] = rightelbow;
 
-	whichjointstartarray[12] = abdomen;
-	whichjointendarray[12] = rightwrist;
+	gamestate.whichjointstartarray[12] = abdomen;
+	gamestate.whichjointendarray[12] = rightwrist;
 
-	whichjointstartarray[13] = abdomen;
-	whichjointendarray[13] = righthand;
+	gamestate.whichjointstartarray[13] = abdomen;
+	gamestate.whichjointendarray[13] = righthand;
 
-	whichjointstartarray[14] = rightshoulder;
-	whichjointendarray[14] = rightelbow;
+	gamestate.whichjointstartarray[14] = rightshoulder;
+	gamestate.whichjointendarray[14] = rightelbow;
 
-	whichjointstartarray[15] = rightelbow;
-	whichjointendarray[15] = rightwrist;
+	gamestate.whichjointstartarray[15] = rightelbow;
+	gamestate.whichjointendarray[15] = rightwrist;
 
-	whichjointstartarray[16] = rightwrist;
-	whichjointendarray[16] = righthand;
+	gamestate.whichjointstartarray[16] = rightwrist;
+	gamestate.whichjointendarray[16] = righthand;
 
-	whichjointstartarray[17] = abdomen;
-	whichjointendarray[17] = leftshoulder;
+	gamestate.whichjointstartarray[17] = abdomen;
+	gamestate.whichjointendarray[17] = leftshoulder;
 
-	whichjointstartarray[18] = abdomen;
-	whichjointendarray[18] = leftelbow;
+	gamestate.whichjointstartarray[18] = abdomen;
+	gamestate.whichjointendarray[18] = leftelbow;
 
-	whichjointstartarray[19] = abdomen;
-	whichjointendarray[19] = leftwrist;
+	gamestate.whichjointstartarray[19] = abdomen;
+	gamestate.whichjointendarray[19] = leftwrist;
 
-	whichjointstartarray[20] = abdomen;
-	whichjointendarray[20] = lefthand;
+	gamestate.whichjointstartarray[20] = abdomen;
+	gamestate.whichjointendarray[20] = lefthand;
 
-	whichjointstartarray[21] = leftshoulder;
-	whichjointendarray[21] = leftelbow;
+	gamestate.whichjointstartarray[21] = leftshoulder;
+	gamestate.whichjointendarray[21] = leftelbow;
 
-	whichjointstartarray[22] = leftelbow;
-	whichjointendarray[22] = leftwrist;
+	gamestate.whichjointstartarray[22] = leftelbow;
+	gamestate.whichjointendarray[22] = leftwrist;
 
-	whichjointstartarray[23] = leftwrist;
-	whichjointendarray[23] = lefthand;
+	gamestate.whichjointstartarray[23] = leftwrist;
+	gamestate.whichjointendarray[23] = lefthand;
 
-	whichjointstartarray[24] = abdomen;
-	whichjointendarray[24] = neck;
+	gamestate.whichjointstartarray[24] = abdomen;
+	gamestate.whichjointendarray[24] = neck;
 
-	whichjointstartarray[25] = neck;
-	whichjointendarray[25] = head;
+	gamestate.whichjointstartarray[25] = neck;
+	gamestate.whichjointendarray[25] = head;
 
 	FadeLoadingScreen(0, gamestate);
 

@@ -271,6 +271,15 @@ struct GameState
 	// squared distance beyond which objects are culled
 	float playerdist = 0;
 
+	// skeletal animation: which joint each bone spans. Row i of the two tables
+	// together describe one bone, the joint it starts from and the joint it ends
+	// at, so the tables are only meaningful as a pair and move as one. They are
+	// built once per session by Game::InitGame and read for the rest of it, and
+	// Skeleton::DoConstraints walks them to a fixed 26 rows, so the extent is
+	// part of the contract rather than a stored count.
+	int whichjointstartarray[26] = {};
+	int whichjointendarray[26] = {};
+
 	// session control
 	int tryquit = 0;
 	int endgame = 0;

@@ -6,7 +6,6 @@
 
 #include <type_traits>
 
-#include "Globals.h"
 #include "GameState.hpp"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
@@ -1493,15 +1492,17 @@ TEST_CASE("tranche 8 GameState members are per instance", "[gamestate]")
 //
 // This tranche is also where the asymmetry goes. DoConstraints received the start
 // table as a parameter while reaching for the end table as a global, so the leaf
-// had two read paths for one piece of data. The next tranche gives both tables to
+// had two read paths for one piece of data. This tranche gives both tables to
 // GameState and threads both through that parameter list.
-TEST_CASE("the tranche 9 skeletal joint tables start at the values GameState will carry", "[gamestate]")
+TEST_CASE("GameState tranche 9 members start at their historical global defaults", "[gamestate]")
 {
+	GameState s;
+
 	SECTION("no bone starts at a joint yet")
 	{
 		for (int i = 0; i < 26; i++) {
 			INFO("joint row " << i);
-			REQUIRE(whichjointstartarray[i] == 0);
+			REQUIRE(s.whichjointstartarray[i] == 0);
 		}
 	}
 
@@ -1509,13 +1510,89 @@ TEST_CASE("the tranche 9 skeletal joint tables start at the values GameState wil
 	{
 		for (int i = 0; i < 26; i++) {
 			INFO("joint row " << i);
-			REQUIRE(whichjointendarray[i] == 0);
+			REQUIRE(s.whichjointendarray[i] == 0);
 		}
 	}
 
 	SECTION("declared types are preserved from the migrated globals")
 	{
-		REQUIRE(std::is_same<decltype(whichjointstartarray), int[26]>::value);
-		REQUIRE(std::is_same<decltype(whichjointendarray), int[26]>::value);
+		REQUIRE(std::is_same<decltype(s.whichjointstartarray), int[26]>::value);
+		REQUIRE(std::is_same<decltype(s.whichjointendarray), int[26]>::value);
+	}
+}
+
+// Moving the tables into GameState is only worth anything if two GameStates stop
+// sharing them, so this is the property under test rather than the defaults above.
+// An array member that kept static storage duration, or that pointed at one shared
+// block, would still behave identically for the single instance the game
+// constructs, and the bug would only ever show up in a unit test.
+//
+// Every write below is seeded with a value the default does not hold, and every
+// row is written at an index other than 0. Seeding with 0 would let the assertions
+// pass against a table the writer never reached - which is precisely what would
+// happen if the two members accidentally aliased one buffer that the test then
+// failed to distinguish, since a defaulted aliased table reads zero from either
+// name. Writing only index 0 would leave the other 25 rows of each table
+// unobserved.
+//
+// The two tables are seeded with different values on purpose. Aliasing a member
+// to a shared block would make them one table of 26, and a test that wrote the
+// same number into both and compared against zero would not notice; seeding row 7
+// of one to 70 and row 7 of the other to 700 makes any such sharing visible on
+// whichever read checks first.
+TEST_CASE("tranche 9 GameState members are per instance", "[gamestate]")
+{
+	GameState a;
+	GameState b;
+
+	SECTION("writing one instance's joint tables leaves the other's at its defaults")
+	{
+		a.whichjointstartarray[7] = 70;
+		a.whichjointstartarray[0] = 71;
+		a.whichjointstartarray[25] = 72;
+		a.whichjointendarray[7] = 700;
+		a.whichjointendarray[0] = 701;
+		a.whichjointendarray[25] = 702;
+
+		for (int i = 0; i < 26; i++) {
+			INFO("joint row " << i);
+			REQUIRE(b.whichjointstartarray[i] == 0);
+			REQUIRE(b.whichjointendarray[i] == 0);
+		}
+	}
+
+	SECTION("the two tables of one instance do not share storage")
+	{
+		// The pair is one bone per row, so a start index and an end index written
+		// to the same slot would mean the end column overwrote the start column
+		// and every bone in the skeleton collapsed onto its own far joint.
+		a.whichjointstartarray[3] = 11;
+		a.whichjointendarray[3] = 22;
+
+		REQUIRE(a.whichjointstartarray[3] == 11);
+		REQUIRE(a.whichjointendarray[3] == 22);
+
+		for (int i = 0; i < 26; i++) {
+			if (i == 3) {
+				continue;
+			}
+
+			INFO("joint row " << i);
+			REQUIRE(a.whichjointstartarray[i] == 0);
+			REQUIRE(a.whichjointendarray[i] == 0);
+		}
+	}
+
+	SECTION("a third instance also starts clean")
+	{
+		a.whichjointstartarray[17] = 5;
+		a.whichjointendarray[17] = 6;
+
+		GameState c;
+		for (int i = 0; i < 26; i++) {
+			INFO("joint row " << i);
+			REQUIRE(c.whichjointstartarray[i] == 0);
+			REQUIRE(c.whichjointendarray[i] == 0);
+		}
 	}
 }

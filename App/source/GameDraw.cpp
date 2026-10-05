@@ -423,7 +423,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 							Person::players[k]->occluded = 0;
 						}
 						if (Person::players[k]->occluded < 25) {
-							Person::players[k]->DrawSkeleton(terrain, Tutorial::active, gamestate.multiplier, whichjointstartarray, gamestate);
+							Person::players[k]->DrawSkeleton(terrain, Tutorial::active, gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
 						}
 					}
 				}
@@ -497,7 +497,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 						Person::players[k]->occluded = 0;
 					}
 					if (Person::players[k]->occluded < 25) {
-						Person::players[k]->DrawSkeleton(terrain, Tutorial::active, gamestate.multiplier, whichjointstartarray, gamestate);
+						Person::players[k]->DrawSkeleton(terrain, Tutorial::active, gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
 					}
 				}
 			}
@@ -1608,7 +1608,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 	glDrawBuffer(GL_BACK);
 	glReadBuffer(GL_BACK);
 
-	weapons.DoStuff(Tutorial::active, Dialog::inDialog(), whichjointstartarray, []() { award_bonus(0, ninja); }, []() { award_bonus(0, Bullseyebonus); }, gamestate);
+	weapons.DoStuff(Tutorial::active, Dialog::inDialog(), gamestate.whichjointstartarray, []() { award_bonus(0, ninja); }, []() { award_bonus(0, Bullseyebonus); }, gamestate);
 
 	if (drawtoggle == 2) {
 		drawtoggle = 0;

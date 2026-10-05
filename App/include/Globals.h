@@ -14,7 +14,5 @@ extern SDL_Window* sdlwindow;
 extern Frustum frustum;
 extern Weapons weapons;
 extern Vector3 windvector;
-extern int whichjointstartarray[26];
-extern int whichjointendarray[26];
 extern StereoMode stereomode;
 extern StereoMode newstereomode;

@@ -1824,12 +1824,12 @@ void Person::RagDoll(bool checkcollision, Terrain& terrainref, bool tutorialActi
 			skeleton.joints[jointindex].velocity = 0;
 			skeleton.joints[jointindex].velchange = 0;
 		}
-		skeleton.DoConstraints(&coords, &scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray);
+		skeleton.DoConstraints(&coords, &scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray, gamestate.whichjointendarray);
 		if (Animation::animations[animCurrent].height == lowheight || Animation::animations[animTarget].height == lowheight) {
-			skeleton.DoConstraints(&coords, &scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray);
-			skeleton.DoConstraints(&coords, &scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray);
-			skeleton.DoConstraints(&coords, &scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray);
-			skeleton.DoConstraints(&coords, &scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray);
+			skeleton.DoConstraints(&coords, &scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray, gamestate.whichjointendarray);
+			skeleton.DoConstraints(&coords, &scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray, gamestate.whichjointendarray);
+			skeleton.DoConstraints(&coords, &scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray, gamestate.whichjointendarray);
+			skeleton.DoConstraints(&coords, &scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray, gamestate.whichjointendarray);
 		}
 
 		ragdollspeed = targetFrame().speed * 2;
@@ -5303,7 +5303,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 
 		skeleton.DoGravity(&scale, timemultiplier, gamestate.gravity);
 		float damageamount;
-		damageamount = skeleton.DoConstraints(&coords, &scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray) * 5;
+		damageamount = skeleton.DoConstraints(&coords, &scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray, gamestate.whichjointendarray) * 5;
 		if (damage > damagetolerance - damageamount && !dead && (bonus != spinecrusher || bonustime > 1) && (bonus != style || bonustime > 1) && (bonus != cannon || bonustime > 1)) {
 			award_bonus(id, deepimpact);
 		}
@@ -6383,7 +6383,7 @@ static void IKHelper(Person* p, float interp, Terrain& terrainref, bool tutorial
 	p->jointPos(rightknee) = (p->jointPos(rightfoot) + change2) / 2 + (p->jointPos(rightknee)) / 2;
 
 	// fix up skeleton now that we've moved body parts?
-	p->skeleton.DoConstraints(&p->coords, &p->scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray);
+	p->skeleton.DoConstraints(&p->coords, &p->scale, tutorialActive, gamestate.bloodtoggle, timemultiplier, terrainref, gamestate.environment, gamestate.camerashake, gamestate.freeze, gamestate.detail, jointstartarray, gamestate.whichjointendarray);
 }
 
 /* EFFECT

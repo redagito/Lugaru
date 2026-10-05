@@ -376,8 +376,7 @@ const std::set<std::string> kPendingGlobals = {
 	"viewer", "viewerfacing",
 	"light", "terrain",
 	"sdlwindow", "frustum", "weapons",
-	"windvector", "whichjointstartarray",
-	"whichjointendarray", "stereomode",
+	"windvector", "stereomode",
 	"newstereomode",
 
 	// App/include/GameGlobals.h
@@ -430,8 +429,8 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 	{
 		// Without this, a parser that quietly matched nothing would leave every
 		// assertion above passing for the wrong reason.
-		REQUIRE(globals.size() == 34);
-		REQUIRE(members.size() == 143);
+		REQUIRE(globals.size() == 32);
+		REQUIRE(members.size() == 145);
 	}
 }
 

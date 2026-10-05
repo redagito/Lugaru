@@ -102,7 +102,7 @@ void Skeleton::FindForwards()
  * 
  * Tutorial::active
  */
-float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive, bool bloodtoggleflag, float timemultiplier, Terrain& terrainref, int envtype, float shakeamount, bool freeze, int detaillevel, int jointstartarray[26])
+float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive, bool bloodtoggleflag, float timemultiplier, Terrain& terrainref, int envtype, float shakeamount, bool freeze, int detaillevel, int jointstartarray[26], int jointendarray[26])
 {
 	const float elasticity = .3f;
 	Vector3 bounceness;
@@ -441,12 +441,12 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 				for (i = 0; i < 26; i++) {
 					//Make this less stupid
 					Vector3 start = joints[jointlabels[jointstartarray[i]]].position * (*scale) + *coords;
-					Vector3 end = joints[jointlabels[whichjointendarray[i]]].position * (*scale) + *coords;
+					Vector3 end = joints[jointlabels[jointendarray[i]]].position * (*scale) + *coords;
 					whichhit = Object::objects[k]->model.LineCheckSlidePossible(&start, &end, &Object::objects[k]->position, &Object::objects[k]->yaw);
 					if (whichhit != -1) {
-						joints[jointlabels[whichjointendarray[i]]].position = (end - *coords) / (*scale);
+						joints[jointlabels[jointendarray[i]]].position = (end - *coords) / (*scale);
 						for (unsigned j = 0; j < muscles.size(); j++) {
-							if ((muscles[j].parent1->label == jointstartarray[i] && muscles[j].parent2->label == whichjointendarray[i]) || (muscles[j].parent2->label == jointstartarray[i] && muscles[j].parent1->label == whichjointendarray[i])) {
+							if ((muscles[j].parent1->label == jointstartarray[i] && muscles[j].parent2->label == jointendarray[i]) || (muscles[j].parent2->label == jointstartarray[i] && muscles[j].parent1->label == jointendarray[i])) {
 								muscles[j].DoConstraint(spinny, timemultiplier, freeze);
 							}
 						}
