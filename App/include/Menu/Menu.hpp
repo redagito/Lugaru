@@ -73,15 +73,16 @@ public:
 	static int getSelected(int mousex, int mousey);
 	static void drawItems(GameState& gamestate, GameAssets& assets);
 
-	static void Load(GameState& gamestate);
+	static void Load(GameState& gamestate, GameAssets& assets);
 	static void Tick(GameState& gamestate, GameAssets& assets);
 	static void updateSettingsMenu(GameState& gamestate);
 	static void updateStereoConfigMenu(GameState& gamestate);
 	static void updateControlsMenu(GameState& gamestate);
-	static void setKeySelected(GameState& gamestate);
+	static void setKeySelected(GameState& gamestate, GameAssets& assets);
 	/**
 	 * Waits for the key-capture thread started by setKeySelected() to finish.
-	 * Must be called before the GameState that thread references is destroyed.
+	 * Must be called before the GameState and GameAssets that thread references
+	 * are destroyed.
 	 */
 	static void joinKeySelectThread();
 	static void startChallengeLevel(int challengelevel, GameState& gamestate, GameAssets& assets);

@@ -37,6 +37,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 #include <string>
 
+struct GameAssets;
 struct GameState;
 
 #define passivetype 0
@@ -342,11 +343,11 @@ public:
 
     bool jumpclimb;
 
-    Person(GameState& gamestate);
-    Person(FILE*, int, unsigned, GameState& gamestate);
-    Person(Json::Value, int, unsigned, GameState& gamestate);
+    Person(GameState& gamestate, GameAssets& assets);
+    Person(FILE*, int, unsigned, GameState& gamestate, GameAssets& assets);
+    Person(Json::Value, int, unsigned, GameState& gamestate, GameAssets& assets);
 
-    void skeletonLoad(bool tutorialActive, GameState& gamestate);
+    void skeletonLoad(bool tutorialActive, GameState& gamestate, GameAssets& assets);
 
     // convenience functions
     inline Joint& joint(int bodypart) { return skeleton.joints[skeleton.jointlabels[bodypart]]; }
@@ -359,7 +360,7 @@ public:
     float getProportion(int part) const;
     Vector3 getProportionXYZ(int part, GameState& gamestate) const;
 
-    void changeCreatureType(person_type type, bool tutorialActive, GameState& gamestate);
+    void changeCreatureType(person_type type, bool tutorialActive, GameState& gamestate, GameAssets& assets);
 
     void CheckKick(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
     void CatchFire(GameState& gamestate);
@@ -413,18 +414,18 @@ public:
     }
 
     int SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
-    int DrawSkeleton(Terrain& terrain, bool tutorialActive, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
+    int DrawSkeleton(Terrain& terrain, bool tutorialActive, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
     void Puff(int whichlabel, GameState& gamestate);
     void FootLand(bodypart whichfoot, float opacity, Terrain& terrain, GameState& gamestate);
-    void DoStuff(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
+    void DoStuff(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
     void setTargetAnimation(int);
     void DoAnimations(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
     void RagDoll(bool checkcollision, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
 
     void takeWeapon(int weaponId);
 
-    bool addClothes(const int& clothesId, GameState& gamestate);
-    void addClothes(GameState& gamestate);
+    bool addClothes(const int& clothesId, GameState& gamestate, GameAssets& assets);
+    void addClothes(GameState& gamestate, GameAssets& assets);
 
     void doAI(const Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, GameState& gamestate);
 

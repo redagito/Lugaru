@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "GameAssets.hpp"
 #include "GameState.hpp"
 #include "Objects/Person.hpp"
 #include "Objects/PersonType.hpp"
@@ -27,11 +28,14 @@ void ensurePersonTypesLoaded()
 std::shared_ptr<Person> makePerson()
 {
 	ensurePersonTypesLoaded();
-	// Person only needs the GameState for its loading-progress callback, which it
-	// consumes synchronously in its constructor. Static so it unambiguously
-	// outlives every Person the helper hands out.
+	// Person only needs the GameState and the GameAssets for their loading-progress
+	// callback, which it consumes synchronously in its constructor. Both static so
+	// they unambiguously outlive every Person the helper hands out. A GameAssets
+	// that never loads anything holds no GL object, so building and dropping one
+	// here needs no context.
 	static GameState gamestate;
-	return std::make_shared<Person>(gamestate);
+	static GameAssets assets;
+	return std::make_shared<Person>(gamestate, assets);
 }
 
 } // namespace

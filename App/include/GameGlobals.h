@@ -9,19 +9,7 @@
 
 namespace Game
 {
-	extern Texture terraintexture;
-	extern Texture terraintexture2;
-	extern Texture loadscreentexture;
-	extern Texture Mapcircletexture;
-	extern Texture Maparrowtexture;
-	extern Texture Mapboxtexture;
-	extern Texture cursortexture;
-	extern GLuint screentexture;
-	extern GLuint screentexture2;
-	extern Texture Mainmenuitems[10];
-
 	extern Model hawk;
-	extern Texture hawktexture;
 
 	extern Model eye;
 	extern Model cornea;

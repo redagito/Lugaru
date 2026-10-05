@@ -16,6 +16,13 @@
 // as SkyBox* or Text* would compile and run exactly like the old globals, so
 // nothing below would notice that the new/delete pair was back.
 //
+// The same reasoning covers the eleven shared textures that used to sit in
+// GameGlobals.h beside them. A Texture is a shared_ptr to a GL object, so
+// declaring one extern put the whole handle in reach of every file with no
+// owner, and GameState cannot take it over for the same reason as the three
+// above. They join GameAssets, by value, which is why the header must show no
+// pointer to any of them either.
+//
 // This test therefore reads the sources as text rather than exercising the
 // objects, which cannot be built without a context. The test project is told
 // where App/include and App/source live (LUGARU_APP_INCLUDE_DIR,
@@ -38,6 +45,30 @@ namespace
 const char* const kIncludeDir = LUGARU_APP_INCLUDE_DIR;
 const char* const kGameAssetsHeader = LUGARU_APP_INCLUDE_DIR "/GameAssets.hpp";
 const char* const kGameGlobalsSource = LUGARU_APP_SOURCE_DIR "/GameGlobals.cpp";
+
+// The eleven names that used to be declared extern in GameGlobals.h and defined
+// in GameGlobals.cpp. Each is paired with the declaration it has as a GameAssets
+// member, because "is it a member" is a different, weaker question than "is it
+// a member by value".
+struct TextureGlobal
+{
+	const char* name;
+	const char* declaration;
+};
+
+const TextureGlobal kTextureGlobals[] = {
+	{ "terraintexture", "Texture terraintexture;" },
+	{ "terraintexture2", "Texture terraintexture2;" },
+	{ "loadscreentexture", "Texture loadscreentexture;" },
+	{ "Mapcircletexture", "Texture Mapcircletexture;" },
+	{ "Maparrowtexture", "Texture Maparrowtexture;" },
+	{ "Mapboxtexture", "Texture Mapboxtexture;" },
+	{ "cursortexture", "Texture cursortexture;" },
+	{ "hawktexture", "Texture hawktexture;" },
+	{ "Mainmenuitems", "Texture Mainmenuitems[10];" },
+	{ "screentexture", "GLuint screentexture" },
+	{ "screentexture2", "GLuint screentexture2" },
+};
 
 std::string readText(const char* path)
 {
@@ -244,7 +275,95 @@ TEST_CASE("GameGlobals.cpp no longer defines the three objects", "[assets][archi
 	SECTION("the rest of the file is untouched")
 	{
 		// Guards against 'remove the globals' being done by emptying the file.
-		REQUIRE(text.find("Mainmenuitems") != std::string::npos);
+		REQUIRE(text.find("consoletext") != std::string::npos);
 		REQUIRE(text.find("namespace Game") != std::string::npos);
+	}
+}
+
+TEST_CASE("the shared textures are members of GameAssets, not globals", "[assets][architecture]")
+{
+	SECTION("no header declares one of them extern")
+	{
+		// An extern declaration is what let the draw and load paths name these
+		// with no owner in sight. The owner is a struct passed by reference now,
+		// so nothing under App/include may declare them at all.
+		std::vector<std::string> offenders;
+		for (const std::filesystem::path& path : readAllHeaders()) {
+			const std::string text = readText(path.string().c_str());
+			for (const TextureGlobal& global : kTextureGlobals) {
+				if (text.find(std::string("extern Texture ") + global.name) != std::string::npos ||
+				    text.find(std::string("extern GLuint ") + global.name) != std::string::npos) {
+					offenders.push_back(path.filename().string() + ": " + global.name);
+				}
+			}
+		}
+
+		INFO("headers still declaring a texture global: " << joinPaths(offenders));
+		REQUIRE(offenders.empty());
+	}
+
+	SECTION("no header points at one of them")
+	{
+		// Stricter than the extern sweep on purpose: a Texture* member of some
+		// other owner, or a forward declaration kept only so a header can name
+		// one, is the same escape hatch spelled differently.
+		std::vector<std::string> offenders;
+		for (const std::filesystem::path& path : readAllHeaders()) {
+			const std::string text = readText(path.string().c_str());
+			if (text.find("Texture*") != std::string::npos ||
+			    text.find("GLuint*") != std::string::npos) {
+				offenders.push_back(path.filename().string());
+			}
+		}
+
+		INFO("headers still pointing at a texture: " << joinPaths(offenders));
+		REQUIRE(offenders.empty());
+	}
+
+	SECTION("GameAssets holds every one of them by value")
+	{
+		REQUIRE(std::filesystem::exists(kGameAssetsHeader));
+
+		const std::string text = readText(kGameAssetsHeader);
+		for (const TextureGlobal& global : kTextureGlobals) {
+			CAPTURE(global.name);
+			INFO("missing declaration: " << global.declaration);
+			REQUIRE(text.find(global.declaration) != std::string::npos);
+		}
+	}
+
+	SECTION("GameAssets reaches none of them through a pointer")
+	{
+		// The assertion that pins "by value". A Texture* or GLuint* member would
+		// compile, draw and load exactly like the globals it replaced, and
+		// nothing else here would notice the owner had gone missing again.
+		const std::string text = readText(kGameAssetsHeader);
+
+		INFO("GameAssets.hpp still reaches a texture through a pointer");
+		REQUIRE(text.find("Texture*") == std::string::npos);
+		REQUIRE(text.find("GLuint*") == std::string::npos);
+	}
+}
+
+TEST_CASE("GameGlobals.cpp no longer defines the shared textures", "[assets][architecture]")
+{
+	// The definitions sat next to the models still pending migration, which made
+	// them easy to leave behind. Only the eleven may have gone: anything else in
+	// that file is a later tranche, and the empty-file guard above still catches
+	// a wholesale rewrite.
+	const std::string text = readText(kGameGlobalsSource);
+
+	SECTION("none of the eleven is left")
+	{
+		for (const TextureGlobal& global : kTextureGlobals) {
+			CAPTURE(global.name);
+			REQUIRE(wholeWordPositions(text, global.name).empty());
+		}
+	}
+
+	SECTION("the models that are still pending are")
+	{
+		REQUIRE(text.find("Model hawk;") != std::string::npos);
+		REQUIRE(text.find("Model iris;") != std::string::npos);
 	}
 }

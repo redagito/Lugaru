@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "GameGlobals.h"
 #include "Globals.h"
 #include "Game.hpp"
+#include "GameAssets.hpp"
 #include "GameState.hpp"
 #include "Utils/Folders.hpp"
 
@@ -57,7 +58,7 @@ std::vector<std::string> ListCampaigns()
 	return campaignNames;
 }
 
-void LoadCampaign(GameState& gamestate)
+void LoadCampaign(GameState& gamestate, GameAssets& assets)
 {
 	if (!Account::hasActive()) {
 		return;
@@ -70,7 +71,7 @@ void LoadCampaign(GameState& gamestate)
 		}
 		std::cerr << "Could not find campaign \"" << Account::active().getCurrentCampaign() << "\", falling back to main." << std::endl;
 		Account::active().setCurrentCampaign("main");
-		return LoadCampaign(gamestate);
+		return LoadCampaign(gamestate, assets);
 	}
 	ipstream.ignore(256, ':');
 	int numlevels;
@@ -94,10 +95,10 @@ void LoadCampaign(GameState& gamestate)
 
 	std::ifstream test(Folders::getResourcePath("Textures/" + Account::active().getCurrentCampaign() + "/World.png"));
 	if (test.good()) {
-		Game::Mainmenuitems[7].load("Textures/" + Account::active().getCurrentCampaign() + "/World.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		assets.Mainmenuitems[7].load("Textures/" + Account::active().getCurrentCampaign() + "/World.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 	}
 	else {
-		Game::Mainmenuitems[7].load("Textures/World.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		assets.Mainmenuitems[7].load("Textures/World.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 	}
 
 	if (Account::active().getCampaignChoicesMade() == 0) {

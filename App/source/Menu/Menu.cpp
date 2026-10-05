@@ -37,6 +37,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 // Should not be needed, Menu should call methods from other classes to launch maps and challenges and so on
 #include "Level/Awards.hpp"
 
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -371,16 +372,16 @@ Values of gamestate.mainmenu :
 18 stereo configuration
 */
 
-void Menu::Load(GameState& gamestate)
+void Menu::Load(GameState& gamestate, GameAssets& assets)
 {
     clearMenu();
     switch (gamestate.mainmenu) {
         case 1:
         case 2:
-            addImage(0, Mainmenuitems[0], 150, 480 - 128, 256, 128);
-            addButtonImage(1, Mainmenuitems[gamestate.mainmenu == 1 ? 1 : 5], 18, 480 - 152 - 32, 128, 32);
-            addButtonImage(2, Mainmenuitems[2], 18, 480 - 228 - 32, 112, 32);
-            addButtonImage(3, Mainmenuitems[gamestate.mainmenu == 1 ? 3 : 6], 18, 480 - 306 - 32, gamestate.mainmenu == 1 ? 68 : 132, 32);
+            addImage(0, assets.Mainmenuitems[0], 150, 480 - 128, 256, 128);
+            addButtonImage(1, assets.Mainmenuitems[gamestate.mainmenu == 1 ? 1 : 5], 18, 480 - 152 - 32, 128, 32);
+            addButtonImage(2, assets.Mainmenuitems[2], 18, 480 - 228 - 32, 112, 32);
+            addButtonImage(3, assets.Mainmenuitems[gamestate.mainmenu == 1 ? 3 : 6], 18, 480 - 306 - 32, gamestate.mainmenu == 1 ? 68 : 132, 32);
             addLabel(-1, VERSION_NUMBER + VERSION_SUFFIX, 640 - 100, 10);
             break;
         case 3:
@@ -417,7 +418,7 @@ void Menu::Load(GameState& gamestate)
             updateControlsMenu(gamestate);
             break;
         case 5: {
-            LoadCampaign(gamestate);
+            LoadCampaign(gamestate, assets);
             addLabel(-1, Account::active().getName(), 5, 400);
             addButton(1, "Tutorial", 5, 300);
             addButton(2, "Challenge", 5, 240);
@@ -428,7 +429,7 @@ void Menu::Load(GameState& gamestate)
 
             //show campaign map
             //with (2,-5) offset from old code
-            addImage(-1, Mainmenuitems[7], 150 + 2, 60 - 5, 400, 400);
+            addImage(-1, assets.Mainmenuitems[7], 150 + 2, 60 - 5, 400, 400);
             //show levels
             int numlevels = Account::active().getCampaignChoicesMade();
             numlevels += numlevels > 0 ? campaignlevels[numlevels - 1].nextlevel.size() : 1;
@@ -444,7 +445,7 @@ void Menu::Load(GameState& gamestate)
                     Vector3 start = campaignlevels[i - 1].getCenter();
                     addMapLine(start.x, start.y, midpoint.x - start.x, midpoint.y - start.y, 0.5, active ? 1 : 0.5, active ? 1 : 0.5, 0, 0);
                 }
-                addMapMarker(NB_CAMPAIGN_MENU_ITEM + i, Mapcircletexture,
+                addMapMarker(NB_CAMPAIGN_MENU_ITEM + i, assets.Mapcircletexture,
                              midpoint.x - itemsize / 2, midpoint.y - itemsize / 2, itemsize, itemsize, active ? 1 : 0.5, 0, 0);
 
                 if (active) {
@@ -744,7 +745,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets)
                         gamestate.keyselect = gamestate.selected;
                     }
                     if (gamestate.keyselect != -1) {
-                        setKeySelected(gamestate);
+                        setKeySelected(gamestate, assets);
                     }
                     if (gamestate.selected == (gamestate.devtools ? 10 : 9)) {
                         flash(gamestate);
@@ -821,7 +822,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets)
                             }
                             Account::active().setCurrentCampaign(*c);
                         }
-                        Load(gamestate);
+                        Load(gamestate, assets);
                         break;
                 }
                 break;
@@ -929,7 +930,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets)
                 newuserselected = 0;
             }
             entername = 0;
-            Load(gamestate);
+            Load(gamestate, assets);
         }
 
         newuserblinkdelay -= gamestate.multiplier;
@@ -945,15 +946,28 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets)
     }
 
     if (oldmainmenu != gamestate.mainmenu) {
-        Load(gamestate);
+        Load(gamestate, assets);
     }
     oldmainmenu = gamestate.mainmenu;
 }
 
+// SDL_CreateThread carries one pointer and the thread needs two: the caller's
+// GameState, which it writes the captured key into, and the owner of the menu
+// textures, which Menu::Load reads. It gets this record on the heap and deletes
+// it on the way out. Both pointers stay valid because joinKeySelectThread()
+// runs before either object leaves scope.
+struct KeySelectArgs
+{
+    GameState* gamestate;
+    GameAssets* assets;
+};
+
 int setKeySelected_thread(void* data)
 {
     using namespace Game;
-    GameState& gamestate = *static_cast<GameState*>(data);
+    std::unique_ptr<KeySelectArgs> args(static_cast<KeySelectArgs*>(data));
+    GameState& gamestate = *args->gamestate;
+    GameAssets& assets = *args->assets;
     int scancode = -1;
     SDL_Event evenement;
     while (scancode == -1) {
@@ -1008,13 +1022,13 @@ int setKeySelected_thread(void* data)
     }
     gamestate.keyselect = -1;
     gamestate.waiting = false;
-    Menu::Load(gamestate);
+    Menu::Load(gamestate, assets);
     return 0;
 }
 
-// The key-capture thread holds a reference to the caller's GameState, so its
-// handle is retained and must be joined before that GameState goes out of
-// scope. See Menu::joinKeySelectThread().
+// The key-capture thread holds a reference to the caller's GameState and to its
+// GameAssets, so its handle is retained and must be joined before either goes
+// out of scope. See Menu::joinKeySelectThread().
 static SDL_Thread* keyselectthread = nullptr;
 
 void Menu::joinKeySelectThread()
@@ -1025,13 +1039,15 @@ void Menu::joinKeySelectThread()
 	}
 }
 
-void Menu::setKeySelected(GameState& gamestate)
+void Menu::setKeySelected(GameState& gamestate, GameAssets& assets)
 {
     gamestate.waiting = true;
     printf("launch thread\n");
     Menu::joinKeySelectThread();
-    keyselectthread = SDL_CreateThread(setKeySelected_thread, NULL, &gamestate);
+    KeySelectArgs* args = new KeySelectArgs{ &gamestate, &assets };
+    keyselectthread = SDL_CreateThread(setKeySelected_thread, NULL, args);
     if (keyselectthread == NULL) {
+        delete args;
         fprintf(stderr, "Unable to create thread: %s\n", SDL_GetError());
         gamestate.waiting = false;
         return;

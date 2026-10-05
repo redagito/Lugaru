@@ -371,20 +371,24 @@ std::vector<SlotOccurrence> findSaveSlot(const char* path, const std::string& na
 // have to stop growing, and it has to stop holding any name that GameState
 // already owns. The window handle is absent on purpose: it is not pending
 // migration, it now lives in WindowContext.cpp, which WindowOwnershipTest.cpp
-// checks. skybox, text and textmono are absent for the same kind of reason:
-// they are owned by GameAssets and passed by reference, which
-// AssetOwnershipTest.cpp checks.
+// checks. skybox, text, textmono and the eleven shared textures are absent for
+// the same kind of reason: they are owned by GameAssets and passed by reference,
+// which AssetOwnershipTest.cpp checks.
+//
+// What is left is the four Model globals, which cannot go into GameState for the
+// same reason the textures could not, consoletext, which is still data, and
+// terrain and weapons, which own buffers and a collection rather than a handle
+// and are large enough that by-value storage in GameState would be wrong.
 const std::set<std::string> kPendingGlobals = {
 	// App/include/Globals.h
 	"terrain",
 	"weapons",
 
 	// App/include/GameGlobals.h
-	"terraintexture", "terraintexture2", "loadscreentexture", "Mapcircletexture",
-	"Maparrowtexture", "Mapboxtexture", "cursortexture", "screentexture",
-	"screentexture2", "Mainmenuitems",
-	"hawk", "hawktexture", "eye",
-	"cornea", "iris",
+	"hawk",
+	"eye",
+	"cornea",
+	"iris",
 	"consoletext",
 };
 
@@ -429,7 +433,7 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 	{
 		// Without this, a parser that quietly matched nothing would leave every
 		// assertion above passing for the wrong reason.
-		REQUIRE(globals.size() == 18);
+		REQUIRE(globals.size() == 7);
 		REQUIRE(members.size() == 155);
 	}
 }

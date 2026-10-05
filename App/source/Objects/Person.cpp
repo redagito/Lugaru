@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdlib>
 
 #include "Game.hpp"
+#include "GameAssets.hpp"
 #include "GameGlobals.h"
 #include "GameState.hpp"
 #include "Globals.h"
@@ -39,7 +40,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 std::vector<std::shared_ptr<Person>> Person::players;
 
-Person::Person(GameState& gamestate)
+Person::Person(GameState& gamestate, GameAssets& assets)
 	: whichpatchx(0)
 	, whichpatchz(0)
 	, animCurrent(bounceidleanim)
@@ -302,7 +303,7 @@ Person::Person(GameState& gamestate)
 	, whichskin(0)
 	, rabbitkickragdoll(false)
 
-	, tempanimation("Tempanim", lowheight, neutral, [&]() { Game::LoadingScreen(gamestate); })
+	, tempanimation("Tempanim", lowheight, neutral, [&]() { Game::LoadingScreen(gamestate, assets); })
 
 	, jumpclimb(false)
 {
@@ -311,8 +312,8 @@ Person::Person(GameState& gamestate)
 }
 
 /* Read a person in tfile. Throws an error if it’s not valid */
-Person::Person(FILE* tfile, int mapvers, unsigned i, GameState& gamestate)
-	: Person(gamestate)
+Person::Person(FILE* tfile, int mapvers, unsigned i, GameState& gamestate, GameAssets& assets)
+	: Person(gamestate, assets)
 {
 	id = i;
 	funpackf(tfile, "Bi Bi Bf Bf Bf Bi", &whichskin, &creature, &coords.x, &coords.y, &coords.z, &num_weapons);
@@ -415,16 +416,16 @@ Person::Person(FILE* tfile, int mapvers, unsigned i, GameState& gamestate)
 	realoldcoords = coords;
 }
 
-void Person::changeCreatureType(person_type type, bool tutorialActive, GameState& gamestate)
+void Person::changeCreatureType(person_type type, bool tutorialActive, GameState& gamestate, GameAssets& assets)
 {
 	creature = type;
 	whichskin = 0;
-	skeletonLoad(tutorialActive, gamestate);
+	skeletonLoad(tutorialActive, gamestate, assets);
 	scale = PersonType::types[creature].defaultScale;
 	damagetolerance = PersonType::types[creature].defaultDamageTolerance;
 }
 
-void Person::skeletonLoad(bool tutorialActive, GameState& gamestate)
+void Person::skeletonLoad(bool tutorialActive, GameState& gamestate, GameAssets& assets)
 {
 	skeleton.id = id;
 	skeleton.Load(
@@ -440,9 +441,9 @@ void Person::skeletonLoad(bool tutorialActive, GameState& gamestate)
 		PersonType::types[creature].modelFileNames[6],
 		PersonType::types[creature].lowModelFileName,
 		PersonType::types[creature].modelClothesFileName,
-		PersonType::types[creature].clothes, tutorialActive, [&]() {Game::LoadingScreen(gamestate); });
+		PersonType::types[creature].clothes, tutorialActive, [&]() {Game::LoadingScreen(gamestate, assets); });
 
-	skeleton.drawmodel.textureptr.load(PersonType::types[creature].skins[whichskin], 1, &skeleton.skinText[0], &skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	skeleton.drawmodel.textureptr.load(PersonType::types[creature].skins[whichskin], 1, &skeleton.skinText[0], &skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 }
 
 void Person::setProportions(float head, float body, float arms, float legs)
@@ -4525,7 +4526,7 @@ void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialo
  * MONSTER
  * TODO Wtf is this? Refactor!
  */
-void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate)
+void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate, GameAssets& assets)
 {
 	static Vector3 terrainnormal;
 	static Vector3 flatfacing;
@@ -5341,7 +5342,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 						pause_sound(whooshsound);
 					}
 					skeleton.free = 3;
-					DrawSkeleton(terrainref, tutorialActive, timemultiplier, jointstartarray, gamestate);
+					DrawSkeleton(terrainref, tutorialActive, timemultiplier, jointstartarray, gamestate, assets);
 					skeleton.free = 2;
 				}
 				if (dead == 2 && bloodloss < damagetolerance) {
@@ -6390,7 +6391,7 @@ static void IKHelper(Person* p, float interp, Terrain& terrainref, bool tutorial
  * MONSTER
  * TODO: ???
  */
-int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemultiplier, int jointstartarray[26], GameState& gamestate)
+int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemultiplier, int jointstartarray[26], GameState& gamestate, GameAssets& assets)
 {
 	int oldplayerdetail;
 	if ((gamestate.frustum.SphereInFrustum(coords.x, coords.y + scale * 3, coords.z, scale * 8) && distsq(&gamestate.viewer, &coords) < gamestate.viewdistance * gamestate.viewdistance) || skeleton.free == 3) {
@@ -6689,13 +6690,13 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 			if (skeleton.free != 2 && (skeleton.free == 1 || skeleton.free == 3 || id == 0 || (normalsupdatedelay <= 0) || animTarget == getupfromfrontanim || animTarget == getupfrombackanim || animCurrent == getupfromfrontanim || animCurrent == getupfrombackanim)) {
 				normalsupdatedelay = 1;
 				if (playerdetail || skeleton.free == 3) {
-					skeleton.drawmodel.CalculateNormals(0, [&]() {Game::LoadingScreen(gamestate); });
+					skeleton.drawmodel.CalculateNormals(0, [&]() {Game::LoadingScreen(gamestate, assets); });
 				}
 				if (!playerdetail || skeleton.free == 3) {
-					skeleton.drawmodellow.CalculateNormals(0, [&]() {Game::LoadingScreen(gamestate); });
+					skeleton.drawmodellow.CalculateNormals(0, [&]() {Game::LoadingScreen(gamestate, assets); });
 				}
 				if (skeleton.clothes) {
-					skeleton.drawmodelclothes.CalculateNormals(0, [&]() {Game::LoadingScreen(gamestate); });
+					skeleton.drawmodelclothes.CalculateNormals(0, [&]() {Game::LoadingScreen(gamestate, assets); });
 				}
 			}
 			else {
@@ -7351,17 +7352,17 @@ void Person::takeWeapon(int weaponId)
 	weaponids[0] = weaponId;
 }
 
-void Person::addClothes(GameState& gamestate)
+void Person::addClothes(GameState& gamestate, GameAssets& assets)
 {
 	if (clothes.size() > 0) {
 		for (unsigned i = 0; i < clothes.size(); i++) {
-			addClothes(i, gamestate);
+			addClothes(i, gamestate, assets);
 		}
 		DoMipmaps();
 	}
 }
 
-bool Person::addClothes(const int& clothesId, GameState& gamestate)
+bool Person::addClothes(const int& clothesId, GameState& gamestate, GameAssets& assets)
 {
 	const std::string fileName = clothes[clothesId];
 
@@ -7369,7 +7370,7 @@ bool Person::addClothes(const int& clothesId, GameState& gamestate)
 
 	//Load Image
 	ImageRec texture;
-	bool opened = load_image(Folders::getResourcePath(fileName).c_str(), texture, [&]() {Game::LoadingScreen(gamestate); });
+	bool opened = load_image(Folders::getResourcePath(fileName).c_str(), texture, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 	float alphanum;
 	//Is it valid?
@@ -8544,8 +8545,8 @@ bool Person::catchKnife()
 		((PersonType::types[creature].knifeCatchingType == 1) && (rand() % 3 != 0) && (!hasWeapon()) && (isIdle() || isRun() || animTarget == walkanim));
 }
 
-Person::Person(Json::Value value, int /*mapvers*/, unsigned i, GameState& gamestate)
-	: Person(gamestate)
+Person::Person(Json::Value value, int /*mapvers*/, unsigned i, GameState& gamestate, GameAssets& assets)
+	: Person(gamestate, assets)
 {
 	id = i;
 

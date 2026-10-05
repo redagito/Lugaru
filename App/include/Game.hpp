@@ -52,12 +52,12 @@ struct GameState;
 namespace Game 
 {
 
-	void deleteGame(GameState& gamestate);
+	void deleteGame(GameState& gamestate, GameAssets& assets);
 
 	void InitGame(GameState& gamestate, GameAssets& assets);
 	void LoadStuff(GameState& gamestate, GameAssets& assets);
-	void LoadScreenTexture(GameState& gamestate);
-	void LoadingScreen(GameState& gamestate);
+	void LoadScreenTexture(GameState& gamestate, GameAssets& assets);
+	void LoadingScreen(GameState& gamestate, GameAssets& assets);
 	int DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets);
 	void playdialoguescenesound(GameState& gamestate);
 	int findClosestPlayer();

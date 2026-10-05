@@ -112,7 +112,7 @@ static void set_metal(int pnum, const char* args)
 	Person::players[pnum]->metallow = low;
 }
 
-static void set_noclothes(int pnum, const char*, GameState& gamestate)
+static void set_noclothes(int pnum, const char*, GameState& gamestate, GameAssets& assets)
 {
 	Person::players[pnum]->clothes.clear();
 	Person::players[pnum]->clothestintr.clear();
@@ -120,10 +120,10 @@ static void set_noclothes(int pnum, const char*, GameState& gamestate)
 	Person::players[pnum]->clothestintb.clear();
 	Person::players[pnum]->skeleton.drawmodel.textureptr.load(
 		PersonType::types[Person::players[pnum]->creature].skins[Person::players[pnum]->whichskin], 1,
-		&Person::players[pnum]->skeleton.skinText[0], &Person::players[pnum]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		&Person::players[pnum]->skeleton.skinText[0], &Person::players[pnum]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 }
 
-static void set_clothes(int pnum, const char* args, GameState& gamestate)
+static void set_clothes(int pnum, const char* args, GameState& gamestate, GameAssets& assets)
 {
 	char buf[64];
 	snprintf(buf, 63, "Textures/%s.png", args);
@@ -151,7 +151,7 @@ static void set_clothes(int pnum, const char* args, GameState& gamestate)
 	Person::players[pnum]->clothestintg.push_back(tintg);
 	Person::players[pnum]->clothestintb.push_back(tintb);
 
-	if (!Person::players[pnum]->addClothes(id, gamestate)) {
+	if (!Person::players[pnum]->addClothes(id, gamestate, assets)) {
 		return;
 	}
 
@@ -494,29 +494,29 @@ void ch_metal(const char* args, GameState&, GameAssets&)
 	set_metal(0, args);
 }
 
-void ch_noclothes(const char* args, GameState& gamestate, GameAssets&)
+void ch_noclothes(const char* args, GameState& gamestate, GameAssets& assets)
 {
-	set_noclothes(0, args, gamestate);
+	set_noclothes(0, args, gamestate, assets);
 }
 
-void ch_noclothesnear(const char* args, GameState& gamestate, GameAssets&)
+void ch_noclothesnear(const char* args, GameState& gamestate, GameAssets& assets)
 {
 	int closest = findClosestPlayer();
 	if (closest >= 0) {
-		set_noclothes(closest, args, gamestate);
+		set_noclothes(closest, args, gamestate, assets);
 	}
 }
 
-void ch_clothes(const char* args, GameState& gamestate, GameAssets&)
+void ch_clothes(const char* args, GameState& gamestate, GameAssets& assets)
 {
-	set_clothes(0, args, gamestate);
+	set_clothes(0, args, gamestate, assets);
 }
 
-void ch_clothesnear(const char* args, GameState& gamestate, GameAssets&)
+void ch_clothesnear(const char* args, GameState& gamestate, GameAssets& assets)
 {
 	int closest = findClosestPlayer();
 	if (closest >= 0) {
-		set_clothes(closest, args, gamestate);
+		set_clothes(closest, args, gamestate, assets);
 	}
 }
 
@@ -543,27 +543,27 @@ void ch_cellophane(const char*, GameState& gamestate, GameAssets&)
 	gamestate.cellophane = !gamestate.cellophane;
 }
 
-void ch_funnybunny(const char*, GameState& gamestate, GameAssets&)
+void ch_funnybunny(const char*, GameState& gamestate, GameAssets& assets)
 {
-	Person::players[0]->changeCreatureType(rabbittype, Tutorial::active, gamestate);
+	Person::players[0]->changeCreatureType(rabbittype, Tutorial::active, gamestate, assets);
 	Person::players[0]->headless = 0;
 	set_proportion(0, "1 1 1 1");
 }
 
-void ch_wolfie(const char*, GameState& gamestate, GameAssets&)
+void ch_wolfie(const char*, GameState& gamestate, GameAssets& assets)
 {
-	Person::players[0]->changeCreatureType(wolftype, Tutorial::active, gamestate);
+	Person::players[0]->changeCreatureType(wolftype, Tutorial::active, gamestate, assets);
 	set_proportion(0, "1 1 1 1");
 }
 
-void ch_lizardwolf(const char*, GameState& gamestate, GameAssets&)
+void ch_lizardwolf(const char*, GameState& gamestate, GameAssets& assets)
 {
-	Person::players[0]->skeleton.drawmodel.textureptr.load("Textures/FurWolfLizard.jpg", 1, &Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	Person::players[0]->skeleton.drawmodel.textureptr.load("Textures/FurWolfLizard.jpg", 1, &Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 }
 
-void ch_darko(const char*, GameState& gamestate, GameAssets&)
+void ch_darko(const char*, GameState& gamestate, GameAssets& assets)
 {
-	Person::players[0]->skeleton.drawmodel.textureptr.load("Textures/FurDarko.jpg", 1, &Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+	Person::players[0]->skeleton.drawmodel.textureptr.load("Textures/FurDarko.jpg", 1, &Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 }
 
 void ch_sizemin(const char*, GameState&, GameAssets&)
@@ -705,7 +705,7 @@ void ch_mobile(const char*, GameState&, GameAssets&)
 	Person::players[0]->immobile = 0;
 }
 
-void ch_default(const char*, GameState& gamestate, GameAssets&)
+void ch_default(const char*, GameState& gamestate, GameAssets& assets)
 {
 	Person::players[0]->armorhead = 1;
 	Person::players[0]->armorhigh = 1;
@@ -728,7 +728,7 @@ void ch_default(const char*, GameState& gamestate, GameAssets&)
 	Person::players[0]->clothestintb.clear();
 	Person::players[0]->skeleton.drawmodel.textureptr.load(
 		PersonType::types[Person::players[0]->creature].skins[Person::players[0]->whichskin], 1,
-		&Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		&Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 	gamestate.editoractive = typeactive;
 	Person::players[0]->immobile = 0;
@@ -789,7 +789,7 @@ void ch_slofreq(const char* args, GameState&, GameAssets&)
 	slomofreq = atof(args);
 }
 
-void ch_skytint(const char* args, GameState& gamestate, GameAssets&)
+void ch_skytint(const char* args, GameState& gamestate, GameAssets& assets)
 {
 	sscanf(args, "%f%f%f", &gamestate.skyboxr, &gamestate.skyboxg, &gamestate.skyboxb);
 
@@ -799,26 +799,26 @@ void ch_skytint(const char* args, GameState& gamestate, GameAssets&)
 
 	SetUpLighting(gamestate);
 
-	terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+	terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
 	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
 }
 
-void ch_skylight(const char* args, GameState& gamestate, GameAssets&)
+void ch_skylight(const char* args, GameState& gamestate, GameAssets& assets)
 {
 	sscanf(args, "%f%f%f", &gamestate.skyboxlightr, &gamestate.skyboxlightg, &gamestate.skyboxlightb);
 
 	SetUpLighting(gamestate);
 
-	terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+	terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
 	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
 }
 
-void ch_skybox(const char*, GameState& gamestate, GameAssets&)
+void ch_skybox(const char*, GameState& gamestate, GameAssets& assets)
 {
 	gamestate.skyboxtexture = !gamestate.skyboxtexture;
 
 	SetUpLighting(gamestate);
 
-	terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
+	terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
 	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
 }

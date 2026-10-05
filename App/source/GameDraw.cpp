@@ -372,9 +372,9 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 		glDisable(GL_BLEND);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		terraintexture.bind();
+		assets.terraintexture.bind();
 		terrain.draw(0, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.frustum, gamestate.blurness);
-		terraintexture2.bind();
+		assets.terraintexture2.bind();
 		terrain.draw(1, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.frustum, gamestate.blurness);
 
 		if (gamestate.decalstoggle)
@@ -425,7 +425,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 							Person::players[k]->occluded = 0;
 						}
 						if (Person::players[k]->occluded < 25) {
-							Person::players[k]->DrawSkeleton(terrain, Tutorial::active, gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+							Person::players[k]->DrawSkeleton(terrain, Tutorial::active, gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 						}
 					}
 				}
@@ -461,7 +461,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 				glColor4f(gamestate.light.color[0], gamestate.light.color[1], gamestate.light.color[2], 1);
 			}
 			if ((gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance > 0) {
-				hawk.drawdifftex(hawktexture);
+				hawk.drawdifftex(assets.hawktexture);
 			}
 		}
 		glPopMatrix();
@@ -499,7 +499,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 						Person::players[k]->occluded = 0;
 					}
 					if (Person::players[k]->occluded < 25) {
-						Person::players[k]->DrawSkeleton(terrain, Tutorial::active, gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+						Person::players[k]->DrawSkeleton(terrain, Tutorial::active, gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 					}
 				}
 			}
@@ -1090,7 +1090,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 				if (Object::objects[i]->type == treetrunktype) {
 					distcheck = distsq(&Person::players[0]->coords, &Object::objects[i]->position);
 					if (distcheck < mapviewdist) {
-						Mapcircletexture.bind();
+						assets.Mapcircletexture.bind();
 						glColor4f(0, .3, 0, opac * (1 - distcheck / mapviewdist));
 						glPushMatrix();
 						glTranslatef(Object::objects[i]->position.x / terrain.scale / 256 * -2 + 1, Object::objects[i]->position.z / terrain.scale / 256 * 2 - 1, 0);
@@ -1112,7 +1112,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 				if (Object::objects[i]->type == boxtype) {
 					distcheck = distsq(&Person::players[0]->coords, &Object::objects[i]->position);
 					if (distcheck < mapviewdist) {
-						Mapboxtexture.bind();
+						assets.Mapboxtexture.bind();
 						glColor4f(.4, .4, .4, opac * (1 - distcheck / mapviewdist));
 						glPushMatrix();
 						glTranslatef(Object::objects[i]->position.x / terrain.scale / 256 * -2 + 1, Object::objects[i]->position.z / terrain.scale / 256 * 2 - 1, 0);
@@ -1133,7 +1133,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 				}
 			}
 			if (gamestate.editorenabled) {
-				Mapcircletexture.bind();
+				assets.Mapcircletexture.bind();
 				for (int i = 0; i < numboundaries; i++) {
 					glColor4f(0, 0, 0, opac / 3);
 					glPushMatrix();
@@ -1156,7 +1156,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 				distcheck = distsq(&Person::players[0]->coords, &Person::players[i]->coords);
 				if (distcheck < mapviewdist) {
 					glPushMatrix();
-					Maparrowtexture.bind();
+					assets.Maparrowtexture.bind();
 					if (i == 0) {
 						glColor4f(1, 1, 1, opac);
 					}
@@ -1325,7 +1325,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 			glEnable(GL_TEXTURE_2D);
 			glFinish();
 			if (!drawtoggle || drawmode != realmotionblurmode || (drawtoggle == 2 || change == 1)) {
-				if (screentexture) {
+				if (assets.screentexture) {
 
 					glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 					GLfloat subtractColor[4] = { 0.5, 0.5, 0.5, 0.0 };
@@ -1334,23 +1334,23 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_CONSTANT);
 					glTexEnvf(GL_TEXTURE_ENV, GL_RGB_SCALE, 2.0f);
 
-					glBindTexture(GL_TEXTURE_2D, screentexture);
+					glBindTexture(GL_TEXTURE_2D, assets.screentexture);
 					glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, texviewwidth, texviewheight);
 				}
 			}
 			if ((drawtoggle || change == 1) && drawmode == realmotionblurmode) {
-				if (screentexture2) {
-					glBindTexture(GL_TEXTURE_2D, screentexture2);
+				if (assets.screentexture2) {
+					glBindTexture(GL_TEXTURE_2D, assets.screentexture2);
 					glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, texviewwidth, texviewheight);
 				}
-				if (!screentexture2) {
+				if (!assets.screentexture2) {
 					glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-					glGenTextures(1, &screentexture2);
+					glGenTextures(1, &assets.screentexture2);
 					glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 					glEnable(GL_TEXTURE_2D);
-					glBindTexture(GL_TEXTURE_2D, screentexture2);
+					glBindTexture(GL_TEXTURE_2D, assets.screentexture2);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
@@ -1372,7 +1372,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 			glColor3f(1.0, 1.0, 1.0); // no coloring
 
 			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, screentexture);
+			glBindTexture(GL_TEXTURE_2D, assets.screentexture);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glDisable(GL_DEPTH_TEST);
@@ -1412,7 +1412,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 				glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 				glClear(GL_COLOR_BUFFER_BIT);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-				glBindTexture(GL_TEXTURE_2D, screentexture);
+				glBindTexture(GL_TEXTURE_2D, assets.screentexture);
 				glColor4f(1, 1, 1, .5);
 				glPushMatrix();
 				glBegin(GL_QUADS);
@@ -1426,7 +1426,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 				glVertex3f(-1, 1, 0.0f);
 				glEnd();
 				glPopMatrix();
-				glBindTexture(GL_TEXTURE_2D, screentexture2);
+				glBindTexture(GL_TEXTURE_2D, assets.screentexture2);
 				glColor4f(1, 1, 1, .5);
 				glPushMatrix();
 				glBegin(GL_QUADS);
@@ -1669,7 +1669,7 @@ void DrawMenu(GameState& gamestate, GameAssets& assets)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glEnable(GL_TEXTURE_2D);
-	Game::Mainmenuitems[4].bind();
+	assets.Mainmenuitems[4].bind();
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 0);
 	glVertex3f(-1, -1, 0);
@@ -1727,7 +1727,7 @@ void DrawMenu(GameState& gamestate, GameAssets& assets)
 		glTranslatef(1, -1, 0);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glColor4f(1, 1, 1, 1);
-		Game::cursortexture.bind();
+		assets.cursortexture.bind();
 		glPushMatrix();
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 0);

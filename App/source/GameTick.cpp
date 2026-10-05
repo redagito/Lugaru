@@ -269,18 +269,18 @@ void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 			emit_stream_np(stream_wind);
 		}
 
-		Object::treetextureptr.load("Textures/SnowTree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
-		Object::bushtextureptr.load("Textures/BushSnow.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
-		Object::rocktextureptr.load("Textures/BoulderSnow.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
-		Object::boxtextureptr.load("Textures/SnowBox.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Object::treetextureptr.load("Textures/SnowTree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Object::bushtextureptr.load("Textures/BushSnow.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Object::rocktextureptr.load("Textures/BoulderSnow.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Object::boxtextureptr.load("Textures/SnowBox.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 		footstepsound = footstepsn1;
 		footstepsound2 = footstepsn2;
 		footstepsound3 = footstepst1;
 		footstepsound4 = footstepst2;
 
-		terraintexture.load("Textures/Snow.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
-		terraintexture2.load("Textures/Rock.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		assets.terraintexture.load("Textures/Snow.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.terraintexture2.load("Textures/Rock.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 		temptexdetail = gamestate.texdetail;
 		if (gamestate.texdetail > 1) {
@@ -291,17 +291,17 @@ void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 			"Textures/Skybox(snow)/Back.jpg",
 			"Textures/Skybox(snow)/Right.jpg",
 			"Textures/Skybox(snow)/Up.jpg",
-			"Textures/Skybox(snow)/Down.jpg", gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+			"Textures/Skybox(snow)/Down.jpg", gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 		gamestate.texdetail = temptexdetail;
 	}
 	else if (gamestate.environment == desertenvironment) {
 		gamestate.windvector = 0;
 		gamestate.windvector.z = 2;
-		Object::treetextureptr.load("Textures/DesertTree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
-		Object::bushtextureptr.load("Textures/BushDesert.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
-		Object::rocktextureptr.load("Textures/BoulderDesert.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
-		Object::boxtextureptr.load("Textures/DesertBox.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Object::treetextureptr.load("Textures/DesertTree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Object::bushtextureptr.load("Textures/BushDesert.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Object::rocktextureptr.load("Textures/BoulderDesert.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Object::boxtextureptr.load("Textures/DesertBox.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 		if (gamestate.ambientsound) {
 			emit_stream_np(stream_desertambient);
@@ -312,8 +312,8 @@ void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 		footstepsound3 = footstepsn1;
 		footstepsound4 = footstepsn2;
 
-		terraintexture.load("Textures/Sand.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
-		terraintexture2.load("Textures/SandSlope.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		assets.terraintexture.load("Textures/Sand.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.terraintexture2.load("Textures/SandSlope.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 		temptexdetail = gamestate.texdetail;
 		if (gamestate.texdetail > 1) {
@@ -324,17 +324,17 @@ void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 			"Textures/Skybox(sand)/Back.jpg",
 			"Textures/Skybox(sand)/Right.jpg",
 			"Textures/Skybox(sand)/Up.jpg",
-			"Textures/Skybox(sand)/Down.jpg", gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+			"Textures/Skybox(sand)/Down.jpg", gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 		gamestate.texdetail = temptexdetail;
 	}
 	else if (gamestate.environment == grassyenvironment) {
 		gamestate.windvector = 0;
 		gamestate.windvector.z = 2;
-		Object::treetextureptr.load("Textures/Tree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
-		Object::bushtextureptr.load("Textures/Bush.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
-		Object::rocktextureptr.load("Textures/Boulder.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
-		Object::boxtextureptr.load("Textures/GrassBox.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		Object::treetextureptr.load("Textures/Tree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Object::bushtextureptr.load("Textures/Bush.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Object::rocktextureptr.load("Textures/Boulder.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Object::boxtextureptr.load("Textures/GrassBox.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 		if (gamestate.ambientsound) {
 			emit_stream_np(stream_wind, 100.);
@@ -345,8 +345,8 @@ void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 		footstepsound3 = footstepst1;
 		footstepsound4 = footstepst2;
 
-		terraintexture.load("Textures/GrassDirt.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
-		terraintexture2.load("Textures/MossRock.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+		assets.terraintexture.load("Textures/GrassDirt.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.terraintexture2.load("Textures/MossRock.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 		temptexdetail = gamestate.texdetail;
 		if (gamestate.texdetail > 1) {
@@ -357,7 +357,7 @@ void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 			"Textures/Skybox(grass)/Back.jpg",
 			"Textures/Skybox(grass)/Right.jpg",
 			"Textures/Skybox(grass)/Up.jpg",
-			"Textures/Skybox(grass)/Down.jpg", gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+			"Textures/Skybox(grass)/Down.jpg", gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 		gamestate.texdetail = temptexdetail;
 	}
@@ -365,7 +365,7 @@ void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 	gamestate.texdetail = 1;
 	// Fail loudly: if the heightmap does not load, terrain.size stays 0 and
 	// Terrain::getHeight returns 0 everywhere, silently flattening the world.
-	if (!terrain.load("Textures/HeightMap.png", gamestate.environment, [&]() {Game::LoadingScreen(gamestate); })) {
+	if (!terrain.load("Textures/HeightMap.png", gamestate.environment, [&]() {Game::LoadingScreen(gamestate, assets); })) {
 		throw std::runtime_error("failed to load terrain heightmap Textures/HeightMap.png");
 	}
 
@@ -512,7 +512,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 				terrain.patchobjects[i][j].clear();
 			}
 		}
-		Game::LoadingScreen(gamestate);
+		Game::LoadingScreen(gamestate, assets);
 	}
 
 	weapons.weapons.clear();
@@ -580,7 +580,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 		}
 	}
 
-	Game::LoadingScreen(gamestate);
+	Game::LoadingScreen(gamestate, assets);
 
 	funpackf(tfile, "Bf Bf Bf", &Person::players[0]->armorhead, &Person::players[0]->armorhigh, &Person::players[0]->armorlow);
 	funpackf(tfile, "Bf Bf Bf", &Person::players[0]->protectionhead, &Person::players[0]->protectionhigh, &Person::players[0]->protectionlow);
@@ -633,7 +633,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	}
 	gamestate.oldenvironment = gamestate.environment;
 
-	Object::LoadObjectsFromFile(tfile, gamestate.stealthloading, terrain, [&]() {Game::LoadingScreen(gamestate); });
+	Object::LoadObjectsFromFile(tfile, gamestate.stealthloading, terrain, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 	if (mapvers >= 7) {
 		int numhotspots;
@@ -663,14 +663,14 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 		Hotspot::hotspots.clear();
 	}
 
-	Game::LoadingScreen(gamestate);
+	Game::LoadingScreen(gamestate, assets);
 
 	if (!gamestate.stealthloading) {
 		Object::ComputeCenter();
 		Object::ComputeRadius();
 	}
 
-	Game::LoadingScreen(gamestate);
+	Game::LoadingScreen(gamestate, assets);
 
 	int numplayers;
 	funpackf(tfile, "Bi", &numplayers);
@@ -680,14 +680,14 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	unsigned j = 1;
 	for (int i = 1; i < numplayers; i++) {
 		try {
-			Person::players.push_back(std::shared_ptr<Person>(new Person(tfile, mapvers, j, gamestate)));
+			Person::players.push_back(std::shared_ptr<Person>(new Person(tfile, mapvers, j, gamestate, assets)));
 			j++;
 		}
 		catch (InvalidPersonException& e) {
 			std::cerr << "Invalid Person found in " << name << ":" << e.what() << std::endl;
 		}
 	}
-	Game::LoadingScreen(gamestate);
+	Game::LoadingScreen(gamestate, assets);
 
 	funpackf(tfile, "Bi", &gamestate.numpathpoints);
 	if (gamestate.numpathpoints > 30 || gamestate.numpathpoints < 0) {
@@ -699,7 +699,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 			funpackf(tfile, "Bi", &gamestate.pathpointconnect[i][k]);
 		}
 	}
-	Game::LoadingScreen(gamestate);
+	Game::LoadingScreen(gamestate, assets);
 
 	funpackf(tfile, "Bf Bf Bf Bf", &gamestate.mapcenter.x, &gamestate.mapcenter.y, &gamestate.mapcenter.z, &gamestate.mapradius);
 
@@ -707,16 +707,16 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 
 	if (!gamestate.stealthloading) {
 		Object::AddObjectsToTerrain(gamestate.environment, terrain, gamestate.detail);
-		terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
-		Game::LoadingScreen(gamestate);
+		terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Game::LoadingScreen(gamestate, assets);
 		Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
-		Game::LoadingScreen(gamestate);
+		Game::LoadingScreen(gamestate, assets);
 	}
 
 	fclose(tfile);
 
 	for (unsigned i = 0; i < Person::players.size(); i++) {
-		Game::LoadingScreen(gamestate);
+		Game::LoadingScreen(gamestate, assets);
 		if (i == 0) {
 			Person::players[i]->burnt = 0;
 			Person::players[i]->bled = 0;
@@ -728,9 +728,9 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 		}
 		Person::players[i]->skeleton.free = 0;
 
-		Person::players[i]->skeletonLoad(Tutorial::active, gamestate);
+		Person::players[i]->skeletonLoad(Tutorial::active, gamestate, assets);
 
-		Person::players[i]->addClothes(gamestate);
+		Person::players[i]->addClothes(gamestate, assets);
 
 		if (i == 0) {
 			Person::players[i]->animCurrent = bounceidleanim;
@@ -768,9 +768,9 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 				Person::players[i]->damagetolerance = 200;
 			}
 
-			Game::LoadingScreen(gamestate);
+			Game::LoadingScreen(gamestate, assets);
 
-			Person::players[i]->tempanimation = Animation("Tempanim", lowheight, neutral, [&]() { Game::LoadingScreen(gamestate); });
+			Person::players[i]->tempanimation = Animation("Tempanim", lowheight, neutral, [&]() { Game::LoadingScreen(gamestate, assets); });
 
 			Person::players[i]->headmorphness = 0;
 			Person::players[i]->targetheadmorphness = 1;
@@ -827,7 +827,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	gamestate.hawkcoords = Person::players[0]->coords;
 	gamestate.hawkcoords.y += 30;
 
-	Game::LoadingScreen(gamestate);
+	Game::LoadingScreen(gamestate, assets);
 
 	OPENAL_StopSound(OPENAL_ALL);
 	if (gamestate.ambientsound) {
@@ -901,7 +901,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 				terrain.patchobjects[i][j].clear();
 			}
 		}
-		Game::LoadingScreen(gamestate);
+		Game::LoadingScreen(gamestate, assets);
 	}
 
 	if (mapvers < 13) {
@@ -920,7 +920,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	gamestate.skyboxlightg = map_data["map"]["skybox"].get("lightg", gamestate.skyboxg).asFloat();
 	gamestate.skyboxlightb = map_data["map"]["skybox"].get("lightb", gamestate.skyboxb).asFloat();
 
-	Game::LoadingScreen(gamestate);
+	Game::LoadingScreen(gamestate, assets);
 
 	//dialogues
 	Dialog::loadDialogs(map_data["map"]["dialogs"]);
@@ -933,7 +933,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	gamestate.oldenvironment = gamestate.environment;
 
 	if (!gamestate.stealthloading) {
-		Object::LoadObjectsFromJson(map_data["map"]["objects"], terrain, [&]() {Game::LoadingScreen(gamestate); });
+		Object::LoadObjectsFromJson(map_data["map"]["objects"], terrain, [&]() {Game::LoadingScreen(gamestate, assets); });
 	}
 
 	Hotspot::hotspots.resize(map_data["map"]["hotspots"].size());
@@ -944,14 +944,14 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 		Hotspot::hotspots[i].position = map_data["map"]["hotspots"][i]["position"];
 	}
 
-	Game::LoadingScreen(gamestate);
+	Game::LoadingScreen(gamestate, assets);
 
 	if (!gamestate.stealthloading) {
 		Object::ComputeCenter();
 		Object::ComputeRadius();
 	}
 
-	Game::LoadingScreen(gamestate);
+	Game::LoadingScreen(gamestate, assets);
 
 	if (map_data["map"]["players"].size() > maxplayers) {
 		std::cout << "Warning: this level contains more players than allowed" << std::endl;
@@ -970,7 +970,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	unsigned j = 0;
 	for (unsigned i = 0; i < map_data["map"]["players"].size(); i++) {
 		try {
-			Person::players.push_back(std::shared_ptr<Person>(new Person(map_data["map"]["players"][i], mapvers, j, gamestate)));
+			Person::players.push_back(std::shared_ptr<Person>(new Person(map_data["map"]["players"][i], mapvers, j, gamestate, assets)));
 			j++;
 		}
 		catch (InvalidPersonException&) {
@@ -983,7 +983,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 		Person::players[0]->targetyaw = playerTargetYaw;
 	}
 
-	Game::LoadingScreen(gamestate);
+	Game::LoadingScreen(gamestate, assets);
 
 	gamestate.numpathpoints = map_data["map"]["pathpoints"].size();
 	for (unsigned i = 0; i < map_data["map"]["pathpoints"].size(); i++) {
@@ -994,7 +994,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 		}
 	}
 
-	Game::LoadingScreen(gamestate);
+	Game::LoadingScreen(gamestate, assets);
 
 	gamestate.mapcenter = map_data["map"]["center"];
 	gamestate.mapradius = map_data["map"]["radius"].asFloat();
@@ -1003,18 +1003,18 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 
 	if (!gamestate.stealthloading) {
 		Object::AddObjectsToTerrain(gamestate.environment, terrain, gamestate.detail);
-		terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate); });
-		Game::LoadingScreen(gamestate);
+		terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Game::LoadingScreen(gamestate, assets);
 		Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
-		Game::LoadingScreen(gamestate);
+		Game::LoadingScreen(gamestate, assets);
 	}
 
 	for (unsigned i = 0; i < Person::players.size(); i++) {
-		Game::LoadingScreen(gamestate);
+		Game::LoadingScreen(gamestate, assets);
 
 		Person::players[i]->skeleton.free = 0;
-		Person::players[i]->skeletonLoad(Tutorial::active, gamestate);
-		Person::players[i]->addClothes(gamestate);
+		Person::players[i]->skeletonLoad(Tutorial::active, gamestate, assets);
+		Person::players[i]->addClothes(gamestate, assets);
 
 		Person::players[i]->speed = 1 + (float)(rand() % 100) / 1000;
 		if (gamestate.difficulty == 0) {
@@ -1049,7 +1049,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	gamestate.hawkcoords = Person::players[0]->coords;
 	gamestate.hawkcoords.y += 30;
 
-	Game::LoadingScreen(gamestate);
+	Game::LoadingScreen(gamestate, assets);
 
 	OPENAL_StopSound(OPENAL_ALL);
 	if (gamestate.ambientsound) {
@@ -1356,10 +1356,10 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 
 				Person::players[closest]->skeleton.drawmodel.textureptr.load(
 					PersonType::types[Person::players[closest]->creature].skins[Person::players[closest]->whichskin], 1,
-					&Person::players[closest]->skeleton.skinText[0], &Person::players[closest]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+					&Person::players[closest]->skeleton.skinText[0], &Person::players[closest]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 			}
 
-			Person::players[closest]->addClothes(gamestate);
+			Person::players[closest]->addClothes(gamestate, assets);
 		}
 
 		/* Change creature type */
@@ -1371,7 +1371,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 
 			if (closest >= 0) {
 				person_type nextType = static_cast<person_type>((Person::players[closest]->creature + 1) % PersonType::types.size());
-				Person::players[closest]->changeCreatureType(nextType, Tutorial::active, gamestate);
+				Person::players[closest]->changeCreatureType(nextType, Tutorial::active, gamestate, assets);
 			}
 		}
 
@@ -1576,16 +1576,16 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 					tmppitch = rand() % 360;
 				}
 
-				Object::MakeObject(gamestate.editortype, scenecoords, (int)tmpyaw - ((int)tmpyaw) % 30, (int)tmppitch, gamestate.editorsize, gamestate.environment, terrain, gamestate.foliage, gamestate.detail, [&]() {Game::LoadingScreen(gamestate); });
+				Object::MakeObject(gamestate.editortype, scenecoords, (int)tmpyaw - ((int)tmpyaw) % 30, (int)tmppitch, gamestate.editorsize, gamestate.environment, terrain, gamestate.foliage, gamestate.detail, [&]() {Game::LoadingScreen(gamestate, assets); });
 				if (gamestate.editortype == treetrunktype) {
-					Object::MakeObject(treeleavestype, scenecoords, rand() % 360 * (tmppitch < 2) + (int)gamestate.editoryaw - ((int)gamestate.editoryaw) % 30, gamestate.editorpitch, gamestate.editorsize, gamestate.environment, terrain, gamestate.foliage, gamestate.detail, [&]() {Game::LoadingScreen(gamestate); });
+					Object::MakeObject(treeleavestype, scenecoords, rand() % 360 * (tmppitch < 2) + (int)gamestate.editoryaw - ((int)gamestate.editoryaw) % 30, gamestate.editorpitch, gamestate.editorsize, gamestate.environment, terrain, gamestate.foliage, gamestate.detail, [&]() {Game::LoadingScreen(gamestate, assets); });
 				}
 			}
 		}
 
 		/* Add player */
 		if (Input::isKeyPressed(SDL_SCANCODE_P) && !Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			Person::players.push_back(std::shared_ptr<Person>(new Person(gamestate)));
+			Person::players.push_back(std::shared_ptr<Person>(new Person(gamestate, assets)));
 
 			Person::players.back()->id = Person::players.size() - 1;
 
@@ -1594,9 +1594,9 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 			Person::players.back()->howactive = gamestate.editoractive;
 			Person::players.back()->whichskin = (int)(abs(rand() % 3));
 
-			Person::players.back()->skeletonLoad(Tutorial::active, gamestate);
+			Person::players.back()->skeletonLoad(Tutorial::active, gamestate, assets);
 
-			Person::players.back()->skeleton.drawmodelclothes.textureptr.load("Textures/Belt.png", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate); });
+			Person::players.back()->skeleton.drawmodelclothes.textureptr.load("Textures/Belt.png", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 			Person::players.back()->speed = 1 + (float)(rand() % 100) / 1000;
 
 			Person::players.back()->targetyaw = Person::players[0]->targetyaw;
@@ -1628,7 +1628,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 				Person::players.back()->clothestintg.push_back(Person::players[0]->clothestintg[i]);
 				Person::players.back()->clothestintb.push_back(Person::players[0]->clothestintb[i]);
 			}
-			Person::players.back()->addClothes(gamestate);
+			Person::players.back()->addClothes(gamestate, assets);
 
 			Person::players.back()->power = Person::players[0]->power;
 			Person::players.back()->speedmult = Person::players[0]->speedmult;
@@ -1899,7 +1899,7 @@ void doJumpReversals()
 	}
 }
 
-void doAerialAcrobatics(GameState& gamestate)
+void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 {
 	static Vector3 facing, flatfacing;
 	for (unsigned k = 0; k < Person::players.size(); k++) {
@@ -1928,7 +1928,7 @@ void doAerialAcrobatics(GameState& gamestate)
 			Person::players[k]->yaw = stepTowardf(Person::players[k]->yaw, Person::players[k]->targetyaw, gamestate.multiplier * Person::players[k]->turnspeed * 4);
 		}
 
-		Person::players[k]->DoStuff(terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+		Person::players[k]->DoStuff(terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 		if (Person::players[k]->immobile && k != 0) {
 			Person::players[k]->coords = Person::players[k]->realoldcoords;
 		}
@@ -3152,7 +3152,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets)
 				emit_stream_np(stream_menutheme);
 				pause_sound(leveltheme);
 			}
-			Menu::Load(gamestate);
+			Menu::Load(gamestate, assets);
 		}
 	}
 
@@ -3316,7 +3316,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets)
 				}
 			}
 
-			doAerialAcrobatics(gamestate);
+			doAerialAcrobatics(gamestate, assets);
 
 			static Vector3 oldviewer;
 
@@ -4976,7 +4976,7 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets)
 
 					startbonustotal = 0;
 
-					LoadCampaign(gamestate);
+					LoadCampaign(gamestate, assets);
 
 					gamestate.loading = 2;
 					gamestate.loadtime = 0;
