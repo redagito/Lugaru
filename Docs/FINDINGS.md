@@ -167,7 +167,7 @@ is to remove the redundant scalar parameters across `Sprite::Draw` / `Object::Dr
 **Severity:** informational
 **Status:** by design, recorded so it is not forgotten
 
-All 82 tests are unit or architecture tests. **None of them** loads a level, ticks a
+All tests are unit or architecture tests. **None of them** loads a level, ticks a
 simulation, constructs a `Person` in a running world, or renders a frame. Consequences:
 
 - The globals migration was verified by source-level equivalence (mechanical line-pair and
