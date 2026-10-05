@@ -375,20 +375,17 @@ std::vector<SlotOccurrence> findSaveSlot(const char* path, const std::string& na
 // the same kind of reason: they are owned by GameAssets and passed by reference,
 // which AssetOwnershipTest.cpp checks.
 //
-// What is left is the four Model globals, which cannot go into GameState for the
-// same reason the textures could not, consoletext, which is still data, and
-// terrain and weapons, which own buffers and a collection rather than a handle
-// and are large enough that by-value storage in GameState would be wrong.
+// What is left is consoletext, which is still data and is a std::string[15] that
+// would break GameState's trivial copyability if it went in; terrain, which is
+// about 2.3 MB and so cannot be a by-value member of anything on the stack; and
+// weapons, which holds GL handles in a std::vector<Weapon> and would drag a heap
+// allocation into every GameState.
 const std::set<std::string> kPendingGlobals = {
 	// App/include/Globals.h
 	"terrain",
 	"weapons",
 
 	// App/include/GameGlobals.h
-	"hawk",
-	"eye",
-	"cornea",
-	"iris",
 	"consoletext",
 };
 
@@ -433,7 +430,7 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 	{
 		// Without this, a parser that quietly matched nothing would leave every
 		// assertion above passing for the wrong reason.
-		REQUIRE(globals.size() == 7);
+		REQUIRE(globals.size() == 3);
 		REQUIRE(members.size() == 155);
 	}
 }

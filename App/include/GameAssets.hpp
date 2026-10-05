@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Environment/Skybox.hpp"
+#include "Graphic/Models.hpp"
 #include "Graphic/Text.hpp"
 #include "Graphic/Texture.hpp"
 
@@ -20,6 +21,13 @@
 // ~Text and ~TextureRes both call into GL, so an instance has to be destroyed
 // while its GL context is still current. In main() that means it must go out of
 // scope before SDL_Quit, which it does.
+//
+// The four models were externs in GameGlobals.h for the same reason the textures
+// were. A Model owns four malloc'd buffers through raw pointers and frees them in
+// its destructor, so it cannot live in GameState either: that would break the
+// trivial copyability and trivial destructibility GameState is asserted to have,
+// and the implicit copy would free the same buffer twice. Declared last, so they
+// are destroyed first and leave the GL-touching members above undisturbed.
 
 struct GameAssets
 {
@@ -38,4 +46,9 @@ struct GameAssets
 	Texture hawktexture;
 	GLuint screentexture = 0;
 	GLuint screentexture2 = 0;
+
+	Model hawk;
+	Model eye;
+	Model cornea;
+	Model iris;
 };

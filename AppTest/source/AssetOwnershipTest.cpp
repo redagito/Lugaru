@@ -81,6 +81,24 @@ const TextureGlobal kTextureGlobals[] = {
 	{ "screentexture2", "GLuint screentexture2" },
 };
 
+// The four Model globals, paired with the declaration each one has to end up
+// with, for the same reason as the table above: "is it a member" is a weaker
+// question than "is it a member by value". These four are named in full because
+// Model* is legitimate elsewhere - Person::SphereCheck and Decal both take one -
+// so the sweep below has to be about these names, not about the type.
+struct ModelGlobal
+{
+	const char* name;
+	const char* declaration;
+};
+
+const ModelGlobal kModelGlobals[] = {
+	{ "hawk", "Model hawk;" },
+	{ "eye", "Model eye;" },
+	{ "cornea", "Model cornea;" },
+	{ "iris", "Model iris;" },
+};
+
 std::string readText(const char* path)
 {
 	std::ifstream input(path);
@@ -423,9 +441,86 @@ TEST_CASE("GameGlobals.cpp no longer defines the shared textures", "[assets][arc
 		}
 	}
 
-	SECTION("the models that are still pending are")
+	SECTION("consoletext is the only thing left in it")
 	{
-		REQUIRE(text.find("Model hawk;") != std::string::npos);
-		REQUIRE(text.find("Model iris;") != std::string::npos);
+		// The four models that used to sit here have moved to GameAssets, so the
+		// file is down to a single pending definition. Anchoring on that exact line
+		// is what keeps the sweep above from passing over an emptied file, which is
+		// the one way to satisfy "none of the eleven is left" without doing the
+		// work - exactly as the hawk and iris anchors did before.
+		REQUIRE(text.find("std::string consoletext[15] = {};") != std::string::npos);
+		REQUIRE(text.find("namespace Game") != std::string::npos);
+	}
+}
+
+TEST_CASE("the model globals are members of GameAssets, not globals", "[assets][architecture]")
+{
+	// hawk, eye, cornea and iris were the last four Model instances in
+	// GameGlobals.h. A Model owns four malloc'd buffers through raw pointers and
+	// has a destructor that frees them, so it is emphatically not something
+	// GameState can hold: that would break the trivial copyability and
+	// trivial destructibility GameStateTest.cpp:109-110 asserts, and the implicit
+	// copy would free the same buffer twice. GameAssets is the owner for them, by
+	// value, like the textures above.
+	SECTION("no header declares one of them extern")
+	{
+		// An extern declaration is what let the load and draw paths name these with
+		// no owner in sight. The owner is a struct passed by reference now, so
+		// nothing under App/include may declare them at all.
+		std::vector<std::string> offenders;
+		for (const std::filesystem::path& path : readAllHeaders()) {
+			const std::string text = readText(path.string().c_str());
+			for (const ModelGlobal& global : kModelGlobals) {
+				CAPTURE(global.name);
+				REQUIRE(text.find(std::string("extern Model ") + global.name) == std::string::npos);
+			}
+			if (text.find("extern Model ") != std::string::npos) {
+				offenders.push_back(path.filename().string());
+			}
+		}
+
+		INFO("headers still declaring a model global: " << joinPaths(offenders));
+		REQUIRE(offenders.empty());
+	}
+
+	SECTION("no header points at one of them")
+	{
+		// Both spellings, because both dodge the extern sweep above while putting
+		// the same unowned model back in reach: a Model* member of some other owner
+		// would own nothing and hand back a dangling pointer after the real owner
+		// went away. Model* itself is left alone - Person::SphereCheck and Decal
+		// legitimately take one, so only these four names are swept.
+		for (const std::filesystem::path& path : readAllHeaders()) {
+			const std::string text = readText(path.string().c_str());
+			for (const ModelGlobal& global : kModelGlobals) {
+				CAPTURE(global.name);
+				REQUIRE(text.find(std::string("Model* ") + global.name) == std::string::npos);
+				REQUIRE(text.find(std::string("Model ") + global.name + "*") == std::string::npos);
+			}
+		}
+	}
+
+	SECTION("GameAssets holds every one of them by value")
+	{
+		REQUIRE(std::filesystem::exists(kGameAssetsHeader));
+
+		const std::string text = readText(kGameAssetsHeader);
+		for (const ModelGlobal& global : kModelGlobals) {
+			CAPTURE(global.name);
+			INFO("missing declaration: " << global.declaration);
+			REQUIRE_FALSE(wholeWordPositions(text, global.declaration).empty());
+		}
+	}
+
+	SECTION("GameAssets reaches none of them through a pointer")
+	{
+		// The assertion that pins "by value", and unlike the header sweep above it
+		// can be unconditional: nothing in this header has any business holding a
+		// Model*. A Model* member would load, scale and draw exactly like the
+		// globals it replaced and nothing else here would notice.
+		const std::string text = readText(kGameAssetsHeader);
+
+		INFO("GameAssets.hpp still reaches a model through a pointer");
+		REQUIRE(text.find("Model*") == std::string::npos);
 	}
 }

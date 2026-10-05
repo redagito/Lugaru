@@ -717,26 +717,26 @@ void Game::LoadStuff(GameState& gamestate, GameAssets& assets)
 	gamestate.viewer.x = terrain.size / 2 * terrain.scale;
 	gamestate.viewer.z = terrain.size / 2 * terrain.scale;
 
-	hawk.load("Models/Hawk.solid", [&]() { LoadingScreen(gamestate, assets); });
-	hawk.Scale(.03, .03, .03);
-	hawk.Rotate(90, 1, 1);
-	hawk.CalculateNormals(0, [&]() { LoadingScreen(gamestate, assets); });
-	hawk.ScaleNormals(-1, -1, -1);
+	assets.hawk.load("Models/Hawk.solid", [&]() { LoadingScreen(gamestate, assets); });
+	assets.hawk.Scale(.03, .03, .03);
+	assets.hawk.Rotate(90, 1, 1);
+	assets.hawk.CalculateNormals(0, [&]() { LoadingScreen(gamestate, assets); });
+	assets.hawk.ScaleNormals(-1, -1, -1);
 	gamestate.hawkcoords.x = terrain.size / 2 * terrain.scale - 5 - 7;
 	gamestate.hawkcoords.z = terrain.size / 2 * terrain.scale - 5 - 7;
 	gamestate.hawkcoords.y = terrain.getHeight(gamestate.hawkcoords.x, gamestate.hawkcoords.z) + 25;
 
-	eye.load("Models/Eye.solid", [&]() { Game::LoadingScreen(gamestate, assets); });
-	eye.Scale(.03, .03, .03);
-	eye.CalculateNormals(0, [&]() { LoadingScreen(gamestate, assets); });
+	assets.eye.load("Models/Eye.solid", [&]() { Game::LoadingScreen(gamestate, assets); });
+	assets.eye.Scale(.03, .03, .03);
+	assets.eye.CalculateNormals(0, [&]() { LoadingScreen(gamestate, assets); });
 
-	cornea.load("Models/Cornea.solid", [&]() { Game::LoadingScreen(gamestate, assets); });
-	cornea.Scale(.03, .03, .03);
-	cornea.CalculateNormals(0, [&]() { Game::LoadingScreen(gamestate, assets); });
+	assets.cornea.load("Models/Cornea.solid", [&]() { Game::LoadingScreen(gamestate, assets); });
+	assets.cornea.Scale(.03, .03, .03);
+	assets.cornea.CalculateNormals(0, [&]() { Game::LoadingScreen(gamestate, assets); });
 
-	iris.load("Models/Iris.solid", [&]() { Game::LoadingScreen(gamestate, assets); });
-	iris.Scale(.03, .03, .03);
-	iris.CalculateNormals(0, [&]() { LoadingScreen(gamestate, assets); });
+	assets.iris.load("Models/Iris.solid", [&]() { Game::LoadingScreen(gamestate, assets); });
+	assets.iris.Scale(.03, .03, .03);
+	assets.iris.CalculateNormals(0, [&]() { LoadingScreen(gamestate, assets); });
 
 	LoadSave("Textures/WolfBloodFur.png", &PersonType::types[wolftype].bloodText[0], gamestate, assets);
 	LoadSave("Textures/BloodFur.png", &PersonType::types[rabbittype].bloodText[0], gamestate, assets);

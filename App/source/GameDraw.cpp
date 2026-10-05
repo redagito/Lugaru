@@ -446,7 +446,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 
 		//draw hawk
 		glPushMatrix();
-		if (gamestate.frustum.SphereInFrustum(gamestate.realhawkcoords.x + hawk.boundingspherecenter.x, gamestate.realhawkcoords.y + hawk.boundingspherecenter.y, gamestate.realhawkcoords.z + hawk.boundingspherecenter.z, 2)) {
+		if (gamestate.frustum.SphereInFrustum(gamestate.realhawkcoords.x + assets.hawk.boundingspherecenter.x, gamestate.realhawkcoords.y + assets.hawk.boundingspherecenter.y, gamestate.realhawkcoords.z + assets.hawk.boundingspherecenter.z, 2)) {
 			glAlphaFunc(GL_GREATER, 0.0001f);
 			glDepthMask(1);
 			glDisable(GL_CULL_FACE);
@@ -461,7 +461,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 				glColor4f(gamestate.light.color[0], gamestate.light.color[1], gamestate.light.color[2], 1);
 			}
 			if ((gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance > 0) {
-				hawk.drawdifftex(assets.hawktexture);
+				assets.hawk.drawdifftex(assets.hawktexture);
 			}
 		}
 		glPopMatrix();
