@@ -29,6 +29,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Menu/Menu.hpp"
 #include "Tutorial.hpp"
 #include "Utils/Input.hpp"
+#include "WindowContext.hpp"
 #include "Globals.h"
 
 extern bool campaign;
@@ -1601,7 +1602,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 
 	if (side == stereoRight || side == stereoCenter) {
 		if (drawmode != motionblurmode || gamestate.mainmenu) {
-			swap_gl_buffers();
+			swap_gl_buffers(mainWindow());
 		}
 	}
 

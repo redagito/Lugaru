@@ -24,6 +24,4 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 Terrain terrain;
 
-SDL_Window* sdlwindow;
-
 Weapons weapons;

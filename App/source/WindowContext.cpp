@@ -31,6 +31,38 @@ int kContextHeight = 0;
 
 std::set<std::pair<int, int>> resolutions;
 
+// The one and only window. File-scope static, so it has internal linkage:
+// nothing outside this translation unit can declare it, which is what stops the
+// extern in a header and the global this replaced from coming back.
+static SDL_Window* sdlwindow = nullptr;
+
+SDL_Window* createWindow(int width, int height, Uint32 flags)
+{
+	sdlwindow = SDL_CreateWindow("Lugaru", SDL_WINDOWPOS_CENTERED_DISPLAY(0), SDL_WINDOWPOS_CENTERED_DISPLAY(0), width, height, flags);
+	return sdlwindow;
+}
+
+SDL_Window* mainWindow()
+{
+	return sdlwindow;
+}
+
+bool createGLContext()
+{
+	SDL_GLContext glctx = SDL_GL_CreateContext(sdlwindow);
+	if (!glctx) {
+		return false;
+	}
+
+	SDL_GL_MakeCurrent(sdlwindow, glctx);
+	return true;
+}
+
+bool isFocused()
+{
+	return ((SDL_GetWindowFlags(sdlwindow) & SDL_WINDOW_INPUT_FOCUS) != 0);
+}
+
 void toggleFullscreen(GameState& gamestate)
 {
 	gamestate.fullscreen = !gamestate.fullscreen;

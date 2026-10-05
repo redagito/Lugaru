@@ -7,5 +7,4 @@
 #include <SDL.h>
 
 extern Terrain terrain;
-extern SDL_Window* sdlwindow;
 extern Weapons weapons;

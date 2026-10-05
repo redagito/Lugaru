@@ -96,9 +96,8 @@ std::string firstWord(const std::string& code)
 }
 
 // Pulls the declared names out of everything after a declaration's type: the
-// shapes that occur are "float yaw, pitch", "int pathpointconnect[30][30]" and
-// "SDL_Window* sdlwindow". Anything from the terminating semicolon on is not
-// part of a declarator.
+// shapes that occur are "float yaw, pitch" and "int pathpointconnect[30][30]".
+// Anything from the terminating semicolon on is not part of a declarator.
 std::vector<std::string> declaredNames(const std::string& full_declaration)
 {
 	std::vector<std::string> names;
@@ -367,14 +366,16 @@ std::vector<SlotOccurrence> findSaveSlot(const char* path, const std::string& na
 
 // The globals still pending migration, reviewed one by one. Every scalar here
 // has a GameState member to move into; entries whose type GameState
-// deliberately does not hold (Texture, Model, Text*, Terrain, Frustum, Weapons,
-// an SDL_Window*) are never going to leave, so this list does not have to reach
-// zero. It does have to stop growing, and it has to stop holding any name that
-// GameState already owns.
+// deliberately does not hold (Texture, Model, Text*, Terrain, Frustum, Weapons)
+// are never going to leave, so this list does not have to reach zero. It does
+// have to stop growing, and it has to stop holding any name that GameState
+// already owns. The window handle is absent on purpose: it is not pending
+// migration, it now lives in WindowContext.cpp, which WindowOwnershipTest.cpp
+// checks.
 const std::set<std::string> kPendingGlobals = {
 	// App/include/Globals.h
 	"terrain",
-	"sdlwindow", "weapons",
+	"weapons",
 
 	// App/include/GameGlobals.h
 	"terraintexture", "terraintexture2", "loadscreentexture", "Mapcircletexture",
@@ -426,7 +427,7 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 	{
 		// Without this, a parser that quietly matched nothing would leave every
 		// assertion above passing for the wrong reason.
-		REQUIRE(globals.size() == 22);
+		REQUIRE(globals.size() == 21);
 		REQUIRE(members.size() == 155);
 	}
 }

@@ -38,6 +38,27 @@ struct GameState;
 // startup and consulted by the menu's resolution picker.
 extern std::set<std::pair<int, int>> resolutions;
 
+/**
+ * Creates the main window with the given size and flags, replacing any window
+ * created earlier, and returns it - null when SDL refuses.
+ *
+ * The handle stays inside WindowContext.cpp: no header declares it. Callers
+ * that need it ask for it back with mainWindow().
+ */
+SDL_Window* createWindow(int width, int height, Uint32 flags);
+
+/** The main window, or null while none has been created. */
+SDL_Window* mainWindow();
+
+/**
+ * Creates the GL context for the main window and makes it current. Returns
+ * false, having done nothing else, when SDL refuses the context.
+ */
+bool createGLContext();
+
+/** True when the main window currently holds input focus. */
+bool isFocused();
+
 /** Toggles fullscreen mode on the main window. */
 void toggleFullscreen(GameState& gamestate);
 

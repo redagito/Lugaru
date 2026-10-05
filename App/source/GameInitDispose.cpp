@@ -29,6 +29,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "LoadingClock.hpp"
 #include "Menu/Menu.hpp"
 #include "Utils/Folders.hpp"
+#include "WindowContext.hpp"
 
 #include "Globals.h"
 #include <gl/GL.h>
@@ -396,7 +397,7 @@ void Game::LoadingScreen(GameState& gamestate)
 		glDepthMask(1);
 	}
 
-	swap_gl_buffers();
+	swap_gl_buffers(mainWindow());
 }
 
 void FadeLoadingScreen(float howmuch, GameState& gamestate)
@@ -451,7 +452,7 @@ void FadeLoadingScreen(float howmuch, GameState& gamestate)
 	glDisable(GL_BLEND);
 	glDepthMask(1);
 	//Text
-	swap_gl_buffers();
+	swap_gl_buffers(mainWindow());
 }
 
 void Game::InitGame(GameState& gamestate)

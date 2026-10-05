@@ -57,7 +57,7 @@ using namespace std;
 void initGL(GameState& gamestate)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	swap_gl_buffers();
+	swap_gl_buffers(mainWindow());
 
 	// clear all states
 	glDisable(GL_ALPHA_TEST);
@@ -177,38 +177,27 @@ bool SetUp(GameState& gamestate)
 		sdlflags |= SDL_WINDOW_INPUT_GRABBED;
 	}
 
-	sdlwindow = SDL_CreateWindow("Lugaru", SDL_WINDOWPOS_CENTERED_DISPLAY(0), SDL_WINDOWPOS_CENTERED_DISPLAY(0),
-		kContextWidth, kContextHeight, sdlflags);
-
-	if (!sdlwindow) {
+	if (!createWindow(kContextWidth, kContextHeight, sdlflags)) {
 		fprintf(stderr, "SDL_CreateWindow() failed: %s\n", SDL_GetError());
 		fprintf(stderr, "forcing 640x480...\n");
 		kContextWidth = 640;
 		kContextHeight = 480;
-		sdlwindow = SDL_CreateWindow("Lugaru", SDL_WINDOWPOS_CENTERED_DISPLAY(0), SDL_WINDOWPOS_CENTERED_DISPLAY(0),
-			kContextWidth, kContextHeight, sdlflags);
-		if (!sdlwindow) {
+		if (!createWindow(kContextWidth, kContextHeight, sdlflags)) {
 			fprintf(stderr, "SDL_CreateWindow() failed: %s\n", SDL_GetError());
 			fprintf(stderr, "forcing 640x480 windowed mode...\n");
 			sdlflags &= ~SDL_WINDOW_FULLSCREEN;
-			sdlwindow = SDL_CreateWindow("Lugaru", SDL_WINDOWPOS_CENTERED_DISPLAY(0), SDL_WINDOWPOS_CENTERED_DISPLAY(0),
-				kContextWidth, kContextHeight, sdlflags);
-
-			if (!sdlwindow) {
+			if (!createWindow(kContextWidth, kContextHeight, sdlflags)) {
 				fprintf(stderr, "SDL_CreateWindow() failed: %s\n", SDL_GetError());
 				return false;
 			}
 		}
 	}
 
-	SDL_GLContext glctx = SDL_GL_CreateContext(sdlwindow);
-	if (!glctx) {
+	if (!createGLContext()) {
 		fprintf(stderr, "SDL_GL_CreateContext() failed: %s\n", SDL_GetError());
 		SDL_Quit();
 		return false;
 	}
-
-	SDL_GL_MakeCurrent(sdlwindow, glctx);
 
 	int dblbuf = 0;
 	if ((SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &dblbuf) == -1) || (!dblbuf)) {
@@ -382,11 +371,6 @@ void CleanUp(void)
 }
 
 // --------------------------------------------------------------------------
-
-static bool IsFocused()
-{
-	return ((SDL_GetWindowFlags(sdlwindow) & SDL_WINDOW_INPUT_FOCUS) != 0);
-}
 
 #ifndef LUGARU_PLATFORM_WINDOWS
 // (code lifted from physfs: http://icculus.org/physfs/ ... zlib license.)
@@ -578,7 +562,7 @@ int main(int argc, char** argv)
 			}
 
 			while (!gameDone && !gamestate.tryquit) {
-				if (IsFocused()) {
+				if (isFocused()) {
 					gameFocused = true;
 
 					// check windows messages

@@ -84,10 +84,12 @@ namespace Game
 	void flash(GameState& gamestate, float amount = 1, int delay = 1);
 }
 
-inline void swap_gl_buffers(void)
+// Presents the back buffer and waits out the rest of the frame. The window is
+// passed in rather than reached for, so the caller names where it comes from -
+// which is WindowContext, the only place the handle is declared.
+inline void swap_gl_buffers(SDL_Window* window)
 {
-	extern SDL_Window* sdlwindow;
-	SDL_GL_SwapWindow(sdlwindow);
+	SDL_GL_SwapWindow(window);
 
 	// try to limit this to 60fps, even if vsync fails.
 	Uint32 now;
