@@ -324,11 +324,14 @@ TEST_CASE("the shared textures are members of GameAssets, not globals", "[assets
 	{
 		REQUIRE(std::filesystem::exists(kGameAssetsHeader));
 
+		// Whole-word, not find: "GLuint screentexture" is a prefix of
+		// "GLuint screentexture2", so a plain substring search found one member
+		// and reported both as present.
 		const std::string text = readText(kGameAssetsHeader);
 		for (const TextureGlobal& global : kTextureGlobals) {
 			CAPTURE(global.name);
 			INFO("missing declaration: " << global.declaration);
-			REQUIRE(text.find(global.declaration) != std::string::npos);
+			REQUIRE_FALSE(wholeWordPositions(text, global.declaration).empty());
 		}
 	}
 
