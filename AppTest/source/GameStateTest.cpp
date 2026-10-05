@@ -6,7 +6,6 @@
 
 #include <type_traits>
 
-#include "GameGlobals.h"
 #include "GameState.hpp"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
@@ -105,8 +104,8 @@ TEST_CASE("a freshly constructed GameState is unaffected by another instance", "
 
 	SECTION("GameState is trivially destructible and needs no GL context")
 	{
-		// It holds scalars only; rendering resources stay out so this can be
-		// constructed and destroyed in a plain unit test.
+		// It holds scalars and plain-data arrays, no rendering resources, so this
+		// can be constructed and destroyed in a plain unit test.
 		REQUIRE(std::is_trivially_destructible<GameState>::value);
 		REQUIRE(std::is_trivially_copyable<GameState>::value);
 	}
@@ -1338,41 +1337,43 @@ TEST_CASE("tranche 7 GameState members are per instance", "[gamestate]")
 // waypoint graph: `numpathpoints`, `pathpoint`, `numpathpointconnect` and
 // `pathpointconnect`. They index each other - the connect counts and the connect
 // table are both keyed by a path point, and the table's entries are indices back
-// into the point list - so they are pinned here as one group and move as one
+// into the point list - so they are pinned here as one group and moved as one
 // group. Splitting them would leave the graph half in each place.
 //
-// The values below are read from the globals themselves, while the globals are
-// still the thing being read, so the literals are observed rather than assumed.
-// The tranche that follows re-points these same assertions at the GameState
-// members and adds the per-instance isolation the move buys.
+// These are the assertions the previous commit made against the globals
+// themselves, re-pointed at the members and with nothing dropped. The values were
+// read from the globals while they were still there, so they are observed rather
+// than assumed, and they sit next to `pathpointselected` because the editor's
+// link and delete commands key off that one.
 //
-// `pathpoint` is declared with no initialiser, unlike its two siblings which say
-// `= {}`. It still starts all zeroes, because Vector3 gives x, y and z default
-// member initialisers, so default-constructing the array runs them for every
-// element. That is pinned here by reading all thirty points rather than being
-// taken on trust, because a member written as a bare `Vector3 pathpoint[30];`
-// would have kept the same values by a different mechanism - and a member
-// written as an array of default-initialised Vector3 would not compile at all.
+// `pathpoint` was declared with no initialiser, unlike its two siblings which
+// said `= {}`. It still started all zeroes, because Vector3 gives x, y and z
+// default member initialisers, so default-constructing the array ran them for
+// every element. That is pinned by reading all thirty points rather than being
+// taken on trust, and the member spells the same intent out as `= {}` so the
+// zeroing does not depend on Vector3 keeping its default member initialisers.
 //
-// The declared types are pinned whole, extent included: `Vector3[30]`,
-// `int[30]` and `int[30][30]`. A comparison of values cannot tell a
-// thirty-element array from a thirty-one-element one whose last element is never
-// read, and the connect table's second extent is the difference between 900 ints
-// and a map that silently reads past what was written.
-TEST_CASE("the tranche 8 pathfinding globals start at the values GameState will carry", "[gamestate]")
+// The declared types are pinned whole, extent included: `Vector3[30]`, `int[30]`
+// and `int[30][30]`. A comparison of values cannot tell a thirty-element array from
+// a thirty-one-element one whose last element is never read, and the connect
+// table's second extent is the difference between 900 ints and a map that
+// silently reads past what was written.
+TEST_CASE("GameState tranche 8 members start at their historical global defaults", "[gamestate]")
 {
+	GameState s;
+
 	SECTION("no path points exist yet")
 	{
-		REQUIRE(Game::numpathpoints == 0);
+		REQUIRE(s.numpathpoints == 0);
 	}
 
 	SECTION("every path point starts at the origin")
 	{
 		for (int i = 0; i < 30; i++) {
 			INFO("path point " << i);
-			REQUIRE(Game::pathpoint[i].x == 0.0f);
-			REQUIRE(Game::pathpoint[i].y == 0.0f);
-			REQUIRE(Game::pathpoint[i].z == 0.0f);
+			REQUIRE(s.pathpoint[i].x == 0.0f);
+			REQUIRE(s.pathpoint[i].y == 0.0f);
+			REQUIRE(s.pathpoint[i].z == 0.0f);
 		}
 	}
 
@@ -1380,20 +1381,89 @@ TEST_CASE("the tranche 8 pathfinding globals start at the values GameState will 
 	{
 		for (int i = 0; i < 30; i++) {
 			INFO("path point " << i);
-			REQUIRE(Game::numpathpointconnect[i] == 0);
+			REQUIRE(s.numpathpointconnect[i] == 0);
 
 			for (int k = 0; k < 30; k++) {
 				INFO("path point " << i << " link " << k);
-				REQUIRE(Game::pathpointconnect[i][k] == 0);
+				REQUIRE(s.pathpointconnect[i][k] == 0);
 			}
 		}
 	}
 
 	SECTION("declared types are preserved from the migrated globals")
 	{
-		REQUIRE(std::is_same<decltype(Game::numpathpoints), int>::value);
-		REQUIRE(std::is_same<decltype(Game::pathpoint), Vector3[30]>::value);
-		REQUIRE(std::is_same<decltype(Game::numpathpointconnect), int[30]>::value);
-		REQUIRE(std::is_same<decltype(Game::pathpointconnect), int[30][30]>::value);
+		REQUIRE(std::is_same<decltype(s.numpathpoints), int>::value);
+		REQUIRE(std::is_same<decltype(s.pathpoint), Vector3[30]>::value);
+		REQUIRE(std::is_same<decltype(s.numpathpointconnect), int[30]>::value);
+		REQUIRE(std::is_same<decltype(s.pathpointconnect), int[30][30]>::value);
+	}
+}
+
+// Moving the graph into GameState is only worth anything if two GameStates stop
+// sharing it, so this is the property under test rather than the defaults above.
+// The scalars it is easy to get wrong here: an array member that kept static
+// storage duration, or that pointed at one shared block, would still behave
+// identically for the single instance the game constructs, and the bug would only
+// show up in a unit test.
+//
+// Every write below is seeded with a value the default does not hold, and every
+// array is written at an index other than 0. Seeding with 0 would let the
+// assertions pass against an array the writer never reached, and writing only
+// index 0 would leave the other 29 elements - and, for the connect table, the
+// other 899 - unobserved.
+TEST_CASE("tranche 8 GameState members are per instance", "[gamestate]")
+{
+	GameState a;
+	GameState b;
+
+	SECTION("writing one instance's pathfinding graph leaves the other's at its defaults")
+	{
+		a.numpathpoints = 3;
+		a.pathpoint[0] = Vector3(1.0f, 2.0f, 3.0f);
+		a.pathpoint[2] = Vector3(-4.5f, 6.25f, 7.75f);
+		a.pathpoint[29] = Vector3(8.0f, 9.0f, 10.0f);
+		a.numpathpointconnect[1] = 4;
+		a.numpathpointconnect[29] = 2;
+		a.pathpointconnect[0][0] = 5;
+		a.pathpointconnect[17][29] = 27;
+
+		REQUIRE(b.numpathpoints == 0);
+
+		for (int i = 0; i < 30; i++) {
+			INFO("path point " << i);
+			REQUIRE(b.pathpoint[i].x == 0.0f);
+			REQUIRE(b.pathpoint[i].y == 0.0f);
+			REQUIRE(b.pathpoint[i].z == 0.0f);
+			REQUIRE(b.numpathpointconnect[i] == 0);
+
+			for (int k = 0; k < 30; k++) {
+				INFO("path point " << i << " link " << k);
+				REQUIRE(b.pathpointconnect[i][k] == 0);
+			}
+		}
+	}
+
+	SECTION("a third instance also starts clean")
+	{
+		a.numpathpoints = 12;
+		a.pathpoint[11] = Vector3(100.0f, 200.0f, 300.0f);
+		a.numpathpointconnect[11] = 3;
+		a.pathpointconnect[11][2] = 4;
+
+		GameState c;
+		REQUIRE(c.numpathpoints == 0);
+
+		for (int i = 0; i < 30; i++) {
+			INFO("path point " << i);
+			REQUIRE(c.pathpoint[i].x == 0.0f);
+			REQUIRE(c.pathpoint[i].y == 0.0f);
+			REQUIRE(c.pathpoint[i].z == 0.0f);
+			REQUIRE(c.numpathpointconnect[i] == 0);
+
+			for (int k = 0; k < 30; k++) {
+				INFO("path point " << i << " link " << k);
+				REQUIRE(c.pathpointconnect[i][k] == 0);
+			}
+		}
 	}
 }

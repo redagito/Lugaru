@@ -7287,7 +7287,7 @@ int Person::SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, fl
 	return firstintersecting;
 }
 
-int findPathDist(int start, int end)
+int findPathDist(int start, int end, GameState& gamestate)
 {
 	int connected;
 	int closest;
@@ -7301,20 +7301,20 @@ int findPathDist(int start, int end)
 		int last4 = -1;
 		while (last != end && count < 30) {
 			closest = -1;
-			for (int j = 0; j < Game::numpathpoints; j++) {
+			for (int j = 0; j < gamestate.numpathpoints; j++) {
 				if (j != last && j != last2 && j != last3 && j != last4) {
 					connected = 0;
-					if (Game::numpathpointconnect[j]) {
-						for (int k = 0; k < Game::numpathpointconnect[j]; k++) {
-							if (Game::pathpointconnect[j][k] == last) {
+					if (gamestate.numpathpointconnect[j]) {
+						for (int k = 0; k < gamestate.numpathpointconnect[j]; k++) {
+							if (gamestate.pathpointconnect[j][k] == last) {
 								connected = 1;
 							}
 						}
 					}
 					if (!connected) {
-						if (Game::numpathpointconnect[last]) {
-							for (int k = 0; k < Game::numpathpointconnect[last]; k++) {
-								if (Game::pathpointconnect[last][k] == j) {
+						if (gamestate.numpathpointconnect[last]) {
+							for (int k = 0; k < gamestate.numpathpointconnect[last]; k++) {
+								if (gamestate.pathpointconnect[last][k] == j) {
 									connected = 1;
 								}
 							}
@@ -7455,20 +7455,20 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 				Vector3 colpoint;
 				closest = -1;
 				closestdistance = -1;
-				for (int j = 0; j < Game::numpathpoints; j++) {
-					if (closest == -1 || distsq(&finalfinaltarget, &Game::pathpoint[j]) < closestdistance) {
-						closestdistance = distsq(&finalfinaltarget, &Game::pathpoint[j]);
+				for (int j = 0; j < gamestate.numpathpoints; j++) {
+					if (closest == -1 || distsq(&finalfinaltarget, &gamestate.pathpoint[j]) < closestdistance) {
+						closestdistance = distsq(&finalfinaltarget, &gamestate.pathpoint[j]);
 						closest = j;
-						finaltarget = Game::pathpoint[j];
+						finaltarget = gamestate.pathpoint[j];
 					}
 				}
 				finalpathfindpoint = closest;
-				for (int j = 0; j < Game::numpathpoints; j++) {
-					for (int k = 0; k < Game::numpathpointconnect[j]; k++) {
-						DistancePointLine(&finalfinaltarget, &Game::pathpoint[j], &Game::pathpoint[Game::pathpointconnect[j][k]], &tempdist, &colpoint);
+				for (int j = 0; j < gamestate.numpathpoints; j++) {
+					for (int k = 0; k < gamestate.numpathpointconnect[j]; k++) {
+						DistancePointLine(&finalfinaltarget, &gamestate.pathpoint[j], &gamestate.pathpoint[gamestate.pathpointconnect[j][k]], &tempdist, &colpoint);
 						if (sq(tempdist) < closestdistance) {
-							if (findDistance(&colpoint, &Game::pathpoint[j]) + findDistance(&colpoint, &Game::pathpoint[Game::pathpointconnect[j][k]]) <
-								findDistance(&Game::pathpoint[j], &Game::pathpoint[Game::pathpointconnect[j][k]]) + .1) {
+							if (findDistance(&colpoint, &gamestate.pathpoint[j]) + findDistance(&colpoint, &gamestate.pathpoint[gamestate.pathpointconnect[j][k]]) <
+								findDistance(&gamestate.pathpoint[j], &gamestate.pathpoint[gamestate.pathpointconnect[j][k]]) + .1) {
 								closestdistance = sq(tempdist);
 								closest = j;
 								finaltarget = colpoint;
@@ -7486,22 +7486,22 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 				closest = -1;
 				closestdistance = -1;
 				if (lastpathfindpoint == -1) {
-					for (int j = 0; j < Game::numpathpoints; j++) {
+					for (int j = 0; j < gamestate.numpathpoints; j++) {
 						if (j != lastpathfindpoint) {
-							if (closest == -1 || (distsq(&coords, &Game::pathpoint[j]) < closestdistance)) {
-								closestdistance = distsq(&coords, &Game::pathpoint[j]);
+							if (closest == -1 || (distsq(&coords, &gamestate.pathpoint[j]) < closestdistance)) {
+								closestdistance = distsq(&coords, &gamestate.pathpoint[j]);
 								closest = j;
 							}
 						}
 					}
 					targetpathfindpoint = closest;
-					for (int j = 0; j < Game::numpathpoints; j++) {
+					for (int j = 0; j < gamestate.numpathpoints; j++) {
 						if (j != lastpathfindpoint) {
-							for (int k = 0; k < Game::numpathpointconnect[j]; k++) {
-								DistancePointLine(&coords, &Game::pathpoint[j], &Game::pathpoint[Game::pathpointconnect[j][k]], &tempdist, &colpoint);
+							for (int k = 0; k < gamestate.numpathpointconnect[j]; k++) {
+								DistancePointLine(&coords, &gamestate.pathpoint[j], &gamestate.pathpoint[gamestate.pathpointconnect[j][k]], &tempdist, &colpoint);
 								if (sq(tempdist) < closestdistance) {
-									if (findDistance(&colpoint, &Game::pathpoint[j]) + findDistance(&colpoint, &Game::pathpoint[Game::pathpointconnect[j][k]]) <
-										findDistance(&Game::pathpoint[j], &Game::pathpoint[Game::pathpointconnect[j][k]]) + .1) {
+									if (findDistance(&colpoint, &gamestate.pathpoint[j]) + findDistance(&colpoint, &gamestate.pathpoint[gamestate.pathpointconnect[j][k]]) <
+										findDistance(&gamestate.pathpoint[j], &gamestate.pathpoint[gamestate.pathpointconnect[j][k]]) + .1) {
 										closestdistance = sq(tempdist);
 										closest = j;
 									}
@@ -7512,30 +7512,30 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 					targetpathfindpoint = closest;
 				}
 				else {
-					for (int j = 0; j < Game::numpathpoints; j++) {
+					for (int j = 0; j < gamestate.numpathpoints; j++) {
 						if (j != lastpathfindpoint &&
 							j != lastpathfindpoint2 &&
 							j != lastpathfindpoint3 &&
 							j != lastpathfindpoint4) {
 							bool connected = 0;
-							if (Game::numpathpointconnect[j]) {
-								for (int k = 0; k < Game::numpathpointconnect[j]; k++) {
-									if (Game::pathpointconnect[j][k] == lastpathfindpoint) {
+							if (gamestate.numpathpointconnect[j]) {
+								for (int k = 0; k < gamestate.numpathpointconnect[j]; k++) {
+									if (gamestate.pathpointconnect[j][k] == lastpathfindpoint) {
 										connected = 1;
 									}
 								}
 							}
 							if (!connected) {
-								if (Game::numpathpointconnect[lastpathfindpoint]) {
-									for (int k = 0; k < Game::numpathpointconnect[lastpathfindpoint]; k++) {
-										if (Game::pathpointconnect[lastpathfindpoint][k] == j) {
+								if (gamestate.numpathpointconnect[lastpathfindpoint]) {
+									for (int k = 0; k < gamestate.numpathpointconnect[lastpathfindpoint]; k++) {
+										if (gamestate.pathpointconnect[lastpathfindpoint][k] == j) {
 											connected = 1;
 										}
 									}
 								}
 							}
 							if (connected) {
-								tempdist = findPathDist(j, finalpathfindpoint);
+								tempdist = findPathDist(j, finalpathfindpoint, gamestate);
 								if (closest == -1 || tempdist < closestdistance) {
 									closestdistance = tempdist;
 									closest = j;
@@ -7548,11 +7548,11 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 			}
 			losupdatedelay -= timemultiplier;
 
-			targetyaw = roughDirectionTo(coords, Game::pathpoint[targetpathfindpoint]);
+			targetyaw = roughDirectionTo(coords, gamestate.pathpoint[targetpathfindpoint]);
 			lookyaw = targetyaw;
 
 			//reached target point
-			if (distsqflat(&coords, &Game::pathpoint[targetpathfindpoint]) < .6) {
+			if (distsqflat(&coords, &gamestate.pathpoint[targetpathfindpoint]) < .6) {
 				lastpathfindpoint4 = lastpathfindpoint3;
 				lastpathfindpoint3 = lastpathfindpoint2;
 				lastpathfindpoint2 = lastpathfindpoint;

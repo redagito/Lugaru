@@ -386,8 +386,7 @@ const std::set<std::string> kPendingGlobals = {
 	"screentexture2", "Mainmenuitems", "skybox",
 	"hawk", "hawktexture", "hawkcoords", "realhawkcoords", "eye",
 	"cornea", "iris", "mapcenter", "text",
-	"textmono", "pathpoint", "numpathpoints",
-	"numpathpointconnect", "pathpointconnect", "consoletext",
+	"textmono", "consoletext",
 };
 
 } // namespace
@@ -431,8 +430,8 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 	{
 		// Without this, a parser that quietly matched nothing would leave every
 		// assertion above passing for the wrong reason.
-		REQUIRE(globals.size() == 38);
-		REQUIRE(members.size() == 139);
+		REQUIRE(globals.size() == 34);
+		REQUIRE(members.size() == 143);
 	}
 }
 

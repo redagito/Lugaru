@@ -29,10 +29,5 @@ namespace Game
 	Text* text = NULL;
 	Text* textmono = NULL;
 
-	Vector3 pathpoint[30];
-	int numpathpoints = 0;
-	int numpathpointconnect[30] = {};
-	int pathpointconnect[30][30] = {};
-
 	std::string consoletext[15] = {};
 }

@@ -244,10 +244,10 @@ void ch_save_json(const char* args, GameState& gamestate)
 		map_data["map"]["players"][j] = *Person::players[j];
 	}
 
-	for (int j = 0; j < numpathpoints; j++) {
-		map_data["map"]["pathpoints"][j]["pos"] = pathpoint[j];
-		for (int k = 0; k < numpathpointconnect[j]; k++) {
-			map_data["map"]["pathpoints"][j]["connect"][k] = pathpointconnect[j][k];
+	for (int j = 0; j < gamestate.numpathpoints; j++) {
+		map_data["map"]["pathpoints"][j]["pos"] = gamestate.pathpoint[j];
+		for (int k = 0; k < gamestate.numpathpointconnect[j]; k++) {
+			map_data["map"]["pathpoints"][j]["connect"][k] = gamestate.pathpointconnect[j][k];
 		}
 	}
 
@@ -382,11 +382,11 @@ void ch_save(const char* args, GameState& gamestate)
 		}
 	}
 
-	fpackf(tfile, "Bi", numpathpoints);
-	for (int j = 0; j < numpathpoints; j++) {
-		fpackf(tfile, "Bf Bf Bf Bi", pathpoint[j].x, pathpoint[j].y, pathpoint[j].z, numpathpointconnect[j]);
-		for (int k = 0; k < numpathpointconnect[j]; k++) {
-			fpackf(tfile, "Bi", pathpointconnect[j][k]);
+	fpackf(tfile, "Bi", gamestate.numpathpoints);
+	for (int j = 0; j < gamestate.numpathpoints; j++) {
+		fpackf(tfile, "Bf Bf Bf Bi", gamestate.pathpoint[j].x, gamestate.pathpoint[j].y, gamestate.pathpoint[j].z, gamestate.numpathpointconnect[j]);
+		for (int k = 0; k < gamestate.numpathpointconnect[j]; k++) {
+			fpackf(tfile, "Bi", gamestate.pathpointconnect[j][k]);
 		}
 	}
 

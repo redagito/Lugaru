@@ -1,13 +1,16 @@
 #pragma once
 
+#include "Math/Vector3.hpp"
+
 // GameState replaces globals previously declared in App/include/Globals.h and
 // App/include/GameGlobals.h. It is expected to be constructed once and passed
 // by reference; it owns no storage outside itself, so two instances never
 // share values.
 //
-// Scalars only. Rendering resources (Texture, Model) deliberately stay out:
-// they need a GL context, so putting them here would make this struct
-// untestable outside the renderer and non-trivially destructible.
+// Scalars and plain-data arrays. Rendering resources (Texture, Model)
+// deliberately stay out: they need a GL context, so putting them here would
+// make this struct untestable outside the renderer and non-trivially
+// destructible.
 
 struct GameState
 {
@@ -20,6 +23,16 @@ struct GameState
 
 	// which path point the editor is currently working on; -1 means none
 	int pathpointselected = 0;
+
+	// the editor's pathfinding graph: the path points, and which of them link to
+	// which. numpathpointconnect[i] counts a row of pathpointconnect, and every
+	// entry in that row is an index back into pathpoint, so these three index
+	// each other and have to move together. They index pathpointselected too,
+	// which is what the editor keys its link and delete commands off.
+	int numpathpoints = 0;
+	Vector3 pathpoint[30] = {};
+	int numpathpointconnect[30] = {};
+	int pathpointconnect[30][30] = {};
 
 	// hawk
 	float hawkyaw = 0;

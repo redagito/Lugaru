@@ -688,14 +688,14 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	}
 	Game::LoadingScreen(gamestate);
 
-	funpackf(tfile, "Bi", &numpathpoints);
-	if (numpathpoints > 30 || numpathpoints < 0) {
-		numpathpoints = 0;
+	funpackf(tfile, "Bi", &gamestate.numpathpoints);
+	if (gamestate.numpathpoints > 30 || gamestate.numpathpoints < 0) {
+		gamestate.numpathpoints = 0;
 	}
-	for (int i = 0; i < numpathpoints; i++) {
-		funpackf(tfile, "Bf Bf Bf Bi", &pathpoint[i].x, &pathpoint[i].y, &pathpoint[i].z, &numpathpointconnect[i]);
-		for (int k = 0; k < numpathpointconnect[i]; k++) {
-			funpackf(tfile, "Bi", &pathpointconnect[i][k]);
+	for (int i = 0; i < gamestate.numpathpoints; i++) {
+		funpackf(tfile, "Bf Bf Bf Bi", &gamestate.pathpoint[i].x, &gamestate.pathpoint[i].y, &gamestate.pathpoint[i].z, &gamestate.numpathpointconnect[i]);
+		for (int k = 0; k < gamestate.numpathpointconnect[i]; k++) {
+			funpackf(tfile, "Bi", &gamestate.pathpointconnect[i][k]);
 		}
 	}
 	Game::LoadingScreen(gamestate);
@@ -984,12 +984,12 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 
 	Game::LoadingScreen(gamestate);
 
-	numpathpoints = map_data["map"]["pathpoints"].size();
+	gamestate.numpathpoints = map_data["map"]["pathpoints"].size();
 	for (unsigned i = 0; i < map_data["map"]["pathpoints"].size(); i++) {
-		pathpoint[i] = map_data["map"]["pathpoints"][i]["pos"];
-		numpathpointconnect[i] = map_data["map"]["pathpoints"][i]["connect"].size();
+		gamestate.pathpoint[i] = map_data["map"]["pathpoints"][i]["pos"];
+		gamestate.numpathpointconnect[i] = map_data["map"]["pathpoints"][i]["connect"].size();
 		for (unsigned k = 0; k < map_data["map"]["pathpoints"][i]["connect"].size(); k++) {
-			pathpointconnect[i][k] = map_data["map"]["pathpoints"][i]["connect"][k].asInt();
+			gamestate.pathpointconnect[i][k] = map_data["map"]["pathpoints"][i]["connect"][k].asInt();
 		}
 	}
 
@@ -1649,34 +1649,34 @@ void Game::ProcessDevInput(GameState& gamestate)
 
 		/* Connect waypoint */
 		if (Input::isKeyPressed(SDL_SCANCODE_P) && Input::isKeyDown(SDL_SCANCODE_LCTRL) && !Input::isKeyDown(SDL_SCANCODE_LSHIFT)) {
-			if (numpathpoints < 30) {
+			if (gamestate.numpathpoints < 30) {
 				bool connected = false;
-				if (numpathpoints > 1) {
-					for (int i = 0; i < numpathpoints; i++) {
-						if (distsq(&pathpoint[i], &Person::players[0]->coords) < .5 && i != gamestate.pathpointselected && !connected) {
+				if (gamestate.numpathpoints > 1) {
+					for (int i = 0; i < gamestate.numpathpoints; i++) {
+						if (distsq(&gamestate.pathpoint[i], &Person::players[0]->coords) < .5 && i != gamestate.pathpointselected && !connected) {
 							bool alreadyconnected = false;
-							for (int j = 0; j < numpathpointconnect[gamestate.pathpointselected]; j++) {
-								if (pathpointconnect[gamestate.pathpointselected][j] == i) {
+							for (int j = 0; j < gamestate.numpathpointconnect[gamestate.pathpointselected]; j++) {
+								if (gamestate.pathpointconnect[gamestate.pathpointselected][j] == i) {
 									alreadyconnected = true;
 								}
 							}
 							if (!alreadyconnected) {
-								numpathpointconnect[gamestate.pathpointselected]++;
+								gamestate.numpathpointconnect[gamestate.pathpointselected]++;
 								connected = true;
-								pathpointconnect[gamestate.pathpointselected][numpathpointconnect[gamestate.pathpointselected] - 1] = i;
+								gamestate.pathpointconnect[gamestate.pathpointselected][gamestate.numpathpointconnect[gamestate.pathpointselected] - 1] = i;
 							}
 						}
 					}
 				}
 				if (!connected) {
-					numpathpoints++;
-					pathpoint[numpathpoints - 1] = Person::players[0]->coords;
-					numpathpointconnect[numpathpoints - 1] = 0;
-					if (numpathpoints > 1 && gamestate.pathpointselected != -1) {
-						numpathpointconnect[gamestate.pathpointselected]++;
-						pathpointconnect[gamestate.pathpointselected][numpathpointconnect[gamestate.pathpointselected] - 1] = numpathpoints - 1;
+					gamestate.numpathpoints++;
+					gamestate.pathpoint[gamestate.numpathpoints - 1] = Person::players[0]->coords;
+					gamestate.numpathpointconnect[gamestate.numpathpoints - 1] = 0;
+					if (gamestate.numpathpoints > 1 && gamestate.pathpointselected != -1) {
+						gamestate.numpathpointconnect[gamestate.pathpointselected]++;
+						gamestate.pathpointconnect[gamestate.pathpointselected][gamestate.numpathpointconnect[gamestate.pathpointselected] - 1] = gamestate.numpathpoints - 1;
 					}
-					gamestate.pathpointselected = numpathpoints - 1;
+					gamestate.pathpointselected = gamestate.numpathpoints - 1;
 				}
 			}
 			else {
@@ -1687,7 +1687,7 @@ void Game::ProcessDevInput(GameState& gamestate)
 		/* Select next path waypoint */
 		if (Input::isKeyPressed(SDL_SCANCODE_PERIOD)) {
 			gamestate.pathpointselected++;
-			if (gamestate.pathpointselected >= numpathpoints) {
+			if (gamestate.pathpointselected >= gamestate.numpathpoints) {
 				gamestate.pathpointselected = -1;
 			}
 		}
@@ -1696,31 +1696,31 @@ void Game::ProcessDevInput(GameState& gamestate)
 		if (Input::isKeyPressed(SDL_SCANCODE_COMMA) && !Input::isKeyDown(SDL_SCANCODE_LSHIFT)) {
 			gamestate.pathpointselected--;
 			if (gamestate.pathpointselected <= -2) {
-				gamestate.pathpointselected = numpathpoints - 1;
+				gamestate.pathpointselected = gamestate.numpathpoints - 1;
 			}
 		}
 
 		/* Delete path waypoint */
 		if (Input::isKeyPressed(SDL_SCANCODE_COMMA) && Input::isKeyDown(SDL_SCANCODE_LSHIFT)) {
 			if (gamestate.pathpointselected != -1) {
-				numpathpoints--;
-				pathpoint[gamestate.pathpointselected] = pathpoint[numpathpoints];
-				numpathpointconnect[gamestate.pathpointselected] = numpathpointconnect[numpathpoints];
-				for (int i = 0; i < numpathpointconnect[gamestate.pathpointselected]; i++) {
-					pathpointconnect[gamestate.pathpointselected][i] = pathpointconnect[numpathpoints][i];
+				gamestate.numpathpoints--;
+				gamestate.pathpoint[gamestate.pathpointselected] = gamestate.pathpoint[gamestate.numpathpoints];
+				gamestate.numpathpointconnect[gamestate.pathpointselected] = gamestate.numpathpointconnect[gamestate.numpathpoints];
+				for (int i = 0; i < gamestate.numpathpointconnect[gamestate.pathpointselected]; i++) {
+					gamestate.pathpointconnect[gamestate.pathpointselected][i] = gamestate.pathpointconnect[gamestate.numpathpoints][i];
 				}
-				for (int i = 0; i < numpathpoints; i++) {
-					for (int j = 0; j < numpathpointconnect[i]; j++) {
-						if (pathpointconnect[i][j] == gamestate.pathpointselected) {
-							pathpointconnect[i][j] = pathpointconnect[i][numpathpointconnect[i] - 1];
-							numpathpointconnect[i]--;
+				for (int i = 0; i < gamestate.numpathpoints; i++) {
+					for (int j = 0; j < gamestate.numpathpointconnect[i]; j++) {
+						if (gamestate.pathpointconnect[i][j] == gamestate.pathpointselected) {
+							gamestate.pathpointconnect[i][j] = gamestate.pathpointconnect[i][gamestate.numpathpointconnect[i] - 1];
+							gamestate.numpathpointconnect[i]--;
 						}
-						if (pathpointconnect[i][j] == numpathpoints) {
-							pathpointconnect[i][j] = gamestate.pathpointselected;
+						if (gamestate.pathpointconnect[i][j] == gamestate.numpathpoints) {
+							gamestate.pathpointconnect[i][j] = gamestate.pathpointselected;
 						}
 					}
 				}
-				gamestate.pathpointselected = numpathpoints - 1;
+				gamestate.pathpointselected = gamestate.numpathpoints - 1;
 			}
 		}
 

@@ -536,14 +536,14 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				}
 			}
 
-			if (numpathpoints > 1) {
+			if (gamestate.numpathpoints > 1) {
 				glColor4f(0, 1, 0, 1);
-				for (unsigned k = 0; int(k) < numpathpoints; k++) {
-					if (numpathpointconnect[k]) {
-						for (int i = 0; i < numpathpointconnect[k]; i++) {
+				for (unsigned k = 0; int(k) < gamestate.numpathpoints; k++) {
+					if (gamestate.numpathpointconnect[k]) {
+						for (int i = 0; i < gamestate.numpathpointconnect[k]; i++) {
 							glBegin(GL_LINE_LOOP);
-							glVertex3f(pathpoint[k].x, pathpoint[k].y + .5, pathpoint[k].z);
-							glVertex3f(pathpoint[pathpointconnect[k][i]].x, pathpoint[pathpointconnect[k][i]].y + .5, pathpoint[pathpointconnect[k][i]].z);
+							glVertex3f(gamestate.pathpoint[k].x, gamestate.pathpoint[k].y + .5, gamestate.pathpoint[k].z);
+							glVertex3f(gamestate.pathpoint[gamestate.pathpointconnect[k][i]].x, gamestate.pathpoint[gamestate.pathpointconnect[k][i]].y + .5, gamestate.pathpoint[gamestate.pathpointconnect[k][i]].z);
 							glEnd();
 						}
 					}
@@ -551,7 +551,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate)
 				glColor4f(1, 1, 1, 1);
 				glPointSize(4);
 				glBegin(GL_POINTS);
-				glVertex3f(pathpoint[gamestate.pathpointselected].x, pathpoint[gamestate.pathpointselected].y + .5, pathpoint[gamestate.pathpointselected].z);
+				glVertex3f(gamestate.pathpoint[gamestate.pathpointselected].x, gamestate.pathpoint[gamestate.pathpointselected].y + .5, gamestate.pathpoint[gamestate.pathpointselected].z);
 				glEnd();
 			}
 		}

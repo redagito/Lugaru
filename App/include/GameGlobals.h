@@ -36,10 +36,5 @@ namespace Game
 	extern Text* text;
 	extern Text* textmono;
 
-	extern Vector3 pathpoint[30];
-	extern int numpathpoints;
-	extern int numpathpointconnect[30];
-	extern int pathpointconnect[30][30];
-
 	extern std::string consoletext[15];
 }
