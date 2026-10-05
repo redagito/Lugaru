@@ -7,6 +7,7 @@
 #include <type_traits>
 
 #include "GameState.hpp"
+#include "Globals.h"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
 {
@@ -1284,5 +1285,32 @@ TEST_CASE("tranche 6 GameState members are per instance", "[gamestate]")
 		REQUIRE(c.selected == 0);
 		REQUIRE(c.yaw == 0.0f);
 		REQUIRE(c.pitch == 0.0f);
+	}
+}
+
+// Tranche 7 covers one global, `multiplier`: the per-tick time scale. Its
+// default is pinned here by reading the global itself, while the global is
+// still the thing being read, so the literal below is observed rather than
+// assumed. The tranche that follows moves it into a GameState member sitting
+// beside realmultiplier and asserts the same value against that member.
+//
+// The type is pinned alongside the value because a comparison such as
+// `REQUIRE(x == 0)` holds just as happily for an int as for a float, and the
+// test projects compile with /wd4244, which suppresses the float-to-int
+// conversion warning that would otherwise be the only hint of a type slip.
+//
+// The name is also a widespread parameter name elsewhere in the codebase, so
+// this test deliberately refers to the global unqualified: it is the only
+// place in the test project where the bare identifier means the global.
+TEST_CASE("the tranche 7 multiplier global starts at the value GameState will carry", "[gamestate]")
+{
+	SECTION("per-tick time scale")
+	{
+		REQUIRE(multiplier == 0.0f);
+	}
+
+	SECTION("declared type is preserved from the migrated global")
+	{
+		REQUIRE(std::is_same<decltype(multiplier), float>::value);
 	}
 }
