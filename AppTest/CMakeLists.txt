@@ -34,6 +34,9 @@ target_compile_definitions(${PROJECT_NAME}
 	# The asset ownership guard scans Lugaru/source as well: main.cpp is the other
 	# place that owns a GameAssets, and it is not under App.
 	PRIVATE LUGARU_LUGARU_SOURCE_DIR="${CMAKE_SOURCE_DIR}/Lugaru/source"
+	# The console command documentation guard reads Docs/DEVTOOLS.txt, which lives
+	# outside both trees.
+	PRIVATE LUGARU_REPO_ROOT="${CMAKE_SOURCE_DIR}"
 )
 
 target_include_directories(${PROJECT_NAME}
