@@ -14,10 +14,10 @@ been reproduced at runtime.
 ## 1. Out-of-bounds read of `pathpoint[-1]` when drawing pathfind links
 
 **Severity:** medium (undefined behaviour, potential crash or garbage geometry)
-**Status:** confirmed by reading code; not reproduced at runtime; no test coverage
+**Status:** fixed - the draw guard now also tests for the `-1` sentinel
 
-`App/source/GameDraw.cpp:539` guards the pathfind-link drawing loop with only
-`numpathpoints > 1`, then at `:554` indexes
+`App/source/GameDraw.cpp:539` guarded the pathfind-link drawing loop with only
+`numpathpoints > 1`, then at `:554` indexed
 `pathpoint[gamestate.pathpointselected]`.
 
 `gamestate.pathpointselected` uses `-1` as a valid "nothing selected" sentinel. It is set
@@ -29,14 +29,33 @@ if (numpathpoints > 1 && gamestate.pathpointselected != -1) {
 ```
 
 So the codebase already knows the right idiom, and the delete path at
-`GameTick.cpp:1705` is also correctly guarded. `GameDraw.cpp` is the one site missing the
+`GameTick.cpp:1705` is also correctly guarded. `GameDraw.cpp` was the one site missing the
 `-1` check.
 
 Reaching it requires more than one pathfind waypoint plus none selected, so it is narrow.
 It is a read of one `Vector3` before the array.
 
-**Suggested fix:** add `&& gamestate.pathpointselected != -1` to the `GameDraw.cpp:539`
-guard, matching `GameTick.cpp:1675`.
+The suggested fix was applied: the guard around the pathfind-link block now reads
+`if (gamestate.numpathpoints > 1 && gamestate.pathpointselected != -1) {`, which is the
+`GameTick.cpp` idiom above with the member qualification the block already used. Nothing
+else moved - the same links and the same marker point are drawn, from the same coordinates,
+for the same selections; only the state where nothing is selected stops drawing anything at
+all, which is what the block was already doing for zero or one waypoint. Pinned by
+`532495f` ("Assert the path-link draw guards against no selection"), as `the draw path never
+indexes the path point graph with an unselected point` in
+`AppTest/source/PathPointGuardTest.cpp`. That assertion is scoped to `GameDraw.cpp`: it walks
+the file's subscripts and requires each one made with the selection to sit inside a block
+whose condition tests for `-1`.
+
+**Known gap, left alone here:** `GameTick.cpp:1659-1667` has the same defect. The connect
+command's first half runs inside a `numpathpoints > 1` guard with no `-1` test, and
+`i != gamestate.pathpointselected` is trivially true when the selection is `-1`, so with
+nothing selected and the player near a path point it increments
+`numpathpointconnect[-1]` and writes `pathpointconnect[-1][n]`. Given the member order at
+`App/include/GameState.hpp:41-44`, `numpathpointconnect[-1]` overlaps the tail of
+`pathpoint[29]` and `pathpointconnect[-1]` overlaps the tail of `numpathpointconnect`, so
+that one is a write into live graph state rather than merely a read before the array. It
+wants its own fix and its own assertion, and it is out of scope for this one.
 
 ---
 

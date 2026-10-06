@@ -538,7 +538,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 				}
 			}
 
-			if (gamestate.numpathpoints > 1) {
+			if (gamestate.numpathpoints > 1 && gamestate.pathpointselected != -1) {
 				glColor4f(0, 1, 0, 1);
 				for (unsigned k = 0; int(k) < gamestate.numpathpoints; k++) {
 					if (gamestate.numpathpointconnect[k]) {
