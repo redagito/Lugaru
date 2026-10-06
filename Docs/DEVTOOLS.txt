@@ -83,6 +83,19 @@ save (string) - saves the state of the current map.
     The string corresponds to the filename that the map will be saved under in
     the Maps folder, located in Lugaru's Data folder. Caution: this command
     will overwrite other maps with the same name without prompting you.
+save_json (string) - saves the state of the current map as JSON, version 13.
+    This is the format the map loader prefers; 'save' writes the older binary
+    format instead. The string corresponds to the filename the map will be
+    saved under, with '.json' appended for you. Caution: this command will
+    overwrite other maps with the same name without prompting you.
+    Caution: unlike 'map', which reads the Maps folder in Lugaru's Data folder,
+    this writes to the Maps folder in your user data directory, so 'map' will
+    not find what you have just saved until you copy the file across yourself.
+convert_to_json (string) - loads the named map and immediately saves it back
+    out as JSON, which is how a map is converted from the older binary format.
+    The string is the name of an existing map, exactly as 'map' takes it. The
+    result is written to the same user data Maps folder as 'save_json', with
+    the same caveat about 'map' not looking there.
 
 Character attributes
 ~~~~~~~~~~~~~~~~~~~~
@@ -120,6 +133,16 @@ armorreset, protectionreset - reset the value of the armor and protection
 armornear, protectionnear, proportionnear, sizenear - apply the changes to the
     character nearest to you instead of you.
 cellophane - makes everyone invisible, except for the shadows.
+belt - hides or shows the clothes your character is wearing.
+    Despite the name this affects all of your clothes, not a belt in
+    particular. It only stops them being drawn; unlike 'noclothes' they stay on
+    the character, so using 'belt' again brings them back.
+default - resets the main player's character to its default state.
+    Armor, protection and metal all go to 1 for the head, high and low, as do
+    the amount of health you have and your running speed. Your size goes to the
+    default for your creature, all four proportions go to 1, any clothes you are
+    wearing are removed, and 'immobile' is cancelled. It also sets the initial
+    state of the next character placed in the editor back to 'active'.
 
 Character appearance
 ~~~~~~~~~~~~~~~~~~~~

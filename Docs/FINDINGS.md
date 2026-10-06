@@ -162,19 +162,31 @@ friction `1.5` rather than `.5`.
 
 ---
 
-## 5. Editor: two level-saving commands are undocumented
+## 5. Editor: four console commands are undocumented
 
 **Severity:** low (documentation gap)
-**Status:** confirmed by reading code
+**Status:** fixed - all four are now documented
 
 `Docs/DEVTOOLS.txt` documents `map` and `save`, but not:
 
 - `save_json` (`ConsoleCmds.cpp:193`) - writes JSON `version 13`, the format the loader
   prefers
 - `convert_to_json` (`ConsoleCmds.cpp:266`) - loads then re-saves as JSON
+- `belt` (`ConsoleCmds.cpp:536`) - toggles `skeleton.clothes`, which gates the draw of the
+  clothing mesh, so it hides and shows the clothes without removing them
+- `default` (`ConsoleCmds.cpp:708`) - resets the main player's armor, protection, metal,
+  health, speed, scale and proportions, clears their clothes, cancels `immobile`, and sets
+  `gamestate.editoractive` back to `typeactive`
 
 Meanwhile the documented `save` (`ConsoleCmds.cpp:272`) writes the legacy **binary**
 `mapvers 12`. So the documented command is the one you are least likely to want.
+
+The sweep that found these was written first, as `every console command is documented` in
+`AppTest/source/ConsoleTableTest.cpp`: it reuses the `DECLARE_COMMAND` extraction the table
+tests already do, so the list cannot drift from the code, and it guards on the extracted
+count (62) so a parser that matched nothing cannot pass. It reported **four** missing
+commands rather than the two originally expected here; `belt` and `default` are real
+commands with no entry in the file, so all four were documented.
 
 ---
 
