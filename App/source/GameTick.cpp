@@ -1652,7 +1652,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 		if (Input::isKeyPressed(SDL_SCANCODE_P) && Input::isKeyDown(SDL_SCANCODE_LCTRL) && !Input::isKeyDown(SDL_SCANCODE_LSHIFT)) {
 			if (gamestate.numpathpoints < 30) {
 				bool connected = false;
-				if (gamestate.numpathpoints > 1) {
+				if (gamestate.numpathpoints > 1 && gamestate.pathpointselected != -1) {
 					for (int i = 0; i < gamestate.numpathpoints; i++) {
 						if (distsq(&gamestate.pathpoint[i], &Person::players[0]->coords) < .5 && i != gamestate.pathpointselected && !connected) {
 							bool alreadyconnected = false;
