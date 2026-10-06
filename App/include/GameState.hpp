@@ -20,7 +20,13 @@ struct GameState
 	// editor
 	int editoractive = 0;
 	int editorpathtype = 0;
-	float editorsize = 0;
+	// editorsize is the scale given to the next object placed in the editor, and
+	// the up/down keys move it by one frame's multiplier per tick while held - so
+	// about 1.0 per second of holding - down to a floor of .1. One second of
+	// holding `up` lands on 1, which is also the scale Object::Scale expects for a
+	// nominal object and the value Object::LoadObjects falls back to. Starting at
+	// 0, as the global it came from did, placed a zero-scale object instead.
+	float editorsize = 1;
 	bool editorenabled = false;
 	int editortype = 0;
 

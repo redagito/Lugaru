@@ -309,7 +309,9 @@ TEST_CASE("GameState tranche 3 members start at their historical global defaults
 
 	SECTION("editor")
 	{
-		REQUIRE(s.editorsize == 0.0f);
+		// Not the historical default: 0 was the editor's unusable starting scale
+		// and is corrected in the tranche that covers the editor keys.
+		REQUIRE(s.editorsize == 1.0f);
 	}
 
 	SECTION("console")
@@ -403,7 +405,7 @@ TEST_CASE("tranche 3 GameState members are per instance", "[gamestate]")
 		REQUIRE(b.targetblurness == 0.0f);
 		REQUIRE(b.oldenvironment == 0);
 		REQUIRE(b.firstLoadDone == false);
-		REQUIRE(b.editorsize == 0.0f);
+		REQUIRE(b.editorsize == 1.0f);
 		REQUIRE(b.consolekey == 0);
 		REQUIRE(b.consoleselected == 0);
 		REQUIRE(b.stereoreverse == false);
@@ -479,7 +481,7 @@ TEST_CASE("tranche 3 GameState members are per instance", "[gamestate]")
 		REQUIRE(c.targetblurness == 0.0f);
 		REQUIRE(c.oldenvironment == 0);
 		REQUIRE(c.firstLoadDone == false);
-		REQUIRE(c.editorsize == 0.0f);
+		REQUIRE(c.editorsize == 1.0f);
 		REQUIRE(c.consolekey == 0);
 		REQUIRE(c.consoleselected == 0);
 		REQUIRE(c.stereoreverse == false);

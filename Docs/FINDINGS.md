@@ -137,18 +137,28 @@ locations), so it is recorded rather than fixed in isolation.
 ## 4. Editor: `editorsize` defaults to 0, so the first placed object has zero scale
 
 **Severity:** low (surprising but harmless; nothing crashes)
-**Status:** confirmed by reading code
+**Status:** fixed - the default is now `1`
 
-`App/include/GameState.hpp:17` declares `float editorsize = 0;`. It is passed as the object
+`App/include/GameState.hpp:17` declared `float editorsize = 0;`. It is passed as the object
 scale at `App/source/GameTick.cpp:1578` and `:1580`. Pressing `o` to place an object before
-pressing `up` therefore places a zero-scale object.
+pressing `up` therefore placed a zero-scale object.
 
 There is no way to re-size or re-place an object after creation - `editorsize`,
 `editoryaw` and `editorpitch` are all *next-object* state, so editing is strictly
 create-or-delete.
 
-The `0` default is faithful to the original global and was deliberately preserved during
-migration. Changing it to something usable is a behaviour change and needs a decision.
+The `0` default was faithful to the original global and was deliberately preserved during
+migration, but keeping it is a behaviour change in the wrong direction, so it has been
+changed to `1`. Pinned by `56b253d` ("Assert a fresh editor size is usable"). Derived from
+the code rather than picked: the increment is `gamestate.editorsize += gamestate.multiplier`
+once per tick while `up` is held, and `multiplier` is the frame delta clamped to
+`[.001, .6]` (`Lugaru/source/main.cpp:282-288` and `:317-319`), so one second of holding
+adds about `1.0` and the decrement floors at `.1`. One second of holding `up` therefore lands
+on `1`, which is also the nominal object scale - `Object::Object` calls
+`model.Scale(.3 * scale, .3 * scale, .3 * scale)` (`Object.cpp:161`) - and the value
+`Object::LoadObjects` falls back to when a scale cannot be read (`Object.cpp:601`). `1` also
+puts `scale` on the `> .5` side of the branch at `Object.cpp:114`, so a placed rock gets the
+friction `1.5` rather than `.5`.
 
 ---
 
