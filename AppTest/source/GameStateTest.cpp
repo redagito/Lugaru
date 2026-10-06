@@ -1918,3 +1918,16 @@ TEST_CASE("GameState tranche 11 members are per instance", "[gamestate]")
 		REQUIRE(c.frustum.frustum[2][3] == 0.0f);
 	}
 }
+
+// editorsize is passed straight to Object::MakeObject as the scale of the object
+// being placed, so a fresh GameState hands it `model.Scale(0, 0, 0)`: an
+// invisible object with no way to fix it, since the editor's size, yaw and pitch
+// are all next-object state. The arrow keys rescue it only if they are pressed
+// first, and the decrement floors at .1 so the usable range starts well above
+// zero. Placing with `o` straight after entering the editor has to work.
+TEST_CASE("a fresh editor size is usable without touching the arrow keys", "[gamestate]")
+{
+	GameState s;
+
+	REQUIRE(s.editorsize > 0.0f);
+}
