@@ -41,21 +41,45 @@ The suggested fix was applied: the guard around the pathfind-link block now read
 else moved - the same links and the same marker point are drawn, from the same coordinates,
 for the same selections; only the state where nothing is selected stops drawing anything at
 all, which is what the block was already doing for zero or one waypoint. Pinned by
-`532495f` ("Assert the path-link draw guards against no selection"), as `the draw path never
-indexes the path point graph with an unselected point` in
-`AppTest/source/PathPointGuardTest.cpp`. That assertion is scoped to `GameDraw.cpp`: it walks
-the file's subscripts and requires each one made with the selection to sit inside a block
-whose condition tests for `-1`.
+`532495f` ("Assert the path-link draw guards against no selection"), as `no file indexes the path
+point graph with an unselected point` in `AppTest/source/PathPointGuardTest.cpp`. That assertion
+walks every `.c`, `.cpp`, `.h` and `.hpp` under `App/include` and `App/source`, and requires each
+subscript made with the selection to sit inside a block whose condition tests for `-1`.
 
-**Known gap, left alone here:** `GameTick.cpp:1659-1667` has the same defect. The connect
-command's first half runs inside a `numpathpoints > 1` guard with no `-1` test, and
+**Known gap, now fixed:** `GameTick.cpp:1659-1667` had the same defect. The connect
+command's first half ran inside a `numpathpoints > 1` guard with no `-1` test, and
 `i != gamestate.pathpointselected` is trivially true when the selection is `-1`, so with
-nothing selected and the player near a path point it increments
-`numpathpointconnect[-1]` and writes `pathpointconnect[-1][n]`. Given the member order at
+nothing selected and the player near a path point it incremented
+`numpathpointconnect[-1]` and wrote `pathpointconnect[-1][n]`. Given the member order at
 `App/include/GameState.hpp:41-44`, `numpathpointconnect[-1]` overlaps the tail of
 `pathpoint[29]` and `pathpointconnect[-1]` overlaps the tail of `numpathpointconnect`, so
-that one is a write into live graph state rather than merely a read before the array. It
-wants its own fix and its own assertion, and it is out of scope for this one.
+that one was a write into live graph state rather than merely a read before the array.
+
+The fix is the one line this gap was left waiting for, applied by `a24c617` ("Skip connecting
+path points when nothing is selected"):
+
+```cpp
+if (gamestate.numpathpoints > 1 && gamestate.pathpointselected != -1) {
+```
+
+which is the `GameTick.cpp:1676` idiom further down the same keybind, with the member
+qualification the block already used. Nothing else in the block moved - same loop bounds, same
+coordinates, same `alreadyconnected` logic, same insertion. `i != gamestate.pathpointselected` at
+`:1657` stays: with a real selection it is the only thing stopping the command from connecting
+a point to itself when the player is standing on the selected one, so it is not redundant with
+the new guard, only newly necessary to reason about separately.
+
+One consequence worth naming: with nothing selected and the player near an existing point, the
+old code set `connected` before corrupting the table, so the `if (!connected)` at `:1672` never
+ran and no point was added. Now that the block is skipped, that key adds a point and selects it,
+which is what the same key already did whenever there were zero or one points. That is the
+guard's doing, not an extra change.
+
+The sweep that found it is now tree-wide rather than scoped to `GameDraw.cpp`, and it holds
+over all 15 subscripts the two files make with the selection - the marker point's x, y and z,
+and the twelve in `GameTick.cpp` - pinned by `df0ebd9` ("Extend the path-point guard check to the
+whole tree") as `no file indexes the path point graph with an unselected point` in
+`AppTest/source/PathPointGuardTest.cpp`. No other unguarded site turned up.
 
 ---
 

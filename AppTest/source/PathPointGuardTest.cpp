@@ -8,30 +8,37 @@
 // point - and a site that subscripts the graph with it unchecked reads or writes
 // before the start of the array.
 //
-// GameDraw.cpp was the one site that did not check. Its pathfind link block was
-// guarded by `numpathpoints > 1` alone, and the marker point at the end of that
-// block read `pathpoint[pathpointselected]`, so with two or more waypoints and
-// none selected it read pathpoint[-1] once per frame.
+// GameDraw.cpp was the first site found. Its pathfind link block was guarded by
+// `numpathpoints > 1` alone, and the marker point at the end of that block read
+// `pathpoint[pathpointselected]`, so with two or more waypoints and none
+// selected it read pathpoint[-1] once per frame.
 //
-// Drawing needs a GL context, so the block cannot be executed by a unit test and
-// the assertions below read App/source/GameDraw.cpp as text. They ask the
-// question rather than matching a line: for every subscript in the file whose
-// index expression names the selection, is some enclosing `if` condition testing
-// `pathpointselected != -1`? Following the enclosing conditions by brace depth
-// instead of by adjacency is what makes this an invariant - it does not care
-// which line the guard sits on or how it is spaced, and it keeps holding if the
-// marker point is moved, given another enclosing block, or joined by a second
-// one.
+// GameTick.cpp:1659-1667 is the second, and the worse of the two: the first half
+// of the connect command increments `numpathpointconnect[pathpointselected]`
+// inside the same `numpathpoints > 1` guard, and `i != pathpointselected` in its
+// body is trivially true when nothing is selected, so it cannot stand in for the
+// check. Both now guard with `numpathpoints > 1 && pathpointselected != -1` -
+// GameTick.cpp already used exactly that idiom further down the same keybind, at
+// `:1676`.
 //
-// The same question asked over GameTick.cpp fails today, at
-// GameTick.cpp:1659-1667, where the connect command increments
-// `numpathpointconnect[pathpointselected]` inside a `numpathpoints > 1` guard
-// with no -1 check. That is a separate defect in a different file, outside the
-// scope of this fix; it is named here so this assertion is not mistaken for a
-// clean sweep of the tree.
+// Neither can be executed by a unit test - the drawing needs a GL context and the
+// editor commands need a key event - so the assertions below read the source as
+// text. They ask the question rather than matching a line: for every subscript
+// whose index expression names the selection, is some enclosing `if` condition
+// testing `pathpointselected != -1`? Following the enclosing conditions by
+// brace depth instead of by adjacency is what makes this an invariant - it does
+// not care which line the guard sits on or how it is spaced, and it keeps
+// holding if a site is moved, given another enclosing block, or joined by a
+// second one.
 //
-// The test project is told where App/source lives (LUGARU_APP_SOURCE_DIR) so the
-// scan does not have to guess from its working directory.
+// The scope is every .c, .cpp, .h and .hpp under App/include and App/source: 15
+// subscripts over two files today, rather than the one file the assertion began
+// with. A file that starts indexing the graph is then covered without having to
+// be named here.
+//
+// The test project is told where those two trees live (LUGARU_APP_INCLUDE_DIR
+// and LUGARU_APP_SOURCE_DIR) so the scan does not have to guess from its
+// working directory.
 
 #include <catch2/catch_test_macros.hpp>
 
