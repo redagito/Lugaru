@@ -35,7 +35,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <cctype>
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -43,7 +45,21 @@
 namespace
 {
 
-const char* const kGameDrawSource = LUGARU_APP_SOURCE_DIR "/GameDraw.cpp";
+// Both trees App is built from, walked whole rather than reduced to the two
+// files that happen to index the graph today, so that a subscript added to a
+// file this test has never heard of is still covered. Both locations are handed
+// over by AppTest/CMakeLists.txt, so neither has to be guessed from the working
+// directory.
+const char* const kAppTrees[] = {
+	LUGARU_APP_INCLUDE_DIR,
+	LUGARU_APP_SOURCE_DIR,
+};
+
+const std::vector<std::string> kSourceExtensions = { ".c", ".cpp", ".h", ".hpp" };
+
+// The file the marker point is drawn in. Named only so that the count below can
+// be pinned to it: the sweep itself does not use it.
+const char* const kMarkerFile = "GameDraw.cpp";
 
 // The three members an index expression can be applied to. Whole-word matching
 // is what keeps them apart: `pathpoint` is a prefix of both `pathpointconnect`
@@ -59,18 +75,68 @@ const char* const kGraphArrays[] = {
 const char* const kSelection = "pathpointselected";
 const char* const kNoSelectionCheck = "pathpointselected!=-1";
 
-// How many subscripts the draw path is expected to make with the selection: the
-// x, the y and the z of the single marker point it draws for the selected path
-// point. Pinned so that a deleted or renamed site cannot leave the assertion
-// below holding over nothing - and, read the other way, so that dropping the
-// marker point cannot pass as a fix for the out-of-bounds read.
-const int kExpectedSites = 3;
+// How many subscripts the tree is expected to make with the selection: three in
+// GameDraw.cpp, and the twelve in GameTick.cpp that the connect command, the add
+// half of the connect command and the delete command make. Pinned so that a
+// deleted or renamed site cannot leave the assertions below holding over
+// nothing.
+const int kExpectedSites = 15;
 
-std::vector<std::string> readLines(const char* path)
+// How many of them belong to the marker point alone: the x, the y and the z of
+// the single glVertex3f GameDraw.cpp draws for the selected path point. Pinned
+// apart from the total so that dropping the marker point cannot pass as a fix
+// for the out-of-bounds read - it would take this count with it.
+const int kExpectedMarkerSites = 3;
+
+// Every source file under the two trees, sorted, so that a failure names them in
+// a stable order.
+std::vector<std::filesystem::path> readAllAppSources()
 {
-	std::ifstream input(path);
+	std::vector<std::filesystem::path> paths;
+	std::error_code error;
+
+	for (const char* const root : kAppTrees) {
+		for (const std::filesystem::directory_entry& entry :
+		     std::filesystem::recursive_directory_iterator(root, error)) {
+			if (!entry.is_regular_file(error)) {
+				continue;
+			}
+			const std::string extension = entry.path().extension().string();
+			if (std::find(kSourceExtensions.begin(), kSourceExtensions.end(), extension) !=
+			    kSourceExtensions.end()) {
+				paths.push_back(entry.path());
+			}
+		}
+	}
+
+	if (error) {
+		FAIL("could not walk the App trees: " << error.message());
+	}
+
+	std::sort(paths.begin(), paths.end());
+	return paths;
+}
+
+// A path as a failure message should name it: relative to the tree it was found
+// under, so the message reads `Objects/Person.cpp:42` instead of printing the
+// whole configured path.
+std::string displayPath(const std::filesystem::path& path)
+{
+	for (const char* const root : kAppTrees) {
+		const std::filesystem::path relative = path.lexically_relative(root);
+		if (!relative.empty() && *relative.begin() != "..") {
+			return relative.generic_string();
+		}
+	}
+
+	return path.filename().string();
+}
+
+std::vector<std::string> readLines(const std::filesystem::path& path)
+{
+	std::ifstream input(path.string().c_str());
 	if (!input) {
-		FAIL("could not open " << path);
+		FAIL("could not open " << path.string());
 	}
 
 	std::vector<std::string> lines;
@@ -244,11 +310,12 @@ bool rulesOutNoSelection(const std::string& condition)
 	return squashed.find(kNoSelectionCheck) != std::string::npos;
 }
 
-// One subscript of the graph made with the selection: where it is, what it is
-// applied to, the expression it was applied to, and the condition of every block
-// enclosing it, outermost first.
+// One subscript of the graph made with the selection: the file it is in, where
+// in it, what it is applied to, the expression it was applied to, and the
+// condition of every block enclosing it, outermost first.
 struct IndexSite
 {
+	std::string file;
 	int line = 0;
 	std::string::size_type column = 0;
 	std::string array;
@@ -256,18 +323,19 @@ struct IndexSite
 	std::vector<std::string> conditions;
 };
 
-// Every subscript in one source file whose index expression names the selection,
+// Every subscript in one file whose index expression names the selection,
 // carrying the conditions of the blocks each one sits inside.
 //
 // A site is recorded before the braces on its own line are applied, so a block
 // that opens further along the same line cannot be credited to it, and the
 // walk runs left to right so a site that precedes a closing brace on the same
 // line is not credited with the block that brace ends.
-std::vector<IndexSite> findSelectionIndexes(const char* path)
+std::vector<IndexSite> findSelectionIndexes(const std::filesystem::path& path)
 {
 	std::vector<IndexSite> sites;
 
 	const std::vector<std::string> lines = readLines(path);
+	const std::string file = displayPath(path);
 
 	std::vector<std::string> code;
 	bool inBlockComment = false;
@@ -294,6 +362,7 @@ std::vector<IndexSite> findSelectionIndexes(const char* path)
 				}
 
 				IndexSite site;
+				site.file = file;
 				site.line = static_cast<int>(l) + 1;
 				site.column = at;
 				site.array = name;
@@ -329,6 +398,32 @@ std::vector<IndexSite> findSelectionIndexes(const char* path)
 	return sites;
 }
 
+// The same sweep over every source file in both trees, in file then line order.
+std::vector<IndexSite> findAllSelectionIndexes()
+{
+	std::vector<IndexSite> sites;
+
+	for (const std::filesystem::path& path : readAllAppSources()) {
+		const std::vector<IndexSite> found = findSelectionIndexes(path);
+		sites.insert(sites.end(), found.begin(), found.end());
+	}
+
+	return sites;
+}
+
+// How many of `sites` are in `file`.
+std::size_t countIn(const std::vector<IndexSite>& sites, const std::string& file)
+{
+	std::size_t count = 0;
+	for (const IndexSite& site : sites) {
+		if (site.file == file) {
+			++count;
+		}
+	}
+
+	return count;
+}
+
 std::string describe(const std::vector<IndexSite>& sites)
 {
 	std::string joined;
@@ -336,7 +431,8 @@ std::string describe(const std::vector<IndexSite>& sites)
 		if (!joined.empty()) {
 			joined += "; ";
 		}
-		joined += "line " + std::to_string(site.line) + ": " + site.array + "[" + site.index + "]";
+		joined += site.file + ":" + std::to_string(site.line) + ": " + site.array +
+		          "[" + site.index + "]";
 	}
 	return joined;
 }
@@ -360,23 +456,28 @@ std::string describe(const std::vector<std::string>& conditions)
 
 } // namespace
 
-TEST_CASE("the draw path never indexes the path point graph with an unselected point", "[pathpoint][bounds]")
+TEST_CASE("no file indexes the path point graph with an unselected point", "[pathpoint][bounds]")
 {
 	// Reached with more than one pathfind waypoint and none of them selected,
 	// which is the state the editor is in by default after one press of `.`.
 	// Nothing upstream repairs it: the sentinel is a resting value, and
-	// GameTick.cpp:1675 and :1706 both test for it before they subscript.
-	const std::vector<IndexSite> sites = findSelectionIndexes(kGameDrawSource);
+	// GameTick.cpp:1676 and :1706 both test for it before they subscript.
+	const std::vector<IndexSite> sites = findAllSelectionIndexes();
 
-	SECTION("the scan found the marker point it is checking")
+	SECTION("the scan found the sites it is checking")
 	{
-		// Non-vacuity. The three are the x, the y and the z of one glVertex3f, and
-		// this is what stops the assertion below from holding because the scan
-		// matched nothing - whether because the site was renamed, moved to another
-		// file, or dropped, or because the marker point was deleted outright as a
-		// way of "fixing" the read.
+		// Non-vacuity. The three in GameDraw.cpp are the x, the y and the z of
+		// one glVertex3f, and this is what stops the assertion below from
+		// holding because the scan matched nothing - whether because a site was
+		// renamed, moved to another file, or dropped, or because the marker
+		// point was deleted outright as a way of "fixing" the read.
 		INFO("subscripts found with the selection: " << describe(sites));
-		REQUIRE(sites.size() == kExpectedSites);
+		REQUIRE(sites.size() == static_cast<std::size_t>(kExpectedSites));
+	}
+
+	SECTION("the marker point is still among them")
+	{
+		REQUIRE(countIn(sites, kMarkerFile) == static_cast<std::size_t>(kExpectedMarkerSites));
 	}
 
 	SECTION("every one of them is inside a block guarded against the sentinel")
@@ -387,7 +488,7 @@ TEST_CASE("the draw path never indexes the path point graph with an unselected p
 				guarded = guarded || rulesOutNoSelection(condition);
 			}
 
-			INFO("line " << site.line << ": " << site.array << "[" << site.index << "]"
+			INFO(site.file << ":" << site.line << ": " << site.array << "[" << site.index << "]"
 			     << " is inside, innermost first: " << describe(site.conditions));
 			REQUIRE(guarded);
 		}
