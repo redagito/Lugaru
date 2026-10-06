@@ -730,9 +730,16 @@ void Game::LoadStuff(GameState& gamestate, GameAssets& assets)
 	assets.eye.Scale(.03, .03, .03);
 	assets.eye.CalculateNormals(0, [&]() { LoadingScreen(gamestate, assets); });
 
+	// cornea and iris are loaded here but nothing ever draws them: grep finds no
+	// reader for either name anywhere outside this block. That is not dead code
+	// to be deleted - it is the eyeball rendering missing its second half, and
+	// the load cost should be paid again only once something draws them.
+	// Restoring it means drawing eye + cornea + iris together at the camera's
+	// near plane in Game::DrawGLScene, at the same .03 scale. Do not remove the
+	// loads on the assumption they are unused; see Docs/FINDINGS.md.
 	assets.cornea.load("Models/Cornea.solid", [&]() { Game::LoadingScreen(gamestate, assets); });
 	assets.cornea.Scale(.03, .03, .03);
-	assets.cornea.CalculateNormals(0, [&]() { Game::LoadingScreen(gamestate, assets); });
+	assets.cornea.CalculateNormals(0, [&]() { LoadingScreen(gamestate, assets); });
 
 	assets.iris.load("Models/Iris.solid", [&]() { Game::LoadingScreen(gamestate, assets); });
 	assets.iris.Scale(.03, .03, .03);

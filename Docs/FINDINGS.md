@@ -238,3 +238,31 @@ The code was correct; the report was not. The same pattern appeared in the tranc
 agents understating counts. Every claim is therefore verified independently rather than
 trusted, and the audit trail in `AppTest/source/GlobalMigrationTest.cpp` exists partly
 because self-reported numbers have been unreliable.
+
+---
+
+## 10. SHELVED: the eyeball rendering is missing its second half
+
+**Severity:** unknown - looks like an unfinished feature, not a defect
+**Status:** shelved deliberately on 2026-10-06; do not "clean up"
+
+`Assets::cornea` and `Assets::iris` are loaded in `Game::LoadStuff`
+(`App/source/GameInitDispose.cpp`) but nothing ever draws them. Grepping either name
+finds no reader anywhere outside that load block, so the game pays the mesh load and the
+heap for two models that never reach a frame.
+
+This is recorded as a **suspected bug rather than dead code**, on the judgement that the
+eyeball rendering was meant to draw all three parts and does not. `eye` itself is loaded
+the same way and scaled to `.03`, which is the scale a model drawn at the camera's near
+plane would use - consistent with an eye/cornea/iris trio that was drawn together once
+and lost the caller.
+
+**Deliberately left in place.** The obvious-looking cleanup here is to delete the two loads
+and the two `GameAssets` members, which would be wrong: it would destroy the evidence and
+make restoring the feature mean re-adding the assets, the loads and the scale calls. A
+comment at the load site records the same thing for anyone reading the code rather than
+this document.
+
+To restore: draw `eye`, `cornea` and `iris` together in `Game::DrawGLScene` at the
+camera's near plane, at `.03` scale, then delete the loads and the comment together with
+the feature.
