@@ -220,20 +220,31 @@ block - fall-through, early return, or unwind. The explicit join at `:636` stays
 ## 3. Editor: saved maps are written somewhere the loader never reads
 
 **Severity:** medium (the editor's save/load loop does not work end to end)
-**Status:** confirmed by reading code
+**Status:** fixed - the loader searches both Maps folders
 
-The two operations use different roots:
+The two operations used different roots:
 
 - save writes to `Folders::getUserDataPath() + "/Maps"` - `App/source/Devtools/ConsoleCmds.cpp:195`
   (`save_json`) and `:274` (`save`, binary)
-- load reads from `Folders::getResourcePath("Maps/" + name + ".json")` - `App/source/GameTick.cpp:857`,
+- load read only from `Folders::getResourcePath("Maps/" + name + ".json")` - `App/source/GameTick.cpp:857`,
   which resolves to `dataDir + "/Maps/..."` via `Foundation/include/Utils/Folders.hpp:68-71`
 
-So `map foo` after `save_json foo` will not find the file; it has to be copied by hand from
+So `map foo` after `save_json foo` did not find the file; it had to be copied by hand from
 `%APPDATA%\Lugaru\Maps\` into `Lugaru\Data\Maps\`.
 
-This will be addressed as part of the planned editor work (a map picker covering both
-locations), so it is recorded rather than fixed in isolation.
+Saving is unchanged - the user data directory is the right place for user-created content,
+and moving it would break existing workflows. `Folders::findMapPath(name, extension)` in
+`Foundation/include/Utils/Folders.hpp` resolves a map name to a path, and the loader calls it
+from both `Game::LoadJsonLevel` and the binary branch of `Game::LoadLevel`. It searches the
+user data `Maps` folder first and falls back to the resource `Maps` folder, returning an empty
+string when the map is in neither, so a missing map is still reported as missing instead of
+being opened from a path that does not exist.
+
+The consequence of that ordering is that a user map now shadows a shipped map of the same
+name: a `Data/Maps/tutorial.json` that has been edited and saved to the user data folder is
+the one that loads. That is the point of the change - a map the user just saved is the one
+they mean - but it does mean an edited copy cannot be un-shadowed without deleting or renaming
+it, and it is the reason the map picker should show both locations rather than merging them.
 
 ---
 

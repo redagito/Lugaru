@@ -77,8 +77,9 @@ Mapping
 ~~~~~~~
 
 map (string) - loads the specified map.
-    The string corresponds to the filename of a map in the Maps folder, located
-    in Lugaru's Data folder.
+    The string corresponds to the filename of a map in the Maps folder in
+    Lugaru's Data folder or in your user data directory, which is searched
+    first, so a map saved there replaces the shipped map of the same name.
 save (string) - saves the state of the current map.
     The string corresponds to the filename that the map will be saved under in
     the Maps folder, located in Lugaru's Data folder. Caution: this command
@@ -88,14 +89,13 @@ save_json (string) - saves the state of the current map as JSON, version 13.
     format instead. The string corresponds to the filename the map will be
     saved under, with '.json' appended for you. Caution: this command will
     overwrite other maps with the same name without prompting you.
-    Caution: unlike 'map', which reads the Maps folder in Lugaru's Data folder,
-    this writes to the Maps folder in your user data directory, so 'map' will
-    not find what you have just saved until you copy the file across yourself.
+    This writes to the Maps folder in your user data directory. 'map' looks in
+    both that folder and Lugaru's Data folder, so it finds what you just saved.
 convert_to_json (string) - loads the named map and immediately saves it back
     out as JSON, which is how a map is converted from the older binary format.
     The string is the name of an existing map, exactly as 'map' takes it. The
-    result is written to the same user data Maps folder as 'save_json', with
-    the same caveat about 'map' not looking there.
+    result is written to the same user data Maps folder as 'save_json', and is
+    found again by 'map' for the same reason.
 
 Character attributes
 ~~~~~~~~~~~~~~~~~~~~
