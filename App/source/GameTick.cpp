@@ -465,9 +465,9 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 		// Try JSON loading first, binary is fallback
 		return true;
 	}
-	const std::string level_path = Folders::getResourcePath("Maps/" + name);
-	if (!Folders::file_exists(level_path)) {
-		perror(std::string("LoadLevel: Could not open file '" + level_path).c_str());
+	const std::string level_path = Folders::findMapPath(name, "");
+	if (level_path.empty()) {
+		perror(std::string("LoadLevel: Could not find map '" + name + "' in the user data or Data Maps folders").c_str());
 		return false;
 	}
 
@@ -856,9 +856,9 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 
 bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& gamestate, GameAssets& assets)
 {
-	const std::string level_path = Folders::getResourcePath("Maps/" + name + ".json");
-	if (!Folders::file_exists(level_path)) {
-		perror(std::string("LoadLevel: Could not open file '" + level_path).c_str());
+	const std::string level_path = Folders::findMapPath(name, ".json");
+	if (level_path.empty()) {
+		perror(std::string("LoadLevel: Could not find map '" + name + ".json' in the user data or Data Maps folders").c_str());
 		return false;
 	}
 

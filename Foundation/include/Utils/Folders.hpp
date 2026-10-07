@@ -76,6 +76,26 @@ public:
         return getUserDataPath() + "/users";
     }
 
+    /** Returns the Maps folder inside the user data directory, where the editor saves */
+    static inline std::string getUserMapsPath()
+    {
+        return getUserDataPath() + "/Maps";
+    }
+
+    /** Returns the Maps folder inside the resource directory */
+    static inline std::string getResourceMapsPath()
+    {
+        return getResourcePath("Maps");
+    }
+
+    /** Returns the full path of the named map in userMapsDir, else in resourceMapsDir.
+        Returns an empty string when it is in neither. The extension is appended to the
+        name: "" for the binary format, ".json" for JSON. */
+    static std::string findMapPath(const std::string& userMapsDir, const std::string& resourceMapsDir, const std::string& name, const std::string& extension);
+
+    /** Same, searching the user data and resource Maps folders */
+    static std::string findMapPath(const std::string& name, const std::string& extension);
+
     static bool makeDirectory(const std::string& path);
 
 private:

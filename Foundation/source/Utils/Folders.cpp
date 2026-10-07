@@ -152,3 +152,22 @@ bool Folders::file_exists(const std::string& filepath)
         return true;
     }
 }
+
+std::string Folders::findMapPath(const std::string& userMapsDir, const std::string& resourceMapsDir, const std::string& name, const std::string& extension)
+{
+    const std::string fileName = name + extension;
+    const std::string userPath = userMapsDir + '/' + fileName;
+    if (file_exists(userPath)) {
+        return userPath;
+    }
+    const std::string resourcePath = resourceMapsDir + '/' + fileName;
+    if (file_exists(resourcePath)) {
+        return resourcePath;
+    }
+    return std::string();
+}
+
+std::string Folders::findMapPath(const std::string& name, const std::string& extension)
+{
+    return findMapPath(getUserMapsPath(), getResourceMapsPath(), name, extension);
+}

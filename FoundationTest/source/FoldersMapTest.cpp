@@ -6,6 +6,7 @@
 
 #include <cstdio>
 #include <string>
+#include <vector>
 
 #include "Platform/Platform.hpp"
 #include "Utils/Folders.hpp"
@@ -49,6 +50,7 @@ struct TempMaps
 	std::string root = "lugaru-map-lookup-test";
 	std::string userMaps = root + "/user/Maps";
 	std::string resourceMaps = root + "/resource/Maps";
+	std::vector<std::string> files;
 
 	TempMaps()
 	{
@@ -61,6 +63,9 @@ struct TempMaps
 
 	~TempMaps()
 	{
+		for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it) {
+			std::remove(it->c_str());
+		}
 		removeDir(userMaps);
 		removeDir(resourceMaps);
 		removeDir(root + "/user");
@@ -68,10 +73,11 @@ struct TempMaps
 		removeDir(root);
 	}
 
-	std::string write(const std::string& mapsDir, const std::string& fileName) const
+	std::string write(const std::string& mapsDir, const std::string& fileName)
 	{
 		const std::string path = mapsDir + '/' + fileName;
 		writeFile(path, "{}");
+		files.push_back(path);
 		return path;
 	}
 
@@ -85,7 +91,7 @@ struct TempMaps
 
 TEST_CASE("looking a map up in a pair of Maps folders", "[folders]")
 {
-	const TempMaps maps;
+	TempMaps maps;
 
 	SECTION("a map is found in whichever folder holds it")
 	{
