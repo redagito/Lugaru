@@ -546,6 +546,19 @@ void Menu::startChallengeLevel(int challengelevel, GameState& gamestate, GameAss
 
 void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 {
+    // Answer the capture thread's request for the menu to be rebuilt. It used to
+    // rebuild it itself, in the middle of a frame the main thread was running,
+    // which put two threads on Menu::items at once.
+    //
+    // First thing in the body, and not inside any branch below, because this has
+    // to happen on the frames the capture thread is waiting as well as on the one
+    // it finishes on: everything after the controls-menu input handling below only
+    // runs when `waiting` is already clear. takeReloadRequest() also acquires, so
+    // the keybind the thread wrote is visible to the Load that follows.
+    if (keycapture.takeReloadRequest()) {
+        Load(gamestate, assets, keycapture);
+    }
+
     //escape key pressed
     if (Input::isKeyPressed(SDL_SCANCODE_ESCAPE) &&
         (gamestate.mainmenu >= 3) && (gamestate.mainmenu != 8) && !((gamestate.mainmenu == 7) && entername)) {

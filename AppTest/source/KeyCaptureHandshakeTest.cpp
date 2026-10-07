@@ -37,7 +37,10 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <atomic>
+#include <algorithm>
+#include <atomic>
 #include <cctype>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -49,8 +52,18 @@
 namespace
 {
 
+// Both trees App is built from, walked whole rather than reduced to the one file
+// the assertions below happen to look in, so that a second consumer of the
+// reload request appearing in a file this test has never heard of is still
+// caught.
+const char* const kAppTrees[] = {
+	LUGARU_APP_INCLUDE_DIR,
+	LUGARU_APP_SOURCE_DIR,
+};
+
 const char* const kGameStateHeader = LUGARU_APP_INCLUDE_DIR "/GameState.hpp";
 const char* const kMenuSource = LUGARU_APP_SOURCE_DIR "/Menu/Menu.cpp";
+const char* const kGameTickSource = LUGARU_APP_SOURCE_DIR "/GameTick.cpp";
 const char* const kMainSource = LUGARU_LUGARU_SOURCE_DIR "/main.cpp";
 
 // The thread body, anchored on the signature rather than a line number so that
@@ -59,6 +72,9 @@ const char* const kThreadSignature = "int setKeySelected_thread(void* data)";
 
 // The main-thread half of the handshake lives here.
 const char* const kTickSignature = "void Menu::Tick(";
+
+// The frame body, which is what has to keep reaching Menu::Tick.
+const char* const kGameTickSignature = "void Game::Tick(";
 
 // The guard that makes the join unconditional, pinned by name because it is the
 // only thing standing between an exception on the main thread and a thread still
@@ -211,6 +227,76 @@ std::string functionBody(const std::string& code, const std::string& signature)
 std::string::size_type positionOf(const std::string& code, const std::string& declaration)
 {
 	return code.find(declaration);
+}
+
+// Every source file under the two App trees.
+std::vector<std::filesystem::path> readAllAppSources()
+{
+	std::vector<std::filesystem::path> paths;
+	std::error_code error;
+
+	for (const char* const root : kAppTrees) {
+		for (const std::filesystem::directory_entry& entry :
+		     std::filesystem::recursive_directory_iterator(root, error)) {
+			if (!entry.is_regular_file(error)) {
+				continue;
+			}
+			const std::string extension = entry.path().extension().string();
+			if (extension == ".c" || extension == ".cpp" || extension == ".h" || extension == ".hpp") {
+				paths.push_back(entry.path());
+			}
+		}
+	}
+
+	if (error) {
+		FAIL("could not walk the App trees: " + error.message());
+	}
+
+	std::sort(paths.begin(), paths.end());
+	return paths;
+}
+
+// How many whole-word occurrences of `name` there are across the App trees, and
+// which files they are in. Used to pin that a name has exactly one caller, which
+// is the only thing that stops a second one appearing somewhere unchecked.
+int countAcrossAppTrees(const std::string& name, std::vector<std::string>& where)
+{
+	int total = 0;
+
+	for (const std::filesystem::path& path : readAllAppSources()) {
+		const std::vector<std::string::size_type> found =
+			wholeWordPositions(readCode(path.string().c_str()), name);
+		if (!found.empty()) {
+			total += static_cast<int>(found.size());
+			where.push_back(path.filename().string() + ":" + std::to_string(found.size()));
+		}
+	}
+
+	return total;
+}
+
+// The same text with every space, tab and newline removed, so that a statement
+// can be looked for as one string however it happens to be wrapped and indented.
+std::string squash(const std::string& text)
+{
+	std::string squashed;
+	for (const char c : text) {
+		if (std::isspace(static_cast<unsigned char>(c)) == 0) {
+			squashed += c;
+		}
+	}
+	return squashed;
+}
+
+template <typename Paths>
+std::string joinPaths(const Paths& paths)
+{
+	std::string joined;
+	for (const std::string& path : paths) {
+		joined += (joined.empty() ? "" : ", ");
+		joined += path;
+	}
+	return joined;
 }
 
 } // namespace
@@ -439,6 +525,143 @@ TEST_CASE("the capture thread does not reach the menu item list", "[keycapture][
 		REQUIRE(wholeWordPositions(body, "items").empty());
 		REQUIRE(wholeWordPositions(body, "setText").empty());
 		REQUIRE(wholeWordPositions(body, "clearMenu").empty());
+	}
+
+	SECTION("it is not handed the assets at all")
+	{
+		// The stronger version of the same claim. Dropping the Menu::Load call
+		// left GameAssets unreferenced by the thread, and taking it out of the
+		// argument record means no future edit can put a call that needs it back
+		// without having to change this file first. Without this, closing the
+		// route would rest on nothing enforcing that the thread only ever
+		// arrives at mainmenu 3 or 4 - it never did enforce that, and it is not
+		// what keeps Menu::items and the shared textures out of reach now.
+		const std::string args = functionBody(code, "struct KeySelectArgs");
+		REQUIRE_FALSE(args.empty());
+		REQUIRE(wholeWordPositions(args, "GameAssets").empty());
+
+		const std::string thread = functionBody(code, kThreadSignature);
+		REQUIRE(wholeWordPositions(thread, "assets").empty());
+		REQUIRE(wholeWordPositions(thread, "GameAssets").empty());
+	}
+}
+
+TEST_CASE("the main thread answers the reload request", "[keycapture][architecture]")
+{
+	// Moving the rebuild off the capture thread is only worth anything if the
+	// main thread actually does it. The thread sets reloadRequested and returns;
+	// somebody has to notice, and the answer has to be the reload the thread used
+	// to perform itself.
+	const std::string code = readCode(kMenuSource);
+	const std::string tick = functionBody(code, kTickSignature);
+
+	SECTION("Menu::Tick is where it happens")
+	{
+		// Non-vacuity, and it has to come first: an empty body would satisfy
+		// "nothing consumed the request" on its own.
+		INFO("Menu::Tick body is " << tick.size() << " bytes");
+		REQUIRE(tick.size() > 1000);
+		REQUIRE(tick.find("keyselect") != std::string::npos);
+		REQUIRE(tick.find("setKeySelected") != std::string::npos);
+	}
+
+	SECTION("it takes the request and reloads")
+	{
+		REQUIRE(tick.find("takeReloadRequest()") != std::string::npos);
+		REQUIRE(tick.find("Load(gamestate, assets, keycapture)") != std::string::npos);
+	}
+
+	SECTION("it takes the request whether or not a capture is in flight")
+	{
+		// The point that decides whether this works at all. Menu::Tick only runs
+		// the controls-menu input handling when `waiting` is clear, so a consume
+		// sitting anywhere after that test would never run on the frames that
+		// matter - and the frame the request arrives is the frame the flag was
+		// still set on the previous pass through. Nothing lexically between the
+		// top of the body and the take may test `waiting`.
+		const std::string::size_type take = tick.find("takeReloadRequest()");
+		REQUIRE(take != std::string::npos);
+
+		const std::string before = tick.substr(0, take);
+		INFO("text before the take names waiting: " << wholeWordPositions(before, "waiting").size());
+		REQUIRE(wholeWordPositions(before, "waiting").empty());
+	}
+
+	SECTION("nothing else in App consumes it")
+	{
+		// One consumer. A second one would be a second place rebuilding the menu
+		// in response to a rebind, and the test that finds it would be in the file
+		// it landed in rather than here.
+		std::vector<std::string> where;
+		const int found = countAcrossAppTrees("takeReloadRequest", where);
+
+		INFO("takeReloadRequest appears in: " << joinPaths(where));
+		REQUIRE(found == 2); // the declaration in KeyCapture.hpp and this one call
+	}
+}
+
+TEST_CASE("Menu::Tick is reached on the main thread while the capture thread is alive",
+          "[keycapture][architecture]")
+{
+	// The reachability argument for putting the consume in Menu::Tick, stated as
+	// four facts about the source rather than as prose. A request that nothing
+	// ever comes back for is the same as no reload at all, and it would not fail
+	// a single one of the behavioural tests above.
+	//
+	// The thread is started only from Menu::Tick; Menu::Tick runs only while
+	// gamestate.mainmenu is set; mainmenu cannot fall back to 0 while the thread
+	// is waiting, because the main loop stops pumping SDL events for exactly as
+	// long as it is; so every frame the thread is alive, the frame body reaches
+	// the consume.
+	SECTION("the thread is only ever started from Menu::Tick")
+	{
+		const std::string menu = readCode(kMenuSource);
+		const std::string tick = functionBody(menu, kTickSignature);
+		REQUIRE(tick.size() > 1000);
+
+		std::vector<std::string> where;
+		const int started = countAcrossAppTrees("setKeySelected(gamestate", where);
+
+		INFO("setKeySelected(gamestate appears in: " << joinPaths(where));
+		REQUIRE(started == 1);
+		REQUIRE(tick.find("setKeySelected(gamestate") != std::string::npos);
+	}
+
+	SECTION("Menu::Tick runs whenever a menu is up")
+	{
+		// Pinned as a squashed prefix rather than as an adjacency test: the guard
+		// and the call have to be consecutive, so that moving the call out of the
+		// guard - which is the whole risk - shows up as a failure.
+		const std::string frame = functionBody(readCode(kGameTickSource), kGameTickSignature);
+		REQUIRE(frame.size() > 1000);
+
+		INFO("Game::Tick body is " << frame.size() << " bytes");
+		REQUIRE(squash(frame).find("if(gamestate.mainmenu){Menu::Tick(") != std::string::npos);
+	}
+
+	SECTION("and it is the only place Menu::Tick is called from")
+	{
+		// The definition in Menu.cpp is not a call, so the count is over the call
+		// shape rather than over the name.
+		std::vector<std::string> where;
+		const int calls = countAcrossAppTrees("Menu::Tick(gamestate", where);
+
+		INFO("Menu::Tick(gamestate appears in: " << joinPaths(where));
+		REQUIRE(calls == 1);
+	}
+
+	SECTION("the main loop stops pumping events for as long as the thread waits")
+	{
+		// The load-bearing one. It is what stops a queued click from moving
+		// gamestate.mainmenu to 0 while the thread is parked, which is what makes
+		// the guard in Game::Tick hold. main() reads it from the KeyCapture the
+		// thread writes, once per frame, before anything else in the frame.
+		const std::string main = readCode(kMainSource);
+		const std::string::size_type poll = main.find("SDL_PollEvent");
+		REQUIRE(poll != std::string::npos);
+
+		const std::string before = main.substr(0, poll);
+		REQUIRE(before.find("!keycapture.waiting") != std::string::npos);
 	}
 }
 
