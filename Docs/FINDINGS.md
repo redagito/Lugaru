@@ -88,7 +88,9 @@ whole tree") as `no file indexes the path point graph with an unselected point` 
 **Severity:** medium (use-after-free on the exception path; formally UB on the handshake)
 **Status:** closed. The join hole in 2c is closed by an RAII guard; 2a and 2b are closed by
 giving the handshake an owner of its own (`KeyCapture`) and moving the menu rebuild onto the
-main thread. Pinned by `AppTest/source/KeyCaptureHandshakeTest.cpp`. Nothing here was ever
+main thread; and 2d is closed by the thread no longer writing anything outside that owner, so
+`GameState` and the audio library are main-thread-only again. Pinned by
+`AppTest/source/KeyCaptureHandshakeTest.cpp`. Nothing here was ever
 reproduced at runtime, so the closing argument is the source plus the tests rather than a run
 that used to fail.
 
@@ -181,14 +183,36 @@ thread happened to arrive at `mainmenu` 3 or 4 - nothing enforced that, and the 
 holding it back was the same handshake as above. With the call gone the thread holds no
 `GameAssets&` at all: `KeySelectArgs` carries a `GameState*` and a `KeyCapture*` and nothing
 else, so the route is closed by the shape of the argument record rather than by a
-coincidence. `fireSound()` still reaches the audio library's `samp` and `channels` tables by
-non-atomic read, which is unchanged and was already the case; it is a read of tables the main
-thread only reallocates when a level loads, and the capture thread cannot outlive a load.
+coincidence.
+
+### 2d. CLOSED: the thread wrote ten non-atomic keybind members
+
+Assigning the captured scancode into `GameState` was the last thing the thread did to shared
+state, and it was the one that mattered most. The ten keybind members (`forwardkey`,
+`backkey`, `leftkey`, `rightkey`, `crouchkey`, `jumpkey`, `drawkey`, `throwkey`,
+`attackkey`, `consolekey`) are plain `unsigned short`, not atomic, and the main thread reads
+them every frame to decide what a key press means. For as long as a capture was in flight one
+thread was writing them while the other read them.
+
+Ordering the reads after `reloadRequested` narrows that window; it does not make a
+non-atomic object safe to share. The fix was not to make ten members atomic - that reaches
+through `Input::isKeyPressed`, `SaveSettings`/`LoadSettings`, `Tutorial.cpp` and every
+tranche test - but to stop the thread writing them at all. The thread now parks the scancode
+and the row it was captured for in `KeyCapture` (`capturedScancode`, `capturedRow`) and
+returns. `applyCapturedKey`, on the main thread at the top of `Menu::Tick`, moves them into
+the keybind and plays `fireSound()`, which had the same problem for the same reason: it reads
+the audio library's own unsynchronised `samp` and `channels` tables.
+
+`KeySelectArgs` consequently shrank to a single `KeyCapture*`. The thread now writes nothing
+but its own locals and four `std::atomic` members, which is the whole of what crosses the
+thread boundary. Pinned by `the capture thread writes no game state at all` in
+`AppTest/source/KeyCaptureHandshakeTest.cpp`, which reads the thread body with comments
+stripped and fails if the name `gamestate` or `fireSound` appears in it at all.
 
 ### 2c. An exception unwinds past the join, leaving a dangling reference
 
-The thread holds a `GameState&` and a `KeyCapture&`, so it must be joined before either
-object is destroyed. `Lugaru/source/main.cpp:636` does that explicitly, but the enclosing
+The thread holds a `KeyCapture&`, so it must be joined before that object is destroyed.
+`Lugaru/source/main.cpp:636` does that explicitly, but the enclosing
 `catch (const std::exception&)` at `main.cpp:646` is reached by an exception thrown while
 the thread is still alive, and that path never passes the join at `:636`.
 
