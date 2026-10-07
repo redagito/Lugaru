@@ -519,7 +519,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 
 		glDepthMask(0);
 
-		Sprite::Draw(gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.light, gamestate.multiplier, gamestate.gravity, terrain, gamestate.detail, gamestate.viewerfacing, gamestate.bloodtoggle, gamestate.windvector, Tutorial::active, gamestate);
+		Sprite::Draw(gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.light, gamestate.multiplier, terrain, gamestate.detail, gamestate.viewerfacing, gamestate.bloodtoggle, gamestate.windvector, Tutorial::active, gamestate);
 
 		//waypoints, pathpoints in editor
 		if (gamestate.editorenabled) {

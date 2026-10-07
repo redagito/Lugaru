@@ -307,17 +307,22 @@ commands with no entry in the file, so all four were documented.
 ## 6. `Sprite::Draw` receives the same value twice
 
 **Severity:** low (redundancy, no defect)
-**Status:** confirmed by reading code
+**Status:** `Sprite::Draw` fixed; the same shape remains on the draw functions listed below
 
-`App/include/Graphic/Sprite.hpp:83` takes `float gravity` as a positional parameter, while
-the same call at `App/source/GameDraw.cpp:519` also passes `gamestate`. The body uses the
-parameter in some places (`Sprite.cpp:297,341,421,424`) and the instance in others
-(`Sprite.cpp:367`) - two sources of truth for one value in one call.
+`App/include/Graphic/Sprite.hpp` took `float gravity` as a positional parameter while the same
+call also passed `gamestate`. The body used the parameter in some places and the instance in
+others - two sources of truth for one value in one call. The parameter is gone; the four body
+sites now read `gamestate.gravity`, and the call site no longer passes it twice. `Sprite.cpp`
+needed `#include "GameState.hpp"` to do that, since it previously relied only on the forward
+declaration in `Sprite.hpp`.
 
-This matches existing project convention: `multiplier`, `bloodtoggle` and `windvector` are
-passed the same way. Collapsing only `gravity` would be inconsistent, so the sensible fix
-is to remove the redundant scalar parameters across `Sprite::Draw` / `Object::Draw` /
-`Terrain::draw` as one coherent step, once `multiplier` is no longer a global.
+**What still has the same shape.** `Object::Draw`, `Object::draw`, `Object::drawSecondPass` and
+`Terrain::draw` each still take `multiplier`, `bloodtoggle` or `windvector` positionally while
+also receiving `gamestate`, and their bodies use whichever is closer to hand. That is a larger
+cleanup than one signature and was deliberately left alone here rather than half-done. Note that
+`multiplier` stopped being a global several tranches ago, so the original reason for the
+precondition recorded in earlier revisions of this entry no longer applies - the remaining work
+is now simply that it is a wider change than it was.
 
 ---
 

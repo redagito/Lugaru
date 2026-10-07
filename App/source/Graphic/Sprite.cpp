@@ -20,6 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Graphic/Sprite.hpp"
 
+#include "GameState.hpp"
 #include "Objects/Object.hpp"
 #include "Objects/Person.hpp"
 
@@ -41,7 +42,7 @@ float Sprite::checkdelay = 0;
 std::vector<std::unique_ptr<Sprite>> Sprite::sprites = std::vector<std::unique_ptr<Sprite>>();
 
 //Functions
-void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, int environment, const Light& light, float multiplier, float gravity, 
+void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, int environment, const Light& light, float multiplier,
 	Terrain& terrain, int detail, const Vector3& viewerfacing, bool bloodtoggle, const Vector3& windvector, bool tutorialActive, GameState& gamestate)
 {
 	int k = 0;
@@ -294,7 +295,7 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 		if (sprites[i]->type == cloudsprite || sprites[i]->type == cloudimpactsprite) {
 			sprites[i]->opacity -= multiplier / 2;
 			sprites[i]->size += multiplier / 2;
-			sprites[i]->velocity.y += gravity * multiplier * .25;
+			sprites[i]->velocity.y += gamestate.gravity * multiplier * .25;
 		}
 		if (sprites[i]->type == breathsprite) {
 			sprites[i]->opacity -= multiplier / 2;
@@ -338,7 +339,7 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 		if (sprites[i]->type == bloodsprite) {
 			bool spritehit = 0;
 			sprites[i]->rotation += multiplier * 100;
-			sprites[i]->velocity.y += gravity * multiplier;
+			sprites[i]->velocity.y += gamestate.gravity * multiplier;
 			if (check) {
 				Vector3 where, startpoint, endpoint, movepoint, footpoint;
 				float rotationpoint;
@@ -418,10 +419,10 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 			sprites[i]->rotation += sprites[i]->rotatespeed * multiplier;
 			sprites[i]->opacity -= multiplier / 2;
 			if (sprites[i]->special == 0 || sprites[i]->special == 2 || sprites[i]->special == 3) {
-				sprites[i]->velocity.y += gravity * multiplier;
+				sprites[i]->velocity.y += gamestate.gravity * multiplier;
 			}
 			if (sprites[i]->special == 1) {
-				sprites[i]->velocity.y += gravity * multiplier * .5;
+				sprites[i]->velocity.y += gamestate.gravity * multiplier * .5;
 			}
 		}
 		if (sprites[i]->type == flamesprite || sprites[i]->type == weaponflamesprite || sprites[i]->type == weaponshinesprite || sprites[i]->type == bloodflamesprite) {
