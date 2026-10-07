@@ -388,7 +388,7 @@ void Game::LoadingScreen(GameState& gamestate, GameAssets& assets)
 		glDepthMask(1);
 	}
 
-	swap_gl_buffers(mainWindow());
+	swap_gl_buffers(WindowContext::mainWindow());
 }
 
 void FadeLoadingScreen(float howmuch, GameState& gamestate)
@@ -443,7 +443,7 @@ void FadeLoadingScreen(float howmuch, GameState& gamestate)
 	glDisable(GL_BLEND);
 	glDepthMask(1);
 	//Text
-	swap_gl_buffers(mainWindow());
+	swap_gl_buffers(WindowContext::mainWindow());
 }
 
 void Game::InitGame(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)

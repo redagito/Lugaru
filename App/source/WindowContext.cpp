@@ -26,6 +26,9 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace Game;
 
+namespace WindowContext
+{
+
 int kContextWidth = 0;
 int kContextHeight = 0;
 
@@ -109,4 +112,6 @@ SDL_bool sdlEventProc(const SDL_Event& e, GameState& gamestate)
 		break;
 	}
 	return SDL_TRUE;
+}
+
 }

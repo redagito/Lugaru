@@ -40,21 +40,21 @@ bool save_screenshot_png(const char* file_name)
 		return false;
 	}
 
-	png_bytep* row_pointers = new png_bytep[kContextHeight];
-	png_bytep screenshot = new png_byte[kContextWidth * kContextHeight * 3];
+	png_bytep* row_pointers = new png_bytep[WindowContext::kContextHeight];
+	png_bytep screenshot = new png_byte[WindowContext::kContextWidth * WindowContext::kContextHeight * 3];
 	if ((!screenshot) || (!row_pointers)) {
 		goto save_png_done;
 	}
 
 	glGetError();
-	glReadPixels(0, 0, kContextWidth, kContextHeight,
+	glReadPixels(0, 0, WindowContext::kContextWidth, WindowContext::kContextHeight,
 		GL_RGB, GL_UNSIGNED_BYTE, screenshot);
 	if (glGetError() != GL_NO_ERROR) {
 		goto save_png_done;
 	}
 
-	for (int i = 0; i < kContextHeight; i++) {
-		row_pointers[i] = screenshot + ((kContextWidth * ((kContextHeight - 1) - i)) * 3);
+	for (int i = 0; i < WindowContext::kContextHeight; i++) {
+		row_pointers[i] = screenshot + ((WindowContext::kContextWidth * ((WindowContext::kContextHeight - 1) - i)) * 3);
 	}
 
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -77,7 +77,7 @@ bool save_screenshot_png(const char* file_name)
 		goto save_png_done;
 	}
 
-	png_set_IHDR(png_ptr, info_ptr, kContextWidth, kContextHeight,
+	png_set_IHDR(png_ptr, info_ptr, WindowContext::kContextWidth, WindowContext::kContextHeight,
 		8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
 		PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 

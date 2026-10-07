@@ -667,12 +667,12 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
                 fireSound();
                 switch (gamestate.selected) {
                     case 0:
-                        newscreenresolution = resolutions.find(std::make_pair(gamestate.newscreenwidth, gamestate.newscreenheight));
+                        newscreenresolution = WindowContext::resolutions.find(std::make_pair(gamestate.newscreenwidth, gamestate.newscreenheight));
                         /* Next one (end() + 1 is also end() so the ++ is safe even if it was not found) */
                         newscreenresolution++;
-                        if (newscreenresolution == resolutions.end()) {
+                        if (newscreenresolution == WindowContext::resolutions.end()) {
                             /* It was the last one (or not found), go back to the beginning */
-                            newscreenresolution = resolutions.begin();
+                            newscreenresolution = WindowContext::resolutions.begin();
                         }
                         gamestate.newscreenwidth = newscreenresolution->first;
                         gamestate.newscreenheight = newscreenresolution->second;
@@ -747,7 +747,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
                         gamestate.showdamagebar = !gamestate.showdamagebar;
                         break;
                     case 14:
-                        toggleFullscreen(gamestate);
+                        WindowContext::toggleFullscreen(gamestate);
                         break;
                 }
                 updateSettingsMenu(gamestate);
@@ -917,7 +917,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
                         gamestate.mainmenu = 3;
 
                         gamestate.stereomode = gamestate.newstereomode;
-                        InitStereo(gamestate.stereomode, kContextWidth, kContextHeight);
+                        InitStereo(gamestate.stereomode, WindowContext::kContextWidth, WindowContext::kContextHeight);
                     }
                 }
                 updateStereoConfigMenu(gamestate);

@@ -33,8 +33,8 @@ void DefaultSettings(GameState& gamestate)
 	gamestate.detail = 2;
 	gamestate.ismotionblur = 1;
 	gamestate.usermousesensitivity = 1;
-	gamestate.newscreenwidth = kContextWidth = 1024;
-	gamestate.newscreenheight = kContextHeight = 768;
+	gamestate.newscreenwidth = WindowContext::kContextWidth = 1024;
+	gamestate.newscreenheight = WindowContext::kContextHeight = 768;
 	gamestate.fullscreen = 0;
 	gamestate.floatjump = 0;
 	gamestate.autoslomo = 1;
@@ -202,15 +202,15 @@ bool LoadSettings(GameState& gamestate)
 		}
 
 		if (!strncmp(setting, "Screenwidth", 11)) {
-			ipstream >> kContextWidth;
-			if (kContextWidth < (int)gamestate.minscreenwidth || kContextWidth >(int)gamestate.maxscreenwidth) {
-				kContextWidth = (int)gamestate.minscreenwidth;
+			ipstream >> WindowContext::kContextWidth;
+			if (WindowContext::kContextWidth < (int)gamestate.minscreenwidth || WindowContext::kContextWidth >(int)gamestate.maxscreenwidth) {
+				WindowContext::kContextWidth = (int)gamestate.minscreenwidth;
 			}
 		}
 		else if (!strncmp(setting, "Screenheight", 12)) {
-			ipstream >> kContextHeight;
-			if (kContextHeight < (int)gamestate.minscreenheight || kContextHeight >(int)gamestate.maxscreenheight) {
-				kContextHeight = (int)gamestate.minscreenheight;
+			ipstream >> WindowContext::kContextHeight;
+			if (WindowContext::kContextHeight < (int)gamestate.minscreenheight || WindowContext::kContextHeight >(int)gamestate.maxscreenheight) {
+				WindowContext::kContextHeight = (int)gamestate.minscreenheight;
 			}
 		}
 		else if (!strncmp(setting, "Fullscreen", 10)) {

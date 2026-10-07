@@ -59,7 +59,7 @@ using namespace std;
 void initGL(GameState& gamestate)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	swap_gl_buffers(mainWindow());
+	swap_gl_buffers(WindowContext::mainWindow());
 
 	// clear all states
 	glDisable(GL_ALPHA_TEST);
@@ -97,7 +97,7 @@ void initGL(GameState& gamestate)
 	glAlphaFunc(GL_GREATER, 0.5f);
 
 	if (CanInitStereo(gamestate.stereomode)) {
-		InitStereo(gamestate.stereomode, kContextWidth, kContextHeight);
+		InitStereo(gamestate.stereomode, WindowContext::kContextWidth, WindowContext::kContextHeight);
 	}
 	else {
 		fprintf(stderr, "Failed to initialize stereo, disabling.\n");
@@ -145,11 +145,11 @@ bool SetUp(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 				continue; // sane lower limit.
 			}
 			pair<int, int> resolution(mode.w, mode.h);
-			resolutions.insert(resolution);
+			WindowContext::resolutions.insert(resolution);
 		}
 	}
 
-	if (resolutions.empty()) {
+	if (WindowContext::resolutions.empty()) {
 		const std::string error = "No suitable video resolutions found.";
 		std::cerr << error << std::endl;
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Lugaru init failed!", error.c_str(), NULL);
@@ -159,7 +159,7 @@ bool SetUp(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 
 	if (commandLineOptions[SHOWRESOLUTIONS]) {
 		printf("Available resolutions:\n");
-		for (auto resolution = resolutions.begin(); resolution != resolutions.end(); resolution++) {
+		for (auto resolution = WindowContext::resolutions.begin(); resolution != WindowContext::resolutions.end(); resolution++) {
 			printf("  %d x %d\n", (int)resolution->first, (int)resolution->second);
 		}
 	}
@@ -179,23 +179,23 @@ bool SetUp(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 		sdlflags |= SDL_WINDOW_INPUT_GRABBED;
 	}
 
-	if (!createWindow(kContextWidth, kContextHeight, sdlflags)) {
+	if (!WindowContext::createWindow(WindowContext::kContextWidth, WindowContext::kContextHeight, sdlflags)) {
 		fprintf(stderr, "SDL_CreateWindow() failed: %s\n", SDL_GetError());
 		fprintf(stderr, "forcing 640x480...\n");
-		kContextWidth = 640;
-		kContextHeight = 480;
-		if (!createWindow(kContextWidth, kContextHeight, sdlflags)) {
+		WindowContext::kContextWidth = 640;
+		WindowContext::kContextHeight = 480;
+		if (!WindowContext::createWindow(WindowContext::kContextWidth, WindowContext::kContextHeight, sdlflags)) {
 			fprintf(stderr, "SDL_CreateWindow() failed: %s\n", SDL_GetError());
 			fprintf(stderr, "forcing 640x480 windowed mode...\n");
 			sdlflags &= ~SDL_WINDOW_FULLSCREEN;
-			if (!createWindow(kContextWidth, kContextHeight, sdlflags)) {
+			if (!WindowContext::createWindow(WindowContext::kContextWidth, WindowContext::kContextHeight, sdlflags)) {
 				fprintf(stderr, "SDL_CreateWindow() failed: %s\n", SDL_GetError());
 				return false;
 			}
 		}
 	}
 
-	if (!createGLContext()) {
+	if (!WindowContext::createGLContext()) {
 		fprintf(stderr, "SDL_GL_CreateContext() failed: %s\n", SDL_GetError());
 		SDL_Quit();
 		return false;
@@ -219,8 +219,8 @@ bool SetUp(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 
 	initGL(gamestate);
 
-	GLint width = kContextWidth;
-	GLint height = kContextHeight;
+	GLint width = WindowContext::kContextWidth;
+	GLint height = WindowContext::kContextHeight;
 	gMidPoint.h = width / 2;
 	gMidPoint.v = height / 2;
 	gamestate.screenwidth = width;
@@ -232,8 +232,8 @@ bool SetUp(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 
 	/* If saved resolution is not in the list, add it to the list (so that it’s selectable in the options) */
 	pair<int, int> startresolution(width, height);
-	if (resolutions.find(startresolution) == resolutions.end()) {
-		resolutions.insert(startresolution);
+	if (WindowContext::resolutions.find(startresolution) == WindowContext::resolutions.end()) {
+		WindowContext::resolutions.insert(startresolution);
 	}
 
 	InitGame(gamestate, assets, keycapture);
@@ -252,14 +252,14 @@ static void DoMouse(GameState& gamestate)
 		if (gamestate.mousecoordh < 0) {
 			gamestate.mousecoordh = 0;
 		}
-		else if (gamestate.mousecoordh >= kContextWidth) {
-			gamestate.mousecoordh = kContextWidth - 1;
+		else if (gamestate.mousecoordh >= WindowContext::kContextWidth) {
+			gamestate.mousecoordh = WindowContext::kContextWidth - 1;
 		}
 		if (gamestate.mousecoordv < 0) {
 			gamestate.mousecoordv = 0;
 		}
-		else if (gamestate.mousecoordv >= kContextHeight) {
-			gamestate.mousecoordv = kContextHeight - 1;
+		else if (gamestate.mousecoordv >= WindowContext::kContextHeight) {
+			gamestate.mousecoordv = WindowContext::kContextHeight - 1;
 		}
 	}
 }
@@ -597,7 +597,7 @@ int main(int argc, char** argv)
 			}
 
 			while (!gameDone && !gamestate.tryquit) {
-				if (isFocused()) {
+				if (WindowContext::isFocused()) {
 					gameFocused = true;
 
 					// check windows messages
@@ -608,7 +608,7 @@ int main(int argc, char** argv)
 					if (!keycapture.waiting) {
 						// message pump
 						while (SDL_PollEvent(&e)) {
-							if (!sdlEventProc(e, gamestate)) {
+							if (!WindowContext::sdlEventProc(e, gamestate)) {
 								gameDone = true;
 								break;
 							}

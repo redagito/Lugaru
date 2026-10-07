@@ -50,7 +50,7 @@ void Game::inputText(std::string& str, unsigned* charselected, GameState& gamest
     }
 
     while (SDL_PollEvent(&evenement)) {
-        if (!sdlEventProc(evenement, gamestate)) {
+        if (!WindowContext::sdlEventProc(evenement, gamestate)) {
             gamestate.tryquit = 1;
             break;
         }

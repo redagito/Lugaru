@@ -26,13 +26,16 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <set>
 #include <utility>
 
+struct GameState;
+
+namespace WindowContext
+{
+
 // Dimensions of the main window / GL context, in pixels. Owned by the
 // application layer: the executable sets these up at startup and several
 // subsystems (settings, menu, screenshots) read them.
 extern int kContextWidth;
 extern int kContextHeight;
-
-struct GameState;
 
 // Video modes reported by SDL, as (width, height) pairs. Populated during
 // startup and consulted by the menu's resolution picker.
@@ -67,5 +70,7 @@ void toggleFullscreen(GameState& gamestate);
  * quit, SDL_TRUE otherwise.
  */
 SDL_bool sdlEventProc(const SDL_Event& e, GameState& gamestate);
+
+}
 
 #endif // _WINDOWCONTEXT_HPP_

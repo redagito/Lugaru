@@ -1604,7 +1604,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 
 	if (side == stereoRight || side == stereoCenter) {
 		if (drawmode != motionblurmode || gamestate.mainmenu) {
-			swap_gl_buffers(mainWindow());
+			swap_gl_buffers(WindowContext::mainWindow());
 		}
 	}
 
