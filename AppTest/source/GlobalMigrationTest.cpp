@@ -182,6 +182,14 @@ std::set<std::string> gameStateMembers()
 			continue;
 		}
 
+		// An enum declaration declares a type rather than a member, and the
+		// forward declaration GameState.hpp uses for StereoMode is the case that
+		// matters: `enum StereoMode : int` would otherwise be read as a member
+		// whose name is the trailing `int`.
+		if (text.starts_with("enum ")) {
+			continue;
+		}
+
 		const std::string::size_type semicolon = text.find(';');
 		if (semicolon == std::string::npos) {
 			continue;

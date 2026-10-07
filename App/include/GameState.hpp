@@ -1,9 +1,14 @@
 #pragma once
 
 #include "Environment/Lights.hpp"
-#include "Graphic/Stereo.hpp"
 #include "Math/Frustum.hpp"
 #include "Math/Vector3.hpp"
+
+// The stereo mode below is spelled by value rather than by the Graphics header
+// that names its enumerators, so the two members can be declared here without
+// GameState - which the renderer builds and tests read - depending on a layer
+// above it. stereoNone is zero; the definition is in Graphic/Stereo.hpp.
+enum StereoMode : int;
 
 // GameState replaces globals previously declared in App/include/Globals.h and
 // App/include/GameGlobals.h. It is expected to be constructed once and passed
@@ -293,9 +298,11 @@ struct GameState
 	// the stereo mode the renderer is using, and the one the options menu is
 	// building up for the next restart. The menu copies the first into the second
 	// on entry, walks the second forward one mode at a time, and only commits it
-	// back to the first once the renderer has agreed to initialise it.
-	StereoMode stereomode = stereoNone;
-	StereoMode newstereomode = stereoNone;
+	// back to the first once the renderer has agreed to initialise it. Both start
+	// at stereoNone, which is why they are spelled as a zero cast rather than by
+	// name - the enumerators live behind the forward declaration above.
+	StereoMode stereomode = static_cast<StereoMode>(0);
+	StereoMode newstereomode = static_cast<StereoMode>(0);
 
 	// challenge progression
 	int numchallengelevels = 0;

@@ -23,7 +23,10 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <string>
 
-enum StereoMode
+// The underlying type is spelled out so a header that only needs to name the
+// type can forward declare it (`enum StereoMode : int;`) instead of including
+// this one. It is the type MSVC picks for this enumeration either way.
+enum StereoMode : int
 {
     stereoNone,
     stereoAnaglyph,             /* red/cyan */

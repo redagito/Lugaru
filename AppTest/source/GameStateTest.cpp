@@ -7,6 +7,10 @@
 #include <type_traits>
 
 #include "GameState.hpp"
+// For the stereo enumerators the tranche 10 assertions below compare against.
+// GameState.hpp forward declares the type rather than including it, so the test
+// asks for the definition itself.
+#include "Graphic/Stereo.hpp"
 
 TEST_CASE("GameState members start at their historical global defaults", "[gamestate]")
 {
