@@ -82,8 +82,10 @@ map (string) - loads the specified map.
     first, so a map saved there replaces the shipped map of the same name.
 save (string) - saves the state of the current map.
     The string corresponds to the filename that the map will be saved under in
-    the Maps folder, located in Lugaru's Data folder. Caution: this command
-    will overwrite other maps with the same name without prompting you.
+    the Maps folder of your user data directory. 'map' looks there as well as
+    in Lugaru's Data folder, so it finds what you have just saved. Caution:
+    this command will overwrite other maps with the same name without
+    prompting you.
 save_json (string) - saves the state of the current map as JSON, version 13.
     This is the format the map loader prefers; 'save' writes the older binary
     format instead. The string corresponds to the filename the map will be
