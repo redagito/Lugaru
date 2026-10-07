@@ -720,7 +720,69 @@ TEST_CASE("the capture thread is still joined on every exit path", "[keycapture]
 		// otherwise be reading. Removing it would make the join happen after the
 		// context is gone.
 		const std::vector<std::string::size_type> joins = wholeWordPositions(code, "joinKeySelectThread");
-		INFO("occurrences of joinKeySelectThread: " << joins.size());
+INFO("occurrences of joinKeySelectThread: " << joins.size());
 		REQUIRE(joins.size() >= 2);
+	}
+}
+
+TEST_CASE("the capture thread writes no game state at all", "[keycapture][architecture]")
+{
+	// The thread used to assign the captured scancode straight into one of ten
+	// GameState keybind members. Those are plain unsigned short, not atomic, and
+	// the main thread reads them every frame to decide what a key press means -
+	// so for as long as the capture was in flight, one thread was writing them
+	// while the other read them. Ordering the read after the reload flag narrows
+	// the window; it does not make a non-atomic object safe to share.
+	//
+	// The fix is not to make ten members atomic, which would reach through
+	// Input::isKeyPressed, the settings file and every tranche test. It is for
+	// the thread to stop writing them: it parks the scancode in KeyCapture, and
+	// the main thread moves it into the keybind when it answers the request.
+	const std::string code = readCode(kMenuSource);
+
+	SECTION("the file was read and the thread body is in it")
+	{
+		INFO("Menu.cpp is " << code.size() << " bytes of code");
+		REQUIRE(code.size() > 1000);
+		REQUIRE_FALSE(functionBody(code, kThreadSignature).empty());
+	}
+
+	SECTION("the thread body names no GameState member")
+	{
+		const std::string body = functionBody(code, kThreadSignature);
+
+		INFO("body is " << body.size() << " bytes");
+		REQUIRE(body.size() > 100);
+		REQUIRE(wholeWordPositions(body, "gamestate").empty());
+	}
+
+	SECTION("it plays no sound from the thread")
+	{
+		// fireSound reaches the audio library's own file-static channel and
+		// sample arrays, which are not synchronised with anything. The same
+		// treatment as the keybinds applies: the main thread plays it.
+		const std::string body = functionBody(code, kThreadSignature);
+
+		REQUIRE(wholeWordPositions(body, "fireSound").empty());
+	}
+
+	SECTION("it still does the capture, through KeyCapture")
+	{
+		// Non-vacuity: an empty body would satisfy the two sections above on its
+		// own, so the body has to be shown to be the real capture loop.
+		const std::string body = functionBody(code, kThreadSignature);
+
+		REQUIRE(body.find("SDL_WaitEvent") != std::string::npos);
+		REQUIRE(body.find("keycapture") != std::string::npos);
+		REQUIRE(body.find("reloadRequested") != std::string::npos);
+		REQUIRE(body.find("waiting") != std::string::npos);
+	}
+
+	SECTION("the main thread is the one that writes the keybind")
+	{
+		// The mirror image: the assignment has to exist somewhere on the main
+		// thread side, or the capture would be silently discarded.
+		REQUIRE(code.find("scancode") != std::string::npos);
+		REQUIRE(wholeWordPositions(code, "forwardkey").size() >= 1);
 	}
 }
