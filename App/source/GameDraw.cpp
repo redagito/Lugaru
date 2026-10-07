@@ -24,6 +24,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Audio/openal_wrapper.hpp"
 #include "GameAssets.hpp"
 #include "GameState.hpp"
+#include "KeyCapture.hpp"
 #include "Level/Awards.hpp"
 #include "Level/Dialog.hpp"
 #include "Level/Hotspot.hpp"
@@ -61,10 +62,10 @@ void Game::flash(GameState& gamestate, float amount, int delay) // shouldn't be 
 	gamestate.flashdelay = delay;
 }
 
-void DrawMenu(GameState& gamestate, GameAssets& assets);
+void DrawMenu(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture);
 
 /*********************> DrawGLScene() <*****/
-int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
+int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 {
 	static float texcoordwidth, texcoordheight;
 	static float texviewwidth, texviewheight;
@@ -1593,7 +1594,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 	}
 
 	if (gamestate.mainmenu) {
-		DrawMenu(gamestate, assets);
+		DrawMenu(gamestate, assets, keycapture);
 	}
 
 	if (gamestate.freeze || gamestate.winfreeze || (gamestate.mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
@@ -1623,7 +1624,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets)
 	return 0;
 }
 
-void DrawMenu(GameState& gamestate, GameAssets& assets)
+void DrawMenu(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 {
 	// !!! FIXME: hack: clamp framerate in menu so text input works correctly on fast systems.
 	SDL_Delay(15);
@@ -1720,7 +1721,7 @@ void DrawMenu(GameState& gamestate, GameAssets& assets)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glPopMatrix();
-	if (!gamestate.waiting) { // hide the cursor while waiting for a key
+	if (!keycapture.waiting) { // hide the cursor while waiting for a key
 		glPushMatrix();
 		glTranslatef(gamestate.mousecoordh - gamestate.screenwidth / 2, gamestate.mousecoordv * -1 + gamestate.screenheight / 2, 0);
 		glScalef((float)gamestate.screenwidth / 64, (float)gamestate.screenwidth / 64, 1);

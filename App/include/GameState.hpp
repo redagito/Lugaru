@@ -210,9 +210,6 @@ struct GameState
 	unsigned short throwkey = 0;
 	unsigned short attackkey = 0;
 
-	// which keybind row the controls menu is waiting for a key on; -1 means none
-	int keyselect = 0;
-
 	// audio
 	float volume = 0;
 	bool musictoggle = false;
@@ -345,7 +342,4 @@ struct GameState
 
 	// whether the camera is detached from the player and free-flying
 	bool cameramode = false;
-
-	// whether text input has been requested and is still collecting characters
-	bool waiting = false;
 };

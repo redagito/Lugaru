@@ -431,7 +431,7 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 		// Without this, a parser that quietly matched nothing would leave every
 		// assertion above passing for the wrong reason.
 		REQUIRE(globals.size() == 3);
-		REQUIRE(members.size() == 155);
+		REQUIRE(members.size() == 153);
 	}
 }
 

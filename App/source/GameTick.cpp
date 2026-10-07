@@ -31,6 +31,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Devtools/ConsoleCmds.hpp"
 #include "GameAssets.hpp"
 #include "GameState.hpp"
+#include "KeyCapture.hpp"
 #include "Level/Awards.hpp"
 #include "Level/Campaign.hpp"
 #include "Level/Dialog.hpp"
@@ -1079,7 +1080,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
  * Gameplay-related input processing is still done in Game::Tick() for now
  * as it is tightly coupled to the game logic.
  */
-void Game::ProcessInput(GameState& gamestate, GameAssets& assets)
+void Game::ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 {
 	/* Pump SDL input events */
 	Input::Tick();
@@ -1185,7 +1186,7 @@ void Game::ProcessInput(GameState& gamestate, GameAssets& assets)
 			}
 			else {
 				gamestate.freeze = 0;
-				gamestate.waiting = false;
+				keycapture.waiting = false;
 			}
 		}
 
@@ -3111,13 +3112,13 @@ void doPlayerCollisions(GameState& gamestate)
 	}
 }
 
-void Game::Tick(GameState& gamestate, GameAssets& assets)
+void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 {
 	static Vector3 facing, flatfacing;
 	static int target;
 
 	/* Pump SDL input events and process non-gameplay related ones */
-	ProcessInput(gamestate, assets);
+	ProcessInput(gamestate, assets, keycapture);
 
 	/*
 	Values of gamestate.mainmenu :
@@ -3152,12 +3153,12 @@ void Game::Tick(GameState& gamestate, GameAssets& assets)
 				emit_stream_np(stream_menutheme);
 				pause_sound(leveltheme);
 			}
-			Menu::Load(gamestate, assets);
+			Menu::Load(gamestate, assets, keycapture);
 		}
 	}
 
 	if (gamestate.mainmenu) {
-		Menu::Tick(gamestate, assets);
+		Menu::Tick(gamestate, assets, keycapture);
 	}
 
 	if (!gamestate.mainmenu) {
@@ -3174,8 +3175,8 @@ void Game::Tick(GameState& gamestate, GameAssets& assets)
 		if (gamestate.console) {
 			gamestate.freeze = 1;
 
-			inputText(consoletext[0], &gamestate.consoleselected, gamestate);
-			if (!gamestate.waiting) {
+			inputText(consoletext[0], &gamestate.consoleselected, gamestate, keycapture);
+			if (!keycapture.waiting) {
 				if (!consoletext[0].empty()) {
 					cmd_dispatch(consoletext[0], gamestate, assets);
 					for (int k = 14; k >= 1; k--) {

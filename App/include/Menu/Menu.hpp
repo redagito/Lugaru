@@ -28,6 +28,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 struct GameAssets;
 struct GameState;
+struct KeyCapture;
 
 struct MenuItem
 {
@@ -73,15 +74,15 @@ public:
 	static int getSelected(int mousex, int mousey);
 	static void drawItems(GameState& gamestate, GameAssets& assets);
 
-	static void Load(GameState& gamestate, GameAssets& assets);
-	static void Tick(GameState& gamestate, GameAssets& assets);
+	static void Load(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture);
+	static void Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture);
 	static void updateSettingsMenu(GameState& gamestate);
 	static void updateStereoConfigMenu(GameState& gamestate);
-	static void updateControlsMenu(GameState& gamestate);
-	static void setKeySelected(GameState& gamestate, GameAssets& assets);
+	static void updateControlsMenu(GameState& gamestate, KeyCapture& keycapture);
+	static void setKeySelected(GameState& gamestate, KeyCapture& keycapture);
 	/**
 	 * Waits for the key-capture thread started by setKeySelected() to finish.
-	 * Must be called before the GameState and GameAssets that thread references
+	 * Must be called before the GameState and KeyCapture that thread references
 	 * are destroyed.
 	 */
 	static void joinKeySelectThread();

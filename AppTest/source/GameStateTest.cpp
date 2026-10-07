@@ -835,11 +835,17 @@ TEST_CASE("tranche 4 GameState members are per instance", "[gamestate]")
 	}
 }
 
-// Tranche 5 covers twenty-six more scalar globals from App/include/Globals.h
+// Tranche 5 covers twenty-four more scalar globals from App/include/Globals.h
 // and App/include/GameGlobals.h. Each member's default is the literal the
 // global it came from was initialised with, and its declared type is the type
 // that global declared. The literals were first pinned by reading the globals
 // themselves, while they were still around to be compared against.
+//
+// It was twenty-six until keyselect and waiting moved to KeyCapture, which
+// cannot be a member here: they are the handshake with the one thread in the
+// process and so are atomic, and an atomic member would cost GameState the
+// trivial copyability this file asserts. They are pinned there instead, in
+// KeyCaptureHandshakeTest.cpp.
 //
 // Types are pinned next to the values on purpose. A value comparison such as
 // `REQUIRE(x == 0)` holds just as happily for an int as for a float, so on its
@@ -923,11 +929,6 @@ TEST_CASE("GameState tranche 5 members start at their historical global defaults
 		REQUIRE(s.pathpointselected == 0);
 	}
 
-	SECTION("keybind capture")
-	{
-		REQUIRE(s.keyselect == 0);
-	}
-
 	SECTION("audio")
 	{
 		REQUIRE(s.musictype == 0);
@@ -953,11 +954,6 @@ TEST_CASE("GameState tranche 5 members start at their historical global defaults
 		REQUIRE(s.targetlevel == 0);
 	}
 
-	SECTION("text input")
-	{
-		REQUIRE(s.waiting == false);
-	}
-
 	SECTION("declared types are preserved from the migrated globals")
 	{
 		REQUIRE(std::is_same<decltype(s.decalstoggle), bool>::value);
@@ -979,13 +975,11 @@ TEST_CASE("GameState tranche 5 members start at their historical global defaults
 		REQUIRE(std::is_same<decltype(s.editorenabled), bool>::value);
 		REQUIRE(std::is_same<decltype(s.editortype), int>::value);
 		REQUIRE(std::is_same<decltype(s.pathpointselected), int>::value);
-		REQUIRE(std::is_same<decltype(s.keyselect), int>::value);
 		REQUIRE(std::is_same<decltype(s.musictype), int>::value);
 		REQUIRE(std::is_same<decltype(s.stealthloading), bool>::value);
 		REQUIRE(std::is_same<decltype(s.cameramode), bool>::value);
 		REQUIRE(std::is_same<decltype(s.console), bool>::value);
 		REQUIRE(std::is_same<decltype(s.targetlevel), int>::value);
-		REQUIRE(std::is_same<decltype(s.waiting), bool>::value);
 	}
 }
 
@@ -1015,15 +1009,13 @@ TEST_CASE("tranche 5 GameState members are per instance", "[gamestate]")
 		a.editorenabled = true;
 		a.editortype = 4;
 		a.pathpointselected = 7;
-		a.keyselect = 3;
 		a.musictype = 5;
 		a.stealthloading = true;
 		a.cameramode = true;
 		a.console = true;
 		a.targetlevel = 9;
-		a.waiting = true;
 
-		// Every one of the twenty-six was seeded to a value its default does not
+		// Every one of the twenty-four was seeded to a value its default does not
 		// hold, so each assertion below is an observation of a value the writer
 		// never touched rather than a restatement of the default.
 		REQUIRE(b.decalstoggle == false);
@@ -1045,13 +1037,11 @@ TEST_CASE("tranche 5 GameState members are per instance", "[gamestate]")
 		REQUIRE(b.editorenabled == false);
 		REQUIRE(b.editortype == 0);
 		REQUIRE(b.pathpointselected == 0);
-		REQUIRE(b.keyselect == 0);
 		REQUIRE(b.musictype == 0);
 		REQUIRE(b.stealthloading == false);
 		REQUIRE(b.cameramode == false);
 		REQUIRE(b.console == false);
 		REQUIRE(b.targetlevel == 0);
-		REQUIRE(b.waiting == false);
 	}
 
 	SECTION("a third instance also starts clean")
@@ -1075,13 +1065,11 @@ TEST_CASE("tranche 5 GameState members are per instance", "[gamestate]")
 		a.editorenabled = true;
 		a.editortype = 6;
 		a.pathpointselected = 11;
-		a.keyselect = 6;
 		a.musictype = 8;
 		a.stealthloading = true;
 		a.cameramode = true;
 		a.console = true;
 		a.targetlevel = 12;
-		a.waiting = true;
 
 		GameState c;
 		REQUIRE(c.decalstoggle == false);
@@ -1103,13 +1091,11 @@ TEST_CASE("tranche 5 GameState members are per instance", "[gamestate]")
 		REQUIRE(c.editorenabled == false);
 		REQUIRE(c.editortype == 0);
 		REQUIRE(c.pathpointselected == 0);
-		REQUIRE(c.keyselect == 0);
 		REQUIRE(c.musictype == 0);
 		REQUIRE(c.stealthloading == false);
 		REQUIRE(c.cameramode == false);
 		REQUIRE(c.console == false);
 		REQUIRE(c.targetlevel == 0);
-		REQUIRE(c.waiting == false);
 	}
 }
 

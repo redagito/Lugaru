@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "GameGlobals.h"
 #include "GameState.hpp"
 #include "Globals.h"
+#include "KeyCapture.hpp"
 
 #include "Audio/AudioState.hpp"
 #include "Audio/openal_wrapper.hpp"
@@ -108,7 +109,7 @@ void initGL(GameState& gamestate)
 
 static Point gMidPoint;
 
-bool SetUp(GameState& gamestate, GameAssets& assets)
+bool SetUp(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 {
 	gamestate.cellophane = 0;
 	gamestate.texdetail = 4;
@@ -235,7 +236,7 @@ bool SetUp(GameState& gamestate, GameAssets& assets)
 		resolutions.insert(startresolution);
 	}
 
-	InitGame(gamestate, assets);
+	InitGame(gamestate, assets, keycapture);
 
 	return true;
 }
@@ -307,7 +308,7 @@ void DoFrameRate(GameState& gamestate, int update)
 	}
 }
 
-void DoUpdate(GameState& gamestate, GameAssets& assets)
+void DoUpdate(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 {
 	static float sps = 200;
 	static int count;
@@ -348,17 +349,17 @@ void DoUpdate(GameState& gamestate, GameAssets& assets)
 	TickOnce(gamestate);
 
 	for (int i = 0; i < count; i++) {
-		Tick(gamestate, assets);
+		Tick(gamestate, assets, keycapture);
 	}
 	gamestate.multiplier = oldmult;
 
 	TickOnceAfter(gamestate, assets);
 	if (gamestate.stereomode == stereoNone) {
-		DrawGLScene(stereoCenter, gamestate, assets);
+		DrawGLScene(stereoCenter, gamestate, assets, keycapture);
 	}
 	else {
-		DrawGLScene(stereoLeft, gamestate, assets);
-		DrawGLScene(stereoRight, gamestate, assets);
+		DrawGLScene(stereoLeft, gamestate, assets, keycapture);
+		DrawGLScene(stereoRight, gamestate, assets, keycapture);
 	}
 }
 
@@ -481,8 +482,8 @@ namespace
 
 // Joins the key-capture thread when the enclosing scope ends, however it ends:
 // falling off the bottom, an early return, or an exception unwinding past it.
-// The thread holds references to gamestate and to assets, so it must not outlive
-// either, and destruction is the only thing on every one of those paths.
+// The thread holds references to gamestate and to keycapture, so it must not
+// outlive either, and destruction is the only thing on every one of those paths.
 struct JoinKeySelectThreadOnExit
 {
 	~JoinKeySelectThreadOnExit()
@@ -559,14 +560,19 @@ int main(int argc, char** argv)
 			// outlive every frame and go out of scope before SDL_Quit below.
 			GameAssets assets;
 
-			// Declared after both objects the thread references, so it is
-			// destroyed before either of them: the join cannot be skipped by the
+			// The handshake with the one thread in the process, by the same rule and
+			// for the same reason: one per process, passed by reference. It holds
+			// atomics, so unlike GameState it cannot live inside one.
+			KeyCapture keycapture;
+
+			// Declared after all three objects the thread references, so it is
+			// destroyed before any of them: the join cannot be skipped by the
 			// early return below or by an exception unwinding out of this block.
 			// It does not run before CleanUp(), so ~GameAssets still deletes its
 			// GL objects with a current context.
 			JoinKeySelectThreadOnExit joinKeySelectThread;
 
-			if (!SetUp(gamestate, assets)) {
+			if (!SetUp(gamestate, assets, keycapture)) {
 				delete[] commandLineOptionsBuffer;
 				return 42;
 			}
@@ -599,7 +605,7 @@ int main(int argc, char** argv)
 					gamestate.deltah = 0;
 					gamestate.deltav = 0;
 					SDL_Event e;
-					if (!gamestate.waiting) {
+					if (!keycapture.waiting) {
 						// message pump
 						while (SDL_PollEvent(&e)) {
 							if (!sdlEventProc(e, gamestate)) {
@@ -610,13 +616,13 @@ int main(int argc, char** argv)
 					}
 
 					// game
-					DoUpdate(gamestate, assets);
+					DoUpdate(gamestate, assets, keycapture);
 				}
 				else {
 					if (gameFocused) {
 						// allow game chance to pause
 						gameFocused = false;
-						DoUpdate(gamestate, assets);
+						DoUpdate(gamestate, assets, keycapture);
 					}
 
 					// game is not in focus, give CPU time to other apps by waiting for messages instead of 'peeking'

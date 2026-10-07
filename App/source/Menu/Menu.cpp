@@ -25,6 +25,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "GameGlobals.h"
 #include "GameState.hpp"
 #include "Globals.h"
+#include "KeyCapture.hpp"
 
 #include "Audio/openal_wrapper.hpp"
 #include "Graphic/gamegl.hpp"
@@ -340,19 +341,19 @@ void Menu::updateStereoConfigMenu(GameState& gamestate)
     setText(2, std::string("Reverse stereo: ") + (gamestate.stereoreverse ? "Yes" : "No"));
 }
 
-void Menu::updateControlsMenu(GameState& gamestate)
+void Menu::updateControlsMenu(GameState& gamestate, KeyCapture& keycapture)
 {
-    setText(0, (std::string) "Forwards: " + (gamestate.keyselect == 0 ? "_" : Input::keyToChar(gamestate.forwardkey)));
-    setText(1, (std::string) "Back: " + (gamestate.keyselect == 1 ? "_" : Input::keyToChar(gamestate.backkey)));
-    setText(2, (std::string) "Left: " + (gamestate.keyselect == 2 ? "_" : Input::keyToChar(gamestate.leftkey)));
-    setText(3, (std::string) "Right: " + (gamestate.keyselect == 3 ? "_" : Input::keyToChar(gamestate.rightkey)));
-    setText(4, (std::string) "Crouch: " + (gamestate.keyselect == 4 ? "_" : Input::keyToChar(gamestate.crouchkey)));
-    setText(5, (std::string) "Jump: " + (gamestate.keyselect == 5 ? "_" : Input::keyToChar(gamestate.jumpkey)));
-    setText(6, (std::string) "Draw: " + (gamestate.keyselect == 6 ? "_" : Input::keyToChar(gamestate.drawkey)));
-    setText(7, (std::string) "Throw: " + (gamestate.keyselect == 7 ? "_" : Input::keyToChar(gamestate.throwkey)));
-    setText(8, (std::string) "Attack: " + (gamestate.keyselect == 8 ? "_" : Input::keyToChar(gamestate.attackkey)));
+    setText(0, (std::string) "Forwards: " + (keycapture.keyselect == 0 ? "_" : Input::keyToChar(gamestate.forwardkey)));
+    setText(1, (std::string) "Back: " + (keycapture.keyselect == 1 ? "_" : Input::keyToChar(gamestate.backkey)));
+    setText(2, (std::string) "Left: " + (keycapture.keyselect == 2 ? "_" : Input::keyToChar(gamestate.leftkey)));
+    setText(3, (std::string) "Right: " + (keycapture.keyselect == 3 ? "_" : Input::keyToChar(gamestate.rightkey)));
+    setText(4, (std::string) "Crouch: " + (keycapture.keyselect == 4 ? "_" : Input::keyToChar(gamestate.crouchkey)));
+    setText(5, (std::string) "Jump: " + (keycapture.keyselect == 5 ? "_" : Input::keyToChar(gamestate.jumpkey)));
+    setText(6, (std::string) "Draw: " + (keycapture.keyselect == 6 ? "_" : Input::keyToChar(gamestate.drawkey)));
+    setText(7, (std::string) "Throw: " + (keycapture.keyselect == 7 ? "_" : Input::keyToChar(gamestate.throwkey)));
+    setText(8, (std::string) "Attack: " + (keycapture.keyselect == 8 ? "_" : Input::keyToChar(gamestate.attackkey)));
     if (gamestate.devtools) {
-        setText(9, (std::string) "Console: " + (gamestate.keyselect == 9 ? "_" : Input::keyToChar(gamestate.consolekey)));
+        setText(9, (std::string) "Console: " + (keycapture.keyselect == 9 ? "_" : Input::keyToChar(gamestate.consolekey)));
     }
 }
 
@@ -372,7 +373,7 @@ Values of gamestate.mainmenu :
 18 stereo configuration
 */
 
-void Menu::Load(GameState& gamestate, GameAssets& assets)
+void Menu::Load(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 {
     clearMenu();
     switch (gamestate.mainmenu) {
@@ -415,7 +416,7 @@ void Menu::Load(GameState& gamestate, GameAssets& assets)
                 addButton(9, "", 10 + 10, 40);
             }
             addButton(gamestate.devtools ? 10 : 9, "Back", 10, 10);
-            updateControlsMenu(gamestate);
+            updateControlsMenu(gamestate, keycapture);
             break;
         case 5: {
             LoadCampaign(gamestate, assets);
@@ -543,7 +544,7 @@ void Menu::startChallengeLevel(int challengelevel, GameState& gamestate, GameAss
     pause_sound(stream_menutheme);
 }
 
-void Menu::Tick(GameState& gamestate, GameAssets& assets)
+void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 {
     //escape key pressed
     if (Input::isKeyPressed(SDL_SCANCODE_ESCAPE) &&
@@ -700,7 +701,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets)
                         flash(gamestate);
                         gamestate.mainmenu = 4;
                         gamestate.selected = -1;
-                        gamestate.keyselect = -1;
+                        keycapture.keyselect = -1;
                         break;
                     case 8:
                         flash(gamestate);
@@ -727,7 +728,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets)
                         flash(gamestate);
                         gamestate.newstereomode = gamestate.stereomode;
                         gamestate.mainmenu = 18;
-                        gamestate.keyselect = -1;
+                        keycapture.keyselect = -1;
                         break;
                     case 13:
                         gamestate.showdamagebar = !gamestate.showdamagebar;
@@ -739,20 +740,20 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets)
                 updateSettingsMenu(gamestate);
                 break;
             case 4:
-                if (!gamestate.waiting) {
+                if (!keycapture.waiting) {
                     fireSound();
-                    if (gamestate.selected < (gamestate.devtools ? 10 : 9) && gamestate.keyselect == -1) {
-                        gamestate.keyselect = gamestate.selected;
+                    if (gamestate.selected < (gamestate.devtools ? 10 : 9) && keycapture.keyselect == -1) {
+                        keycapture.keyselect = gamestate.selected;
                     }
-                    if (gamestate.keyselect != -1) {
-                        setKeySelected(gamestate, assets);
+                    if (keycapture.keyselect != -1) {
+                        setKeySelected(gamestate, keycapture);
                     }
                     if (gamestate.selected == (gamestate.devtools ? 10 : 9)) {
                         flash(gamestate);
                         gamestate.mainmenu = 3;
                     }
                 }
-                updateControlsMenu(gamestate);
+                updateControlsMenu(gamestate, keycapture);
                 break;
             case 5:
                 fireSound();
@@ -822,7 +823,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets)
                             }
                             Account::active().setCurrentCampaign(*c);
                         }
-                        Load(gamestate, assets);
+                        Load(gamestate, assets, keycapture);
                         break;
                 }
                 break;
@@ -914,8 +915,8 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets)
     OPENAL_SetFrequency(channels[stream_menutheme]);
 
     if (entername) {
-        inputText(newusername, &newuserselected, gamestate);
-        if (!gamestate.waiting) {                 // the input as finished
+        inputText(newusername, &newuserselected, gamestate, keycapture);
+        if (!keycapture.waiting) {                 // the input as finished
             if (!newusername.empty()) { // with enter
                 Account::add(std::string(newusername));
 
@@ -930,7 +931,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets)
                 newuserselected = 0;
             }
             entername = 0;
-            Load(gamestate, assets);
+            Load(gamestate, assets, keycapture);
         }
 
         newuserblinkdelay -= gamestate.multiplier;
@@ -946,25 +947,33 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets)
     }
 
     if (oldmainmenu != gamestate.mainmenu) {
-        Load(gamestate, assets);
+        Load(gamestate, assets, keycapture);
     }
     oldmainmenu = gamestate.mainmenu;
 }
 
 // SDL_CreateThread carries one pointer and the thread needs two: the caller's
-// GameState, which it writes the captured key into, and the owner of the menu
-// textures, which Menu::Load reads. It gets this record on the heap and deletes
-// it on the way out. Both pointers stay valid because joinKeySelectThread()
-// runs before either object leaves scope. Anonymous, so neither name can collide
-// with another translation unit's: an ODR violation would be diagnosed as one
-// symbol quietly replacing another rather than as a redeclaration error.
+// GameState, which it writes the captured key into, and the KeyCapture beside it,
+// which is the handshake the two threads agree on. It gets this record on the
+// heap and deletes it on the way out. Both pointers stay valid because
+// joinKeySelectThread() runs before either object leaves scope. Anonymous, so
+// neither name can collide with another translation unit's: an ODR violation
+// would be diagnosed as one symbol quietly replacing another rather than as a
+// redeclaration error.
+//
+// The thread has no GameAssets. It used to, for the Menu::Load it ended with, and
+// that was the point at which a thread stopped being a reader of shared state
+// and became a writer of it: Menu::Load clears and rebuilds the file-static
+// Menu::items the main thread walks in handleFadeEffect, and reads
+// assets.Mainmenuitems and assets.Mapcircletexture while doing it. Dropping the
+// call dropped the last route from this thread to either.
 namespace
 {
 
 struct KeySelectArgs
 {
     GameState* gamestate;
-    GameAssets* assets;
+    KeyCapture* keycapture;
 };
 
 int setKeySelected_thread(void* data)
@@ -972,7 +981,7 @@ int setKeySelected_thread(void* data)
     using namespace Game;
     std::unique_ptr<KeySelectArgs> args(static_cast<KeySelectArgs*>(data));
     GameState& gamestate = *args->gamestate;
-    GameAssets& assets = *args->assets;
+    KeyCapture& keycapture = *args->keycapture;
     int scancode = -1;
     SDL_Event evenement;
     while (scancode == -1) {
@@ -990,7 +999,7 @@ int setKeySelected_thread(void* data)
     }
     if (scancode != SDL_SCANCODE_ESCAPE) {
         fireSound();
-        switch (gamestate.keyselect) {
+        switch (keycapture.keyselect) {
             case 0:
                 gamestate.forwardkey = scancode;
                 break;
@@ -1025,17 +1034,23 @@ int setKeySelected_thread(void* data)
                 break;
         }
     }
-    gamestate.keyselect = -1;
-    gamestate.waiting = false;
-    Menu::Load(gamestate, assets);
+    keycapture.keyselect = -1;
+    // Asked for, not done. The menu that displays the captured key is rebuilt by
+    // Menu::Tick on the main thread, which is where Menu::items belongs.
+    keycapture.reloadRequested = true;
+    // Cleared last, and it is what publishes the keybind write above: this store
+    // releases, and the main thread's next load of `waiting` acquires, so every
+    // write made before this line is visible to whatever the main thread does
+    // after it sees the flag down - including Menu::Load reading the new keybind.
+    keycapture.waiting = false;
     return 0;
 }
 
 } // namespace
 
-// The key-capture thread holds a reference to the caller's GameState and to its
-// GameAssets, so its handle is retained and must be joined before either goes
-// out of scope. See Menu::joinKeySelectThread().
+// The key-capture thread holds a reference to the caller's GameState and to the
+// KeyCapture beside it, so its handle is retained and must be joined before
+// either goes out of scope. See Menu::joinKeySelectThread().
 static SDL_Thread* keyselectthread = nullptr;
 
 void Menu::joinKeySelectThread()
@@ -1046,17 +1061,17 @@ void Menu::joinKeySelectThread()
 	}
 }
 
-void Menu::setKeySelected(GameState& gamestate, GameAssets& assets)
+void Menu::setKeySelected(GameState& gamestate, KeyCapture& keycapture)
 {
-    gamestate.waiting = true;
+    keycapture.waiting = true;
     printf("launch thread\n");
     Menu::joinKeySelectThread();
-    KeySelectArgs* args = new KeySelectArgs{ &gamestate, &assets };
+    KeySelectArgs* args = new KeySelectArgs{ &gamestate, &keycapture };
     keyselectthread = SDL_CreateThread(setKeySelected_thread, NULL, args);
     if (keyselectthread == NULL) {
         delete args;
         fprintf(stderr, "Unable to create thread: %s\n", SDL_GetError());
-        gamestate.waiting = false;
+        keycapture.waiting = false;
         return;
     }
 }

@@ -48,17 +48,18 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 struct GameAssets;
 struct GameState;
+struct KeyCapture;
 
 namespace Game 
 {
 
 	void deleteGame(GameState& gamestate, GameAssets& assets);
 
-	void InitGame(GameState& gamestate, GameAssets& assets);
+	void InitGame(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture);
 	void LoadStuff(GameState& gamestate, GameAssets& assets);
 	void LoadScreenTexture(GameState& gamestate, GameAssets& assets);
 	void LoadingScreen(GameState& gamestate, GameAssets& assets);
-	int DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets);
+	int DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets, KeyCapture& keycapture);
 	void playdialoguescenesound(GameState& gamestate);
 	int findClosestPlayer();
 	void ResetBeforeLevelLoad(bool tutorial, GameState& gamestate);
@@ -68,10 +69,10 @@ namespace Game
 
 	void cmd_dispatch(const std::string cmd, GameState& gamestate, GameAssets& assets);
 
-	void ProcessInput(GameState& gamestate, GameAssets& assets);
+	void ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture);
 	void ProcessDevInput(GameState& gamestate, GameAssets& assets);
 
-	void Tick(GameState& gamestate, GameAssets& assets);
+	void Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture);
 	void TickOnce(GameState& gamestate);
 	void TickOnceAfter(GameState& gamestate, GameAssets& assets);
 
@@ -80,7 +81,7 @@ namespace Game
 
 	void fireSound(int sound = fireendsound);
 
-	void inputText(std::string& str, unsigned* charselected, GameState& gamestate);
+	void inputText(std::string& str, unsigned* charselected, GameState& gamestate, KeyCapture& keycapture);
 	void flash(GameState& gamestate, float amount = 1, int delay = 1);
 }
 

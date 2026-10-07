@@ -27,6 +27,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "GameAssets.hpp"
 #include "GameState.hpp"
 #include "Graphic/Texture.hpp"
+#include "KeyCapture.hpp"
 #include "LoadingClock.hpp"
 #include "Menu/Menu.hpp"
 #include "Utils/Folders.hpp"
@@ -445,7 +446,7 @@ void FadeLoadingScreen(float howmuch, GameState& gamestate)
 	swap_gl_buffers(mainWindow());
 }
 
-void Game::InitGame(GameState& gamestate, GameAssets& assets)
+void Game::InitGame(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 {
 	gamestate.numchallengelevels = 14;
 
@@ -595,7 +596,7 @@ void Game::InitGame(GameState& gamestate, GameAssets& assets)
 	gamestate.newscreenwidth = gamestate.screenwidth;
 	gamestate.newscreenheight = gamestate.screenheight;
 
-	Menu::Load(gamestate, assets);
+	Menu::Load(gamestate, assets, keycapture);
 
 	Animation::loadAll([&]() {Game::LoadingScreen(gamestate, assets); });
 

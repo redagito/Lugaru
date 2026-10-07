@@ -21,6 +21,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Game.hpp"
 #include "GameGlobals.h"
 #include "GameState.hpp"
+#include "KeyCapture.hpp"
 
 #include "Audio/openal_wrapper.hpp"
 #include "Level/Dialog.hpp"
@@ -39,13 +40,13 @@ void Game::fireSound(int sound)
     emit_sound_at(sound);
 }
 
-void Game::inputText(std::string& str, unsigned* charselected, GameState& gamestate)
+void Game::inputText(std::string& str, unsigned* charselected, GameState& gamestate, KeyCapture& keycapture)
 {
     SDL_Event evenement;
 
-    if (!gamestate.waiting) {
+    if (!keycapture.waiting) {
         SDL_StartTextInput();
-        gamestate.waiting = true;
+        keycapture.waiting = true;
     }
 
     while (SDL_PollEvent(&evenement)) {
@@ -65,7 +66,7 @@ void Game::inputText(std::string& str, unsigned* charselected, GameState& gamest
                 if (evenement.key.keysym.sym == SDLK_ESCAPE) {
                     str.clear();
                     *charselected = 0;
-                    gamestate.waiting = false;
+                    keycapture.waiting = false;
                 } else if (evenement.key.keysym.sym == SDLK_BACKSPACE) {
                     if ((*charselected) > 0) {
                         (*charselected)--;
@@ -88,13 +89,13 @@ void Game::inputText(std::string& str, unsigned* charselected, GameState& gamest
                         (*charselected)++;
                     }
                 } else if (evenement.key.keysym.sym == SDLK_RETURN) {
-                    gamestate.waiting = false;
+                    keycapture.waiting = false;
                 }
                 break;
         }
     }
 
-    if (!gamestate.waiting) {
+    if (!keycapture.waiting) {
         SDL_StopTextInput();
     }
 }
