@@ -86,74 +86,134 @@ whole tree") as `no file indexes the path point graph with an unselected point` 
 ## 2. Key-capture thread: unsynchronised handshake, and an exception path that skips the join
 
 **Severity:** medium (use-after-free on the exception path; formally UB on the handshake)
-**Status:** confirmed by reading code; not reproduced at runtime; no test coverage. The join
-hole in 2c is now closed by an RAII guard; 2a and 2b are still open.
+**Status:** closed. The join hole in 2c is closed by an RAII guard; 2a and 2b are closed by
+giving the handshake an owner of its own (`KeyCapture`) and moving the menu rebuild onto the
+main thread. Pinned by `AppTest/source/KeyCaptureHandshakeTest.cpp`. Nothing here was ever
+reproduced at runtime, so the closing argument is the source plus the tests rather than a run
+that used to fail.
 
-The entire project has exactly **one** thread. There are no mutexes, atomics, or condition
-variables anywhere in the tree:
+The entire project has exactly **one** thread:
 
 ```
-App/source/Menu/Menu.cpp:1055   keyselectthread = SDL_CreateThread(setKeySelected_thread, NULL, args)
+App/source/Menu/Menu.cpp:1083   keyselectthread = SDL_CreateThread(setKeySelected_thread, NULL, args)
 ```
 
 It exists for one interaction: clicking a keybind in the options menu parks the main loop
 and this thread blocks in `SDL_WaitEvent` until a key or mouse button arrives.
 
-Three separate problems:
+Three separate problems were recorded. All three are closed now:
 
-### 2a. The `waiting` flag is a handshake, not a synchronisation primitive
+### 2a. CLOSED: the `waiting` flag was a handshake, not a synchronisation primitive
 
-`setKeySelected_thread` writes `gamestate.keyselect` and `gamestate.waiting`
-(`Menu.cpp:1028-1029`); the main thread polls them. They are plain non-atomic members, so
-this is undefined behaviour by the standard even where it behaves correctly in practice on
-x86/ARM. The flag write happens before the thread exits and `joinKeySelectThread` creates
-a happens-before edge, which is why it works today - but nothing enforces the ordering
-during the window the main thread is actually polling.
+`setKeySelected_thread` wrote `gamestate.keyselect` and `gamestate.waiting`; the main thread
+polled them. They were plain non-atomic members, so that was undefined behaviour by the
+standard even where it behaves correctly in practice on x86/ARM. The flag write happened
+before the thread exited and `joinKeySelectThread` created a happens-before edge, which is why
+it worked - but nothing enforced the ordering during the window the main thread was
+actually polling.
 
-### 2b. The thread calls `Menu::Load`, which mutates the shared menu item list
+They cannot be atomic where they were. `std::atomic` is not copyable, and a member of that
+type would cost `GameState` the trivial copyability and trivial destructibility
+`GameStateTest.cpp:109-110` asserts, which is what lets it be built and destroyed in a unit
+test with no GL context. So the handshake moved to a struct of its own, `KeyCapture`
+(`App/include/KeyCapture.hpp`), holding
 
-`Menu::Load(gamestate, assets)` at `Menu.cpp:1030` is the last thing the thread does. It
-clears and rebuilds the file-static `Menu::items` vector (`Menu.cpp:58`), which
-`Menu::handleFadeEffect` (`Menu.cpp:169-184`) walks and mutates on the main thread, and for
-`mainmenu == 5` it calls `LoadCampaign` (`Menu.cpp:421`), which rewrites the global
-`campaignlevels` and `campaignEndText`.
+```
+std::atomic<bool> waiting;
+std::atomic<int> keyselect;
+std::atomic<bool> reloadRequested;
+```
+
+It is default constructed once in `main()` (`main.cpp:566`) beside `GameState` and
+`GameAssets`, and passed by reference down the chain those two already travel: `SetUp`,
+`Game::InitGame`, `Game::Tick`, `Game::ProcessInput`, `Game::DrawGLScene`,
+`Game::inputText`, `Menu::Load`, `Menu::Tick`, `Menu::updateControlsMenu`,
+`Menu::setKeySelected`. There is deliberately no accessor, no global and no file-local
+static - a shared owner behind a getter is the global it replaces with the storage hidden,
+and that shape was already tried in this tree once and reverted.
+
+`waiting` carries two meanings and carried them before the move as well: the capture
+thread's flag, and `Game::inputText`'s "SDL text input has been started and not yet
+submitted". They are mutually exclusive in practice, so they stayed one flag.
+
+Ordering, since it is the reason the members are atomic rather than just concurrent: the
+thread writes the captured scancode into `gamestate`, then `keyselect = -1`, then
+`reloadRequested = true`, then `waiting = false`. `Menu::setKeySelected` stores
+`waiting = true` on the main thread *before* calling `SDL_CreateThread`, so that store is
+earlier than the thread's in `waiting`'s modification order, and the first load the main
+thread makes of `waiting` after the thread starts can therefore only read the thread's
+store. All three members are `std::atomic` with the default `memory_order_seq_cst`, so that
+store is a release and that load is an acquire, and every write the thread made before it -
+the captured keybind included - happens before everything the main thread does after it
+observes the flag down. `takeReloadRequest()`'s `reloadRequested.exchange(false)` is a
+second acquire on the same variable, which is what makes the keybind visible to the
+`Menu::Load` that 2b moved onto the main thread.
+
+### 2b. CLOSED: the thread used to call `Menu::Load`, which mutates the shared menu item list
+
+`Menu::Load(gamestate, assets)` was the last thing the thread did. It clears and rebuilds
+the file-static `Menu::items` vector (`Menu.cpp:59`), which `Menu::handleFadeEffect`
+(`Menu.cpp:170-185`) walks and mutates on the main thread, and for `mainmenu == 5` it calls
+`LoadCampaign` (`Menu.cpp:422`), which rewrites the global `campaignlevels` and
+`campaignEndText`.
 
 An earlier version of this finding claimed `Menu::Load` writes `gamestate.mainmenu = 0`.
-That is wrong: `Menu::Load` spans `Menu.cpp:375-521` and contains no write to any
-`GameState` member. The line it was citing, `Menu.cpp:541`, is inside
-`Menu::startChallengeLevel` (`Menu.cpp:523`), a different function that the thread never
-calls. What races is the item vector, not `mainmenu`.
+That is wrong, and still is: `Menu::Load` spans `Menu.cpp:376-522` and contains no write to
+any `GameState` member. The line it was citing, `Menu.cpp:542`, is inside
+`Menu::startChallengeLevel` (`Menu.cpp:524`), a different function that the thread never
+calls. What raced is the item vector, not `mainmenu`.
 
-In practice the main thread is parked on `waiting` while the thread runs, so this does not
-manifest - but that is a consequence of the handshake, not a design.
+In practice the main thread was parked on `waiting` while the thread ran, so this did not
+manifest - but that was a consequence of the handshake, not a design.
+
+The thread now records the key it captured, sets `reloadRequested`, and returns.
+`Menu::Tick` takes the request and calls `Menu::Load(gamestate, assets, keycapture)` itself,
+on the main thread, exactly where the thread used to. It is the first statement of
+`Menu::Tick` (`Menu.cpp:558`), outside every branch in it, because the controls-menu input
+handling below it only runs once `waiting` is already clear - a consume placed after that
+would never run on the frame the request arrives on. `takeReloadRequest()` consumes the
+request with `exchange(false)`, so one rebind produces one reload rather than one per frame.
+
+Closed alongside it, and only because of the same move: the thread also reached
+`assets.Mainmenuitems` and `assets.Mapcircletexture` through the `Menu::Load` it called, on
+the way to building the menu for `mainmenu` 1, 2 or 5. That was unreachable only because the
+thread happened to arrive at `mainmenu` 3 or 4 - nothing enforced that, and the only thing
+holding it back was the same handshake as above. With the call gone the thread holds no
+`GameAssets&` at all: `KeySelectArgs` carries a `GameState*` and a `KeyCapture*` and nothing
+else, so the route is closed by the shape of the argument record rather than by a
+coincidence. `fireSound()` still reaches the audio library's `samp` and `channels` tables by
+non-atomic read, which is unchanged and was already the case; it is a read of tables the main
+thread only reallocates when a level loads, and the capture thread cannot outlive a load.
 
 ### 2c. An exception unwinds past the join, leaving a dangling reference
 
-The thread holds a `GameState&` and a `GameAssets&`, so it must be joined before either
-object is destroyed. `Lugaru/source/main.cpp:630` does that explicitly, but the enclosing
-`catch (const std::exception&)` at `main.cpp:640` is reached by an exception thrown while
-the thread is still alive, and that path never passes the join at `:630`.
+The thread holds a `GameState&` and a `KeyCapture&`, so it must be joined before either
+object is destroyed. `Lugaru/source/main.cpp:636` does that explicitly, but the enclosing
+`catch (const std::exception&)` at `main.cpp:646` is reached by an exception thrown while
+the thread is still alive, and that path never passes the join at `:636`.
 
-`GameState gamestate` (`main.cpp:554`) and `GameAssets assets` (`main.cpp:560`) are stack
-objects, so on unwind `assets` is destroyed first and `gamestate` second. The thread's
-references are therefore dangling from the moment `assets` begins to destruct, for the
-whole of its destructor. That window is long: `~GameAssets` destroys the two fonts, each a
-`glDeleteLists` (`Graphics/source/Graphic/Text.cpp:140`), and then the skybox and its 18
-`Texture` members (8 singles plus `Mainmenuitems[10]`), each of which can drop the last
-reference to a `TextureRes` and so run a `glDeleteTextures`
-(`Graphics/source/Graphic/Texture.cpp:106-110`). Before commit `d70a1a9` the textures were
-still globals, so the only work in that destructor was the two fonts.
+`GameState gamestate` (`main.cpp:555`), `GameAssets assets` (`main.cpp:561`) and
+`KeyCapture keycapture` (`main.cpp:566`) are stack objects, so on unwind they are destroyed
+in reverse declaration order and `gamestate` last, while the thread's references are dangling
+from the moment the first of them begins to destruct. How long that window was depended on
+what the thread referenced. It used to hold a `GameAssets&`, so the window was
+`~GameAssets`: the two fonts, each a `glDeleteLists`
+(`Graphics/source/Graphic/Text.cpp:140`), and then the skybox and its 18 `Texture` members
+(8 singles plus `Mainmenuitems[10]`), each of which can drop the last reference to a
+`TextureRes` and so run a `glDeleteTextures`
+(`Graphics/source/Graphic/Texture.cpp:106-110`). It holds a `KeyCapture&` now, whose
+destructor is trivial - but `~GameAssets` is still the longest one in the block, and
+`deleteGame` is still called before it, so the window did not go away; it moved.
 
 This is the same class of bug that was already fixed once in `Menu.cpp` (the thread was not
 being joined at all); this is the remaining path.
 
-**Suggested fix:** make `waiting` and `keyselect` `std::atomic`; and decide whether
-`Menu::Load` needs to run on the thread at all, or whether the thread could set a flag and
-let the main thread do the menu reload. The join guarantee is no longer on this list: it is
-now an RAII guard, `JoinKeySelectThreadOnExit` (`main.cpp:486`), declared after both objects
-at `main.cpp:567` and therefore destroyed before them on every exit path out of the block -
-fall-through, early return, or unwind. The explicit join at `:630` stays because
-`deleteGame` deletes GL objects the thread would otherwise still be reading.
+**Suggested fix:** done; see 2a and 2b. The join guarantee is not on this list: it is an RAII
+guard, `JoinKeySelectThreadOnExit` (`main.cpp:487`), declared after all three objects it
+protects at `main.cpp:573` and therefore destroyed before them on every exit path out of the
+block - fall-through, early return, or unwind. The explicit join at `:636` stays because
+`deleteGame` tears down state the thread still references, and it has to happen before
+`~GameAssets` runs.
 
 ---
 
