@@ -619,12 +619,12 @@ TEST_CASE("Menu::Tick is reached on the main thread while the capture thread is 
 		const std::string tick = functionBody(menu, kTickSignature);
 		REQUIRE(tick.size() > 1000);
 
-		std::vector<std::string> where;
-		const int started = countAcrossAppTrees("setKeySelected(gamestate", where);
+std::vector<std::string> where;
+		const int started = countAcrossAppTrees("setKeySelected(keycapture", where);
 
-		INFO("setKeySelected(gamestate appears in: " << joinPaths(where));
+		INFO("setKeySelected(keycapture appears in: " << joinPaths(where));
 		REQUIRE(started == 1);
-		REQUIRE(tick.find("setKeySelected(gamestate") != std::string::npos);
+		REQUIRE(tick.find("setKeySelected(keycapture") != std::string::npos);
 	}
 
 	SECTION("Menu::Tick runs whenever a menu is up")

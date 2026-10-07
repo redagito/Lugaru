@@ -544,6 +544,14 @@ void Menu::startChallengeLevel(int challengelevel, GameState& gamestate, GameAss
     pause_sound(stream_menutheme);
 }
 
+namespace
+{
+// Defined near the capture thread below, with the rest of the file-local
+// machinery for the key capture. Declared here because Menu::Tick, which is the
+// only caller, comes first.
+void applyCapturedKey(GameState& gamestate, KeyCapture& keycapture);
+}
+
 void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 {
     // Answer the capture thread's request for the menu to be rebuilt. It used to
@@ -554,8 +562,9 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
     // to happen on the frames the capture thread is waiting as well as on the one
     // it finishes on: everything after the controls-menu input handling below only
     // runs when `waiting` is already clear. takeReloadRequest() also acquires, so
-    // the keybind the thread wrote is visible to the Load that follows.
+    // the scancode the thread parked is visible to what follows.
     if (keycapture.takeReloadRequest()) {
+        applyCapturedKey(gamestate, keycapture);
         Load(gamestate, assets, keycapture);
     }
 
@@ -759,7 +768,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
                         keycapture.keyselect = gamestate.selected;
                     }
                     if (keycapture.keyselect != -1) {
-                        setKeySelected(gamestate, keycapture);
+                        setKeySelected(keycapture);
                     }
                     if (gamestate.selected == (gamestate.devtools ? 10 : 9)) {
                         flash(gamestate);
@@ -980,20 +989,73 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 // Menu::items the main thread walks in handleFadeEffect, and reads
 // assets.Mainmenuitems and assets.Mapcircletexture while doing it. Dropping the
 // call dropped the last route from this thread to either.
+//
+// It carries no GameState either. The thread used to assign the captured
+// scancode into one of the ten keybind members, which are plain unsigned short
+// that the main thread reads every frame - a data race held open for as long as
+// a capture was in flight. The scancode now travels back through KeyCapture and
+// the main thread writes it.
 namespace
 {
 
 struct KeySelectArgs
 {
-    GameState* gamestate;
     KeyCapture* keycapture;
 };
+
+// The main thread's half of a rebind: take the scancode the capture thread
+// parked and write it into the keybind it belongs to. This used to run on the
+// thread, which made it a writer of the ten non-atomic keybind members while the
+// main thread was reading them. ESC cancels, exactly as it did there.
+void applyCapturedKey(GameState& gamestate, KeyCapture& keycapture)
+{
+    const int scancode = keycapture.capturedScancode.load();
+    const int row = keycapture.capturedRow.load();
+    if (scancode == -1 || scancode == SDL_SCANCODE_ESCAPE) {
+        return;
+    }
+
+    Game::fireSound();
+    switch (row) {
+        case 0:
+            gamestate.forwardkey = static_cast<unsigned short>(scancode);
+            break;
+        case 1:
+            gamestate.backkey = static_cast<unsigned short>(scancode);
+            break;
+        case 2:
+            gamestate.leftkey = static_cast<unsigned short>(scancode);
+            break;
+        case 3:
+            gamestate.rightkey = static_cast<unsigned short>(scancode);
+            break;
+        case 4:
+            gamestate.crouchkey = static_cast<unsigned short>(scancode);
+            break;
+        case 5:
+            gamestate.jumpkey = static_cast<unsigned short>(scancode);
+            break;
+        case 6:
+            gamestate.drawkey = static_cast<unsigned short>(scancode);
+            break;
+        case 7:
+            gamestate.throwkey = static_cast<unsigned short>(scancode);
+            break;
+        case 8:
+            gamestate.attackkey = static_cast<unsigned short>(scancode);
+            break;
+        case 9:
+            gamestate.consolekey = static_cast<unsigned short>(scancode);
+            break;
+        default:
+            break;
+    }
+}
 
 int setKeySelected_thread(void* data)
 {
     using namespace Game;
     std::unique_ptr<KeySelectArgs> args(static_cast<KeySelectArgs*>(data));
-    GameState& gamestate = *args->gamestate;
     KeyCapture& keycapture = *args->keycapture;
     int scancode = -1;
     SDL_Event evenement;
@@ -1010,51 +1072,22 @@ int setKeySelected_thread(void* data)
                 break;
         }
     }
-    if (scancode != SDL_SCANCODE_ESCAPE) {
-        fireSound();
-        switch (keycapture.keyselect) {
-            case 0:
-                gamestate.forwardkey = scancode;
-                break;
-            case 1:
-                gamestate.backkey = scancode;
-                break;
-            case 2:
-                gamestate.leftkey = scancode;
-                break;
-            case 3:
-                gamestate.rightkey = scancode;
-                break;
-            case 4:
-                gamestate.crouchkey = scancode;
-                break;
-            case 5:
-                gamestate.jumpkey = scancode;
-                break;
-            case 6:
-                gamestate.drawkey = scancode;
-                break;
-            case 7:
-                gamestate.throwkey = scancode;
-                break;
-            case 8:
-                gamestate.attackkey = scancode;
-                break;
-            case 9:
-                gamestate.consolekey = scancode;
-                break;
-            default:
-                break;
-        }
-    }
+    // Nothing here touches GameState or the audio library. The ten keybind
+    // members are plain unsigned short, not atomic, and the main thread reads
+    // them every frame to decide what a key press means - so writing them from
+    // here was a data race for as long as a capture was in flight. fireSound
+    // reaches the audio library's own unsynchronised channel and sample arrays,
+    // which is the same problem. Both are the main thread's job now.
+    keycapture.capturedScancode = scancode;
+    keycapture.capturedRow = keycapture.keyselect.load();
     keycapture.keyselect = -1;
-    // Asked for, not done. The menu that displays the captured key is rebuilt by
-    // Menu::Tick on the main thread, which is where Menu::items belongs.
+    // Asked for, not done. The keybind is written and the menu that displays it
+    // is rebuilt by Menu::Tick on the main thread.
     keycapture.reloadRequested = true;
-    // Cleared last, and it is what publishes the keybind write above: this store
-    // releases, and the main thread's next load of `waiting` acquires, so every
-    // write made before this line is visible to whatever the main thread does
-    // after it sees the flag down - including Menu::Load reading the new keybind.
+    // Cleared last, and it is what publishes the stores above: this store
+    // releases, and the main thread's next load of `waiting` acquires, so
+    // everything written before this line is visible to whatever the main thread
+    // does after it sees the flag down.
     keycapture.waiting = false;
     return 0;
 }
@@ -1074,12 +1107,12 @@ void Menu::joinKeySelectThread()
 	}
 }
 
-void Menu::setKeySelected(GameState& gamestate, KeyCapture& keycapture)
+void Menu::setKeySelected(KeyCapture& keycapture)
 {
     keycapture.waiting = true;
     printf("launch thread\n");
     Menu::joinKeySelectThread();
-    KeySelectArgs* args = new KeySelectArgs{ &gamestate, &keycapture };
+    KeySelectArgs* args = new KeySelectArgs{ &keycapture };
     keyselectthread = SDL_CreateThread(setKeySelected_thread, NULL, args);
     if (keyselectthread == NULL) {
         delete args;

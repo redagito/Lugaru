@@ -48,6 +48,16 @@ struct KeyCapture
 	// textures Menu::Load reads on its way through.
 	std::atomic<bool> reloadRequested = false;
 
+	// The key the thread captured, and which row of the controls menu was waiting
+	// for one. The thread parks them here instead of writing the keybind itself:
+	// the ten keybind members are plain unsigned short rather than atomic, so
+	// assigning one from the thread raced every main-thread read of it. The main
+	// thread moves these into the keybind when it answers the reload request.
+	// -1 is the "nothing captured" sentinel, and SDL_SCANCODE_ESCAPE means the
+	// capture was cancelled, which the main thread treats as no change at all.
+	std::atomic<int> capturedScancode = -1;
+	std::atomic<int> capturedRow = -1;
+
 	// Whether a reload is owed, clearing the request as it answers it.
 	//
 	// Both sides are seq_cst, the default, so this read-modify-write acquires

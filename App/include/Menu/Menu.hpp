@@ -79,7 +79,7 @@ public:
 	static void updateSettingsMenu(GameState& gamestate);
 	static void updateStereoConfigMenu(GameState& gamestate);
 	static void updateControlsMenu(GameState& gamestate, KeyCapture& keycapture);
-	static void setKeySelected(GameState& gamestate, KeyCapture& keycapture);
+	static void setKeySelected(KeyCapture& keycapture);
 	/**
 	 * Waits for the key-capture thread started by setKeySelected() to finish.
 	 * Must be called before the GameState and KeyCapture that thread references
