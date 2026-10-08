@@ -20,6 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Level/Awards.hpp"
 
 #include "Game.hpp"
+#include "GameAssets.hpp"
 #include "Objects/Person.hpp"
 
 int bonus;
@@ -76,7 +77,7 @@ int numreversals;
 int numattacks;
 int maxalarmed;
 
-int award_awards(int* awards)
+int award_awards(int* awards, GameAssets& assets)
 {
     int numawards = 0;
     if (damagetaken == 0 && Person::players[0]->bloodloss == 0) {
@@ -119,7 +120,7 @@ int award_awards(int* awards)
         awards[numawards] = awardknifefighter;
         numawards++;
     }
-    if (numattacks == numunarmedattack && numthrowkill == 0 &&  weapons.weapons.size() > 0) {
+    if (numattacks == numunarmedattack && numthrowkill == 0 &&  assets.weapons.weapons.size() > 0) {
         awards[numawards] = awardkungfu;
         numawards++;
     }

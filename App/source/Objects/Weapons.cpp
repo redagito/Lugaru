@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Objects/Weapons.hpp"
 #include "Objects/Person.hpp"
 #include "Objects/Object.hpp"
+#include "GameAssets.hpp"
 #include "GameState.hpp"
 #include "Globals.h"
 
@@ -127,7 +128,7 @@ void Weapon::Load(bool usetrilinear, ProgressCallback callback)
 	staffmodel.CalculateNormals(1, callback);
 }
 
-void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26], GameState& gamestate)
+void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26], GameState& gamestate, GameAssets& assets)
 {
 	int whichpatchx, whichpatchz, whichhit;
 	Vector3 start, end, colpoint, normalrot, footvel, footpoint;
@@ -187,11 +188,11 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 	if (owner == -1 && (velocity.x || velocity.y || velocity.z) && !physics) { // if the weapon is flying
 		position += velocity * gamestate.multiplier;
 		tippoint += velocity * gamestate.multiplier;
-		whichpatchx = position.x / (terrain.size / subdivision * terrain.scale);
-		whichpatchz = position.z / (terrain.size / subdivision * terrain.scale);
+		whichpatchx = position.x / (assets.terrain->size / subdivision * assets.terrain->scale);
+		whichpatchz = position.z / (assets.terrain->size / subdivision * assets.terrain->scale);
 		if (whichpatchx > 0 && whichpatchz > 0 && whichpatchx < subdivision && whichpatchz < subdivision) {
-			for (unsigned int j = 0; j < terrain.patchobjects[whichpatchx][whichpatchz].size(); j++) { // check for collision
-				unsigned int k = terrain.patchobjects[whichpatchx][whichpatchz][j];
+			for (unsigned int j = 0; j < assets.terrain->patchobjects[whichpatchx][whichpatchz].size(); j++) { // check for collision
+				unsigned int k = assets.terrain->patchobjects[whichpatchx][whichpatchz][j];
 				start = oldtippoint;
 				end = tippoint;
 				whichhit = Object::objects[k]->model.LineCheck(&start, &end, &colpoint, &Object::objects[k]->position, &Object::objects[k]->yaw);
@@ -263,7 +264,7 @@ Vector3 temppoint1, temppoint2;
 							Person::players[j]->animTarget = removeknifeanim;
 							Person::players[j]->frameTarget = 1;
 							Person::players[j]->target = 1;
-							Person::players[j]->takeWeapon(i);
+							Person::players[j]->takeWeapon(i, assets);
 
 							Person::players[j]->aitype = attacktypecutoff;
 						}
@@ -282,7 +283,7 @@ Vector3 temppoint1, temppoint2;
 
 							Person::players[j]->weaponids[Person::players[j]->num_weapons - 1] = i;
 
-							Person::players[j]->RagDoll(0, terrain, tutorialActive, inDialog, gamestate.multiplier, jointstartarray, gamestate);
+							Person::players[j]->RagDoll(0, *assets.terrain, tutorialActive, inDialog, gamestate.multiplier, jointstartarray, gamestate, assets);
 							Person::players[j]->jointVel(abdomen) += velocity * 2;
 							Person::players[j]->jointVel(neck) += velocity * 2;
 							Person::players[j]->jointVel(rightshoulder) += velocity * 2;
@@ -331,18 +332,18 @@ Vector3 temppoint1, temppoint2;
 			}
 		}
 
-		if (position.y < terrain.getHeight(position.x, position.z)) {
-			if (terrain.getOpacity(position.x, position.z) < .2) {
+		if (position.y < assets.terrain->getHeight(position.x, position.z)) {
+			if (assets.terrain->getOpacity(position.x, position.z) < .2) {
 				velocity = 0;
-				if (terrain.lineTerrain(oldposition, position, &colpoint) != -1) {
-					position = colpoint * terrain.scale;
+				if (assets.terrain->lineTerrain(oldposition, position, &colpoint) != -1) {
+					position = colpoint * assets.terrain->scale;
 				}
 				else {
-					position.y = terrain.getHeight(position.x, position.z);
+					position.y = assets.terrain->getHeight(position.x, position.z);
 				}
 
-				terrain.MakeDecal(shadowdecalpermanent, position, .06, .5, 0, gamestate.environment);
-				normalrot = terrain.getNormal(position.x, position.z) * -1;
+				assets.terrain->MakeDecal(shadowdecalpermanent, position, .06, .5, 0, gamestate.environment);
+				normalrot = assets.terrain->getNormal(position.x, position.z) * -1;
 				velocity = 0;
 				glMatrixMode(GL_MODELVIEW);
 				glPushMatrix();
@@ -375,7 +376,7 @@ Vector3 temppoint1, temppoint2;
 				emit_sound_at(knifesheathesound, position, 128.);
 
 				Vector3 terrainlight;
-				terrainlight = terrain.getLighting(position.x, position.z);
+				terrainlight = assets.terrain->getLighting(position.x, position.z);
 				if (gamestate.environment == snowyenvironment) {
 					if (distsq(position, gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 						Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x, terrainlight.y, terrainlight.z, .5, .7, gamestate.bloodtoggle);
@@ -458,11 +459,11 @@ Vector3 temppoint1, temppoint2;
 			tippoint = newpoint2;
 
 			//Object collisions
-			whichpatchx = (position.x) / (terrain.size / subdivision * terrain.scale);
-			whichpatchz = (position.z) / (terrain.size / subdivision * terrain.scale);
+			whichpatchx = (position.x) / (assets.terrain->size / subdivision * assets.terrain->scale);
+			whichpatchz = (position.z) / (assets.terrain->size / subdivision * assets.terrain->scale);
 			if (whichpatchx > 0 && whichpatchz > 0 && whichpatchx < subdivision && whichpatchz < subdivision) {
-				for (unsigned int j = 0; j < terrain.patchobjects[whichpatchx][whichpatchz].size(); j++) {
-					unsigned int k = terrain.patchobjects[whichpatchx][whichpatchz][j];
+				for (unsigned int j = 0; j < assets.terrain->patchobjects[whichpatchx][whichpatchz].size(); j++) {
+					unsigned int k = assets.terrain->patchobjects[whichpatchx][whichpatchz][j];
 
 					if (firstfree) {
 						if (type == staff) {
@@ -696,17 +697,17 @@ Vector3 temppoint1, temppoint2;
 				}
 			}
 			//Terrain collisions
-			whichhit = terrain.lineTerrain(oldposition, position, &colpoint);
-			if (whichhit != -1 || position.y < terrain.getHeight(position.x, position.z)) {
+			whichhit = assets.terrain->lineTerrain(oldposition, position, &colpoint);
+			if (whichhit != -1 || position.y < assets.terrain->getHeight(position.x, position.z)) {
 				hitsomething = 1;
 				if (whichhit != -1) {
-					position = colpoint * terrain.scale;
+					position = colpoint * assets.terrain->scale;
 				}
 				else {
-					position.y = terrain.getHeight(position.x, position.z);
+					position.y = assets.terrain->getHeight(position.x, position.z);
 				}
 
-				terrainnormal = terrain.getNormal(position.x, position.z);
+				terrainnormal = assets.terrain->getNormal(position.x, position.z);
 				ReflectVector(&velocity, &terrainnormal);
 				position += terrainnormal * .002;
 				bounceness = terrainnormal * findLength(&velocity) * (abs(normaldotproduct(velocity, terrainnormal)));
@@ -721,7 +722,7 @@ Vector3 temppoint1, temppoint2;
 				else {
 					velocity = 0;
 				}
-				if (terrain.getOpacity(position.x, position.z) < .2) {
+				if (assets.terrain->getOpacity(position.x, position.z) < .2) {
 					velocity += bounceness * elasticity * .3;
 				}
 				else {
@@ -730,7 +731,7 @@ Vector3 temppoint1, temppoint2;
 
 				if (magnitudeSquared(&bounceness) > 1) {
 					int whichsound;
-					if (terrain.getOpacity(position.x, position.z) > .2) {
+					if (assets.terrain->getOpacity(position.x, position.z) > .2) {
 						if (type == staff) {
 							whichsound = footstepsound3 + abs(rand() % 2);
 						}
@@ -742,11 +743,11 @@ Vector3 temppoint1, temppoint2;
 						whichsound = footstepsound + abs(rand() % 2);
 					}
 					emit_sound_at(whichsound, position,
-						magnitudeSquared(&bounceness) * (terrain.getOpacity(position.x, position.z) > .2 ? 128. : 32.));
+						magnitudeSquared(&bounceness) * (assets.terrain->getOpacity(position.x, position.z) > .2 ? 128. : 32.));
 
-					if (terrain.getOpacity(position.x, position.z) < .2) {
+					if (assets.terrain->getOpacity(position.x, position.z) < .2) {
 						Vector3 terrainlight;
-						terrainlight = terrain.getLighting(position.x, position.z);
+						terrainlight = assets.terrain->getLighting(position.x, position.z);
 						if (gamestate.environment == snowyenvironment) {
 							if (distsq(&position, &gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 								Sprite::MakeSprite(cloudsprite, position, velocity, terrainlight.x, terrainlight.y, terrainlight.z, .5, .7, gamestate.bloodtoggle);
@@ -765,16 +766,16 @@ Vector3 temppoint1, temppoint2;
 					}
 				}
 			}
-			whichhit = terrain.lineTerrain(oldtippoint, tippoint, &colpoint);
-			if (whichhit != -1 || tippoint.y < terrain.getHeight(tippoint.x, tippoint.z)) {
+			whichhit = assets.terrain->lineTerrain(oldtippoint, tippoint, &colpoint);
+			if (whichhit != -1 || tippoint.y < assets.terrain->getHeight(tippoint.x, tippoint.z)) {
 				if (whichhit != -1) {
-					tippoint = colpoint * terrain.scale;
+					tippoint = colpoint * assets.terrain->scale;
 				}
 				else {
-					tippoint.y = terrain.getHeight(tippoint.x, tippoint.z);
+					tippoint.y = assets.terrain->getHeight(tippoint.x, tippoint.z);
 				}
 
-				terrainnormal = terrain.getNormal(tippoint.x, tippoint.z);
+				terrainnormal = assets.terrain->getNormal(tippoint.x, tippoint.z);
 				ReflectVector(&tipvelocity, &terrainnormal);
 				tippoint += terrainnormal * .002;
 				bounceness = terrainnormal * findLength(&tipvelocity) * (abs(normaldotproduct(tipvelocity, terrainnormal)));
@@ -789,7 +790,7 @@ Vector3 temppoint1, temppoint2;
 				else {
 					tipvelocity = 0;
 				}
-				if (terrain.getOpacity(tippoint.x, tippoint.z) < .2) {
+				if (assets.terrain->getOpacity(tippoint.x, tippoint.z) < .2) {
 					tipvelocity += bounceness * elasticity * .3;
 				}
 				else {
@@ -798,7 +799,7 @@ Vector3 temppoint1, temppoint2;
 
 				if (magnitudeSquared(&bounceness) > 1) {
 					int whichsound;
-					if (terrain.getOpacity(tippoint.x, tippoint.z) > .2) {
+					if (assets.terrain->getOpacity(tippoint.x, tippoint.z) > .2) {
 						if (type == staff) {
 							whichsound = footstepsound3 + abs(rand() % 2);
 						}
@@ -810,11 +811,11 @@ Vector3 temppoint1, temppoint2;
 						whichsound = footstepsound + abs(rand() % 2);
 					}
 					emit_sound_at(whichsound, tippoint,
-						magnitudeSquared(&bounceness) * (terrain.getOpacity(tippoint.x, tippoint.z) > .2 ? 128. : 32.));
+						magnitudeSquared(&bounceness) * (assets.terrain->getOpacity(tippoint.x, tippoint.z) > .2 ? 128. : 32.));
 
-					if (terrain.getOpacity(tippoint.x, tippoint.z) < .2) {
+					if (assets.terrain->getOpacity(tippoint.x, tippoint.z) < .2) {
 						Vector3 terrainlight;
-						terrainlight = terrain.getLighting(tippoint.x, tippoint.z);
+						terrainlight = assets.terrain->getLighting(tippoint.x, tippoint.z);
 						if (gamestate.environment == snowyenvironment) {
 							if (distsq(&tippoint, &gamestate.viewer) < gamestate.viewdistance * gamestate.viewdistance / 4) {
 								Sprite::MakeSprite(cloudsprite, tippoint, tipvelocity, terrainlight.x, terrainlight.y, terrainlight.z, .5, .7, gamestate.bloodtoggle);
@@ -839,11 +840,11 @@ Vector3 temppoint1, temppoint2;
 			mid /= 2;
 			mid += (position - mid) / 20;
 			oldmid = mid;
-			if (mid.y < terrain.getHeight(mid.x, mid.z)) {
+			if (mid.y < assets.terrain->getHeight(mid.x, mid.z)) {
 				hitsomething = 1;
-				mid.y = terrain.getHeight(mid.x, mid.z);
+				mid.y = assets.terrain->getHeight(mid.x, mid.z);
 
-				terrainnormal = terrain.getNormal(mid.x, mid.z);
+				terrainnormal = assets.terrain->getNormal(mid.x, mid.z);
 				ReflectVector(&velocity, &terrainnormal);
 				//mid+=terrainnormal*.002;
 				bounceness = terrainnormal * findLength(&velocity) * (abs(normaldotproduct(velocity, terrainnormal)));
@@ -858,7 +859,7 @@ Vector3 temppoint1, temppoint2;
 				else {
 					velocity = 0;
 				}
-				if (terrain.getOpacity(mid.x, mid.z) < .2) {
+				if (assets.terrain->getOpacity(mid.x, mid.z) < .2) {
 					velocity += bounceness * elasticity * .3;
 				}
 				else {
@@ -867,7 +868,7 @@ Vector3 temppoint1, temppoint2;
 
 				if (magnitudeSquared(&bounceness) > 1) {
 					int whichsound;
-					if (terrain.getOpacity(mid.x, mid.z) > .2) {
+					if (assets.terrain->getOpacity(mid.x, mid.z) > .2) {
 						if (type == staff) {
 							whichsound = footstepsound3 + abs(rand() % 2);
 						}
@@ -879,7 +880,7 @@ Vector3 temppoint1, temppoint2;
 						whichsound = footstepsound + abs(rand() % 2);
 					}
 					emit_sound_at(whichsound, mid,
-						magnitudeSquared(&bounceness) * (terrain.getOpacity(position.x, position.z) > .2
+						magnitudeSquared(&bounceness) * (assets.terrain->getOpacity(position.x, position.z) > .2
 							? 128.
 							: 32.));
 				}
@@ -890,11 +891,11 @@ Vector3 temppoint1, temppoint2;
 			mid /= 2;
 			mid += (tippoint - mid) / 20;
 			oldmid = mid;
-			if (mid.y < terrain.getHeight(mid.x, mid.z)) {
+			if (mid.y < assets.terrain->getHeight(mid.x, mid.z)) {
 				hitsomething = 1;
-				mid.y = terrain.getHeight(mid.x, mid.z);
+				mid.y = assets.terrain->getHeight(mid.x, mid.z);
 
-				terrainnormal = terrain.getNormal(mid.x, mid.z);
+				terrainnormal = assets.terrain->getNormal(mid.x, mid.z);
 				ReflectVector(&tipvelocity, &terrainnormal);
 				//mid+=terrainnormal*.002;
 				bounceness = terrainnormal * findLength(&tipvelocity) * (abs(normaldotproduct(tipvelocity, terrainnormal)));
@@ -909,7 +910,7 @@ Vector3 temppoint1, temppoint2;
 				else {
 					tipvelocity = 0;
 				}
-				if (terrain.getOpacity(mid.x, mid.z) < .2) {
+				if (assets.terrain->getOpacity(mid.x, mid.z) < .2) {
 					tipvelocity += bounceness * elasticity * .3;
 				}
 				else {
@@ -918,7 +919,7 @@ Vector3 temppoint1, temppoint2;
 
 				if (magnitudeSquared(&bounceness) > 1) {
 					int whichsound;
-					if (terrain.getOpacity(mid.x, mid.z) > .2) {
+					if (assets.terrain->getOpacity(mid.x, mid.z) > .2) {
 						if (type == staff) {
 							whichsound = footstepsound3 + abs(rand() % 2);
 						}
@@ -930,7 +931,7 @@ Vector3 temppoint1, temppoint2;
 						whichsound = footstepsound + abs(rand() % 2);
 					}
 					emit_sound_at(whichsound, mid,
-						magnitudeSquared(&bounceness) * (terrain.getOpacity(position.x, position.z) > .2
+						magnitudeSquared(&bounceness) * (assets.terrain->getOpacity(position.x, position.z) > .2
 							? 128.
 							: 32.));
 				}
@@ -1035,17 +1036,17 @@ Vector3 temppoint1, temppoint2;
 	}
 }
 
-void Weapons::DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye, GameState& gamestate)
+void Weapons::DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye, GameState& gamestate, GameAssets& assets)
 {
 	//Move
 	// TODO What the actual fuck is this?
 	int i = 0;
 	for (std::vector<Weapon>::iterator weapon = weapons.begin(); weapon != weapons.end(); ++weapon) {
-		weapon->doStuff(i++, tutorialActive, inDialog, awardNinja, awardBullseye, jointstartarray, gamestate);
+		weapon->doStuff(i++, tutorialActive, inDialog, awardNinja, awardBullseye, jointstartarray, gamestate, assets);
 	}
 }
 
-void Weapon::draw(GameState& gamestate)
+void Weapon::draw(GameState& gamestate, GameAssets& assets)
 {
 	static Vector3 terrainlight;
 	static GLfloat M[16];
@@ -1115,7 +1116,7 @@ void Weapon::draw(GameState& gamestate)
 	}
 
 	if (draw) {
-		terrainlight = terrain.getLighting(position.x, position.z);
+		terrainlight = assets.terrain->getLighting(position.x, position.z);
 		if (drawhowmany > 0) {
 			glAlphaFunc(GL_GREATER, 0.01);
 		}
@@ -1242,7 +1243,7 @@ void Weapon::thrown(Vector3 v, bool sethitsomething)
 	physics = 0;
 }
 
-void Weapons::Draw(GameState& gamestate)
+void Weapons::Draw(GameState& gamestate, GameAssets& assets)
 {
 	glAlphaFunc(GL_GREATER, 0.9);
 	glEnable(GL_TEXTURE_2D);
@@ -1252,6 +1253,6 @@ void Weapons::Draw(GameState& gamestate)
 	glDepthMask(1);
 
 	for (std::vector<Weapon>::iterator weapon = weapons.begin(); weapon != weapons.end(); ++weapon) {
-		weapon->draw(gamestate);
+		weapon->draw(gamestate, assets);
 	}
 }

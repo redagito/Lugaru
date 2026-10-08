@@ -666,13 +666,13 @@ void Game::LoadStuff(GameState& gamestate, GameAssets& assets)
 
 	Weapon::Load(gamestate.trilinear, [&]() { Game::LoadingScreen(gamestate, assets); });
 
-	terrain.shadowtexture.load("Textures/Shadow.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
-	terrain.bloodtexture.load("Textures/Blood.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
-	terrain.breaktexture.load("Textures/Break.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
-	terrain.bloodtexture2.load("Textures/Blood.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.terrain->shadowtexture.load("Textures/Shadow.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.terrain->bloodtexture.load("Textures/Blood.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.terrain->breaktexture.load("Textures/Break.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.terrain->bloodtexture2.load("Textures/Blood.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
 
-	terrain.footprinttexture.load("Textures/Footprint.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
-	terrain.bodyprinttexture.load("Textures/Bodyprint.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.terrain->footprinttexture.load("Textures/Footprint.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.terrain->bodyprinttexture.load("Textures/Bodyprint.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
 	assets.hawktexture.load("Textures/Hawk.png", 0, gamestate.trilinear, [&]() { LoadingScreen(gamestate, assets); });
 
 	Sprite::cloudtexture.load("Textures/Cloud.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
@@ -713,19 +713,19 @@ void Game::LoadStuff(GameState& gamestate, GameAssets& assets)
 	gamestate.gravity = -10;
 
 	gamestate.texscale = .2 / megascale / viewdistdetail;
-	terrain.scale = 3 * megascale * viewdistdetail;
+	assets.terrain->scale = 3 * megascale * viewdistdetail;
 
-	gamestate.viewer.x = terrain.size / 2 * terrain.scale;
-	gamestate.viewer.z = terrain.size / 2 * terrain.scale;
+	gamestate.viewer.x = assets.terrain->size / 2 * assets.terrain->scale;
+	gamestate.viewer.z = assets.terrain->size / 2 * assets.terrain->scale;
 
 	assets.hawk.load("Models/Hawk.solid", [&]() { LoadingScreen(gamestate, assets); });
 	assets.hawk.Scale(.03, .03, .03);
 	assets.hawk.Rotate(90, 1, 1);
 	assets.hawk.CalculateNormals(0, [&]() { LoadingScreen(gamestate, assets); });
 	assets.hawk.ScaleNormals(-1, -1, -1);
-	gamestate.hawkcoords.x = terrain.size / 2 * terrain.scale - 5 - 7;
-	gamestate.hawkcoords.z = terrain.size / 2 * terrain.scale - 5 - 7;
-	gamestate.hawkcoords.y = terrain.getHeight(gamestate.hawkcoords.x, gamestate.hawkcoords.z) + 25;
+	gamestate.hawkcoords.x = assets.terrain->size / 2 * assets.terrain->scale - 5 - 7;
+	gamestate.hawkcoords.z = assets.terrain->size / 2 * assets.terrain->scale - 5 - 7;
+	gamestate.hawkcoords.y = assets.terrain->getHeight(gamestate.hawkcoords.x, gamestate.hawkcoords.z) + 25;
 
 	assets.eye.load("Models/Eye.solid", [&]() { Game::LoadingScreen(gamestate, assets); });
 	assets.eye.Scale(.03, .03, .03);

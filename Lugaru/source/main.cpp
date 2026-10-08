@@ -38,6 +38,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <fstream>
 #include <iostream>
 #include <math.h>
+#include <memory>
 #include <set>
 #include <stdio.h>
 #include <string.h>
@@ -559,6 +560,13 @@ int main(int argc, char** argv)
 			// draws or loads. Its destructor deletes GL objects, so it has to
 			// outlive every frame and go out of scope before SDL_Quit below.
 			GameAssets assets;
+
+			// A Terrain is roughly 2.3 MB of fixed arrays, far past the 1 MB the
+			// Windows stack reserves by default, so it is heap-allocated here
+			// rather than as a member by value. Its constructor needs no GL
+			// context - only its textures do, and they load in LoadStuff - so
+			// this can sit before SetUp creates the context.
+			assets.terrain = std::make_unique<Terrain>();
 
 			// The handshake with the one thread in the process, by the same rule and
 			// for the same reason: one per process, passed by reference. It holds

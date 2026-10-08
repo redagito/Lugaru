@@ -196,7 +196,7 @@ DialogScene::DialogScene(std::ifstream& ipstream)
 	ipstream >> sound;
 }
 
-void Dialog::tick(int id, GameState& gamestate)
+void Dialog::tick(int id, GameState& gamestate, GameAssets& assets)
 {
 	unsigned playerId = type % 10;
 	bool special = (type > 9);
@@ -210,14 +210,14 @@ void Dialog::tick(int id, GameState& gamestate)
 			(Person::players[playerId]->howactive >= typedead1) ||
 			(type > 40) && (type < 50)) {
 			whichdialogue = id;
-			play([&gamestate]() { Game::playdialoguescenesound(gamestate);  });
+			play([&gamestate]() { Game::playdialoguescenesound(gamestate);  }, assets);
 			dialoguetime = 0;
 			gonethrough++;
 		}
 	}
 }
 
-void Dialog::play(PlaySoundCallback callback)
+void Dialog::play(PlaySoundCallback callback, GameAssets& assets)
 {
 	for (unsigned i = 0; i < scenes.size(); i++) {
 		int playerId = scenes[i].participantfocus;
@@ -225,7 +225,7 @@ void Dialog::play(PlaySoundCallback callback)
 		Person::players[playerId]->yaw = participantyaw[playerId];
 		Person::players[playerId]->targetyaw = participantyaw[playerId];
 		Person::players[playerId]->velocity = 0;
-		Person::players[playerId]->animTarget = Person::players[playerId]->getIdle(inDialog());
+		Person::players[playerId]->animTarget = Person::players[playerId]->getIdle(inDialog(), assets);
 		Person::players[playerId]->frameTarget = 0;
 	}
 

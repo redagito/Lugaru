@@ -32,7 +32,7 @@ public:
     static float stagetime;
     static float maxtime;
 
-    static void Do(float timemultiplier, bool bloodtoggleflag, GameState& gamestate);
+    static void Do(float timemultiplier, bool bloodtoggleflag, GameState& gamestate, GameAssets& assets);
     static void DrawTextInfo(GameState& gamestate, GameAssets& assets);
     static void DoStuff(float timemultiplier, bool bloodtoggleflag, GameState& gamestate);
 

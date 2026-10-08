@@ -289,13 +289,13 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 						if (Person::players[k]->skeleton.joints[i].label == leftknee || Person::players[k]->skeleton.joints[i].label == rightknee || Person::players[k]->skeleton.joints[i].label == groin) {
 							point = DoRotation(Person::players[k]->skeleton.joints[i].position, 0, Person::players[k]->yaw, 0) * Person::players[k]->scale + Person::players[k]->coords;
 							size = .4f;
-							opacity = .4 - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
+							opacity = .4 - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - assets.terrain->getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
 							if (k != 0 && Tutorial::active) {
-								opacity = .2 + .2 * sin(gamestate.smoketex * 6 + i) - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
+								opacity = .2 + .2 * sin(gamestate.smoketex * 6 + i) - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - assets.terrain->getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
 							}
-							terrain.MakeDecal(shadowdecal, point, size, opacity, rotation, gamestate.environment);
-							for (unsigned int l = 0; l < terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
-								unsigned int j = terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
+							assets.terrain->MakeDecal(shadowdecal, point, size, opacity, rotation, gamestate.environment);
+							for (unsigned int l = 0; l < assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
+								unsigned int j = assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
 								if (Object::objects[j]->position.y < Person::players[k]->coords.y || Object::objects[j]->type == tunneltype || Object::objects[j]->type == weirdtype) {
 									point = DoRotation(DoRotation(Person::players[k]->skeleton.joints[i].position, 0, Person::players[k]->yaw, 0) * Person::players[k]->scale + Person::players[k]->coords - Object::objects[j]->position, 0, -Object::objects[j]->yaw, 0);
 									size = .4f;
@@ -321,13 +321,13 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 								point = DoRotation(Person::players[k]->skeleton.joints[i].position, 0, Person::players[k]->yaw, 0) * Person::players[k]->scale + Person::players[k]->coords;
 							}
 							size = .4f;
-							opacity = .4 - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 5;
+							opacity = .4 - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - assets.terrain->getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 5;
 							if (k != 0 && Tutorial::active) {
-								opacity = .2 + .2 * sin(gamestate.smoketex * 6 + i) - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
+								opacity = .2 + .2 * sin(gamestate.smoketex * 6 + i) - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - assets.terrain->getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
 							}
-							terrain.MakeDecal(shadowdecal, point, size, opacity * .7, rotation, gamestate.environment);
-							for (unsigned int l = 0; l < terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
-								unsigned int j = terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
+							assets.terrain->MakeDecal(shadowdecal, point, size, opacity * .7, rotation, gamestate.environment);
+							for (unsigned int l = 0; l < assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
+								unsigned int j = assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
 								if (Object::objects[j]->position.y < Person::players[k]->coords.y || Object::objects[j]->type == tunneltype || Object::objects[j]->type == weirdtype) {
 									if (Person::players[k]->skeleton.free) {
 										point = DoRotation(Person::players[k]->skeleton.joints[i].position * Person::players[k]->scale + Person::players[k]->coords - Object::objects[j]->position, 0, -Object::objects[j]->yaw, 0);
@@ -352,10 +352,10 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 				if (gamestate.frustum.SphereInFrustum(Person::players[k]->coords.x, Person::players[k]->coords.y, Person::players[k]->coords.z, Person::players[k]->scale * 5)) {
 					point = Person::players[k]->coords;
 					size = .7;
-					opacity = .4 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 5;
-					terrain.MakeDecal(shadowdecal, point, size, opacity * .7, rotation, gamestate.environment);
-					for (unsigned int l = 0; l < terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
-						unsigned int j = terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
+					opacity = .4 - (Person::players[k]->coords.y - assets.terrain->getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 5;
+					assets.terrain->MakeDecal(shadowdecal, point, size, opacity * .7, rotation, gamestate.environment);
+					for (unsigned int l = 0; l < assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
+						unsigned int j = assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
 						point = DoRotation(Person::players[k]->coords - Object::objects[j]->position, 0, -Object::objects[j]->yaw, 0);
 						size = .7;
 						opacity = .4f;
@@ -374,13 +374,13 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		assets.terraintexture.bind();
-		terrain.draw(0, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.frustum, gamestate.blurness);
+		assets.terrain->draw(0, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.frustum, gamestate.blurness);
 		assets.terraintexture2.bind();
-		terrain.draw(1, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.frustum, gamestate.blurness);
+		assets.terrain->draw(1, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.frustum, gamestate.blurness);
 
 		if (gamestate.decalstoggle)
 		{
-			terrain.drawdecals(gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.multiplier);
+			assets.terrain->drawdecals(gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.multiplier);
 		}
 
 		//Model
@@ -401,7 +401,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 				if (k == 0 || !Tutorial::active) {
 					glEnable(GL_BLEND);
 					glEnable(GL_LIGHTING);
-					terrainlight = terrain.getLighting(Person::players[k]->coords.x, Person::players[k]->coords.z);
+					terrainlight = assets.terrain->getLighting(Person::players[k]->coords.x, Person::players[k]->coords.z);
 					distance = distsq(&gamestate.viewer, &Person::players[k]->coords);
 					distance = (gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance;
 					glColor4f(terrainlight.x, terrainlight.y, terrainlight.z, distance);
@@ -413,10 +413,10 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 						checkpoint.y += 1;
 						int i = -1;
 						if (Person::players[k]->occluded != 0) {
-							i = Object::checkcollide(gamestate.viewer, checkpoint, Person::players[k]->lastoccluded, terrain);
+							i = Object::checkcollide(gamestate.viewer, checkpoint, Person::players[k]->lastoccluded, *assets.terrain);
 						}
 						if (i == -1) {
-							i = Object::checkcollide(gamestate.viewer, checkpoint, terrain);
+							i = Object::checkcollide(gamestate.viewer, checkpoint, *assets.terrain);
 						}
 						if (i != -1) {
 							Person::players[k]->occluded += 1;
@@ -426,7 +426,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 							Person::players[k]->occluded = 0;
 						}
 						if (Person::players[k]->occluded < 25) {
-							Person::players[k]->DrawSkeleton(terrain, Tutorial::active, gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
+							Person::players[k]->DrawSkeleton(*assets.terrain, Tutorial::active, gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 						}
 					}
 				}
@@ -442,7 +442,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 		glPushMatrix();
 		glCullFace(GL_BACK);
 		glEnable(GL_TEXTURE_2D);
-		Object::Draw(gamestate.decalstoggle, gamestate.multiplier, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.light, gamestate.frustum, terrain, gamestate.detail, gamestate.blurness, gamestate.windvar, gamestate.playerdist);
+		Object::Draw(gamestate.decalstoggle, gamestate.multiplier, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.light, gamestate.frustum, *assets.terrain, gamestate.detail, gamestate.blurness, gamestate.windvar, gamestate.playerdist);
 		glPopMatrix();
 
 		//draw hawk
@@ -475,7 +475,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 			if (!(k == 0 || !Tutorial::active)) {
 				glEnable(GL_BLEND);
 				glEnable(GL_LIGHTING);
-				terrainlight = terrain.getLighting(Person::players[k]->coords.x, Person::players[k]->coords.z);
+				terrainlight = assets.terrain->getLighting(Person::players[k]->coords.x, Person::players[k]->coords.z);
 				distance = distsq(&gamestate.viewer, &Person::players[k]->coords);
 				distance = (gamestate.viewdistance * gamestate.viewdistance - (distance - (gamestate.viewdistance * gamestate.viewdistance * gamestate.fadestart)) * (1 / (1 - gamestate.fadestart))) / gamestate.viewdistance / gamestate.viewdistance;
 				glColor4f(terrainlight.x, terrainlight.y, terrainlight.z, distance);
@@ -487,10 +487,10 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 					checkpoint.y += 1;
 					int i = -1;
 					if (Person::players[k]->occluded != 0) {
-						i = Object::checkcollide(gamestate.viewer, checkpoint, Person::players[k]->lastoccluded, terrain);
+						i = Object::checkcollide(gamestate.viewer, checkpoint, Person::players[k]->lastoccluded, *assets.terrain);
 					}
 					if (i == -1) {
-						i = Object::checkcollide(gamestate.viewer, checkpoint, terrain);
+						i = Object::checkcollide(gamestate.viewer, checkpoint, *assets.terrain);
 					}
 					if (i != -1) {
 						Person::players[k]->occluded += 1;
@@ -500,7 +500,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 						Person::players[k]->occluded = 0;
 					}
 					if (Person::players[k]->occluded < 25) {
-						Person::players[k]->DrawSkeleton(terrain, Tutorial::active, gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
+						Person::players[k]->DrawSkeleton(*assets.terrain, Tutorial::active, gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 					}
 				}
 			}
@@ -508,7 +508,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 
 		glPushMatrix();
 		glEnable(GL_TEXTURE_2D);
-		weapons.Draw(gamestate);
+		assets.weapons.Draw(gamestate, assets);
 		glPopMatrix();
 		glCullFace(GL_BACK);
 
@@ -519,7 +519,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 
 		glDepthMask(0);
 
-		Sprite::Draw(gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.light, gamestate.multiplier, terrain, gamestate.detail, gamestate.viewerfacing, gamestate.bloodtoggle, gamestate.windvector, Tutorial::active, gamestate);
+		Sprite::Draw(gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.light, gamestate.multiplier, *assets.terrain, gamestate.detail, gamestate.viewerfacing, gamestate.bloodtoggle, gamestate.windvector, Tutorial::active, gamestate);
 
 		//waypoints, pathpoints in editor
 		if (gamestate.editorenabled) {
@@ -637,7 +637,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 					}
 					else if ((Hotspot::hotspots[closest].type >= 20) && (Dialog::dialogs[Hotspot::hotspots[closest].type - 20].gonethrough == 0)) {
 						Dialog::whichdialogue = Hotspot::hotspots[closest].type - 20;
-						Dialog::currentDialog().play([&gamestate]() { Game::playdialoguescenesound(gamestate); });
+						Dialog::currentDialog().play([&gamestate]() { Game::playdialoguescenesound(gamestate); }, assets);
 						Dialog::currentDialog().gonethrough++;
 					}
 				}
@@ -1081,12 +1081,12 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 
 			radius = 110;
 
-			glScalef(.25 / radius * 256 * terrain.scale * .4, .25 / radius * 256 * terrain.scale * .4, 1);
+			glScalef(.25 / radius * 256 * assets.terrain->scale * .4, .25 / radius * 256 * assets.terrain->scale * .4, 1);
 			glPushMatrix();
-			glScalef(1 / (1 / radius * 256 * terrain.scale * .4), 1 / (1 / radius * 256 * terrain.scale * .4), 1);
+			glScalef(1 / (1 / radius * 256 * assets.terrain->scale * .4), 1 / (1 / radius * 256 * assets.terrain->scale * .4), 1);
 			glPopMatrix();
 			glRotatef(Person::players[0]->lookyaw * -1 + 180, 0, 0, 1);
-			glTranslatef(-(center.x / terrain.scale / 256 * -2 + 1), (center.z / terrain.scale / 256 * -2 + 1), 0);
+			glTranslatef(-(center.x / assets.terrain->scale / 256 * -2 + 1), (center.z / assets.terrain->scale / 256 * -2 + 1), 0);
 			for (unsigned int i = 0; i < Object::objects.size(); i++) {
 				if (Object::objects[i]->type == treetrunktype) {
 					distcheck = distsq(&Person::players[0]->coords, &Object::objects[i]->position);
@@ -1094,7 +1094,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 						assets.Mapcircletexture.bind();
 						glColor4f(0, .3, 0, opac * (1 - distcheck / mapviewdist));
 						glPushMatrix();
-						glTranslatef(Object::objects[i]->position.x / terrain.scale / 256 * -2 + 1, Object::objects[i]->position.z / terrain.scale / 256 * 2 - 1, 0);
+						glTranslatef(Object::objects[i]->position.x / assets.terrain->scale / 256 * -2 + 1, Object::objects[i]->position.z / assets.terrain->scale / 256 * 2 - 1, 0);
 						glRotatef(Object::objects[i]->yaw, 0, 0, 1);
 						glScalef(.003, .003, .003);
 						glBegin(GL_QUADS);
@@ -1116,7 +1116,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 						assets.Mapboxtexture.bind();
 						glColor4f(.4, .4, .4, opac * (1 - distcheck / mapviewdist));
 						glPushMatrix();
-						glTranslatef(Object::objects[i]->position.x / terrain.scale / 256 * -2 + 1, Object::objects[i]->position.z / terrain.scale / 256 * 2 - 1, 0);
+						glTranslatef(Object::objects[i]->position.x / assets.terrain->scale / 256 * -2 + 1, Object::objects[i]->position.z / assets.terrain->scale / 256 * 2 - 1, 0);
 						glRotatef(Object::objects[i]->yaw, 0, 0, 1);
 						glScalef(.01 * Object::objects[i]->scale, .01 * Object::objects[i]->scale, .01 * Object::objects[i]->scale);
 						glBegin(GL_QUADS);
@@ -1138,7 +1138,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 				for (int i = 0; i < numboundaries; i++) {
 					glColor4f(0, 0, 0, opac / 3);
 					glPushMatrix();
-					glTranslatef(boundary[i].x / terrain.scale / 256 * -2 + 1, boundary[i].z / terrain.scale / 256 * 2 - 1, 0);
+					glTranslatef(boundary[i].x / assets.terrain->scale / 256 * -2 + 1, boundary[i].z / assets.terrain->scale / 256 * 2 - 1, 0);
 					glScalef(.002, .002, .002);
 					glBegin(GL_QUADS);
 					glTexCoord2f(0, 0);
@@ -1176,7 +1176,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 					else {
 						glColor4f(1, 1, 0, 1);
 					}
-					glTranslatef(Person::players[i]->coords.x / terrain.scale / 256 * -2 + 1, Person::players[i]->coords.z / terrain.scale / 256 * 2 - 1, 0);
+					glTranslatef(Person::players[i]->coords.x / assets.terrain->scale / 256 * -2 + 1, Person::players[i]->coords.z / assets.terrain->scale / 256 * 2 - 1, 0);
 					glRotatef(Person::players[i]->yaw + 180, 0, 0, 1);
 					glScalef(.005, .005, .005);
 					glBegin(GL_QUADS);
@@ -1315,7 +1315,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 
 			//Awards
 			int awards[award_count];
-			int numawards = award_awards(awards);
+			int numawards = award_awards(awards, assets);
 
 			for (int i = 0; i < numawards && i < 6; i++) {
 				assets.text.glPrintOutlined(1024 / 30, 768 * 6 / 8 - 90 - 40 * i, award_names[awards[i]], 1, 2, 1024, 768);
@@ -1611,7 +1611,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 	glDrawBuffer(GL_BACK);
 	glReadBuffer(GL_BACK);
 
-	weapons.DoStuff(Tutorial::active, Dialog::inDialog(), gamestate.whichjointstartarray, []() { award_bonus(0, ninja); }, []() { award_bonus(0, Bullseyebonus); }, gamestate);
+	assets.weapons.DoStuff(Tutorial::active, Dialog::inDialog(), gamestate.whichjointstartarray, []() { award_bonus(0, ninja); }, []() { award_bonus(0, Bullseyebonus); }, gamestate, assets);
 
 	if (drawtoggle == 2) {
 		drawtoggle = 0;

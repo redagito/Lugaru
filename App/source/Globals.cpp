@@ -20,8 +20,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Globals.h"
 
-// TODO GET RID OF ALL OF THESE!
-
-Terrain terrain;
-
-Weapons weapons;
+// This translation unit used to define the last of Lugaru's file-scope globals.
+// There are none left: the scalars live in GameState, and everything holding a GL
+// or OS handle lives in GameAssets, both passed by reference from main(). The file
+// remains because its header still exists and other translation units rely on the
+// types it pulls in.

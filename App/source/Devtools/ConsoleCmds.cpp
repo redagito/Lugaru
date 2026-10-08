@@ -191,7 +191,7 @@ void ch_map(const char* args, GameState& gamestate, GameAssets& assets)
 	campaign = 0;
 }
 
-void ch_save_json(const char* args, GameState& gamestate, GameAssets&)
+void ch_save_json(const char* args, GameState& gamestate, GameAssets& assets)
 {
 	std::string map_path = Folders::getUserDataPath() + "/Maps";
 	Folders::makeDirectory(map_path);
@@ -242,7 +242,7 @@ void ch_save_json(const char* args, GameState& gamestate, GameAssets&)
 		std::cout << "Warning: this level contains more players than allowed" << std::endl;
 	}
 	for (unsigned j = 0; j < Person::players.size(); j++) {
-		map_data["map"]["players"][j] = *Person::players[j];
+		map_data["map"]["players"][j] = Person::players[j]->save(assets);
 	}
 
 	for (int j = 0; j < gamestate.numpathpoints; j++) {
@@ -270,7 +270,7 @@ void ch_convert_to_json(const char* args, GameState& gamestate, GameAssets& asse
 	ch_save_json(args, gamestate, assets);
 }
 
-void ch_save(const char* args, GameState& gamestate, GameAssets&)
+void ch_save(const char* args, GameState& gamestate, GameAssets& assets)
 {
 	std::string map_path = Folders::getUserDataPath() + "/Maps";
 	Folders::makeDirectory(map_path);
@@ -294,7 +294,7 @@ void ch_save(const char* args, GameState& gamestate, GameAssets&)
 		Person::players[0]->yaw, Person::players[0]->targetyaw, Person::players[0]->num_weapons);
 	if (Person::players[0]->num_weapons > 0 && Person::players[0]->num_weapons < 5) {
 		for (int j = 0; j < Person::players[0]->num_weapons; j++) {
-			fpackf(tfile, "Bi", weapons.weapons[Person::players[0]->weaponids[j]].getType());
+			fpackf(tfile, "Bi", assets.weapons.weapons[Person::players[0]->weaponids[j]].getType());
 		}
 	}
 
@@ -347,7 +347,7 @@ void ch_save(const char* args, GameState& gamestate, GameAssets&)
 			Person::players[j]->num_weapons, Person::players[j]->howactive, Person::players[j]->scale, Person::players[j]->immobile, Person::players[j]->yaw);
 		if (Person::players[j]->num_weapons < 5) {
 			for (int k = 0; k < Person::players[j]->num_weapons; k++) {
-				fpackf(tfile, "Bi", weapons.weapons[Person::players[j]->weaponids[k]].getType());
+				fpackf(tfile, "Bi", assets.weapons.weapons[Person::players[j]->weaponids[k]].getType());
 			}
 		}
 		if (Person::players[j]->numwaypoints < 30) {
@@ -734,7 +734,7 @@ void ch_default(const char*, GameState& gamestate, GameAssets& assets)
 	Person::players[0]->immobile = 0;
 }
 
-void ch_play(const char* args, GameState& gamestate, GameAssets&)
+void ch_play(const char* args, GameState& gamestate, GameAssets& assets)
 {
 	int dlg;
 	sscanf(args, "%d", &dlg);
@@ -744,7 +744,7 @@ void ch_play(const char* args, GameState& gamestate, GameAssets&)
 		return;
 	}
 
-	Dialog::currentDialog().play([&gamestate]() { Game::playdialoguescenesound(gamestate); });
+	Dialog::currentDialog().play([&gamestate]() { Game::playdialoguescenesound(gamestate); }, assets);
 }
 
 void ch_mapkilleveryone(const char*, GameState& gamestate, GameAssets&)
@@ -799,8 +799,8 @@ void ch_skytint(const char* args, GameState& gamestate, GameAssets& assets)
 
 	SetUpLighting(gamestate);
 
-	terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
-	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
+	assets.terrain->DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
+	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, *assets.terrain);
 }
 
 void ch_skylight(const char* args, GameState& gamestate, GameAssets& assets)
@@ -809,8 +809,8 @@ void ch_skylight(const char* args, GameState& gamestate, GameAssets& assets)
 
 	SetUpLighting(gamestate);
 
-	terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
-	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
+	assets.terrain->DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
+	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, *assets.terrain);
 }
 
 void ch_skybox(const char*, GameState& gamestate, GameAssets& assets)
@@ -819,6 +819,6 @@ void ch_skybox(const char*, GameState& gamestate, GameAssets& assets)
 
 	SetUpLighting(gamestate);
 
-	terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
-	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
+	assets.terrain->DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
+	Object::DoShadows(gamestate.skyboxtexture, gamestate.light, *assets.terrain);
 }

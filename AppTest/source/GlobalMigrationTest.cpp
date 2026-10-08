@@ -374,25 +374,22 @@ std::vector<SlotOccurrence> findSaveSlot(const char* path, const std::string& na
 
 // The globals still pending migration, reviewed one by one. Every scalar here
 // has a GameState member to move into; entries whose type GameState
-// deliberately does not hold (Texture, Model, Text*, Terrain, Frustum, Weapons)
-// are never going to leave, so this list does not have to reach zero. It does
-// have to stop growing, and it has to stop holding any name that GameState
-// already owns. The window handle is absent on purpose: it is not pending
-// migration, it now lives in WindowContext.cpp, which WindowOwnershipTest.cpp
-// checks. skybox, text, textmono and the eleven shared textures are absent for
-// the same kind of reason: they are owned by GameAssets and passed by reference,
-// which AssetOwnershipTest.cpp checks.
+// deliberately does not hold (Texture, Model, Text*) are never going to leave,
+// so this list does not have to reach zero. It does have to stop growing, and it
+// has to stop holding any name that GameState already owns. The window handle is
+// absent on purpose: it is not pending migration, it now lives in
+// WindowContext.cpp, which WindowOwnershipTest.cpp checks. skybox, text, textmono,
+// the eleven shared textures, terrain and weapons are absent for the same kind of
+// reason: they are owned by GameAssets and passed by reference, which
+// AssetOwnershipTest.cpp and TerrainOwnershipTest.cpp check.
 //
-// What is left is consoletext, which is still data and is a std::string[15] that
-// would break GameState's trivial copyability if it went in; terrain, which is
-// about 2.3 MB and so cannot be a by-value member of anything on the stack; and
-// weapons, which holds GL handles in a std::vector<Weapon> and would drag a heap
-// allocation into every GameState.
+// What is left is consoletext. It is a std::string[15], and that is the whole
+// reason it is deferred: GameState has to stay trivially copyable, and an array
+// of std::string is neither trivially copyable nor trivially destructible. It
+// would need to become a fixed-size char array or move out to an owner like the
+// terrain did, and neither is a mechanical change - so it is a decision, not a
+// sweep, and it stays until somebody makes it.
 const std::set<std::string> kPendingGlobals = {
-	// App/include/Globals.h
-	"terrain",
-	"weapons",
-
 	// App/include/GameGlobals.h
 	"consoletext",
 };
@@ -438,7 +435,7 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 	{
 		// Without this, a parser that quietly matched nothing would leave every
 		// assertion above passing for the wrong reason.
-		REQUIRE(globals.size() == 3);
+		REQUIRE(globals.size() == 1);
 		REQUIRE(members.size() == 153);
 	}
 }

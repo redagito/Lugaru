@@ -362,7 +362,7 @@ public:
 
     void changeCreatureType(person_type type, bool tutorialActive, GameState& gamestate, GameAssets& assets);
 
-    void CheckKick(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
+    void CheckKick(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
     void CatchFire(GameState& gamestate);
     void DoBlood(float howmuch, int which, bool tutorialActive, GameState& gamestate);
     void DoBloodBig(float howmuch, int which, bool tutorialActive, GameState& gamestate);
@@ -370,7 +370,7 @@ public:
 
     bool wasIdle() { return animation_bits[animCurrent] & ab_idle; }
     bool isIdle() { return animation_bits[animTarget] & ab_idle; }
-    int getIdle(bool inDialog);
+    int getIdle(bool inDialog, GameAssets& assets);
 
     bool isSitting() { return animation_bits[animTarget] & ab_sit; }
 
@@ -403,8 +403,8 @@ public:
     bool isFlip() { return animation_bits[animTarget] & ab_flip; }
 
     bool isWallJump() { return animation_bits[animTarget] & ab_walljump; }
-    void Reverse(bool tutorialActive, GameState& gamestate);
-    void DoDamage(float howmuch, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
+    void Reverse(bool tutorialActive, GameState& gamestate, GameAssets& assets);
+    void DoDamage(float howmuch, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
     void DoHead(float timemultiplier, GameState& gamestate);
     void DoMipmaps()
     {
@@ -413,28 +413,31 @@ public:
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, skeleton.skinsize, skeleton.skinsize, 0, GL_RGB, GL_UNSIGNED_BYTE, &skeleton.skinText[0]);
     }
 
-    int SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
+    int SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
     int DrawSkeleton(Terrain& terrain, bool tutorialActive, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
     void Puff(int whichlabel, GameState& gamestate);
     void FootLand(bodypart whichfoot, float opacity, Terrain& terrain, GameState& gamestate);
     void DoStuff(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
     void setTargetAnimation(int);
-    void DoAnimations(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
-    void RagDoll(bool checkcollision, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate);
+    void DoAnimations(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
+    void RagDoll(bool checkcollision, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
 
-    void takeWeapon(int weaponId);
+    void takeWeapon(int weaponId, GameAssets& assets);
 
     bool addClothes(const int& clothesId, GameState& gamestate, GameAssets& assets);
     void addClothes(GameState& gamestate, GameAssets& assets);
 
-    void doAI(const Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, GameState& gamestate);
+    void doAI(const Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, GameState& gamestate, GameAssets& assets);
 
     bool catchKnife();
 
     bool hasWeapon() { return (weaponactive != -1); }
     bool isPlayerControlled() { return (aitype == playercontrolled); }
 
-    operator Json::Value();
+    // Was `operator Json::Value()`. A conversion operator takes no parameters,
+    // and the weapon types it has to write out live in the GameAssets weapons, so
+    // it cannot reach them. Nothing called it; the named form can.
+    Json::Value save(GameAssets& assets);
 };
 
 const int maxplayers = 10;

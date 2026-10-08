@@ -366,7 +366,7 @@ void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 	gamestate.texdetail = 1;
 	// Fail loudly: if the heightmap does not load, terrain.size stays 0 and
 	// Terrain::getHeight returns 0 everywhere, silently flattening the world.
-	if (!terrain.load("Textures/HeightMap.png", gamestate.environment, [&]() {Game::LoadingScreen(gamestate, assets); })) {
+	if (!assets.terrain->load("Textures/HeightMap.png", gamestate.environment, [&]() {Game::LoadingScreen(gamestate, assets); })) {
 		throw std::runtime_error("failed to load terrain heightmap Textures/HeightMap.png");
 	}
 
@@ -505,18 +505,18 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	}
 
 	if (!gamestate.stealthloading) {
-		terrain.decals.clear();
+		assets.terrain->decals.clear();
 		Sprite::deleteSprites();
 
 		for (int i = 0; i < subdivision; i++) {
 			for (int j = 0; j < subdivision; j++) {
-				terrain.patchobjects[i][j].clear();
+				assets.terrain->patchobjects[i][j].clear();
 			}
 		}
 		Game::LoadingScreen(gamestate, assets);
 	}
 
-	weapons.weapons.clear();
+	assets.weapons.weapons.clear();
 	Person::players.resize(1);
 
 	funpackf(tfile, "Bi", &mapvers);
@@ -574,10 +574,10 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	}
 	if (Person::players[0]->num_weapons > 0 && Person::players[0]->num_weapons < 5) {
 		for (int j = 0; j < Person::players[0]->num_weapons; j++) {
-			Person::players[0]->weaponids[j] =  weapons.weapons.size();
+			Person::players[0]->weaponids[j] =  assets.weapons.weapons.size();
 			int type;
 			funpackf(tfile, "Bi", &type);
-			weapons.weapons.push_back(Weapon(type, 0));
+			assets.weapons.weapons.push_back(Weapon(type, 0));
 		}
 	}
 
@@ -634,7 +634,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	}
 	gamestate.oldenvironment = gamestate.environment;
 
-	Object::LoadObjectsFromFile(tfile, gamestate.stealthloading, terrain, [&]() {Game::LoadingScreen(gamestate, assets); });
+	Object::LoadObjectsFromFile(tfile, gamestate.stealthloading, *assets.terrain, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 	if (mapvers >= 7) {
 		int numhotspots;
@@ -707,10 +707,10 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	SetUpLighting(gamestate);
 
 	if (!gamestate.stealthloading) {
-		Object::AddObjectsToTerrain(gamestate.environment, terrain, gamestate.detail);
-		terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Object::AddObjectsToTerrain(gamestate.environment, *assets.terrain, gamestate.detail);
+		assets.terrain->DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
 		Game::LoadingScreen(gamestate, assets);
-		Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
+		Object::DoShadows(gamestate.skyboxtexture, gamestate.light, *assets.terrain);
 		Game::LoadingScreen(gamestate, assets);
 	}
 
@@ -894,12 +894,12 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	}
 
 	if (!gamestate.stealthloading) {
-		terrain.decals.clear();
+		assets.terrain->decals.clear();
 		Sprite::deleteSprites();
 
 		for (int i = 0; i < subdivision; i++) {
 			for (int j = 0; j < subdivision; j++) {
-				terrain.patchobjects[i][j].clear();
+				assets.terrain->patchobjects[i][j].clear();
 			}
 		}
 		Game::LoadingScreen(gamestate, assets);
@@ -934,7 +934,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	gamestate.oldenvironment = gamestate.environment;
 
 	if (!gamestate.stealthloading) {
-		Object::LoadObjectsFromJson(map_data["map"]["objects"], terrain, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Object::LoadObjectsFromJson(map_data["map"]["objects"], *assets.terrain, [&]() {Game::LoadingScreen(gamestate, assets); });
 	}
 
 	Hotspot::hotspots.resize(map_data["map"]["hotspots"].size());
@@ -966,7 +966,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 		playerYaw = Person::players[0]->yaw;
 		playerTargetYaw = Person::players[0]->targetyaw;
 	}
-	weapons.weapons.clear();
+	assets.weapons.weapons.clear();
 	Person::players.clear();
 	unsigned j = 0;
 	for (unsigned i = 0; i < map_data["map"]["players"].size(); i++) {
@@ -1003,10 +1003,10 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	SetUpLighting(gamestate);
 
 	if (!gamestate.stealthloading) {
-		Object::AddObjectsToTerrain(gamestate.environment, terrain, gamestate.detail);
-		terrain.DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
+		Object::AddObjectsToTerrain(gamestate.environment, *assets.terrain, gamestate.detail);
+		assets.terrain->DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
 		Game::LoadingScreen(gamestate, assets);
-		Object::DoShadows(gamestate.skyboxtexture, gamestate.light, terrain);
+		Object::DoShadows(gamestate.skyboxtexture, gamestate.light, *assets.terrain);
 		Game::LoadingScreen(gamestate, assets);
 	}
 
@@ -1262,7 +1262,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 
 		/* Ragdoll */
 		if (Input::isKeyPressed(SDL_SCANCODE_N)) {
-			Person::players[0]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+			Person::players[0]->RagDoll(0, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 			emit_sound_at(whooshsound, Person::players[0]->coords, 128.);
 		}
 
@@ -1286,7 +1286,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 			if (closest >= 0) {
 				if (Person::players[closest]->num_weapons > 0) {
 					int weapontype = 0;
-					switch (weapons.weapons[Person::players[closest]->weaponids[0]].getType()) {
+					switch (assets.weapons.weapons[Person::players[closest]->weaponids[0]].getType()) {
 					case knife:
 						weapontype = sword;
 						break;
@@ -1297,11 +1297,11 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 						weapontype = knife;
 						break;
 					}
-					weapons.weapons[Person::players[closest]->weaponids[0]].setType(weapontype);
+					assets.weapons.weapons[Person::players[closest]->weaponids[0]].setType(weapontype);
 				}
 				else {
-					Person::players[closest]->weaponids[0] =  weapons.weapons.size();
-					weapons.weapons.push_back(Weapon(knife, closest));
+					Person::players[closest]->weaponids[0] =  assets.weapons.weapons.size();
+					assets.weapons.weapons.push_back(Weapon(knife, closest));
 					Person::players[closest]->num_weapons = 1;
 				}
 			}
@@ -1421,7 +1421,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 				if (Person::players[closest]->skeleton.free == 2) {
 					Person::players[closest]->skeleton.free = 0;
 				}
-				Person::players[closest]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+				Person::players[closest]->RagDoll(0, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 				Person::players[closest]->dead = 2;
 				Person::players[closest]->headless = 1;
 				Person::players[closest]->DoBloodBig(3, 165, Tutorial::active, gamestate);
@@ -1497,12 +1497,12 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 						continue;
 					}
 					if (distsq(&Person::players[j]->coords, &Person::players[closest]->coords) < 25) {
-						Person::players[j]->DoDamage((25 - distsq(&Person::players[j]->coords, &Person::players[closest]->coords)) * 60, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+						Person::players[j]->DoDamage((25 - distsq(&Person::players[j]->coords, &Person::players[closest]->coords)) * 60, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 						if (Person::players[j]->skeleton.free == 2) {
 							Person::players[j]->skeleton.free = 1;
 						}
 						Person::players[j]->skeleton.longdead = 0;
-						Person::players[j]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+						Person::players[j]->RagDoll(0, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 						for (unsigned i = 0; i < Person::players[j]->skeleton.joints.size(); i++) {
 							temppos = Person::players[j]->skeleton.joints[i].position + Person::players[j]->coords;
 							if (distsq(&temppos, &Person::players[closest]->coords) < 25) {
@@ -1515,8 +1515,8 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 					}
 				}
 
-				Person::players[closest]->DoDamage(10000, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
-				Person::players[closest]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+				Person::players[closest]->DoDamage(10000, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
+				Person::players[closest]->RagDoll(0, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 				Person::players[closest]->dead = 2;
 				Person::players[closest]->coords = 20;
 				Person::players[closest]->skeleton.free = 2;
@@ -1551,7 +1551,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 		if (Input::isKeyPressed(SDL_SCANCODE_DELETE) && !Input::isKeyDown(SDL_SCANCODE_LSHIFT)) {
 			int closest = findClosestObject();
 			if (closest >= 0) {
-				Object::DeleteObject(closest, terrain);
+				Object::DeleteObject(closest, *assets.terrain);
 			}
 		}
 
@@ -1577,9 +1577,9 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
 					tmppitch = rand() % 360;
 				}
 
-				Object::MakeObject(gamestate.editortype, scenecoords, (int)tmpyaw - ((int)tmpyaw) % 30, (int)tmppitch, gamestate.editorsize, gamestate.environment, terrain, gamestate.foliage, gamestate.detail, [&]() {Game::LoadingScreen(gamestate, assets); });
+				Object::MakeObject(gamestate.editortype, scenecoords, (int)tmpyaw - ((int)tmpyaw) % 30, (int)tmppitch, gamestate.editorsize, gamestate.environment, *assets.terrain, gamestate.foliage, gamestate.detail, [&]() {Game::LoadingScreen(gamestate, assets); });
 				if (gamestate.editortype == treetrunktype) {
-					Object::MakeObject(treeleavestype, scenecoords, rand() % 360 * (tmppitch < 2) + (int)gamestate.editoryaw - ((int)gamestate.editoryaw) % 30, gamestate.editorpitch, gamestate.editorsize, gamestate.environment, terrain, gamestate.foliage, gamestate.detail, [&]() {Game::LoadingScreen(gamestate, assets); });
+					Object::MakeObject(treeleavestype, scenecoords, rand() % 360 * (tmppitch < 2) + (int)gamestate.editoryaw - ((int)gamestate.editoryaw) % 30, gamestate.editorpitch, gamestate.editorsize, gamestate.environment, *assets.terrain, gamestate.foliage, gamestate.detail, [&]() {Game::LoadingScreen(gamestate, assets); });
 				}
 			}
 		}
@@ -1929,7 +1929,7 @@ void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 			Person::players[k]->yaw = stepTowardf(Person::players[k]->yaw, Person::players[k]->targetyaw, gamestate.multiplier * Person::players[k]->turnspeed * 4);
 		}
 
-		Person::players[k]->DoStuff(terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
+		Person::players[k]->DoStuff(*assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 		if (Person::players[k]->immobile && k != 0) {
 			Person::players[k]->coords = Person::players[k]->realoldcoords;
 		}
@@ -1952,10 +1952,10 @@ void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 			Person::players[k]->collide -= gamestate.multiplier * 30;
 
 			//clip to terrain
-			Person::players[k]->coords.y = max(Person::players[k]->coords.y, terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z));
+			Person::players[k]->coords.y = max(Person::players[k]->coords.y, assets.terrain->getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z));
 
-			for (unsigned int l = 0; l < terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
-				unsigned int i = terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
+			for (unsigned int l = 0; l < assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
+				unsigned int i = assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
 				if (Object::objects[i]->type != rocktype ||
 					Object::objects[i]->scale > .5 && Person::players[k]->isPlayerControlled() ||
 					Object::objects[i]->position.y > Person::players[k]->coords.y) {
@@ -1968,11 +1968,11 @@ void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 					else {
 						lowpoint.y += 1.3;
 					}
-					if (Person::players[k]->coords.y < terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z) &&
-						Person::players[k]->coords.y > terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z) - .1) {
-						Person::players[k]->coords.y = terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z);
+					if (Person::players[k]->coords.y < assets.terrain->getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z) &&
+						Person::players[k]->coords.y > assets.terrain->getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z) - .1) {
+						Person::players[k]->coords.y = assets.terrain->getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z);
 					}
-					if (Person::players[k]->SphereCheck(&lowpoint, 1.3, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate) != -1) {
+					if (Person::players[k]->SphereCheck(&lowpoint, 1.3, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets) != -1) {
 						flatfacing = lowpoint - Person::players[k]->coords;
 						Person::players[k]->coords = lowpoint;
 						Person::players[k]->coords.y -= 1.3;
@@ -2092,12 +2092,12 @@ void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 						if (Person::players[k]->animTarget == jumpdownanim || Person::players[k]->isFlip()) {
 							//flipped into a rock
 							if (Person::players[k]->isFlip() && Person::players[k]->targetFrame().label == 7) {
-								Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+								Person::players[k]->RagDoll(0, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 							}
 
 							if (Person::players[k]->animTarget == jumpupanim) {
 								Person::players[k]->jumppower = -4;
-								Person::players[k]->animTarget = Person::players[k]->getIdle(Dialog::inDialog());
+								Person::players[k]->animTarget = Person::players[k]->getIdle(Dialog::inDialog(), assets);
 							}
 							Person::players[k]->target = 0;
 							Person::players[k]->frameTarget = 0;
@@ -2125,12 +2125,12 @@ void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 			}
 
 			if (tempcollide) {
-				for (unsigned int l = 0; l < terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
-					int i = terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
+				for (unsigned int l = 0; l < assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
+					int i = assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
 					lowpoint = Person::players[k]->coords;
 					lowpoint.y += 1.35;
 					if (Object::objects[i]->type != rocktype) {
-						if (Person::players[k]->SphereCheck(&lowpoint, 1.33, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate) != -1) {
+						if (Person::players[k]->SphereCheck(&lowpoint, 1.33, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets) != -1) {
 							if (Person::players[k]->animTarget != jumpupanim &&
 								Person::players[k]->animTarget != jumpdownanim &&
 								Person::players[k]->onterrain) {
@@ -2189,8 +2189,8 @@ void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 											if (Person::players[k]->animTarget != jumpupanim && Person::players[k]->animTarget != jumpdownanim) {
 												Person::players[k]->collided = 1;
 											}
-											if (Object::checkcollide(lowpoint7, lowpointtarget7, terrain) == -1) {
-												if (Object::checkcollide(lowpoint6, lowpointtarget6, terrain) == -1) {
+											if (Object::checkcollide(lowpoint7, lowpointtarget7, *assets.terrain) == -1) {
+												if (Object::checkcollide(lowpoint6, lowpointtarget6, *assets.terrain) == -1) {
 													if (Object::objects[i]->model.LineCheckPossible(&lowpoint2, &lowpointtarget2,
 														&colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw) != -1 &&
 														Object::objects[i]->model.LineCheckPossible(&lowpoint3, &lowpointtarget3,
@@ -2283,7 +2283,7 @@ void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 							Person::players[k]->frameTarget > 6)) {
 						//stagger off ledge (?)
 						if (Person::players[k]->animTarget == staggerbackhighanim || Person::players[k]->animTarget == staggerbackhardanim) {
-							Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+							Person::players[k]->RagDoll(0, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 						}
 						Person::players[k]->setTargetAnimation(jumpdownanim);
 
@@ -2300,7 +2300,7 @@ void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 	}
 }
 
-void doAttacks(GameState& gamestate)
+void doAttacks(GameState& gamestate, GameAssets& assets)
 {
 	static int randattack;
 	static bool playerrealattackkeydown = 0;
@@ -2336,7 +2336,7 @@ void doAttacks(GameState& gamestate)
 				Person::players[k]->animTarget == staffspinhitanim) &&
 				Person::players[0]->animCurrent != dodgebackanim &&
 				!Person::players[k]->skeleton.free) {
-				Person::players[k]->Reverse(Tutorial::active, gamestate);
+				Person::players[k]->Reverse(Tutorial::active, gamestate, assets);
 			}
 		}
 	}
@@ -2406,7 +2406,7 @@ void doAttacks(GameState& gamestate)
 						Person::players[k]->animTarget == walkanim ||
 						Person::players[k]->animTarget == sneakanim ||
 						Person::players[k]->isCrouch())) {
-					const int attackweapon = (Person::players[k]->hasWeapon() ? weapons.weapons[Person::players[k]->weaponids[Person::players[k]->weaponactive]].getType() : 0);
+					const int attackweapon = (Person::players[k]->hasWeapon() ? assets.weapons.weapons[Person::players[k]->weaponids[Person::players[k]->weaponactive]].getType() : 0);
 					//normal attacks (?)
 					Person::players[k]->hasvictim = 0;
 					if (Person::players.size() > 1) {
@@ -2748,7 +2748,7 @@ void doAttacks(GameState& gamestate)
 												Person::players[i]->skeleton.free &&
 												Person::players[i]->skeleton.longdead > 1000) {
 												Person::players[k]->animTarget = killanim;
-												terrain.deleteDeadDecals();
+												assets.terrain->deleteDeadDecals();
 												for (unsigned int l = 0; l < Object::objects.size(); l++) {
 													if (Object::objects[l]->model.type == decalstype) {
 														Object::objects[l]->model.deleteDeadDecals();
@@ -2765,7 +2765,7 @@ void doAttacks(GameState& gamestate)
 														Person::players[i]->skeleton.free) &&
 													(!Person::players[i]->dead || gamestate.musictype != stream_fighttheme)) {
 													Person::players[k]->animTarget = dropkickanim;
-													terrain.deleteDeadDecals();
+													assets.terrain->deleteDeadDecals();
 													for (unsigned int l = 0; l < Object::objects.size(); l++) {
 														if (Object::objects[l]->model.type == decalstype) {
 															Object::objects[l]->model.deleteDeadDecals();
@@ -2883,7 +2883,7 @@ void doAttacks(GameState& gamestate)
 	}
 }
 
-void doPlayerCollisions(GameState& gamestate)
+void doPlayerCollisions(GameState& gamestate, GameAssets& assets)
 {
 	static Vector3 rotatetarget;
 	static float collisionradius;
@@ -2965,8 +2965,8 @@ void doPlayerCollisions(GameState& gamestate)
 																		Person::players[l]->velocity = Person::players[0]->velocity;
 																		Person::players[l]->skeleton.free = 0;
 																		Person::players[l]->yaw = 0;
-																		Person::players[l]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
-																		Person::players[l]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+																		Person::players[l]->RagDoll(0, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
+																		Person::players[l]->DoDamage(20, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 																		gamestate.camerashake += .3;
 																		Person::players[l]->skeleton.longdead = 0;
 																		Person::players[0]->lastcollide = 1;
@@ -2999,16 +2999,16 @@ void doPlayerCollisions(GameState& gamestate)
 																					emit_sound_at(heavyimpactsound, Person::players[i]->coords);
 																				}
 
-																				Person::players[i]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+																				Person::players[i]->RagDoll(0, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 																				if (Person::players[i]->damage > Person::players[i]->damagetolerance - magnitudeSquared(&rotatetarget) / 4 && !Person::players[i]->dead) {
 																					award_bonus(0, aimbonus);
 																				}
-																				Person::players[i]->DoDamage(magnitudeSquared(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
-																				Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+																				Person::players[i]->DoDamage(magnitudeSquared(&rotatetarget) / 4, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
+																				Person::players[k]->RagDoll(0, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 																				if (Person::players[k]->damage > Person::players[k]->damagetolerance - magnitudeSquared(&rotatetarget) / 4 && !Person::players[k]->dead) {
 																					award_bonus(0, aimbonus); // Huh, again?
 																				}
-																				Person::players[k]->DoDamage(magnitudeSquared(&rotatetarget) / 4, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+																				Person::players[k]->DoDamage(magnitudeSquared(&rotatetarget) / 4, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 
 																				for (unsigned j = 0; j < Person::players[i]->skeleton.joints.size(); j++) {
 																					Person::players[i]->skeleton.joints[j].velocity = Person::players[i]->skeleton.joints[j].velocity / 5 + Person::players[k]->velocity;
@@ -3069,8 +3069,8 @@ void doPlayerCollisions(GameState& gamestate)
 																					Person::players[i]->velocity = Person::players[k]->velocity;
 																					Person::players[k]->velocity = Person::players[k]->velocity * -.5;
 																					Person::players[k]->velocity.y = Person::players[i]->velocity.y;
-																					Person::players[i]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
-																					Person::players[i]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+																					Person::players[i]->DoDamage(20, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
+																					Person::players[i]->RagDoll(0, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 																					Person::players[k]->lastcollide = 1;
 																					award_bonus(k, AboveBonus);
 																				}
@@ -3084,8 +3084,8 @@ void doPlayerCollisions(GameState& gamestate)
 																					Person::players[k]->velocity = Person::players[i]->velocity;
 																					Person::players[i]->velocity = Person::players[i]->velocity * -.3;
 																					Person::players[i]->velocity.y = Person::players[k]->velocity.y;
-																					Person::players[k]->DoDamage(20, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
-																					Person::players[k]->RagDoll(0, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+																					Person::players[k]->DoDamage(20, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
+																					Person::players[k]->RagDoll(0, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 																					Person::players[i]->lastcollide = 1;
 																					award_bonus(i, AboveBonus);
 																				}
@@ -3093,8 +3093,8 @@ void doPlayerCollisions(GameState& gamestate)
 																		}
 																	}
 																}
-																Person::players[i]->CheckKick(terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
-																Person::players[k]->CheckKick(terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+																Person::players[i]->CheckKick(*assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
+																Person::players[k]->CheckKick(*assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 															}
 														}
 													}
@@ -3218,7 +3218,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 
 			if (talkdelay <= 0 && !Dialog::inDialog() && Animation::animations[Person::players[0]->animTarget].height != highheight) {
 				for (unsigned i = 0; i < Dialog::dialogs.size(); i++) {
-					Dialog::dialogs[i].tick(i, gamestate);
+					Dialog::dialogs[i].tick(i, gamestate, assets);
 				}
 			}
 
@@ -3257,7 +3257,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 
 			//Tutorial
 			if (Tutorial::active) {
-				Tutorial::Do(gamestate.multiplier, gamestate.bloodtoggle, gamestate);
+				Tutorial::Do(gamestate.multiplier, gamestate.bloodtoggle, gamestate, assets);
 			}
 
 			//bonuses
@@ -3505,7 +3505,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 				if (!Dialog::directing) {
 					pause_sound(whooshsound);
 					gamestate.viewer = Dialog::currentScene().camera;
-					gamestate.viewer.y = max((double)gamestate.viewer.y, terrain.getHeight(gamestate.viewer.x, gamestate.viewer.z) + .1);
+					gamestate.viewer.y = max((double)gamestate.viewer.y, assets.terrain->getHeight(gamestate.viewer.x, gamestate.viewer.z) + .1);
 					gamestate.yaw = Dialog::currentScene().camerayaw;
 					gamestate.pitch = Dialog::currentScene().camerapitch;
 					if (Dialog::dialoguetime > 0.5) {
@@ -3573,9 +3573,9 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 				gamestate.hawkcalldelay = 16 + abs(rand() % 8);
 			}
 
-			doAttacks(gamestate);
+			doAttacks(gamestate, assets);
 
-			doPlayerCollisions(gamestate);
+			doPlayerCollisions(gamestate, assets);
 
 			doJumpReversals();
 
@@ -3588,7 +3588,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 			for (unsigned k = 0; k < Person::players.size(); k++) {
 				if (!isnormal(Person::players[k]->coords.x) || !isnormal(Person::players[k]->coords.y) || !isnormal(Person::players[k]->coords.z)) {
 					if (!isnormal(Person::players[k]->coords.x) || !isnormal(Person::players[k]->coords.y) || !isnormal(Person::players[k]->coords.z)) {
-						Person::players[k]->DoDamage(1000, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+						Person::players[k]->DoDamage(1000, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 					}
 				}
 			}
@@ -3730,7 +3730,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 						Person::players[i]->avoidcollided = 0;
 					}
 
-					Person::players[i]->doAI(terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate);
+					Person::players[i]->doAI(*assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate, assets);
 
 					if (Animation::animations[Person::players[i]->animTarget].attack == reversed) {
 						//Person::players[i]->targetyaw=Person::players[i]->yaw;
@@ -3799,13 +3799,13 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 								Person::players[i]->animTarget == backhandspringanim ||
 								Person::players[i]->isFlip() ||
 								!Person::players[i]->isPlayerControlled())) {
-							for (unsigned j = 0; j <  weapons.weapons.size(); j++) {
-								if ((weapons.weapons[j].velocity.x == 0 && weapons.weapons[j].velocity.y == 0 && weapons.weapons[j].velocity.z == 0 ||
+							for (unsigned j = 0; j <  assets.weapons.weapons.size(); j++) {
+								if ((assets.weapons.weapons[j].velocity.x == 0 && assets.weapons.weapons[j].velocity.y == 0 && assets.weapons.weapons[j].velocity.z == 0 ||
 									Person::players[i]->isPlayerControlled()) &&
-									weapons.weapons[j].owner == -1 &&
+									assets.weapons.weapons[j].owner == -1 &&
 									!Person::players[i]->hasWeapon()) {
-									if (distsqflat(&Person::players[i]->coords, &weapons.weapons[j].position) < 2) {
-										if (distsq(&Person::players[i]->coords, &weapons.weapons[j].position) < 2) {
+									if (distsqflat(&Person::players[i]->coords, &assets.weapons.weapons[j].position) < 2) {
+										if (distsq(&Person::players[i]->coords, &assets.weapons.weapons[j].position) < 2) {
 											if (Person::players[i]->isCrouch() ||
 												Person::players[i]->animTarget == sneakanim ||
 												Person::players[i]->isRun() ||
@@ -3813,25 +3813,25 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 												!Person::players[i]->isPlayerControlled()) {
 												Person::players[i]->throwtogglekeydown = 1;
 												Person::players[i]->setTargetAnimation(crouchremoveknifeanim);
-												Person::players[i]->targetyaw = roughDirectionTo(Person::players[i]->coords, weapons.weapons[j].position);
+												Person::players[i]->targetyaw = roughDirectionTo(Person::players[i]->coords, assets.weapons.weapons[j].position);
 												Person::players[i]->hasvictim = 0;
 											}
 											if (Person::players[i]->animTarget == rollanim || Person::players[i]->animTarget == backhandspringanim) {
 												Person::players[i]->throwtogglekeydown = 1;
 												Person::players[i]->hasvictim = 0;
 
-												if ((weapons.weapons[j].velocity.x == 0 && weapons.weapons[j].velocity.y == 0 && weapons.weapons[j].velocity.z == 0 ||
+												if ((assets.weapons.weapons[j].velocity.x == 0 && assets.weapons.weapons[j].velocity.y == 0 && assets.weapons.weapons[j].velocity.z == 0 ||
 													Person::players[i]->isPlayerControlled()) &&
-													weapons.weapons[j].owner == -1 ||
+													assets.weapons.weapons[j].owner == -1 ||
 													Person::players[i]->victim &&
-													weapons.weapons[j].owner == int(Person::players[i]->victim->id)) {
-													if (distsqflat(&Person::players[i]->coords, &weapons.weapons[j].position) < 2 && !Person::players[i]->hasWeapon()) {
-														if (distsq(&Person::players[i]->coords, &weapons.weapons[j].position) < 1 || Person::players[i]->victim) {
-															if (weapons.weapons[j].getType() != staff) {
+													assets.weapons.weapons[j].owner == int(Person::players[i]->victim->id)) {
+													if (distsqflat(&Person::players[i]->coords, &assets.weapons.weapons[j].position) < 2 && !Person::players[i]->hasWeapon()) {
+														if (distsq(&Person::players[i]->coords, &assets.weapons.weapons[j].position) < 1 || Person::players[i]->victim) {
+															if (assets.weapons.weapons[j].getType() != staff) {
 																emit_sound_at(knifedrawsound, Person::players[i]->coords, 128.);
 															}
 
-															Person::players[i]->takeWeapon(j);
+															Person::players[i]->takeWeapon(j, assets);
 														}
 													}
 												}
@@ -3840,31 +3840,31 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 										else if ((Person::players[i]->isIdle() ||
 											Person::players[i]->isFlip() ||
 											!Person::players[i]->isPlayerControlled()) &&
-											distsq(&Person::players[i]->coords, &weapons.weapons[j].position) < 5 &&
-											Person::players[i]->coords.y <  weapons.weapons[j].position.y) {
+											distsq(&Person::players[i]->coords, &assets.weapons.weapons[j].position) < 5 &&
+											Person::players[i]->coords.y <  assets.weapons.weapons[j].position.y) {
 											if (!Person::players[i]->isFlip()) {
 												Person::players[i]->throwtogglekeydown = 1;
 												Person::players[i]->setTargetAnimation(removeknifeanim);
-												Person::players[i]->targetyaw = roughDirectionTo(Person::players[i]->coords,  weapons.weapons[j].position);
+												Person::players[i]->targetyaw = roughDirectionTo(Person::players[i]->coords,  assets.weapons.weapons[j].position);
 											}
 											if (Person::players[i]->isFlip()) {
 												Person::players[i]->throwtogglekeydown = 1;
 												Person::players[i]->hasvictim = 0;
 
-												for (unsigned k = 0; k <  weapons.weapons.size(); k++) {
+												for (unsigned k = 0; k <  assets.weapons.weapons.size(); k++) {
 													if (!Person::players[i]->hasWeapon()) {
-														if ((weapons.weapons[k].velocity.x == 0 &&  weapons.weapons[k].velocity.y == 0 &&  weapons.weapons[k].velocity.z == 0 ||
+														if ((assets.weapons.weapons[k].velocity.x == 0 &&  assets.weapons.weapons[k].velocity.y == 0 &&  assets.weapons.weapons[k].velocity.z == 0 ||
 															Person::players[i]->isPlayerControlled()) &&
-															weapons.weapons[k].owner == -1 ||
+															assets.weapons.weapons[k].owner == -1 ||
 															Person::players[i]->victim &&
-															weapons.weapons[k].owner == int(Person::players[i]->victim->id)) {
-															if (distsqflat(&Person::players[i]->coords, &weapons.weapons[k].position) < 3 &&
+															assets.weapons.weapons[k].owner == int(Person::players[i]->victim->id)) {
+															if (distsqflat(&Person::players[i]->coords, &assets.weapons.weapons[k].position) < 3 &&
 																!Person::players[i]->hasWeapon()) {
-																if (weapons.weapons[k].getType() != staff) {
+																if (assets.weapons.weapons[k].getType() != staff) {
 																	emit_sound_at(knifedrawsound, Person::players[i]->coords, 128.);
 																}
 
-																Person::players[i]->takeWeapon(k);
+																Person::players[i]->takeWeapon(k, assets);
 															}
 														}
 													}
@@ -3913,7 +3913,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 																}
 															}
 															if (!fleshstuck) {
-																if (weapons.weapons[k].getType() != staff) {
+																if (assets.weapons.weapons[k].getType() != staff) {
 																	emit_sound_at(knifedrawsound, Person::players[i]->coords, 128.);
 																}
 															}
@@ -3921,7 +3921,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 																emit_sound_at(fleshstabremovesound, Person::players[i]->coords, 128.);
 															}
 
-															if (weapons.weapons[k].owner != -1) {
+															if (assets.weapons.weapons[k].owner != -1) {
 																if (Person::players[i]->victim->num_weapons == 1) {
 																	Person::players[i]->victim->num_weapons = 0;
 																}
@@ -3944,17 +3944,17 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 																Normalise(&relative);
 																Vector3 footvel, footpoint;
 																footvel = 0;
-																footpoint =  weapons.weapons[k].position;
+																footpoint =  assets.weapons.weapons[k].position;
 																if (Person::players[i]->victim->weaponstuck != -1) {
 																	if (Person::players[i]->victim->weaponids[Person::players[i]->victim->weaponstuck] == k) {
 																		if (gamestate.bloodtoggle) {
 																			Sprite::MakeSprite(cloudimpactsprite, footpoint, footvel, 1, 0, 0, .8, .3, gamestate.bloodtoggle);
 																		}
-																		weapons.weapons[k].bloody = 2;
-																		weapons.weapons[k].blooddrip = 5;
+																		assets.weapons.weapons[k].bloody = 2;
+																		assets.weapons.weapons[k].blooddrip = 5;
 																		Person::players[i]->victim->weaponstuck = -1;
 																		Person::players[i]->victim->bloodloss += 2000;
-																		Person::players[i]->victim->DoDamage(2000, terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
+																		Person::players[i]->victim->DoDamage(2000, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 																	}
 																}
 																if (Person::players[i]->victim->num_weapons > 0) {
@@ -3973,7 +3973,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 																Person::players[i]->victim->jointVel(rightshoulder) += relative * 6;
 																Person::players[i]->victim->jointVel(leftshoulder) += relative * 6;
 															}
-															Person::players[i]->takeWeapon(k);
+															Person::players[i]->takeWeapon(k, assets);
 														}
 													}
 												}
@@ -3984,7 +3984,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 							}
 						}
 						if (Person::players[i]->hasWeapon() && Person::players[i]->isPlayerControlled()) {
-							if (weapons.weapons[Person::players[i]->weaponids[0]].getType() == knife) {
+							if (assets.weapons.weapons[Person::players[i]->weaponids[0]].getType() == knife) {
 								if (Person::players[i]->isIdle() ||
 									Person::players[i]->isRun() ||
 									Person::players[i]->isCrouch() ||
@@ -4001,7 +4001,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 															!Person::players[j]->skeleton.free &&
 															-1 == Object::checkcollide(
 																DoRotation(Person::players[j]->jointPos(head), 0, Person::players[j]->yaw, 0) * Person::players[j]->scale + Person::players[j]->coords, 
-																DoRotation(Person::players[i]->jointPos(head), 0, Person::players[i]->yaw, 0) * Person::players[i]->scale + Person::players[i]->coords, terrain)) {
+																DoRotation(Person::players[i]->jointPos(head), 0, Person::players[i]->yaw, 0) * Person::players[i]->scale + Person::players[i]->coords, *assets.terrain)) {
 															if (!Person::players[i]->isFlip()) {
 																Person::players[i]->throwtogglekeydown = 1;
 																Person::players[i]->victim = Person::players[j];
@@ -4019,7 +4019,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 
 																	aim = DoRotation(aim, (float)abs(rand() % 30) - 15, (float)abs(rand() % 30) - 15, 0);
 
-																	weapons.weapons[Person::players[i]->weaponids[0]].thrown(aim * 50, false);
+																	assets.weapons.weapons[Person::players[i]->weaponids[0]].thrown(aim * 50, false);
 																	Person::players[i]->num_weapons--;
 																	if (Person::players[i]->num_weapons) {
 																		Person::players[i]->weaponids[0] = Person::players[i]->weaponids[Person::players[i]->num_weapons];
@@ -4043,7 +4043,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 								if (tempVelocity.x == 0) {
 									tempVelocity.x = .1;
 								}
-								weapons.weapons[Person::players[i]->weaponids[0]].drop(tempVelocity, tempVelocity, false);
+								assets.weapons.weapons[Person::players[i]->weaponids[0]].drop(tempVelocity, tempVelocity, false);
 								Person::players[i]->num_weapons--;
 								if (Person::players[i]->num_weapons) {
 									Person::players[i]->weaponids[0] = Person::players[i]->weaponids[Person::players[i]->num_weapons];
@@ -4071,12 +4071,12 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 							i != 0) {
 							bool isgood = true;
 							if (Person::players[i]->hasWeapon()) {
-								if (weapons.weapons[Person::players[i]->weaponids[Person::players[i]->weaponactive]].getType() == staff) {
+								if (assets.weapons.weapons[Person::players[i]->weaponids[Person::players[i]->weaponactive]].getType() == staff) {
 									isgood = false;
 								}
 							}
 							if (isgood && Person::players[i]->creature != wolftype) {
-								if (Person::players[i]->isIdle() && Person::players[i]->num_weapons &&  weapons.weapons[Person::players[i]->weaponids[0]].getType() == knife) {
+								if (Person::players[i]->isIdle() && Person::players[i]->num_weapons &&  assets.weapons.weapons[Person::players[i]->weaponids[0]].getType() == knife) {
 									Person::players[i]->setTargetAnimation(drawrightanim);
 									Person::players[i]->drawtogglekeydown = 1;
 								}
@@ -4085,11 +4085,11 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 										Person::players[0]->hasWeapon() &&
 										Person::players[i]->isRun())) &&
 									Person::players[i]->num_weapons &&
-									weapons.weapons[Person::players[i]->weaponids[0]].getType() == sword) {
+									assets.weapons.weapons[Person::players[i]->weaponids[0]].getType() == sword) {
 									Person::players[i]->setTargetAnimation(drawleftanim);
 									Person::players[i]->drawtogglekeydown = 1;
 								}
-								if (Person::players[i]->isCrouch() && Person::players[i]->num_weapons &&  weapons.weapons[Person::players[i]->weaponids[0]].getType() == knife) {
+								if (Person::players[i]->isCrouch() && Person::players[i]->num_weapons &&  assets.weapons.weapons[Person::players[i]->weaponids[0]].getType() == knife) {
 									Person::players[i]->setTargetAnimation(crouchdrawrightanim);
 									Person::players[i]->drawtogglekeydown = 1;
 								}
@@ -4100,16 +4100,16 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 					//clean weapon
 					if (Person::players[i]->hasWeapon()) {
 						if (Person::players[i]->isCrouch() &&
-							weapons.weapons[Person::players[i]->weaponids[Person::players[i]->weaponactive]].bloody &&
+							assets.weapons.weapons[Person::players[i]->weaponids[Person::players[i]->weaponactive]].bloody &&
 							gamestate.bloodtoggle &&
 							Person::players[i]->onterrain &&
 							Person::players[i]->num_weapons &&
 							Person::players[i]->attackkeydown &&
 							gamestate.musictype != stream_fighttheme) {
-							if (weapons.weapons[Person::players[i]->weaponids[Person::players[i]->weaponactive]].getType() == knife) {
+							if (assets.weapons.weapons[Person::players[i]->weaponids[Person::players[i]->weaponactive]].getType() == knife) {
 								Person::players[i]->setTargetAnimation(crouchstabanim);
 							}
-							if (weapons.weapons[Person::players[i]->weaponids[Person::players[i]->weaponactive]].getType() == sword) {
+							if (assets.weapons.weapons[Person::players[i]->weaponids[Person::players[i]->weaponactive]].getType() == sword) {
 								Person::players[i]->setTargetAnimation(swordgroundstabanim);
 							}
 							Person::players[i]->hasvictim = 0;
@@ -4191,7 +4191,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 								}
 							}
 							if (target >= 0) {
-								Person::players[target]->Reverse(Tutorial::active, gamestate);
+								Person::players[target]->Reverse(Tutorial::active, gamestate, assets);
 							}
 							Person::players[i]->lowreversaldelay = .5;
 
@@ -4237,7 +4237,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 									}
 								}
 								if (target >= 0) {
-									Person::players[target]->Reverse(Tutorial::active, gamestate);
+									Person::players[target]->Reverse(Tutorial::active, gamestate, assets);
 								}
 								Person::players[i]->highreversaldelay = .5;
 
@@ -4246,12 +4246,12 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 										Person::players[i]->animCurrent = Person::players[i]->getCrouch();
 										Person::players[i]->frameCurrent = 0;
 									}
-									Person::players[i]->setTargetAnimation(Person::players[i]->getIdle(Dialog::inDialog()));
+									Person::players[i]->setTargetAnimation(Person::players[i]->getIdle(Dialog::inDialog(), assets));
 									Person::players[i]->transspeed = 10;
 								}
 							}
 							if (Person::players[i]->animTarget == sneakanim) {
-								Person::players[i]->setTargetAnimation(Person::players[i]->getIdle(Dialog::inDialog()));
+								Person::players[i]->setTargetAnimation(Person::players[i]->getIdle(Dialog::inDialog(), assets));
 								Person::players[i]->transspeed = 10;
 							}
 						}
@@ -4408,8 +4408,8 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 								Person::players[i]->setTargetAnimation(jumpupanim);
 								Person::players[i]->yaw = Person::players[i]->targetyaw;
 								Person::players[i]->transspeed = 20;
-								Person::players[i]->FootLand(leftfoot, 1, terrain, gamestate);
-								Person::players[i]->FootLand(rightfoot, 1, terrain, gamestate);
+								Person::players[i]->FootLand(leftfoot, 1, *assets.terrain, gamestate);
+								Person::players[i]->FootLand(rightfoot, 1, *assets.terrain, gamestate);
 
 								facing = 0;
 								facing.z = -1;
@@ -4571,9 +4571,9 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 
 			//do animations
 			for (unsigned k = 0; k < Person::players.size(); k++) {
-				Person::players[k]->DoAnimations(terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate);
-				Person::players[k]->whichpatchx = Person::players[k]->coords.x / (terrain.size / subdivision * terrain.scale);
-				Person::players[k]->whichpatchz = Person::players[k]->coords.z / (terrain.size / subdivision * terrain.scale);
+				Person::players[k]->DoAnimations(*assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
+				Person::players[k]->whichpatchx = Person::players[k]->coords.x / (assets.terrain->size / subdivision * assets.terrain->scale);
+				Person::players[k]->whichpatchz = Person::players[k]->coords.z / (assets.terrain->size / subdivision * assets.terrain->scale);
 			}
 
 			//do stuff
@@ -5061,26 +5061,26 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets)
 			gamestate.viewer = cameraloc - facing * cameradist;
 			colviewer = gamestate.viewer;
 			coltarget = cameraloc;
-			Object::SphereCheckPossible(&colviewer, findDistance(&colviewer, &coltarget), terrain);
-			for (unsigned int j = 0; j < terrain.patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz].size(); j++) {
-				unsigned int i = terrain.patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz][j];
+			Object::SphereCheckPossible(&colviewer, findDistance(&colviewer, &coltarget), *assets.terrain);
+			for (unsigned int j = 0; j < assets.terrain->patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz].size(); j++) {
+				unsigned int i = assets.terrain->patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz][j];
 				colviewer = gamestate.viewer;
 				coltarget = cameraloc;
 				if (Object::objects[i]->model.LineCheckPossible(&colviewer, &coltarget, &col, &Object::objects[i]->position, &Object::objects[i]->yaw) != -1) {
 					gamestate.viewer = col;
 				}
 			}
-			for (unsigned int j = 0; j < terrain.patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz].size(); j++) {
-				unsigned int i = terrain.patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz][j];
+			for (unsigned int j = 0; j < assets.terrain->patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz].size(); j++) {
+				unsigned int i = assets.terrain->patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz][j];
 				colviewer = gamestate.viewer;
 				if (Object::objects[i]->model.SphereCheck(&colviewer, .15, &col, &Object::objects[i]->position, &Object::objects[i]->yaw) != -1) {
 					gamestate.viewer = colviewer;
 				}
 			}
 			cameradist = findDistance(&gamestate.viewer, &target);
-			gamestate.viewer.y = max((double)gamestate.viewer.y, terrain.getHeight(gamestate.viewer.x, gamestate.viewer.z) + .6);
-			if (cameraloc.y < terrain.getHeight(cameraloc.x, cameraloc.z)) {
-				cameraloc.y = terrain.getHeight(cameraloc.x, cameraloc.z);
+			gamestate.viewer.y = max((double)gamestate.viewer.y, assets.terrain->getHeight(gamestate.viewer.x, gamestate.viewer.z) + .6);
+			if (cameraloc.y < assets.terrain->getHeight(cameraloc.x, cameraloc.z)) {
+				cameraloc.y = assets.terrain->getHeight(cameraloc.x, cameraloc.z);
 			}
 		}
 		if (gamestate.camerashake > .8) {

@@ -1,9 +1,13 @@
 #pragma once
 
 #include "Environment/Skybox.hpp"
+#include "Environment/Terrain.hpp"
 #include "Graphic/Models.hpp"
 #include "Graphic/Text.hpp"
 #include "Graphic/Texture.hpp"
+#include "Objects/Weapons.hpp"
+
+#include <memory>
 
 // GameAssets owns the session-long rendering helpers that hold OpenGL handles:
 // the skybox, the two fonts and the shared textures. They cannot live in
@@ -28,6 +32,21 @@
 // trivial copyability and trivial destructibility GameState is asserted to have,
 // and the implicit copy would free the same buffer twice. Declared last, so they
 // are destroyed first and leave the GL-touching members above undisturbed.
+//
+// The terrain and the weapons were the last two externs in Globals.h. Neither
+// can live in GameState, for the same reason the models cannot: GameState is
+// asserted to be trivially copyable and trivially destructible. The two shapes
+// differ, and neither is free:
+//
+//  - A terrain's constructor memsets roughly 2.3 MB of fixed arrays, and
+//    GameAssets is a stack local, so it goes behind a pointer. Constructed in
+//    main(), where the reason for the heap is stated, because until that line
+//    the pointer is null.
+//  - A weapons is 24 bytes plus a heap vector, so a value costs nothing.
+//
+// Both were globals whose destructors ran after main returned, which is after
+// SDL_Quit. As members they are destroyed with the rest of GameAssets, while
+// the GL context is still current.
 
 struct GameAssets
 {
@@ -51,6 +70,9 @@ struct GameAssets
 	Model eye;
 	Model cornea;
 	Model iris;
+
+	std::unique_ptr<Terrain> terrain;
+	Weapons weapons;
 
 	// A Model frees its own buffers, so the copy the compiler would generate here
 	// would hand two instances the same four pointers and both destructors would

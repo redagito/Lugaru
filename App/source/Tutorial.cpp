@@ -42,7 +42,7 @@ float Tutorial::stagetime = 0;
 float Tutorial::maxtime = 0;
 float Tutorial::success = 0;
 
-void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamestate)
+void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamestate, GameAssets& assets)
 {
 	if (stagetime > maxtime) {
 		stage++;
@@ -210,7 +210,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			w.firstfree = 1;
 			w.physics = 1;
 
-			weapons.weapons.push_back(w);
+			assets.weapons.weapons.push_back(w);
 		} break;
 		case 40:
 		case 41:
@@ -218,7 +218,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			maxtime = 300;
 			break;
 		case 44:
-			weapons.weapons[0].owner = 1;
+			assets.weapons.weapons[0].owner = 1;
 			Person::players[0]->weaponactive = -1;
 			Person::players[0]->num_weapons = 0;
 			Person::players[1]->weaponactive = 0;
@@ -232,7 +232,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			maxtime = 300;
 			break;
 		case 45:
-			weapons.weapons[0].owner = 1;
+			assets.weapons.weapons[0].owner = 1;
 			Person::players[0]->weaponactive = -1;
 			Person::players[0]->num_weapons = 0;
 			Person::players[1]->weaponactive = 0;
@@ -242,14 +242,14 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			maxtime = 300;
 			break;
 		case 46:
-			weapons.weapons[0].owner = 1;
+			assets.weapons.weapons[0].owner = 1;
 			Person::players[0]->weaponactive = -1;
 			Person::players[0]->num_weapons = 0;
 			Person::players[1]->weaponactive = 0;
 			Person::players[1]->num_weapons = 1;
 			Person::players[1]->weaponids[0] = 0;
 
-			weapons.weapons[0].setType(sword);
+			assets.weapons.weapons[0].setType(sword);
 
 			maxtime = 300;
 			break;
@@ -277,10 +277,10 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			w.firstfree = 1;
 			w.physics = 1;
 
-			weapons.weapons.push_back(w);
+			assets.weapons.weapons.push_back(w);
 
-			weapons.weapons[0].owner = 1;
-			weapons.weapons[1].owner = 0;
+			assets.weapons.weapons[0].owner = 1;
+			assets.weapons.weapons[1].owner = 0;
 			Person::players[0]->weaponactive = 0;
 			Person::players[0]->num_weapons = 1;
 			Person::players[0]->weaponids[0] = 1;
@@ -296,8 +296,8 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 
 			maxtime = 15;
 
-			weapons.weapons[0].owner = 1;
-			weapons.weapons[1].owner = 0;
+			assets.weapons.weapons[0].owner = 1;
+			assets.weapons.weapons[1].owner = 0;
 			Person::players[0]->weaponactive = 0;
 			Person::players[0]->num_weapons = 1;
 			Person::players[0]->weaponids[0] = 1;
@@ -306,10 +306,10 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			Person::players[1]->weaponids[0] = 0;
 
 			if (Person::players[0]->hasWeapon()) {
-				weapons.weapons[Person::players[0]->weaponids[Person::players[0]->weaponactive]].setType(staff);
+				assets.weapons.weapons[Person::players[0]->weaponids[Person::players[0]->weaponactive]].setType(staff);
 			}
 			else {
-				weapons.weapons[0].setType(staff);
+				assets.weapons.weapons[0].setType(staff);
 			}
 			break;
 		case 49:
@@ -319,12 +319,12 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 
 			maxtime = 200;
 
-			weapons.weapons[1].position = 1000;
-			weapons.weapons[1].tippoint = 1000;
+			assets.weapons.weapons[1].position = 1000;
+			assets.weapons.weapons[1].tippoint = 1000;
 
-			weapons.weapons[0].setType(knife);
+			assets.weapons.weapons[0].setType(knife);
 
-			weapons.weapons[0].owner = 0;
+			assets.weapons.weapons[0].owner = 0;
 			Person::players[1]->weaponactive = -1;
 			Person::players[1]->num_weapons = 0;
 			Person::players[0]->weaponactive = 0;
@@ -360,7 +360,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			Person::players[1]->weaponstuck = -1;
 			Person::players[1]->weaponactive = -1;
 
-			weapons.weapons.clear();
+			assets.weapons.weapons.clear();
 		} break;
 		case 51:
 			maxtime = 80000;

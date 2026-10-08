@@ -47,9 +47,11 @@ enum award_types
     award_count
 };
 
+struct GameAssets;
+
 extern const char* award_names[award_count];
 
-int award_awards(int*);
+int award_awards(int*, GameAssets& assets);
 
 extern float damagetaken;
 extern int numfalls;

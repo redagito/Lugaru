@@ -126,7 +126,7 @@ std::atomic<int> keyselect;
 std::atomic<bool> reloadRequested;
 ```
 
-It is default constructed once in `main()` (`main.cpp:566`) beside `GameState` and
+It is default constructed once in `main()` (`main.cpp:574`) beside `GameState` and
 `GameAssets`, and passed by reference down the chain those two already travel: `SetUp`,
 `Game::InitGame`, `Game::Tick`, `Game::ProcessInput`, `Game::DrawGLScene`,
 `Game::inputText`, `Menu::Load`, `Menu::Tick`, `Menu::updateControlsMenu`,
@@ -212,12 +212,12 @@ stripped and fails if the name `gamestate` or `fireSound` appears in it at all.
 ### 2c. An exception unwinds past the join, leaving a dangling reference
 
 The thread holds a `KeyCapture&`, so it must be joined before that object is destroyed.
-`Lugaru/source/main.cpp:636` does that explicitly, but the enclosing
-`catch (const std::exception&)` at `main.cpp:646` is reached by an exception thrown while
-the thread is still alive, and that path never passes the join at `:636`.
+`Lugaru/source/main.cpp:644` does that explicitly, but the enclosing
+`catch (const std::exception&)` at `main.cpp:654` is reached by an exception thrown while
+the thread is still alive, and that path never passes the join at `:644`.
 
-`GameState gamestate` (`main.cpp:555`), `GameAssets assets` (`main.cpp:561`) and
-`KeyCapture keycapture` (`main.cpp:566`) are stack objects, so on unwind they are destroyed
+`GameState gamestate` (`main.cpp:556`), `GameAssets assets` (`main.cpp:562`) and
+`KeyCapture keycapture` (`main.cpp:574`) are stack objects, so on unwind they are destroyed
 in reverse declaration order and `gamestate` last, while the thread's references are dangling
 from the moment the first of them begins to destruct. How long that window was depended on
 what the thread referenced. It used to hold a `GameAssets&`, so the window was
@@ -225,7 +225,9 @@ what the thread referenced. It used to hold a `GameAssets&`, so the window was
 (`Graphics/source/Graphic/Text.cpp:140`), and then the skybox and its 18 `Texture` members
 (8 singles plus `Mainmenuitems[10]`), each of which can drop the last reference to a
 `TextureRes` and so run a `glDeleteTextures`
-(`Graphics/source/Graphic/Texture.cpp:106-110`). It holds a `KeyCapture&` now, whose
+(`Graphics/source/Graphic/Texture.cpp:106-110`). The terrain is a GameAssets member too,
+behind a pointer because it is about 2.3 MB, so its seven `Texture` members add seven more
+chances to run one. It holds a `KeyCapture&` now, whose
 destructor is trivial - but `~GameAssets` is still the longest one in the block, and
 `deleteGame` is still called before it, so the window did not go away; it moved.
 
@@ -233,9 +235,9 @@ This is the same class of bug that was already fixed once in `Menu.cpp` (the thr
 being joined at all); this is the remaining path.
 
 **Suggested fix:** done; see 2a and 2b. The join guarantee is not on this list: it is an RAII
-guard, `JoinKeySelectThreadOnExit` (`main.cpp:487`), declared after all three objects it
-protects at `main.cpp:573` and therefore destroyed before them on every exit path out of the
-block - fall-through, early return, or unwind. The explicit join at `:636` stays because
+guard, `JoinKeySelectThreadOnExit` (`main.cpp:488`), declared after all three objects it
+protects at `main.cpp:581` and therefore destroyed before them on every exit path out of the
+block - fall-through, early return, or unwind. The explicit join at `:644` stays because
 `deleteGame` tears down state the thread still references, and it has to happen before
 `~GameAssets` runs.
 
@@ -290,7 +292,7 @@ migration, but keeping it is a behaviour change in the wrong direction, so it ha
 changed to `1`. Pinned by `56b253d` ("Assert a fresh editor size is usable"). Derived from
 the code rather than picked: the increment is `gamestate.editorsize += gamestate.multiplier`
 once per tick while `up` is held, and `multiplier` is the frame delta clamped to
-`[.001, .6]` (`Lugaru/source/main.cpp:282-288` and `:317-319`), so one second of holding
+`[.001, .6]` (`Lugaru/source/main.cpp:283-289` and `:318-320`), so one second of holding
 adds about `1.0` and the decrement floors at `.1`. One second of holding `up` therefore lands
 on `1`, which is also the nominal object scale - `Object::Object` calls
 `model.Scale(.3 * scale, .3 * scale, .3 * scale)` (`Object.cpp:161`) - and the value

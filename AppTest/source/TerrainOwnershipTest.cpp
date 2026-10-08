@@ -263,7 +263,12 @@ std::vector<TerrainParameter> terrainParameters(const std::string& code)
 		}
 
 		int brackets = 0;
-		for (parameter.bodyBegin = close + 1; parameter.bodyBegin < code.size(); ++parameter.bodyBegin) {
+		// The body starts where the scan starts, not at the brace it finds. A
+		// delegating constructor puts its mem-initializer list in between - and
+		// that list is where it passes terrain on, so excluding it would leave
+		// exactly the uses most likely to be rewritten blind.
+		const std::string::size_type afterList = close + 1;
+		for (parameter.bodyBegin = afterList; parameter.bodyBegin < code.size(); ++parameter.bodyBegin) {
 			const char c = code[parameter.bodyBegin];
 			if (c == '(' || c == '[') {
 				++brackets;
@@ -274,6 +279,7 @@ std::vector<TerrainParameter> terrainParameters(const std::string& code)
 			else if (brackets == 0) {
 				if (c == '{') {
 					parameter.hasBody = true;
+					parameter.bodyBegin = afterList;
 					break;
 				}
 				if (c == ';') {
@@ -311,9 +317,11 @@ std::vector<std::string::size_type> ownedPositions(const std::string& code, cons
 
 	const std::string suffix = std::string(".") + name;
 	for (const std::string::size_type at : wholeWordPositions(code, owner)) {
-		const std::string::size_type tail = at + std::string(owner).size();
-		if (code.compare(tail, suffix.size(), suffix) == 0) {
-			found.push_back(tail);
+		const std::string::size_type dot = at + std::string(owner).size();
+		if (code.compare(dot, suffix.size(), suffix) == 0) {
+			// `dot` indexes the separator, not the name: callers compare these
+			// against wholeWordPositions(name), which reports the name itself.
+			found.push_back(dot + 1);
 		}
 	}
 
@@ -511,7 +519,28 @@ TEST_CASE("every use of the terrain global goes through assets.terrain", "[terra
 
 	SECTION("the scan reached the trees it claims to")
 	{
-		REQUIRE(readAllScannedFiles().size() > 100);
+		// Every .c/.cpp/.h/.hpp under App and Game, less GameAssets.hpp. App
+		// holds 49 of them and Game 4, so 52 is the complete set - the floor is
+		// here to catch a directory walk that silently stops early, not to
+		// describe a number the tree happens to have today.
+		const std::vector<std::filesystem::path> scanned = readAllScannedFiles();
+		INFO("files scanned: " << scanned.size());
+		REQUIRE(scanned.size() >= 50);
+
+		// Spelled out rather than left to the count, because a walk that
+		// collapsed to one directory could still clear a floor.
+		bool sawTick = false;
+		bool sawConsole = false;
+		bool sawTerrain = false;
+		for (const std::filesystem::path& path : scanned) {
+			const std::string name = path.filename().string();
+			sawTick = sawTick || name == "GameTick.cpp";
+			sawConsole = sawConsole || name == "ConsoleCmds.cpp";
+			sawTerrain = sawTerrain || name == "Terrain.cpp";
+		}
+		REQUIRE(sawTick);
+		REQUIRE(sawConsole);
+		REQUIRE(sawTerrain);
 	}
 }
 

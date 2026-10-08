@@ -33,6 +33,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <cmath>
 
+struct GameAssets;
 struct GameState;
 
 #define knife 1
@@ -46,8 +47,8 @@ public:
 
     static void Load(bool usetrilinear, ProgressCallback callback);
 
-    void draw(GameState& gamestate);
-    void doStuff(int, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26], GameState& gamestate);
+    void draw(GameState& gamestate, GameAssets& assets);
+    void doStuff(int, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26], GameState& gamestate, GameAssets& assets);
 
     int getType()
     {
@@ -127,9 +128,10 @@ class Weapons
 public:
     std::vector<Weapon> weapons;
 
-    void Draw(GameState& gamestate);
-    void DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye, GameState& gamestate);
+    void Draw(GameState& gamestate, GameAssets& assets);
+    void DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye, GameState& gamestate, GameAssets& assets);
 };
 
-extern Weapons weapons;
+// There used to be an `extern Weapons weapons;` here as well as in Globals.h.
+// The one instance is a GameAssets member now, reached through it.
 #endif
