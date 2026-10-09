@@ -63,6 +63,26 @@ struct GameAssets
 	Texture cursortexture;
 	Texture Mainmenuitems[10];
 	Texture hawktexture;
+
+	// sprite textures
+	Texture cloudtexture;
+	Texture cloudimpacttexture;
+	Texture bloodtexture;
+	Texture flametexture;
+	Texture bloodflametexture;
+	Texture smoketexture;
+	Texture snowflaketexture;
+	Texture shinetexture;
+	Texture splintertexture;
+	Texture leaftexture;
+	Texture toothtexture;
+
+	// object textures
+	Texture boxtextureptr;
+	Texture treetextureptr;
+	Texture bushtextureptr;
+	Texture rocktextureptr;
+
 	GLuint screentexture = 0;
 	GLuint screentexture2 = 0;
 

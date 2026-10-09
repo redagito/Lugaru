@@ -20,22 +20,12 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Graphic/Sprite.hpp"
 
+#include "GameAssets.hpp"
 #include "GameState.hpp"
 #include "Objects/Object.hpp"
 #include "Objects/Person.hpp"
 
 // init statics
-Texture Sprite::cloudtexture;
-Texture Sprite::cloudimpacttexture;
-Texture Sprite::bloodtexture;
-Texture Sprite::flametexture;
-Texture Sprite::bloodflametexture;
-Texture Sprite::smoketexture;
-Texture Sprite::snowflaketexture;
-Texture Sprite::shinetexture;
-Texture Sprite::splintertexture;
-Texture Sprite::leaftexture;
-Texture Sprite::toothtexture;
 
 float Sprite::checkdelay = 0;
 
@@ -43,7 +33,7 @@ std::vector<std::unique_ptr<Sprite>> Sprite::sprites = std::vector<std::unique_p
 
 //Functions
 void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, int environment, const Light& light, float multiplier,
-	Terrain& terrain, int detail, const Vector3& viewerfacing, bool bloodtoggle, const Vector3& windvector, bool tutorialActive, GameState& gamestate)
+	Terrain& terrain, int detail, const Vector3& viewerfacing, bool bloodtoggle, const Vector3& windvector, bool tutorialActive, GameState& gamestate, GameAssets& assets)
 {
 	int k = 0;
 	float M[16];
@@ -84,7 +74,7 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 		if (lasttype != sprites[i]->type) {
 			switch (sprites[i]->type) {
 			case cloudsprite:
-				cloudtexture.bind();
+				assets.cloudtexture.bind();
 				if (!blend) {
 					blend = 1;
 					glAlphaFunc(GL_GREATER, 0.0001);
@@ -93,7 +83,7 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 				break;
 			case breathsprite:
 			case cloudimpactsprite:
-				cloudimpacttexture.bind();
+				assets.cloudimpacttexture.bind();
 				if (!blend) {
 					blend = 1;
 					glAlphaFunc(GL_GREATER, 0.0001);
@@ -101,7 +91,7 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 				}
 				break;
 			case smoketype:
-				smoketexture.bind();
+				assets.smoketexture.bind();
 				if (!blend) {
 					blend = 1;
 					glAlphaFunc(GL_GREATER, 0.0001);
@@ -109,7 +99,7 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 				}
 				break;
 			case bloodsprite:
-				bloodtexture.bind();
+				assets.bloodtexture.bind();
 				if (!blend) {
 					blend = 1;
 					glAlphaFunc(GL_GREATER, 0.0001);
@@ -119,16 +109,16 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 			case splintersprite:
 				if (lastspecial != sprites[i]->special) {
 					if (sprites[i]->special == 0) {
-						splintertexture.bind();
+						assets.splintertexture.bind();
 					}
 					if (sprites[i]->special == 1) {
-						leaftexture.bind();
+						assets.leaftexture.bind();
 					}
 					if (sprites[i]->special == 2) {
-						snowflaketexture.bind();
+						assets.snowflaketexture.bind();
 					}
 					if (sprites[i]->special == 3) {
-						toothtexture.bind();
+						assets.toothtexture.bind();
 					}
 					if (!blend) {
 						blend = 1;
@@ -138,7 +128,7 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 				}
 				break;
 			case snowsprite:
-				snowflaketexture.bind();
+				assets.snowflaketexture.bind();
 				if (!blend) {
 					blend = 1;
 					glAlphaFunc(GL_GREATER, 0.0001);
@@ -146,7 +136,7 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 				}
 				break;
 			case weaponshinesprite:
-				shinetexture.bind();
+				assets.shinetexture.bind();
 				if (blend) {
 					blend = 0;
 					glAlphaFunc(GL_GREATER, 0.001);
@@ -155,7 +145,7 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 				break;
 			case flamesprite:
 			case weaponflamesprite:
-				flametexture.bind();
+				assets.flametexture.bind();
 				if (blend || lasttype == bloodflamesprite) {
 					blend = 0;
 					glAlphaFunc(GL_GREATER, 0.3);
@@ -163,7 +153,7 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 				}
 				break;
 			case bloodflamesprite:
-				bloodflametexture.bind();
+				assets.bloodflametexture.bind();
 				if (blend) {
 					blend = 0;
 					glAlphaFunc(GL_GREATER, 0.3);

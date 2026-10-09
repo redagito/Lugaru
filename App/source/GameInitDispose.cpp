@@ -665,17 +665,17 @@ void Game::LoadStuff(GameState& gamestate, GameAssets& assets)
 	assets.terrain->bodyprinttexture.load("Textures/Bodyprint.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
 	assets.hawktexture.load("Textures/Hawk.png", 0, gamestate.trilinear, [&]() { LoadingScreen(gamestate, assets); });
 
-	Sprite::cloudtexture.load("Textures/Cloud.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
-	Sprite::cloudimpacttexture.load("Textures/CloudImpact.png", 1, gamestate.trilinear, [&]() { LoadingScreen(gamestate, assets); });
-	Sprite::bloodtexture.load("Textures/BloodParticle.png", 1, gamestate.trilinear, [&]() { LoadingScreen(gamestate, assets); });
-	Sprite::snowflaketexture.load("Textures/SnowFlake.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
-	Sprite::flametexture.load("Textures/Flame.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
-	Sprite::bloodflametexture.load("Textures/BloodFlame.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
-	Sprite::smoketexture.load("Textures/Smoke.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
-	Sprite::shinetexture.load("Textures/Shine.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
-	Sprite::splintertexture.load("Textures/Splinter.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
-	Sprite::leaftexture.load("Textures/Leaf.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
-	Sprite::toothtexture.load("Textures/Tooth.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.cloudtexture.load("Textures/Cloud.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.cloudimpacttexture.load("Textures/CloudImpact.png", 1, gamestate.trilinear, [&]() { LoadingScreen(gamestate, assets); });
+	assets.bloodtexture.load("Textures/BloodParticle.png", 1, gamestate.trilinear, [&]() { LoadingScreen(gamestate, assets); });
+	assets.snowflaketexture.load("Textures/SnowFlake.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.flametexture.load("Textures/Flame.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.bloodflametexture.load("Textures/BloodFlame.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.smoketexture.load("Textures/Smoke.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.shinetexture.load("Textures/Shine.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.splintertexture.load("Textures/Splinter.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.leaftexture.load("Textures/Leaf.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
+	assets.toothtexture.load("Textures/Tooth.png", 1, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
 
 	gamestate.yaw = 0;
 	gamestate.pitch = 0;

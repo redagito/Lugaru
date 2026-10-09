@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "GameAssets.hpp"
 #include "Objects/Object.hpp"
 #include <minwindef.h>
 #include <gl/GL.h>
@@ -41,10 +42,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 std::vector<std::unique_ptr<Object>> Object::objects;
 Vector3 Object::center;
 float Object::radius = 0;
-Texture Object::boxtextureptr;
-Texture Object::treetextureptr;
-Texture Object::bushtextureptr;
-Texture Object::rocktextureptr;
 
 //Functions
 
@@ -347,7 +344,7 @@ void Object::handleRot(int divide, float multiplier)
 	}
 }
 
-void Object::draw(bool decalstoggle, float multiplier, const Vector3& viewer, float viewdistance, float fadestart, int environment, const Light& light, const Frustum& frustum, const Terrain& terrain, int detail, float blurness, float windvar, float playerdist)
+void Object::draw(bool decalstoggle, float multiplier, const Vector3& viewer, float viewdistance, float fadestart, int environment, const Light& light, const Frustum& frustum, const Terrain& terrain, int detail, float blurness, float windvar, float playerdist, GameAssets& assets)
 {
 	float distance = 0.0;
 	Vector3 moved, terrainlight;
@@ -444,7 +441,7 @@ void Object::draw(bool decalstoggle, float multiplier, const Vector3& viewer, fl
 	if (type != treetrunktype && type != treeleavestype && type != bushtype && type != rocktype) {
 		glEnable(GL_CULL_FACE);
 		glAlphaFunc(GL_GREATER, 0.0001);
-		model.drawdifftex(boxtextureptr);
+		model.drawdifftex(assets.boxtextureptr);
 		model.drawdecals(terrain.shadowtexture, terrain.bloodtexture, terrain.bloodtexture2, terrain.breaktexture, decalstoggle, multiplier);
 	}
 
@@ -452,7 +449,7 @@ void Object::draw(bool decalstoggle, float multiplier, const Vector3& viewer, fl
 		glEnable(GL_CULL_FACE);
 		glAlphaFunc(GL_GREATER, 0.0001);
 		glColor4f((1 - shadowed) / 2 + light.ambient[0], (1 - shadowed) / 2 + light.ambient[1], (1 - shadowed) / 2 + light.ambient[2], distance);
-		model.drawdifftex(rocktextureptr);
+		model.drawdifftex(assets.rocktextureptr);
 		model.drawdecals(terrain.shadowtexture, terrain.bloodtexture, terrain.bloodtexture2, terrain.breaktexture, decalstoggle, multiplier);
 	}
 
@@ -464,7 +461,7 @@ void Object::draw(bool decalstoggle, float multiplier, const Vector3& viewer, fl
 		if (distance < 1) {
 			glAlphaFunc(GL_GREATER, 0.2);
 		}
-		model.drawdifftex(treetextureptr);
+		model.drawdifftex(assets.treetextureptr);
 	}
 
 	if (type == bushtype) {
@@ -475,19 +472,19 @@ void Object::draw(bool decalstoggle, float multiplier, const Vector3& viewer, fl
 		if (distance < 1) {
 			glAlphaFunc(GL_GREATER, 0.2);
 		}
-		model.drawdifftex(bushtextureptr);
+		model.drawdifftex(assets.bushtextureptr);
 	}
 
 	if (type == treetrunktype) {
 		glEnable(GL_CULL_FACE);
 		terrainlight = terrain.getLighting(position.x, position.z);
 		glColor4f(terrainlight.x, terrainlight.y, terrainlight.z, distance);
-		model.drawdifftex(treetextureptr);
+		model.drawdifftex(assets.treetextureptr);
 	}
 	glPopMatrix();
 }
 
-void Object::drawSecondPass(const Vector3& viewer, int environment, float multiplier, const Frustum& frustum, const Terrain& terrain, float windvar, float playerdist)
+void Object::drawSecondPass(const Vector3& viewer, int environment, float multiplier, const Frustum& frustum, const Terrain& terrain, float windvar, float playerdist, GameAssets& assets)
 {
 	static float distance;
 	static Vector3 moved, terrainlight;
@@ -552,7 +549,7 @@ void Object::drawSecondPass(const Vector3& viewer, int environment, float multip
 		glColor4f(terrainlight.x, terrainlight.y, terrainlight.z, .3);
 		glAlphaFunc(GL_GREATER, 0);
 		glDisable(GL_ALPHA_TEST);
-		model.drawdifftex(treetextureptr);
+		model.drawdifftex(assets.treetextureptr);
 	}
 
 	if (type == bushtype) {
@@ -564,7 +561,7 @@ void Object::drawSecondPass(const Vector3& viewer, int environment, float multip
 		glColor4f(terrainlight.x, terrainlight.y, terrainlight.z, .3);
 		glAlphaFunc(GL_GREATER, 0);
 		glDisable(GL_ALPHA_TEST);
-		model.drawdifftex(bushtextureptr);
+		model.drawdifftex(assets.bushtextureptr);
 	}
 
 	glPopMatrix();
@@ -673,15 +670,15 @@ void Object::SphereCheckPossible(Vector3* p1, float checkradius, const Terrain& 
 }
 
 void Object::Draw(bool decalstoggle, float multiplier, const Vector3& viewer, float viewdistance, float fadestart, int environment,
-	const Light& light, const Frustum& frustum, const Terrain& terrain, int detail, float blurness, float windvar, float playerdist)
+	const Light& light, const Frustum& frustum, const Terrain& terrain, int detail, float blurness, float windvar, float playerdist, GameAssets& assets)
 {
 	for (unsigned i = 0; i < objects.size(); i++) {
-		objects[i]->draw(decalstoggle, multiplier, viewer, viewdistance, fadestart, environment, light, frustum, terrain, detail, blurness, windvar, playerdist);
+		objects[i]->draw(decalstoggle, multiplier, viewer, viewdistance, fadestart, environment, light, frustum, terrain, detail, blurness, windvar, playerdist, assets);
 	}
 
 	glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, 0);
 	for (unsigned i = 0; i < objects.size(); i++) {
-		objects[i]->drawSecondPass(viewer, environment, multiplier, frustum, terrain, windvar, playerdist);
+		objects[i]->drawSecondPass(viewer, environment, multiplier, frustum, terrain, windvar, playerdist, assets);
 	}
 	if (environment == desertenvironment) {
 		glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, 0);
@@ -818,10 +815,3 @@ Object::operator Json::Value() {
 	return object;
 }
 
-//~ Object::~Objects()
-//~ {
-//~ boxtextureptr.destroy();
-//~ treetextureptr.destroy();
-//~ bushtextureptr.destroy();
-//~ rocktextureptr.destroy();
-//~ }

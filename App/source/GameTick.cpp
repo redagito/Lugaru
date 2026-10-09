@@ -261,10 +261,10 @@ void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 			emit_stream_np(stream_wind);
 		}
 
-		Object::treetextureptr.load("Textures/SnowTree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
-		Object::bushtextureptr.load("Textures/BushSnow.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
-		Object::rocktextureptr.load("Textures/BoulderSnow.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
-		Object::boxtextureptr.load("Textures/SnowBox.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.treetextureptr.load("Textures/SnowTree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.bushtextureptr.load("Textures/BushSnow.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.rocktextureptr.load("Textures/BoulderSnow.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.boxtextureptr.load("Textures/SnowBox.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 		footstepsound = footstepsn1;
 		footstepsound2 = footstepsn2;
@@ -290,10 +290,10 @@ void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 	else if (gamestate.environment == desertenvironment) {
 		gamestate.windvector = 0;
 		gamestate.windvector.z = 2;
-		Object::treetextureptr.load("Textures/DesertTree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
-		Object::bushtextureptr.load("Textures/BushDesert.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
-		Object::rocktextureptr.load("Textures/BoulderDesert.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
-		Object::boxtextureptr.load("Textures/DesertBox.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.treetextureptr.load("Textures/DesertTree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.bushtextureptr.load("Textures/BushDesert.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.rocktextureptr.load("Textures/BoulderDesert.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.boxtextureptr.load("Textures/DesertBox.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 		if (gamestate.ambientsound) {
 			emit_stream_np(stream_desertambient);
@@ -323,10 +323,10 @@ void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 	else if (gamestate.environment == grassyenvironment) {
 		gamestate.windvector = 0;
 		gamestate.windvector.z = 2;
-		Object::treetextureptr.load("Textures/Tree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
-		Object::bushtextureptr.load("Textures/Bush.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
-		Object::rocktextureptr.load("Textures/Boulder.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
-		Object::boxtextureptr.load("Textures/GrassBox.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.treetextureptr.load("Textures/Tree.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.bushtextureptr.load("Textures/Bush.png", 0, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.rocktextureptr.load("Textures/Boulder.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.boxtextureptr.load("Textures/GrassBox.jpg", 1, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 		if (gamestate.ambientsound) {
 			emit_stream_np(stream_wind, 100.);

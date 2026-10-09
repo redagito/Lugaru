@@ -34,6 +34,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 struct GameState;
+struct GameAssets;
 
 #define max_sprites 20000
 
@@ -81,7 +82,7 @@ public:
 	// TODO Update and draw in one?
 	static void Draw(const Vector3& viewer, float viewdistance, float fadestart, int environment, const Light& light, float multiplier,
 		Terrain& terrain, int detail, const Vector3& viewerfacing, bool bloodtoggle, const Vector3& windvector, bool tutorialActive,
-		GameState& gamestate);
+		GameState& gamestate, GameAssets& assets);
 
 	static void deleteSprites()
 	{
@@ -102,21 +103,6 @@ public:
 	{
 		sprites.back()->alivetime = al;
 	}
-
-	static Texture cloudtexture;
-	static Texture bloodtexture;
-	static Texture flametexture;
-	static Texture smoketexture;
-
-	static Texture cloudimpacttexture;
-	static Texture snowflaketexture;
-	static Texture shinetexture;
-	static Texture bloodflametexture;
-
-	static Texture splintertexture;
-
-	static Texture leaftexture;
-	static Texture toothtexture;
 
 	Sprite();
 	~Sprite() = default;

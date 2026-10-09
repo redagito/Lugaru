@@ -434,7 +434,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 		glPushMatrix();
 		glCullFace(GL_BACK);
 		glEnable(GL_TEXTURE_2D);
-		Object::Draw(gamestate.decalstoggle, gamestate.multiplier, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.light, gamestate.frustum, *assets.terrain, gamestate.detail, gamestate.blurness, gamestate.windvar, gamestate.playerdist);
+		Object::Draw(gamestate.decalstoggle, gamestate.multiplier, gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.light, gamestate.frustum, *assets.terrain, gamestate.detail, gamestate.blurness, gamestate.windvar, gamestate.playerdist, assets);
 		glPopMatrix();
 
 		//draw hawk
@@ -511,7 +511,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 
 		glDepthMask(0);
 
-		Sprite::Draw(gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.light, gamestate.multiplier, *assets.terrain, gamestate.detail, gamestate.viewerfacing, gamestate.bloodtoggle, gamestate.windvector, Tutorial::active, gamestate);
+		Sprite::Draw(gamestate.viewer, gamestate.viewdistance, gamestate.fadestart, gamestate.environment, gamestate.light, gamestate.multiplier, *assets.terrain, gamestate.detail, gamestate.viewerfacing, gamestate.bloodtoggle, gamestate.windvector, Tutorial::active, gamestate, assets);
 
 		//waypoints, pathpoints in editor
 		if (gamestate.editorenabled) {

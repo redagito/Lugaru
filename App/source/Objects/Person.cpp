@@ -6809,7 +6809,7 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 			if (playerdetail) {
 				if (!gamestate.showpoints) {
 					if (tutorialActive && (id != 0)) {
-						skeleton.drawmodel.drawdifftex(Sprite::cloudimpacttexture);
+						skeleton.drawmodel.drawdifftex(assets.cloudimpacttexture);
 					}
 					else {
 						skeleton.drawmodel.draw();
@@ -6818,7 +6818,7 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 			}
 			if (!playerdetail) {
 				if (tutorialActive && (id != 0)) {
-					skeleton.drawmodellow.drawdifftex(Sprite::cloudimpacttexture);
+					skeleton.drawmodellow.drawdifftex(assets.cloudimpacttexture);
 				}
 				else {
 					skeleton.drawmodellow.drawdifftex(skeleton.drawmodel.textureptr);
@@ -6847,7 +6847,7 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 					if (playerdetail) {
 						if (!gamestate.showpoints) {
 							if (tutorialActive && (id != 0)) {
-								skeleton.drawmodel.drawdifftex(Sprite::cloudimpacttexture);
+								skeleton.drawmodel.drawdifftex(assets.cloudimpacttexture);
 							}
 							else {
 								skeleton.drawmodel.draw();
@@ -6856,7 +6856,7 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 					}
 					if (!playerdetail) {
 						if (tutorialActive && (id != 0)) {
-							skeleton.drawmodellow.drawdifftex(Sprite::cloudimpacttexture);
+							skeleton.drawmodellow.drawdifftex(assets.cloudimpacttexture);
 						}
 						else {
 							skeleton.drawmodellow.drawdifftex(skeleton.drawmodel.textureptr);
