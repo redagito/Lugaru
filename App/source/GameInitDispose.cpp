@@ -50,14 +50,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <Graphic/Text.hpp>
 #include <Objects/PersonType.hpp>
 
-extern float accountcampaignhighscore[10];
-extern float accountcampaignfasttime[10];
-extern float accountcampaignscore[10];
-extern float accountcampaigntime[10];
-
-extern int accountcampaignchoicesmade[10];
-extern int accountcampaignchoices[10][5000];
-
 void Dispose(GameState& gamestate)
 {
 

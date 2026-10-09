@@ -35,8 +35,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 extern bool campaign;
 
-extern bool gamestart;
-
 int drawtoggle = 0;
 int numboundaries = 0;
 Vector3 boundary[360];
