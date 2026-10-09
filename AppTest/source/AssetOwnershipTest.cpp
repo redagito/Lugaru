@@ -346,17 +346,23 @@ TEST_CASE("GameGlobals.cpp no longer defines the three objects", "[assets][archi
 
 	SECTION("no declaration of the proportional font either")
 	{
-		// Whole-word, so consoletext and text[m] in a comment would not trip it.
+		// Whole-word, so a `text` appearing as part of a longer name in a comment
+		// would not trip it.
 		const std::vector<std::string::size_type> proportional = wholeWordPositions(text, "text");
 		INFO("occurrences of text: " << proportional.size());
 		REQUIRE(proportional.empty());
 	}
 
-	SECTION("the rest of the file is untouched")
+	SECTION("the translation unit is still there")
 	{
-		// Guards against 'remove the globals' being done by emptying the file.
-		REQUIRE(text.find("consoletext") != std::string::npos);
-		REQUIRE(text.find("namespace Game") != std::string::npos);
+		// Guards against 'remove the globals' being done by deleting the file
+		// rather than migrating out of it. The definitions are gone on purpose
+		// now - GameState, GameAssets and Console own them all - so what is
+		// anchored instead is the licence every file carries and the include that
+		// keeps the header reachable from this object file.
+		REQUIRE(text.size() > 200);
+		REQUIRE(text.find("GameGlobals.h") != std::string::npos);
+		REQUIRE(text.find("GNU General Public License") != std::string::npos);
 	}
 }
 
@@ -444,15 +450,16 @@ TEST_CASE("GameGlobals.cpp no longer defines the shared textures", "[assets][arc
 		}
 	}
 
-	SECTION("consoletext is the only thing left in it")
+	SECTION("the file defines nothing any more")
 	{
-		// The four models that used to sit here have moved to GameAssets, so the
-		// file is down to a single pending definition. Anchoring on that exact line
-		// is what keeps the sweep above from passing over an emptied file, which is
-		// the one way to satisfy "none of the eleven is left" without doing the
-		// work - exactly as the hawk and iris anchors did before.
-		REQUIRE(text.find("std::string consoletext[15] = {};") != std::string::npos);
-		REQUIRE(text.find("namespace Game") != std::string::npos);
+		// The four models and consoletext have all moved to an owner, so the file
+		// legitimately defines nothing now. Anchoring on the include and the
+		// licence is what keeps the sweep above from passing over a file that was
+		// deleted rather than migrated - exactly as the hawk, iris and consoletext
+		// anchors did before them.
+		REQUIRE(text.size() > 200);
+		REQUIRE(text.find("GameGlobals.h") != std::string::npos);
+		REQUIRE(text.find("GNU General Public License") != std::string::npos);
 	}
 }
 

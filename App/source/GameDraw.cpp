@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "GameGlobals.h"
 
 #include "Audio/openal_wrapper.hpp"
+#include "Console.hpp"
 #include "GameAssets.hpp"
 #include "GameState.hpp"
 #include "KeyCapture.hpp"
@@ -65,7 +66,7 @@ void Game::flash(GameState& gamestate, float amount, int delay) // shouldn't be 
 void DrawMenu(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture);
 
 /*********************> DrawGLScene() <*****/
-int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
+int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets, KeyCapture& keycapture, Console& console)
 {
 	static float texcoordwidth, texcoordheight;
 	static float texviewwidth, texviewheight;
@@ -563,7 +564,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 
 		glEnable(GL_TEXTURE_2D);
 		glColor4f(.5, .5, .5, 1);
-		if (!gamestate.console) {
+		if (!console.open) {
 			if (!Tutorial::active) {
 				if (bonus > 0 && bonustime < 1 && !gamestate.winfreeze && !Dialog::inDialog()) {
 					const char* bonus_name;
@@ -949,7 +950,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 			glDepthMask(1);
 		}
 
-		if ((((gamestate.blackout && gamestate.damageeffects) || (Person::players[0]->bloodloss > 0 && gamestate.damageeffects && Person::players[0]->blooddimamount > 0) || Person::players[0]->dead) && !gamestate.cameramode) || gamestate.console) {
+		if ((((gamestate.blackout && gamestate.damageeffects) || (Person::players[0]->bloodloss > 0 && gamestate.damageeffects && Person::players[0]->blooddimamount > 0) || Person::players[0]->dead) && !gamestate.cameramode) || console.open) {
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE);
 			glDisable(GL_LIGHTING);
@@ -985,7 +986,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 					gamestate.blackout = Person::players[0]->blooddimamount * .3;
 				}
 			}
-			if (gamestate.console) {
+			if (console.open) {
 				glColor4f(.7, 0, 0, .2);
 			}
 			glBegin(GL_QUADS);
@@ -1572,19 +1573,22 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 			glDepthMask(1);
 		}
 
-		if (gamestate.console) {
+		if (console.open) {
 			glEnable(GL_TEXTURE_2D);
 			glColor4f(1, 1, 1, 1);
 			int offset = 0;
-			if (gamestate.consoleselected >= 60) {
-				offset = gamestate.consoleselected - 60;
+			if (console.selected >= 60) {
+				offset = console.selected - 60;
 			}
 			assets.textmono.glPrint(10, 30, " ]", 0, 1, 1024, 768);
-			if (gamestate.consoleblink) {
-				assets.textmono.glPrint(30 + (float)gamestate.consoleselected * 10 - offset * 10, 30, "_", 0, 1, 1024, 768);
+			if (console.blink) {
+				assets.textmono.glPrint(30 + (float)console.selected * 10 - offset * 10, 30, "_", 0, 1, 1024, 768);
 			}
-			for (unsigned i = 0; i < 15; i++) {
-				assets.textmono.glPrint(30 - offset * 10, 30 + i * 20, consoletext[i], 0, 1, 1024, 768);
+			assets.textmono.glPrint(30 - offset * 10, 30, console.line, 0, 1, 1024, 768);
+			unsigned row = 1;
+			for (const std::string& entry : console.history) {
+				assets.textmono.glPrint(30 - offset * 10, 30 + row * 20, entry, 0, 1, 1024, 768);
+				++row;
 			}
 		}
 	}

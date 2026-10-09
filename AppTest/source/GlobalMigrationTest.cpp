@@ -383,16 +383,12 @@ std::vector<SlotOccurrence> findSaveSlot(const char* path, const std::string& na
 // reason: they are owned by GameAssets and passed by reference, which
 // AssetOwnershipTest.cpp and TerrainOwnershipTest.cpp check.
 //
-// What is left is consoletext. It is a std::string[15], and that is the whole
-// reason it is deferred: GameState has to stay trivially copyable, and an array
-// of std::string is neither trivially copyable nor trivially destructible. It
-// would need to become a fixed-size char array or move out to an owner like the
-// terrain did, and neither is a mechanical change - so it is a decision, not a
-// sweep, and it stays until somebody makes it.
-const std::set<std::string> kPendingGlobals = {
-	// App/include/GameGlobals.h
-	"consoletext",
-};
+// consoletext is absent for the same kind of reason again, and completed last:
+// it needed a fixed-size owner of its own because a std::string array is neither
+// trivially copyable nor trivially destructible, so putting it in GameState would
+// have cost GameState the triviality GameStateTest.cpp:109-110 asserts. That
+// owner is Console, and it is checked by ConsoleOwnershipTest.cpp.
+const std::set<std::string> kPendingGlobals = {};
 
 } // namespace
 
@@ -434,9 +430,11 @@ TEST_CASE("the globals headers only lose globals to GameState", "[gamestate][mig
 	SECTION("the parse found what the headers actually say")
 	{
 		// Without this, a parser that quietly matched nothing would leave every
-		// assertion above passing for the wrong reason.
-		REQUIRE(globals.size() == 1);
-		REQUIRE(members.size() == 153);
+		// assertion above passing for the wrong reason. The headers declare no
+		// globals now that consoletext has an owner of its own, so the parse has
+		// to find nothing for the same reason it used to find exactly one entry.
+		REQUIRE(globals.empty());
+		REQUIRE(members.size() == 149);
 	}
 }
 

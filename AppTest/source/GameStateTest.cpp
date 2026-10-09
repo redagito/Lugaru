@@ -35,8 +35,7 @@ TEST_CASE("GameState members start at their historical global defaults", "[games
 
 	SECTION("console")
 	{
-		REQUIRE(s.consoleblink == false);
-		REQUIRE(s.consoleblinkdelay == 0.0f);
+		REQUIRE(s.consolekey == 0);
 	}
 
 	SECTION("screen limits")
@@ -70,8 +69,6 @@ TEST_CASE("a freshly constructed GameState is unaffected by another instance", "
 		a.hawkyaw = 2.5f;
 		a.hawkcalldelay = 7.0f;
 		a.mousejump = true;
-		a.consoleblink = true;
-		a.consoleblinkdelay = 0.3f;
 		a.slomospeed = 0.25f;
 		a.maxscreenwidth = 1920.0f;
 		a.maxscreenheight = 1080.0f;
@@ -84,8 +81,6 @@ TEST_CASE("a freshly constructed GameState is unaffected by another instance", "
 		REQUIRE(b.hawkyaw == 0.0f);
 		REQUIRE(b.hawkcalldelay == 0.0f);
 		REQUIRE(b.mousejump == false);
-		REQUIRE(b.consoleblink == false);
-		REQUIRE(b.consoleblinkdelay == 0.0f);
 		REQUIRE(b.slomospeed == 0.0f);
 		REQUIRE(b.maxscreenwidth == 3000.0f);
 		REQUIRE(b.maxscreenheight == 3000.0f);
@@ -97,7 +92,6 @@ TEST_CASE("a freshly constructed GameState is unaffected by another instance", "
 		REQUIRE(c.editoractive == 0);
 		REQUIRE(c.hawkyaw == 0.0f);
 		REQUIRE(c.mousejump == false);
-		REQUIRE(c.consoleblink == false);
 		REQUIRE(c.slomospeed == 0.0f);
 		REQUIRE(c.maxscreenwidth == 3000.0f);
 		REQUIRE(c.maxscreenheight == 3000.0f);
@@ -321,7 +315,6 @@ TEST_CASE("GameState tranche 3 members start at their historical global defaults
 	SECTION("console")
 	{
 		REQUIRE(s.consolekey == 0);
-		REQUIRE(s.consoleselected == 0);
 	}
 
 	SECTION("input")
@@ -375,7 +368,6 @@ TEST_CASE("tranche 3 GameState members are per instance", "[gamestate]")
 		a.firstLoadDone = true;
 		a.editorsize = 1.5f;
 		a.consolekey = 99;
-		a.consoleselected = 6;
 		a.stereoreverse = true;
 		a.mousecoordh = 42;
 		a.mousecoordv = 43;
@@ -411,7 +403,6 @@ TEST_CASE("tranche 3 GameState members are per instance", "[gamestate]")
 		REQUIRE(b.firstLoadDone == false);
 		REQUIRE(b.editorsize == 1.0f);
 		REQUIRE(b.consolekey == 0);
-		REQUIRE(b.consoleselected == 0);
 		REQUIRE(b.stereoreverse == false);
 		REQUIRE(b.mousecoordh == 0);
 		REQUIRE(b.mousecoordv == 0);
@@ -450,7 +441,6 @@ TEST_CASE("tranche 3 GameState members are per instance", "[gamestate]")
 		a.firstLoadDone = true;
 		a.editorsize = 17.0f;
 		a.consolekey = 18;
-		a.consoleselected = 19;
 		a.stereoreverse = true;
 		a.mousecoordh = 20;
 		a.mousecoordv = 21;
@@ -487,7 +477,6 @@ TEST_CASE("tranche 3 GameState members are per instance", "[gamestate]")
 		REQUIRE(c.firstLoadDone == false);
 		REQUIRE(c.editorsize == 1.0f);
 		REQUIRE(c.consolekey == 0);
-		REQUIRE(c.consoleselected == 0);
 		REQUIRE(c.stereoreverse == false);
 		REQUIRE(c.mousecoordh == 0);
 		REQUIRE(c.mousecoordv == 0);
@@ -526,7 +515,6 @@ TEST_CASE("tranche 3 GameState members are per instance", "[gamestate]")
 		REQUIRE(std::is_same<decltype(a.firstLoadDone), bool>::value);
 		REQUIRE(std::is_same<decltype(a.editorsize), float>::value);
 		REQUIRE(std::is_same<decltype(a.consolekey), unsigned short>::value);
-		REQUIRE(std::is_same<decltype(a.consoleselected), unsigned>::value);
 		REQUIRE(std::is_same<decltype(a.stereoreverse), bool>::value);
 		REQUIRE(std::is_same<decltype(a.mousecoordh), int>::value);
 		REQUIRE(std::is_same<decltype(a.mousecoordv), int>::value);
@@ -839,7 +827,7 @@ TEST_CASE("tranche 4 GameState members are per instance", "[gamestate]")
 	}
 }
 
-// Tranche 5 covers twenty-four more scalar globals from App/include/Globals.h
+// Tranche 5 covers twenty more scalar globals from App/include/Globals.h
 // and App/include/GameGlobals.h. Each member's default is the literal the
 // global it came from was initialised with, and its declared type is the type
 // that global declared. The literals were first pinned by reading the globals
@@ -849,7 +837,9 @@ TEST_CASE("tranche 4 GameState members are per instance", "[gamestate]")
 // cannot be a member here: they are the handshake with the one thread in the
 // process and so are atomic, and an atomic member would cost GameState the
 // trivial copyability this file asserts. They are pinned there instead, in
-// KeyCaptureHandshakeTest.cpp.
+// KeyCaptureHandshakeTest.cpp. The console's own state left the same way,
+// because a std::string member would break that triviality for the same
+// reason; it is pinned in ConsoleOwnershipTest.cpp.
 //
 // Types are pinned next to the values on purpose. A value comparison such as
 // `REQUIRE(x == 0)` holds just as happily for an int as for a float, so on its
@@ -948,11 +938,6 @@ TEST_CASE("GameState tranche 5 members start at their historical global defaults
 		REQUIRE(s.cameramode == false);
 	}
 
-	SECTION("console")
-	{
-		REQUIRE(s.console == false);
-	}
-
 	SECTION("level switching")
 	{
 		REQUIRE(s.targetlevel == 0);
@@ -982,7 +967,6 @@ TEST_CASE("GameState tranche 5 members start at their historical global defaults
 		REQUIRE(std::is_same<decltype(s.musictype), int>::value);
 		REQUIRE(std::is_same<decltype(s.stealthloading), bool>::value);
 		REQUIRE(std::is_same<decltype(s.cameramode), bool>::value);
-		REQUIRE(std::is_same<decltype(s.console), bool>::value);
 		REQUIRE(std::is_same<decltype(s.targetlevel), int>::value);
 	}
 }
@@ -1016,10 +1000,9 @@ TEST_CASE("tranche 5 GameState members are per instance", "[gamestate]")
 		a.musictype = 5;
 		a.stealthloading = true;
 		a.cameramode = true;
-		a.console = true;
 		a.targetlevel = 9;
 
-		// Every one of the twenty-four was seeded to a value its default does not
+		// Every one of the twenty was seeded to a value its default does not
 		// hold, so each assertion below is an observation of a value the writer
 		// never touched rather than a restatement of the default.
 		REQUIRE(b.decalstoggle == false);
@@ -1044,7 +1027,6 @@ TEST_CASE("tranche 5 GameState members are per instance", "[gamestate]")
 		REQUIRE(b.musictype == 0);
 		REQUIRE(b.stealthloading == false);
 		REQUIRE(b.cameramode == false);
-		REQUIRE(b.console == false);
 		REQUIRE(b.targetlevel == 0);
 	}
 
@@ -1072,7 +1054,6 @@ TEST_CASE("tranche 5 GameState members are per instance", "[gamestate]")
 		a.musictype = 8;
 		a.stealthloading = true;
 		a.cameramode = true;
-		a.console = true;
 		a.targetlevel = 12;
 
 		GameState c;
@@ -1098,7 +1079,6 @@ TEST_CASE("tranche 5 GameState members are per instance", "[gamestate]")
 		REQUIRE(c.musictype == 0);
 		REQUIRE(c.stealthloading == false);
 		REQUIRE(c.cameramode == false);
-		REQUIRE(c.console == false);
 		REQUIRE(c.targetlevel == 0);
 	}
 }

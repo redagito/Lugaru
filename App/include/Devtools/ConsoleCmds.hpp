@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+struct Console;
 struct GameAssets;
 struct GameState;
 
@@ -28,9 +29,9 @@ struct GameState;
  * them. Commands that never touch GameState leave the parameter unnamed, so
  * their bodies are unchanged.
  */
-typedef void (*console_handler)(const char* args, GameState& gamestate, GameAssets& assets);
+typedef void (*console_handler)(const char* args, GameState& gamestate, GameAssets& assets, Console& console);
 
-#define DECLARE_COMMAND(cmd) void ch_##cmd(const char* args, GameState& gamestate, GameAssets& assets);
+#define DECLARE_COMMAND(cmd) void ch_##cmd(const char* args, GameState& gamestate, GameAssets& assets, Console& console);
 #include "ConsoleCmds.def"
 #undef DECLARE_COMMAND
 

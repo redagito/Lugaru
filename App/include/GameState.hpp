@@ -52,12 +52,10 @@ struct GameState
 	float hawkyaw = 0;
 	float hawkcalldelay = 0;
 
-	// console
-	float consoleblinkdelay = 0;
-	bool consoleblink = false;
-	unsigned consoleselected = 0;
+	// The console's own state - the open flag, the cursor, the blink and the
+	// text buffer - lives in Console, which main() owns and passes alongside this.
+	// Only the key that opens it stays here, because it is a setting.
 	unsigned short consolekey = 0;
-	bool console = false;
 
 	// screen limits
 	float maxscreenwidth = 3000;

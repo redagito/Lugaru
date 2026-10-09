@@ -46,6 +46,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #define NB_CAMPAIGN_MENU_ITEM 7
 
+struct Console;
 struct GameAssets;
 struct GameState;
 struct KeyCapture;
@@ -59,22 +60,22 @@ namespace Game
 	void LoadStuff(GameState& gamestate, GameAssets& assets);
 	void LoadScreenTexture(GameState& gamestate, GameAssets& assets);
 	void LoadingScreen(GameState& gamestate, GameAssets& assets);
-	int DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets, KeyCapture& keycapture);
+	int DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets, KeyCapture& keycapture, Console& console);
 	void playdialoguescenesound(GameState& gamestate);
 	int findClosestPlayer();
 	void ResetBeforeLevelLoad(bool tutorial, GameState& gamestate);
-	bool LoadLevel(int which, GameState& gamestate, GameAssets& assets);
-	bool LoadLevel(const std::string& name, bool tutorial, GameState& gamestate, GameAssets& assets);
-	bool LoadJsonLevel(const std::string& name, bool tutorial, GameState& gamestate, GameAssets& assets);
+	bool LoadLevel(int which, GameState& gamestate, GameAssets& assets, Console& console);
+	bool LoadLevel(const std::string& name, bool tutorial, GameState& gamestate, GameAssets& assets, Console& console);
+	bool LoadJsonLevel(const std::string& name, bool tutorial, GameState& gamestate, GameAssets& assets, Console& console);
 
-	void cmd_dispatch(const std::string cmd, GameState& gamestate, GameAssets& assets);
+	void cmd_dispatch(const std::string cmd, GameState& gamestate, GameAssets& assets, Console& console);
 
-	void ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture);
-	void ProcessDevInput(GameState& gamestate, GameAssets& assets);
+	void ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture, Console& console);
+	void ProcessDevInput(GameState& gamestate, GameAssets& assets, Console& console);
 
-	void Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture);
+	void Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture, Console& console);
 	void TickOnce(GameState& gamestate);
-	void TickOnceAfter(GameState& gamestate, GameAssets& assets);
+	void TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& console);
 
 	void SetUpLighting(GameState& gamestate);
 	GLvoid ReSizeGLScene(float fov, float near, GameState& gamestate);

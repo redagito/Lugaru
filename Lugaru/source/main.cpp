@@ -25,6 +25,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Globals.h"
 #include "KeyCapture.hpp"
 
+#include "Console.hpp"
+
 #include "Audio/AudioState.hpp"
 #include "Audio/openal_wrapper.hpp"
 #include "CommandLine.hpp"
@@ -309,7 +311,7 @@ void DoFrameRate(GameState& gamestate, int update)
 	}
 }
 
-void DoUpdate(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
+void DoUpdate(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture, Console& console)
 {
 	static float sps = 200;
 	static int count;
@@ -350,18 +352,18 @@ void DoUpdate(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 	TickOnce(gamestate);
 
 	for (int i = 0; i < count; i++) {
-		Tick(gamestate, assets, keycapture);
+		Tick(gamestate, assets, keycapture, console);
 	}
 	gamestate.multiplier = oldmult;
 
-	TickOnceAfter(gamestate, assets);
-	if (gamestate.stereomode == stereoNone) {
-		DrawGLScene(stereoCenter, gamestate, assets, keycapture);
-	}
-	else {
-		DrawGLScene(stereoLeft, gamestate, assets, keycapture);
-		DrawGLScene(stereoRight, gamestate, assets, keycapture);
-	}
+		TickOnceAfter(gamestate, assets, console);
+		if (gamestate.stereomode == stereoNone) {
+			DrawGLScene(stereoCenter, gamestate, assets, keycapture, console);
+		}
+		else {
+			DrawGLScene(stereoLeft, gamestate, assets, keycapture, console);
+			DrawGLScene(stereoRight, gamestate, assets, keycapture, console);
+		}
 }
 
 // --------------------------------------------------------------------------
@@ -573,6 +575,13 @@ int main(int argc, char** argv)
 			// atomics, so unlike GameState it cannot live inside one.
 			KeyCapture keycapture;
 
+			// The devtools console, by the same rule again: one per process,
+			// passed by reference. It owns std::strings, so it cannot live inside
+			// GameState either - that has to stay trivially copyable and
+			// trivially destructible so a unit test can build one with no GL
+			// context. Its state was the last file-scope global in the project.
+			Console console;
+
 			// Declared after all three objects the thread references, so it is
 			// destroyed before any of them: the join cannot be skipped by the
 			// early return below or by an exception unwinding out of this block.
@@ -596,10 +605,10 @@ int main(int argc, char** argv)
 
 			if (commandLineOptions[CMD].count() > 0) {
 				gamestate.devtools = true;
-				Menu::startChallengeLevel(1, gamestate, assets);
+				Menu::startChallengeLevel(1, gamestate, assets, console);
 				for (option::Option* opt = commandLineOptions[CMD]; opt; opt = opt->next()) {
 					if (opt->arg && (strlen(opt->arg) > 0)) {
-						cmd_dispatch(opt->arg, gamestate, assets);
+						cmd_dispatch(opt->arg, gamestate, assets, console);
 					}
 				}
 			}
@@ -623,14 +632,14 @@ int main(int argc, char** argv)
 						}
 					}
 
-					// game
-					DoUpdate(gamestate, assets, keycapture);
-				}
+				// game
+				DoUpdate(gamestate, assets, keycapture, console);
+			}
 				else {
 					if (gameFocused) {
 						// allow game chance to pause
 						gameFocused = false;
-						DoUpdate(gamestate, assets, keycapture);
+				DoUpdate(gamestate, assets, keycapture, console);
 					}
 
 					// game is not in focus, give CPU time to other apps by waiting for messages instead of 'peeking'

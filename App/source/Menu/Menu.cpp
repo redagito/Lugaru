@@ -521,7 +521,7 @@ void Menu::Load(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
     }
 }
 
-void Menu::startChallengeLevel(int challengelevel, GameState& gamestate, GameAssets& assets)
+void Menu::startChallengeLevel(int challengelevel, GameState& gamestate, GameAssets& assets, Console& console)
 {
     fireSound();
     flash(gamestate);
@@ -532,11 +532,11 @@ void Menu::startChallengeLevel(int challengelevel, GameState& gamestate, GameAss
     gamestate.loadtime = 0;
     gamestate.targetlevel = challengelevel;
     if (gamestate.firstLoadDone) {
-        TickOnceAfter(gamestate, assets);
+        TickOnceAfter(gamestate, assets, console);
     } else {
         LoadStuff(gamestate, assets);
     }
-    LoadLevel(challengelevel, gamestate, assets);
+    LoadLevel(challengelevel, gamestate, assets, console);
     campaign = 0;
 
     gamestate.mainmenu = 0;
@@ -552,7 +552,7 @@ namespace
 void applyCapturedKey(GameState& gamestate, KeyCapture& keycapture);
 }
 
-void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
+void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture, Console& console)
 {
     // Answer the capture thread's request for the menu to be rebuilt. It used to
     // rebuild it itself, in the middle of a frame the main thread was running,
@@ -787,7 +787,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
                     gamestate.loadtime = 0;
                     gamestate.targetlevel = 7;
                     if (gamestate.firstLoadDone) {
-                        TickOnceAfter(gamestate, assets);
+                        TickOnceAfter(gamestate, assets, console);
                     } else {
                         LoadStuff(gamestate, assets);
                     }
@@ -795,7 +795,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
                     actuallevel = (Account::active().getCampaignChoicesMade() > 0 ? campaignlevels[Account::active().getCampaignChoicesMade() - 1].nextlevel[gamestate.whichchoice] : 0);
                     gamestate.visibleloading = true;
                     gamestate.stillloading = 1;
-                    LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate, assets);
+                    LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate, assets, console);
                     campaign = 1;
                     gamestate.mainmenu = 0;
                     gamestate.gameon = 1;
@@ -809,11 +809,11 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
                         gamestate.loadtime = 0;
                         gamestate.targetlevel = -1;
                         if (gamestate.firstLoadDone) {
-                            TickOnceAfter(gamestate, assets);
+                            TickOnceAfter(gamestate, assets, console);
                         } else {
                             LoadStuff(gamestate, assets);
                         }
-                        LoadLevel(-1, gamestate, assets);
+                        LoadLevel(-1, gamestate, assets, console);
 
                         gamestate.mainmenu = 0;
                         gamestate.gameon = 1;
@@ -890,7 +890,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
                 break;
             case 9:
                 if (gamestate.selected < gamestate.numchallengelevels && gamestate.selected <= Account::active().getProgress()) {
-                    startChallengeLevel(gamestate.selected, gamestate, assets);
+                    startChallengeLevel(gamestate.selected, gamestate, assets, console);
                 }
                 if (gamestate.selected == gamestate.numchallengelevels) {
                     fireSound();

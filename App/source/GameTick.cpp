@@ -29,6 +29,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Audio/AudioState.hpp"
 #include "Audio/openal_wrapper.hpp"
 #include "Devtools/ConsoleCmds.hpp"
+#include "Console.hpp"
 #include "GameAssets.hpp"
 #include "GameState.hpp"
 #include "KeyCapture.hpp"
@@ -200,14 +201,14 @@ static int findClosestObject()
 	return closest;
 }
 
-void Game::cmd_dispatch(const std::string cmd, GameState& gamestate, GameAssets& assets)
+void Game::cmd_dispatch(const std::string cmd, GameState& gamestate, GameAssets& assets, Console& console)
 {
 	int i, n_cmds = sizeof(cmd_names) / sizeof(cmd_names[0]);
 
 	for (i = 0; i < n_cmds; i++) {
 		if (cmd.substr(0, cmd.find(' ')) == std::string(cmd_names[i])) {
 			std::cout << "|" << cmd.substr(cmd.find(' ') + 1) << "|" << std::endl;
-			cmd_handlers[i](cmd.substr(cmd.find(' ') + 1).c_str(), gamestate, assets);
+			cmd_handlers[i](cmd.substr(cmd.find(' ') + 1).c_str(), gamestate, assets, console);
 			break;
 		}
 	}
@@ -373,21 +374,21 @@ void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 	gamestate.texdetail = temptexdetail;
 }
 
-bool Game::LoadLevel(int which, GameState& gamestate, GameAssets& assets)
+bool Game::LoadLevel(int which, GameState& gamestate, GameAssets& assets, Console& console)
 {
 	gamestate.stealthloading = 0;
 	whichlevel = which;
 
 	if (which == -1) {
-		return LoadLevel("tutorial", true, gamestate, assets);
+		return LoadLevel("tutorial", true, gamestate, assets, console);
 	}
 	else if (which >= 0 && which <= 15) {
 		char buf[32];
 		sprintf(buf, "map%d", which + 1); // challenges
-		return LoadLevel(buf, false, gamestate, assets);
+		return LoadLevel(buf, false, gamestate, assets, console);
 	}
 	else {
-		return LoadLevel("mapsave", false, gamestate, assets);
+		return LoadLevel("mapsave", false, gamestate, assets, console);
 	}
 }
 
@@ -459,9 +460,9 @@ void Game::ResetBeforeLevelLoad(bool tutorial, GameState& gamestate)
 	gamestate.changedelay = 0;
 }
 
-bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestate, GameAssets& assets)
+bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestate, GameAssets& assets, Console& console)
 {
-	if (LoadJsonLevel(name, tutorial, gamestate, assets)) {
+	if (LoadJsonLevel(name, tutorial, gamestate, assets, console)) {
 		// Try JSON loading first, binary is fallback
 		return true;
 	}
@@ -498,10 +499,10 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 
 	ResetBeforeLevelLoad(tutorial, gamestate);
 
-	if (gamestate.console) {
+	if (console.open) {
 		emit_sound_np(consolesuccesssound);
 		gamestate.freeze = 0;
-		gamestate.console = false;
+		console.open = false;
 	}
 
 	if (!gamestate.stealthloading) {
@@ -854,7 +855,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	return true;
 }
 
-bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& gamestate, GameAssets& assets)
+bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& gamestate, GameAssets& assets, Console& console)
 {
 	const std::string level_path = Folders::findMapPath(name, ".json");
 	if (level_path.empty()) {
@@ -887,10 +888,10 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 
 	ResetBeforeLevelLoad(tutorial, gamestate);
 
-	if (gamestate.console) {
+	if (console.open) {
 		emit_sound_np(consolesuccesssound);
 		gamestate.freeze = 0;
-		gamestate.console = false;
+		console.open = false;
 	}
 
 	if (!gamestate.stealthloading) {
@@ -1080,7 +1081,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
  * Gameplay-related input processing is still done in Game::Tick() for now
  * as it is tightly coupled to the game logic.
  */
-void Game::ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
+void Game::ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture, Console& console)
 {
 	/* Pump SDL input events */
 	Input::Tick();
@@ -1117,8 +1118,8 @@ void Game::ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& ke
 		}
 
 		if ((Input::isKeyDown(SDL_SCANCODE_ESCAPE)) && gamestate.gameon) {
-			if (gamestate.console) {
-				gamestate.console = false;
+			if (console.open) {
+				console.open = false;
 				gamestate.freeze = 0;
 			}
 			else if (gamestate.winfreeze) {
@@ -1180,8 +1181,8 @@ void Game::ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& ke
 	if (gamestate.devtools && !gamestate.mainmenu) {
 		/* Console */
 		if (Input::isKeyPressed(gamestate.consolekey)) {
-			gamestate.console = !gamestate.console;
-			if (gamestate.console) {
+			console.open = !console.open;
+			if (console.open) {
 				OPENAL_SetFrequency(OPENAL_ALL);
 			}
 			else {
@@ -1191,15 +1192,15 @@ void Game::ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& ke
 		}
 
 		/* Other devtools, disabled when the console is shown */
-		if (!gamestate.console) {
-			ProcessDevInput(gamestate, assets);
+		if (!console.open) {
+			ProcessDevInput(gamestate, assets, console);
 		}
 	}
 }
 
-void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets)
+void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets, Console& console)
 {
-	if (!gamestate.devtools || gamestate.mainmenu || gamestate.console) {
+	if (!gamestate.devtools || gamestate.mainmenu || console.open) {
 		return;
 	}
 
@@ -3112,13 +3113,13 @@ void doPlayerCollisions(GameState& gamestate, GameAssets& assets)
 	}
 }
 
-void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
+void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture, Console& console)
 {
 	static Vector3 facing, flatfacing;
 	static int target;
 
 	/* Pump SDL input events and process non-gameplay related ones */
-	ProcessInput(gamestate, assets, keycapture);
+	ProcessInput(gamestate, assets, keycapture, console);
 
 	/*
 	Values of gamestate.mainmenu :
@@ -3136,7 +3137,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 	18 stereo configuration
 	*/
 
-	if (!gamestate.console) {
+	if (!console.open) {
 		//campaign over?
 		if (gamestate.mainmenu && gamestate.endgame == 1) {
 			gamestate.mainmenu = 10;
@@ -3158,7 +3159,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 	}
 
 	if (gamestate.mainmenu) {
-		Menu::Tick(gamestate, assets, keycapture);
+		Menu::Tick(gamestate, assets, keycapture, console);
 	}
 
 	if (!gamestate.mainmenu) {
@@ -3172,25 +3173,21 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 			gamestate.leveltime += gamestate.multiplier;
 		}
 
-		if (gamestate.console) {
+		if (console.open) {
 			gamestate.freeze = 1;
 
-			inputText(consoletext[0], &gamestate.consoleselected, gamestate, keycapture);
+			inputText(console.line, &console.selected, gamestate, keycapture);
 			if (!keycapture.waiting) {
-				if (!consoletext[0].empty()) {
-					cmd_dispatch(consoletext[0], gamestate, assets);
-					for (int k = 14; k >= 1; k--) {
-						consoletext[k] = consoletext[k - 1];
-					}
-					consoletext[0].clear();
-					gamestate.consoleselected = 0;
+				if (!console.line.empty()) {
+					cmd_dispatch(console.line, gamestate, assets, console);
+					console.submit();
 				}
 			}
 
-			gamestate.consoleblinkdelay -= gamestate.multiplier;
-			if (gamestate.consoleblinkdelay <= 0) {
-				gamestate.consoleblinkdelay = .3;
-				gamestate.consoleblink = !gamestate.consoleblink;
+			console.blinkDelay -= gamestate.multiplier;
+			if (console.blinkDelay <= 0) {
+				console.blinkDelay = .3;
+				console.blink = !console.blink;
 			}
 		}
 
@@ -4655,7 +4652,7 @@ void Game::TickOnce(GameState& gamestate)
 	}
 }
 
-void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets)
+void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& console)
 {
 	// TODO Holds state?
 	static Vector3 colviewer;
@@ -4914,7 +4911,7 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets)
 						startbonustotal = bonustotal;
 					}
 
-					LoadLevel(gamestate.targetlevel, gamestate, assets);
+					LoadLevel(gamestate.targetlevel, gamestate, assets, console);
 					fireSound();
 
 					gamestate.loading = 3;
@@ -4925,7 +4922,7 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets)
 
 					fireSound(firestartsound);
 
-					LoadLevel(campaignlevels[Account::active().getCampaignChoicesMade()].mapname.c_str(), false, gamestate, assets);
+					LoadLevel(campaignlevels[Account::active().getCampaignChoicesMade()].mapname.c_str(), false, gamestate, assets, console);
 
 					fireSound();
 
@@ -4989,7 +4986,7 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets)
 					actuallevel = campaignlevels[actuallevel].nextlevel.front();
 					gamestate.visibleloading = true;
 					gamestate.stillloading = 1;
-					LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate, assets);
+					LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate, assets, console);
 					campaign = 1;
 					gamestate.mainmenu = 0;
 					gamestate.gameon = 1;

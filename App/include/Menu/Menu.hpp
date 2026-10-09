@@ -26,6 +26,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Graphic/Texture.hpp"
 
+struct Console;
 struct GameAssets;
 struct GameState;
 struct KeyCapture;
@@ -75,7 +76,7 @@ public:
 	static void drawItems(GameState& gamestate, GameAssets& assets);
 
 	static void Load(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture);
-	static void Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture);
+	static void Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture, Console& console);
 	static void updateSettingsMenu(GameState& gamestate);
 	static void updateStereoConfigMenu(GameState& gamestate);
 	static void updateControlsMenu(GameState& gamestate, KeyCapture& keycapture);
@@ -86,7 +87,7 @@ public:
 	 * are destroyed.
 	 */
 	static void joinKeySelectThread();
-	static void startChallengeLevel(int challengelevel, GameState& gamestate, GameAssets& assets);
+	static void startChallengeLevel(int challengelevel, GameState& gamestate, GameAssets& assets, Console& console);
 
 private:
 	static void handleFadeEffect(GameState& gamestate);
