@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License
 along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cmath>
+
 #include "Animation/Skeleton.hpp"
 #include "Environment/Terrain.hpp"
 
@@ -638,6 +640,46 @@ void Skeleton::FindRotationMuscle(int which, int animation)
 	}
 }
 
+namespace
+{
+// Figure data stores its rotations in degrees.
+const float kDegreesToRadians = 0.017453292519943295f;
+
+// One rotation about a unit axis, in the form glRotatef built.
+void rotateAboutAxis(Vector3& point, float angle, float x, float y, float z)
+{
+	const float cosine = static_cast<float>(cos(angle * kDegreesToRadians));
+	const float sine = static_cast<float>(sin(angle * kDegreesToRadians));
+	const float oneMinusCosine = 1.0f - cosine;
+
+	const float rotatedx = point.x * (x * x * oneMinusCosine + cosine) + point.y * (x * y * oneMinusCosine - z * sine) + point.z * (x * z * oneMinusCosine + y * sine);
+	const float rotatedy = point.x * (y * x * oneMinusCosine + z * sine) + point.y * (y * y * oneMinusCosine + cosine) + point.z * (y * z * oneMinusCosine - x * sine);
+	const float rotatedz = point.x * (z * x * oneMinusCosine - y * sine) + point.y * (z * y * oneMinusCosine + x * sine) + point.z * (z * z * oneMinusCosine + cosine);
+
+	point.x = rotatedx;
+	point.y = rotatedy;
+	point.z = rotatedz;
+}
+
+// The three rotations of a muscle, in the order the matrix stack applied them.
+// The stack read back the translation column, which is the point after all
+// three rotations, so applying them to the point in reverse is the same thing.
+Vector3 rotatePointByMuscle(Vector3 point, const Muscle& muscle)
+{
+	rotateAboutAxis(point, muscle.rotate1 - 90, 0, 1, 0);
+	rotateAboutAxis(point, muscle.rotate2 - 90, 0, 0, 1);
+	rotateAboutAxis(point, muscle.rotate3, 0, 1, 0);
+	return point;
+}
+
+// The midpoint between the two joints a muscle spans, which the vertices are
+// expressed relative to.
+Vector3 muscleMidpoint(const Muscle& muscle)
+{
+	return (muscle.parent1->position + muscle.parent2->position) / 2;
+}
+}
+
 /* EFFECT
  * load skeleton
  * takes filenames for three skeleton files and various models
@@ -649,7 +691,6 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 	const std::string& model7filename, const std::string& modellowfilename,
 	const std::string& modelclothesfilename, bool aclothes, bool tutorialActive, ProgressCallback callback)
 {
-	GLfloat M[16];
 	FILE* tfile = nullptr;
 	size_t lSize = 0;
 	int j, num_joints, num_muscles;
@@ -768,22 +809,11 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 	for (int i = 0; i < num_muscles; i++) {
 		FindRotationMuscle(i, -1);
 	}
-	// this seems to use opengl purely for matrix calculations
+	// this used to use opengl purely for matrix calculations
 	for (int k = 0; k < num_models; k++) {
 		for (int i = 0; i < model[k].vertexNum; i++) {
-			model[k].vertex[i] = model[k].vertex[i] - (muscles[model[k].owner[i]].parent1->position + muscles[model[k].owner[i]].parent2->position) / 2;
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-			glLoadIdentity();
-			glRotatef(muscles[model[k].owner[i]].rotate3, 0, 1, 0);
-			glRotatef(muscles[model[k].owner[i]].rotate2 - 90, 0, 0, 1);
-			glRotatef(muscles[model[k].owner[i]].rotate1 - 90, 0, 1, 0);
-			glTranslatef(model[k].vertex[i].x, model[k].vertex[i].y, model[k].vertex[i].z);
-			glGetFloatv(GL_MODELVIEW_MATRIX, M);
-			model[k].vertex[i].x = M[12] * 1;
-			model[k].vertex[i].y = M[13] * 1;
-			model[k].vertex[i].z = M[14] * 1;
-			glPopMatrix();
+			model[k].vertex[i] = model[k].vertex[i] - muscleMidpoint(muscles[model[k].owner[i]]);
+			model[k].vertex[i] = rotatePointByMuscle(model[k].vertex[i], muscles[model[k].owner[i]]);
 		}
 		model[k].CalculateNormals(0, callback);
 	}
@@ -833,21 +863,10 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 		}
 	}
 
-	// use opengl for its matrix math
+	// the matrix stack was only used for matrix maths here too
 	for (int i = 0; i < modellow.vertexNum; i++) {
-		modellow.vertex[i] = modellow.vertex[i] - (muscles[modellow.owner[i]].parent1->position + muscles[modellow.owner[i]].parent2->position) / 2;
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-		glRotatef(muscles[modellow.owner[i]].rotate3, 0, 1, 0);
-		glRotatef(muscles[modellow.owner[i]].rotate2 - 90, 0, 0, 1);
-		glRotatef(muscles[modellow.owner[i]].rotate1 - 90, 0, 1, 0);
-		glTranslatef(modellow.vertex[i].x, modellow.vertex[i].y, modellow.vertex[i].z);
-		glGetFloatv(GL_MODELVIEW_MATRIX, M);
-		modellow.vertex[i].x = M[12];
-		modellow.vertex[i].y = M[13];
-		modellow.vertex[i].z = M[14];
-		glPopMatrix();
+		modellow.vertex[i] = modellow.vertex[i] - muscleMidpoint(muscles[modellow.owner[i]]);
+		modellow.vertex[i] = rotatePointByMuscle(modellow.vertex[i], muscles[modellow.owner[i]]);
 	}
 
 	modellow.CalculateNormals(0, callback);
@@ -899,21 +918,10 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 			}
 		}
 
-		// use opengl for its matrix math
+		// the matrix stack was only used for matrix maths here too
 		for (int i = 0; i < modelclothes.vertexNum; i++) {
-			modelclothes.vertex[i] = modelclothes.vertex[i] - (muscles[modelclothes.owner[i]].parent1->position + muscles[modelclothes.owner[i]].parent2->position) / 2;
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-			glLoadIdentity();
-			glRotatef(muscles[modelclothes.owner[i]].rotate3, 0, 1, 0);
-			glRotatef(muscles[modelclothes.owner[i]].rotate2 - 90, 0, 0, 1);
-			glRotatef(muscles[modelclothes.owner[i]].rotate1 - 90, 0, 1, 0);
-			glTranslatef(modelclothes.vertex[i].x, modelclothes.vertex[i].y, modelclothes.vertex[i].z);
-			glGetFloatv(GL_MODELVIEW_MATRIX, M);
-			modelclothes.vertex[i].x = M[12];
-			modelclothes.vertex[i].y = M[13];
-			modelclothes.vertex[i].z = M[14];
-			glPopMatrix();
+			modelclothes.vertex[i] = modelclothes.vertex[i] - muscleMidpoint(muscles[modelclothes.owner[i]]);
+			modelclothes.vertex[i] = rotatePointByMuscle(modelclothes.vertex[i], muscles[modelclothes.owner[i]]);
 		}
 
 		modelclothes.CalculateNormals(0, callback);
