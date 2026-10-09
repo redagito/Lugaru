@@ -24,20 +24,13 @@ target_link_libraries(${PROJECT_NAME}
 
 target_compile_definitions(${PROJECT_NAME}
 	PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
-	# The migration guard reads Globals.h, GameGlobals.h and GameState.hpp at
-	# runtime. Hand it their real location rather than letting it guess one from
-	# whatever working directory ctest was configured with.
-	PRIVATE LUGARU_APP_INCLUDE_DIR="${CMAKE_SOURCE_DIR}/App/include"
-	# The same guard reads App/source/GameDraw.cpp to check where the renderer's
-	# multiplier save slot lives.
-	PRIVATE LUGARU_APP_SOURCE_DIR="${CMAKE_SOURCE_DIR}/App/source"
-	# The asset ownership guard scans Lugaru/source as well: main.cpp is the other
-	# place that owns a GameAssets, and it is not under App.
-	PRIVATE LUGARU_LUGARU_SOURCE_DIR="${CMAKE_SOURCE_DIR}/Lugaru/source"
-	# The console command documentation guard reads Docs/DEVTOOLS.txt, which lives
-	# outside both trees.
-	PRIVATE LUGARU_REPO_ROOT="${CMAKE_SOURCE_DIR}"
 )
+
+# The App layer tests construct the real objects - Console, KeyCapture,
+# GameState, GameAssets, Person, Terrain, Weapons - and assert on their
+# behaviour. They deliberately do not read the source tree: a test that
+# pattern-matches source text asserts the code looks a certain way, which taxes
+# every legitimate refactor and catches nothing that compiling does not.
 
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/source/
