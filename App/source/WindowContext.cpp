@@ -20,11 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "WindowContext.hpp"
 
-#include "GameGlobals.h"
 #include "GameState.hpp"
-#include "Globals.h"
-
-using namespace Game;
 
 namespace WindowContext
 {

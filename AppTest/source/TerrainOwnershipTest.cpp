@@ -519,13 +519,15 @@ TEST_CASE("every use of the terrain global goes through assets.terrain", "[terra
 
 	SECTION("the scan reached the trees it claims to")
 	{
-		// Every .c/.cpp/.h/.hpp under App and Game, less GameAssets.hpp. App
-		// holds 49 of them and Game 4, so 52 is the complete set - the floor is
-		// here to catch a directory walk that silently stops early, not to
-		// describe a number the tree happens to have today.
+		// The set is every .h/.hpp under App/include, plus every
+		// .c/.cpp/.h/.hpp under App/source and Lugaru/source, less GameAssets.hpp
+		// - the owner itself, which names them by design. That is 49 today; the
+		// floor is well under it and is here to catch a directory walk that
+		// silently stops early or collapses to one directory, not to describe a
+		// number the tree happens to have today.
 		const std::vector<std::filesystem::path> scanned = readAllScannedFiles();
 		INFO("files scanned: " << scanned.size());
-		REQUIRE(scanned.size() >= 50);
+		REQUIRE(scanned.size() >= 45);
 
 		// Spelled out rather than left to the count, because a walk that
 		// collapsed to one directory could still clear a floor.
@@ -548,39 +550,55 @@ TEST_CASE("the globals header and source no longer name terrain or weapons", "[t
 {
 	// Both were externs in Globals.h and definitions in Globals.cpp. Leaving
 	// either behind would keep the old global alive next to its new owner, so
-	// the assertion is that neither file names them at all.
-	SECTION("Globals.h names neither")
+	// neither file may name them at all.
+	//
+	// Both files have since been deleted outright rather than left behind as
+	// emptied shells. Be clear about what that buys, because it is less than
+	// it sounds: a reference to a deleted header is a hard compile error, so
+	// the stub cannot come back under that name with its includes still
+	// expected of it. It is *not* a guard against new globals - a fresh extern
+	// in a new file, with its own definition, would still compile and link
+	// unnoticed. The extern sweep below is what covers that shape.
+	SECTION("Globals.h and Globals.cpp stay deleted")
 	{
-		const std::string text = codeOnly(readText(kGlobalsHeader));
-		INFO("terrain in Globals.h: " << wholeWordPositions(text, kName).size());
-		REQUIRE(wholeWordPositions(text, kName).empty());
-		REQUIRE(wholeWordPositions(text, kOtherName).empty());
+		REQUIRE_FALSE(std::filesystem::exists(kGlobalsHeader));
+		REQUIRE_FALSE(std::filesystem::exists(kGlobalsSource));
 	}
 
-	SECTION("Globals.cpp names neither")
+	SECTION("GameGlobals.h and GameGlobals.cpp stay deleted too")
 	{
-		const std::string text = codeOnly(readText(kGlobalsSource));
-		INFO("terrain in Globals.cpp: " << wholeWordPositions(text, kName).size());
-		REQUIRE(wholeWordPositions(text, kName).empty());
-		REQUIRE(wholeWordPositions(text, kOtherName).empty());
+		// The same pair of stubs on the other side of the split, retired with
+		// the console migration.
+		REQUIRE_FALSE(std::filesystem::exists(std::string(LUGARU_APP_INCLUDE_DIR) + "/GameGlobals.h"));
+		REQUIRE_FALSE(std::filesystem::exists(std::string(LUGARU_APP_SOURCE_DIR) + "/GameGlobals.cpp"));
 	}
 
-	SECTION("Globals.h was not emptied to satisfy the sweep")
+	SECTION("no surviving header declares them as globals")
 	{
-		// Both names could be removed from an empty file, or from one that was
-		// gutted while still being expected to pull in SDL for something else.
-		// Anchor on the parts other translation units still depend on.
-		const std::string text = readText(kGlobalsHeader);
-		REQUIRE(text.find("#pragma once") != std::string::npos);
-		REQUIRE(text.find("#include <SDL.h>") != std::string::npos);
-		REQUIRE(text.find("#include \"Objects/Weapons.hpp\"") != std::string::npos);
-	}
+		// The real invariant, and deliberately narrow: an `extern` declaration.
+		// Terrain is a type name and a parameter name in plenty of legitimate
+		// places - Skeleton.hpp forward-declares the class and takes a Terrain& -
+		// so sweeping for the bare word would flag every one of them and tell us
+		// nothing. `extern` is what lets a name bind to a global defined in
+		// another translation unit, which is the shape being retired.
+		std::vector<std::string> offenders;
+		for (const std::filesystem::path& path : readAllHeaders()) {
+			const std::string code = codeOnly(readText(path.string().c_str()));
+			const std::string name = path.filename().string();
+			for (const char* word : { "extern const Terrain* ", "extern Terrain* ", "extern Terrain ",
+			                          "extern const Weapons* ", "extern Weapons* ", "extern Weapons " }) {
+				if (code.find(word) != std::string::npos) {
+					offenders.push_back(name + ": " + word);
+				}
+			}
+		}
 
-	SECTION("Globals.cpp was not emptied to satisfy the sweep")
-	{
-		const std::string text = readText(kGlobalsSource);
-		REQUIRE(text.find("Copyright (C) 2003, 2010 - Wolfire Games") != std::string::npos);
-		REQUIRE(text.find("#include \"Globals.h\"") != std::string::npos);
+		std::string joined;
+		for (const std::string& offender : offenders) {
+			joined += (joined.empty() ? "" : ", ") + offender;
+		}
+		INFO("headers still declaring them extern: " << joined);
+		REQUIRE(offenders.empty());
 	}
 }
 

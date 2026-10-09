@@ -20,9 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Game.hpp"
 #include "GameAssets.hpp"
-#include "GameGlobals.h"
 #include "GameState.hpp"
-#include "Globals.h"
 #include "KeyCapture.hpp"
 
 #include "Console.hpp"

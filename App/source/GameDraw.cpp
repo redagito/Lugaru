@@ -19,7 +19,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Game.hpp"
-#include "GameGlobals.h"
 
 #include "Audio/openal_wrapper.hpp"
 #include "Console.hpp"
@@ -33,7 +32,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Tutorial.hpp"
 #include "Utils/Input.hpp"
 #include "WindowContext.hpp"
-#include "Globals.h"
 
 extern bool campaign;
 

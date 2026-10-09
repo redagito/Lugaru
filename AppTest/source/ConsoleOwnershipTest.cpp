@@ -171,31 +171,71 @@ int countAcrossSource(const std::string& needle)
 
 TEST_CASE("GameGlobals.h declares no globals at all", "[console][architecture]")
 {
-	const std::string path = std::string(kAppInclude) + "/GameGlobals.h";
-	const std::string text = readText(path.c_str());
+	// The header used to declare the console's text buffer as an extern array
+	// and, for the last few tranches, was the only file left in the project
+	// with a global in it. It has since been deleted outright, along with
+	// Globals.h - its sibling stub from the other half of the same split.
+	//
+	// Be clear about what deleting it buys, because it is less than it sounds:
+	// a reference to a deleted header is a hard compile error, so this pins the
+	// stub against coming back under that name with those includes still
+	// expected of it. It is *not* a general guarantee against new globals - a
+	// fresh extern in a new file, with its own definition, would still compile
+	// and link. The general guarantee is the sweeps below, which scan for the
+	// shape.
 
-	SECTION("the header was read")
+	SECTION("the header was deleted, along with Globals.h")
 	{
-		INFO("GameGlobals.h is " << text.size() << " bytes");
-		REQUIRE(text.size() > 100);
+		REQUIRE_FALSE(std::filesystem::exists(std::string(kAppInclude) + "/GameGlobals.h"));
+		REQUIRE_FALSE(std::filesystem::exists(std::string(kAppInclude) + "/Globals.h"));
 	}
 
-	SECTION("it declares no extern")
+	SECTION("no surviving header spells the old console global")
 	{
-		// This is the last one. When it went, the header had nothing left to
-		// declare, which is the whole point of the migration.
-		const std::string code = codeOnly(text);
-		INFO("extern declarations left: " << wholeWordPositions(code, "extern").size());
-		REQUIRE(wholeWordPositions(code, "extern").empty());
-	}
+		// consoletext was the console's own std::string[15]: slot 0 the line
+		// being typed, slots 1 to 14 the scrollback, and no guard anywhere
+		// stopped a header from declaring it extern again. It is Console::line
+		// and Console::history now, reached through the owner, so no header
+		// under App/include may name it.
+		std::vector<std::string> offenders;
+		for (const std::filesystem::directory_entry& entry :
+		     std::filesystem::recursive_directory_iterator(kAppInclude)) {
+			if (!entry.is_regular_file()) {
+				continue;
+			}
+			const std::string extension = entry.path().extension().string();
+			if (extension != ".h" && extension != ".hpp") {
+				continue;
+			}
+			const std::string name = entry.path().filename().string();
+			if (name == "GameGlobals.h" || name == "Globals.h") {
+				continue;
+			}
+			const std::string text = codeOnly(readText(entry.path().string().c_str()));
+			if (!wholeWordPositions(text, "consoletext").empty()) {
+				offenders.push_back(name);
+			}
+		}
 
-	SECTION("it was not emptied to satisfy the sweep")
+		std::string names;
+		for (const std::string& offender : offenders) {
+			names += (names.empty() ? "" : ", ") + offender;
+		}
+		INFO("headers still naming consoletext: " << names);
+		REQUIRE(offenders.empty());
+	}
+}
+
+TEST_CASE("no source file left behind declares the console globals", "[console][architecture]")
+{
+	// The mirror of the header sweep above, for the definition side. A global
+	// can be recreated by a stray definition in a .cpp just as easily as by an
+	// extern in a header, and no compiler or linker check catches it when it
+	// has internal linkage.
+	SECTION("no source defines consoletext")
 	{
-		// Deleting the file would satisfy the section above. These two anchors
-		// mean "no globals" and "the header still exists" cannot both be true by
-		// removal.
-		REQUIRE(text.find("#pragma once") != std::string::npos);
-		REQUIRE(text.find("namespace Game") != std::string::npos);
+		INFO("references to consoletext in App/source: " << countAcrossSource("consoletext"));
+		REQUIRE(countAcrossSource("consoletext") == 0);
 	}
 }
 

@@ -19,7 +19,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Devtools/ConsoleCmds.hpp"
-#include "GameGlobals.h"
 
 #include "Audio/AudioState.hpp"
 #include "Game.hpp"
@@ -31,7 +30,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Tutorial.hpp"
 #include "Utils/Folders.hpp"
 
-#include "Globals.h"
 
 #include <json/value.h>
 #include <json/writer.h>

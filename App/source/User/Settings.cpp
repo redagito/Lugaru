@@ -20,9 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "User/Settings.hpp"
 
-#include "GameGlobals.h"
 #include "GameState.hpp"
-#include "Globals.h"
 #include "Graphic/Stereo.hpp"
 #include "Utils/Folders.hpp"
 #include "Utils/Input.hpp"

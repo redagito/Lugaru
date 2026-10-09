@@ -332,37 +332,21 @@ TEST_CASE("nothing reaches the three objects behind a shared accessor", "[assets
 
 TEST_CASE("GameGlobals.cpp no longer defines the three objects", "[assets][architecture]")
 {
-	// The definitions used to sit next to the textures and models still pending
-	// migration, which made them easy to leave behind. Only the ones that are
-	// gone may have vanished: anything else in that file is a later tranche.
-	const std::string text = readText(kGameGlobalsSource);
-
-	const std::vector<std::string::size_type> skybox = wholeWordPositions(text, "skybox");
-	const std::vector<std::string::size_type> mono = wholeWordPositions(text, "textmono");
-
-	INFO("occurrences of skybox: " << skybox.size() << ", of textmono: " << mono.size());
-	REQUIRE(skybox.empty());
-	REQUIRE(mono.empty());
-
-	SECTION("no declaration of the proportional font either")
+	// The definitions used to sit in that file next to the textures and models
+	// still pending migration, which made them easy to leave behind. Every one
+	// of them has since moved into an owner - GameState, GameAssets and Console
+	// - so the file itself was deleted rather than left behind as an emptied
+	// shell.
+	//
+	// What deleting it buys is narrow and worth stating precisely: a reference
+	// to a deleted header is a compile error, so this pins the stub against
+	// coming back under that name with its includes still expected of it. It
+	// is not a guard against new globals in general - a fresh extern with its
+	// own definition would still compile and link. The header sweep in the
+	// tests below is what covers that shape.
+	SECTION("the translation unit stays deleted")
 	{
-		// Whole-word, so a `text` appearing as part of a longer name in a comment
-		// would not trip it.
-		const std::vector<std::string::size_type> proportional = wholeWordPositions(text, "text");
-		INFO("occurrences of text: " << proportional.size());
-		REQUIRE(proportional.empty());
-	}
-
-	SECTION("the translation unit is still there")
-	{
-		// Guards against 'remove the globals' being done by deleting the file
-		// rather than migrating out of it. The definitions are gone on purpose
-		// now - GameState, GameAssets and Console own them all - so what is
-		// anchored instead is the licence every file carries and the include that
-		// keeps the header reachable from this object file.
-		REQUIRE(text.size() > 200);
-		REQUIRE(text.find("GameGlobals.h") != std::string::npos);
-		REQUIRE(text.find("GNU General Public License") != std::string::npos);
+		REQUIRE_FALSE(std::filesystem::exists(kGameGlobalsSource));
 	}
 }
 
@@ -437,29 +421,12 @@ TEST_CASE("the shared textures are members of GameAssets, not globals", "[assets
 TEST_CASE("GameGlobals.cpp no longer defines the shared textures", "[assets][architecture]")
 {
 	// The definitions sat next to the models still pending migration, which made
-	// them easy to leave behind. Only the eleven may have gone: anything else in
-	// that file is a later tranche, and the empty-file guard above still catches
-	// a wholesale rewrite.
-	const std::string text = readText(kGameGlobalsSource);
-
-	SECTION("none of the eleven is left")
+	// them easy to leave behind. All eleven have since moved into GameAssets, so
+	// the file itself was deleted rather than left behind as an emptied shell -
+	// the same outcome as the two-object case above, for the same reason.
+	SECTION("the translation unit stays deleted")
 	{
-		for (const TextureGlobal& global : kTextureGlobals) {
-			CAPTURE(global.name);
-			REQUIRE(wholeWordPositions(text, global.name).empty());
-		}
-	}
-
-	SECTION("the file defines nothing any more")
-	{
-		// The four models and consoletext have all moved to an owner, so the file
-		// legitimately defines nothing now. Anchoring on the include and the
-		// licence is what keeps the sweep above from passing over a file that was
-		// deleted rather than migrated - exactly as the hawk, iris and consoletext
-		// anchors did before them.
-		REQUIRE(text.size() > 200);
-		REQUIRE(text.find("GameGlobals.h") != std::string::npos);
-		REQUIRE(text.find("GNU General Public License") != std::string::npos);
+		REQUIRE_FALSE(std::filesystem::exists(kGameGlobalsSource));
 	}
 }
 

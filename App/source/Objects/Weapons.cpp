@@ -25,7 +25,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Objects/Object.hpp"
 #include "GameAssets.hpp"
 #include "GameState.hpp"
-#include "Globals.h"
 
 #include "Animation/Animation.hpp"
 #include <gl/GL.h>

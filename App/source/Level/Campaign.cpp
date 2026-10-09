@@ -20,8 +20,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Level/Campaign.hpp"
 
-#include "GameGlobals.h"
-#include "Globals.h"
 #include "Game.hpp"
 #include "GameAssets.hpp"
 #include "GameState.hpp"

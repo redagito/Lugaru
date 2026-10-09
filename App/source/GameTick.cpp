@@ -22,8 +22,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #define _USE_MATH_DEFINES
 
 #include "Game.hpp"
-#include "GameGlobals.h"
-#include "Globals.h"
 
 #include "Animation/Animation.hpp"
 #include "Audio/AudioState.hpp"

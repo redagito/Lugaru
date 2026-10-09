@@ -181,11 +181,13 @@ TEST_CASE("the window handle is private to WindowContext.cpp", "[window][archite
 		REQUIRE(text.find("static SDL_Window* " + std::string(kHandleName)) != std::string::npos);
 	}
 
-	SECTION("the two headers it used to live in are clean")
+	SECTION("the headers it used to live in are clean, and the deleted one stays gone")
 	{
 		// Spelled out separately from the sweep above so a failure names the file
-		// the migration was supposed to change.
-		REQUIRE_FALSE(mentionsHandle(kGlobalsHeader));
+		// the migration was supposed to change. Globals.h used to hold the extern
+		// declaration; it has since been deleted outright, alongside GameGlobals.h,
+		// so the compiler now enforces its absence rather than this test.
 		REQUIRE_FALSE(mentionsHandle(kGameHeader));
+		REQUIRE_FALSE(std::filesystem::exists(kGlobalsHeader));
 	}
 }
