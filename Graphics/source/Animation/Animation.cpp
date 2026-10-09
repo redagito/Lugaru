@@ -19,16 +19,16 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Animation/Animation.hpp"
 
+#include "GraphicsState.hpp"
+
 #include "Utils/binio.h"
 #include "Utils/Folders.hpp"
 
-std::vector<Animation> Animation::animations;
-
-void Animation::loadAll(ProgressCallback callback)
+void Animation::loadAll(ProgressCallback callback, GraphicsState& graphics)
 {
 #define DECLARE_ANIM(id, file, height, attack, ...) \
     if constexpr (id < loadable_anim_end)                     \
-        animations.emplace_back(file, height, attack, callback);
+        graphics.animations.emplace_back(file, height, attack, callback);
 #include "Animation/Animation.inc"
 #undef DECLARE_ANIM
 }

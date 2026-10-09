@@ -1790,7 +1790,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets, Console& co
 	}
 }
 
-void doJumpReversals()
+void doJumpReversals(GameAssets& assets)
 {
 	for (unsigned k = 0; k < Person::players.size(); k++) {
 		for (unsigned i = k + 1; i < Person::players.size(); i++) {
@@ -1808,7 +1808,7 @@ void doJumpReversals()
 					if (Person::players[i]->animTarget == jumpupanim &&
 						Person::players[k]->animTarget != getupfrombackanim &&
 						Person::players[k]->animTarget != getupfromfrontanim &&
-						Animation::animations[Person::players[k]->animTarget].height == middleheight &&
+						assets.graphics.animations[Person::players[k]->animTarget].height == middleheight &&
 						normaldotproduct(Person::players[i]->velocity, Person::players[k]->coords - Person::players[i]->coords) < 0 &&
 						((Person::players[k]->isPlayerControlled() && Person::players[k]->attackkeydown) ||
 							!Person::players[k]->isPlayerControlled())) {
@@ -1848,7 +1848,7 @@ void doJumpReversals()
 					if (Person::players[k]->animTarget == jumpupanim &&
 						Person::players[i]->animTarget != getupfrombackanim &&
 						Person::players[i]->animTarget != getupfromfrontanim &&
-						Animation::animations[Person::players[i]->animTarget].height == middleheight &&
+						assets.graphics.animations[Person::players[i]->animTarget].height == middleheight &&
 						normaldotproduct(Person::players[k]->velocity, Person::players[i]->coords - Person::players[k]->coords) < 0 &&
 						((Person::players[i]->isPlayerControlled() && Person::players[i]->attackkeydown) ||
 							!Person::players[i]->isPlayerControlled())) {
@@ -1909,7 +1909,7 @@ void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 			Person::players[k]->animTarget == backhandspringanim ||
 			Person::players[k]->animTarget == dodgebackanim ||
 			Person::players[k]->animTarget == rollanim ||
-			(Animation::animations[Person::players[k]->animTarget].attack &&
+			(assets.graphics.animations[Person::players[k]->animTarget].attack &&
 				Person::players[k]->animTarget != rabbitkickanim &&
 				(Person::players[k]->animTarget != crouchstabanim || Person::players[k]->hasvictim) &&
 				(Person::players[k]->animTarget != swordgroundstabanim || Person::players[k]->hasvictim))) {
@@ -2082,7 +2082,7 @@ void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 
 						if (Person::players[k]->animTarget == jumpdownanim || Person::players[k]->isFlip()) {
 							//flipped into a rock
-							if (Person::players[k]->isFlip() && Person::players[k]->targetFrame().label == 7) {
+							if (Person::players[k]->isFlip() && Person::players[k]->targetFrame(assets).label == 7) {
 								Person::players[k]->RagDoll(0, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 							}
 
@@ -2390,7 +2390,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 					}
 				}
 				//attack
-				if (!Animation::animations[Person::players[k]->animTarget].attack &&
+				if (!assets.graphics.animations[Person::players[k]->animTarget].attack &&
 					!Person::players[k]->backkeydown &&
 					(Person::players[k]->isIdle() ||
 						Person::players[k]->isRun() ||
@@ -2406,7 +2406,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 								continue;
 							}
 							if (!Person::players[k]->hasvictim) {
-								if (Animation::animations[Person::players[k]->animTarget].attack != reversal) {
+								if (assets.graphics.animations[Person::players[k]->animTarget].attack != reversal) {
 									//choose an attack
 									const float distance = distsq(&Person::players[k]->coords, &Person::players[i]->coords);
 									if (distance < 4.5 &&
@@ -2418,7 +2418,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 										Person::players[k]->animTarget != rabbitkickanim &&
 										Person::players[i]->animTarget != getupfrombackanim &&
 										(Person::players[i]->animTarget != staggerbackhighanim &&
-											(Person::players[i]->animTarget != staggerbackhardanim || Person::players[i]->targetFrame().label == 6)) &&
+											(Person::players[i]->animTarget != staggerbackhardanim || Person::players[i]->targetFrame(assets).label == 6)) &&
 										Person::players[i]->animTarget != jumpdownanim &&
 										Person::players[i]->animTarget != jumpupanim &&
 										Person::players[i]->animTarget != getupfromfrontanim) {
@@ -2428,12 +2428,12 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 											//sweep
 											if (distance < 2.5 * sq(Person::players[k]->scale * 5) &&
 												Person::players[k]->crouchkeydown &&
-												Animation::animations[Person::players[i]->animTarget].height != lowheight) {
+												assets.graphics.animations[Person::players[i]->animTarget].height != lowheight) {
 												Person::players[k]->animTarget = sweepanim;
 												//winduppunch
 											}
 											else if (distance < 1.5 * sq(Person::players[k]->scale * 5) &&
-												Animation::animations[Person::players[i]->animTarget].height != lowheight &&
+												assets.graphics.animations[Person::players[i]->animTarget].height != lowheight &&
 												!Person::players[k]->forwardkeydown &&
 												!Person::players[k]->leftkeydown &&
 												!Person::players[k]->rightkeydown &&
@@ -2444,7 +2444,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 												//upunch
 											}
 											else if (distance < 2.5 * sq(Person::players[k]->scale * 5) &&
-												Animation::animations[Person::players[i]->animTarget].height != lowheight &&
+												assets.graphics.animations[Person::players[i]->animTarget].height != lowheight &&
 												!Person::players[k]->forwardkeydown &&
 												!Person::players[k]->leftkeydown &&
 												!Person::players[k]->rightkeydown &&
@@ -2461,7 +2461,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 												//knifeslashstart
 											}
 											else if (distance < 2.5 * sq(Person::players[k]->scale * 5) &&
-												Animation::animations[Person::players[i]->animTarget].height != lowheight &&
+												assets.graphics.animations[Person::players[i]->animTarget].height != lowheight &&
 												!Person::players[k]->forwardkeydown &&
 												!Person::players[k]->leftkeydown &&
 												!Person::players[k]->rightkeydown &&
@@ -2472,7 +2472,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 												//swordslash
 											}
 											else if (distance < 4.5 * sq(Person::players[k]->scale * 5) &&
-												Animation::animations[Person::players[i]->animTarget].height != lowheight &&
+												assets.graphics.animations[Person::players[i]->animTarget].height != lowheight &&
 												!Person::players[k]->crouchkeydown &&
 												attackweapon == sword &&
 												Person::players[k]->weaponmissdelay <= 0) {
@@ -2480,7 +2480,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 												//staffhit
 											}
 											else if (distance < 4.5 * sq(Person::players[k]->scale * 5) &&
-												Animation::animations[Person::players[i]->animTarget].height != lowheight &&
+												assets.graphics.animations[Person::players[i]->animTarget].height != lowheight &&
 												!Person::players[k]->crouchkeydown &&
 												attackweapon == staff &&
 												Person::players[k]->weaponmissdelay <= 0 &&
@@ -2491,7 +2491,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 												//staffspinhit
 											}
 											else if (distance < 4.5 * sq(Person::players[k]->scale * 5) &&
-												Animation::animations[Person::players[i]->animTarget].height != lowheight &&
+												assets.graphics.animations[Person::players[i]->animTarget].height != lowheight &&
 												!Person::players[k]->crouchkeydown &&
 												attackweapon == staff &&
 												Person::players[k]->weaponmissdelay <= 0) {
@@ -2499,13 +2499,13 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 												//spinkick
 											}
 											else if (distance < 2.5 * sq(Person::players[k]->scale * 5) &&
-												Animation::animations[Person::players[i]->animTarget].height != lowheight) {
+												assets.graphics.animations[Person::players[i]->animTarget].height != lowheight) {
 												Person::players[k]->animTarget = spinkickanim;
 												//lowkick
 											}
 											else if (distance < 2.5 * sq(Person::players[k]->scale * 5) &&
-												Animation::animations[Person::players[i]->animTarget].height == lowheight &&
-												Animation::animations[Person::players[k]->animTarget].attack != normalattack) {
+												assets.graphics.animations[Person::players[i]->animTarget].height == lowheight &&
+												assets.graphics.animations[Person::players[k]->animTarget].attack != normalattack) {
 												Person::players[k]->animTarget = lowkickanim;
 											}
 										}
@@ -2514,20 +2514,20 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 												randattack = abs(rand() % 5);
 												if (!attackweapon && distance < 2.5 * sq(Person::players[k]->scale * 5)) {
 													//sweep
-													if (randattack == 0 && Animation::animations[Person::players[i]->animTarget].height != lowheight) {
+													if (randattack == 0 && assets.graphics.animations[Person::players[i]->animTarget].height != lowheight) {
 														Person::players[k]->animTarget = sweepanim;
 														//upunch
 													}
-													else if (randattack == 1 && Animation::animations[Person::players[i]->animTarget].height != lowheight &&
+													else if (randattack == 1 && assets.graphics.animations[Person::players[i]->animTarget].height != lowheight &&
 														!attackweapon) {
 														Person::players[k]->animTarget = upunchanim;
 														//spinkick
 													}
-													else if (randattack == 2 && Animation::animations[Person::players[i]->animTarget].height != lowheight) {
+													else if (randattack == 2 && assets.graphics.animations[Person::players[i]->animTarget].height != lowheight) {
 														Person::players[k]->animTarget = spinkickanim;
 														//lowkick
 													}
-													else if (Animation::animations[Person::players[i]->animTarget].height == lowheight) {
+													else if (assets.graphics.animations[Person::players[i]->animTarget].height == lowheight) {
 														Person::players[k]->animTarget = lowkickanim;
 													}
 												}
@@ -2536,7 +2536,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 													if ((!Tutorial::active || !attackweapon) &&
 														distance < 2.5 * sq(Person::players[k]->scale * 5) &&
 														randattack == 0 &&
-														Animation::animations[Person::players[i]->animTarget].height != lowheight) {
+														assets.graphics.animations[Person::players[i]->animTarget].height != lowheight) {
 														Person::players[k]->animTarget = sweepanim;
 														//knifeslashstart
 													}
@@ -2575,13 +2575,13 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 													else if ((!Tutorial::active || !attackweapon) &&
 														distance < 2.5 * sq(Person::players[k]->scale * 5) &&
 														randattack == 1 &&
-														Animation::animations[Person::players[i]->animTarget].height != lowheight) {
+														assets.graphics.animations[Person::players[i]->animTarget].height != lowheight) {
 														Person::players[k]->animTarget = spinkickanim;
 														//lowkick
 													}
 													else if (distance < 2.5 * sq(Person::players[k]->scale * 5) &&
-														Animation::animations[Person::players[i]->animTarget].height == lowheight &&
-														Animation::animations[Person::players[k]->animTarget].attack != normalattack) {
+														assets.graphics.animations[Person::players[i]->animTarget].height == lowheight &&
+														assets.graphics.animations[Person::players[k]->animTarget].attack != normalattack) {
 														Person::players[k]->animTarget = lowkickanim;
 													}
 												}
@@ -2648,7 +2648,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 											Person::players[i]->targetyaw = Person::players[i]->yaw;
 										}
 									}
-									if (Animation::animations[Person::players[k]->animTarget].attack == normalattack &&
+									if (assets.graphics.animations[Person::players[k]->animTarget].attack == normalattack &&
 										Person::players[k]->victim == Person::players[i] &&
 										(!Person::players[i]->skeleton.free)) {
 										gamestate.oldattackkey = 1;
@@ -2701,7 +2701,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 								continue;
 							}
 							if ((playerrealattackkeydown || Person::players[i]->dead || !hasstaff) &&
-								Animation::animations[Person::players[k]->animTarget].attack == neutral) {
+								assets.graphics.animations[Person::players[k]->animTarget].attack == neutral) {
 								const float distance = distsq(&Person::players[k]->coords, &Person::players[i]->coords);
 								if (!Person::players[i]->dead || !gamestate.realthreat || (!attackweapon && Person::players[k]->crouchkeydown)) {
 									if (Person::players[i]->skeleton.free) {
@@ -2767,7 +2767,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 										}
 									}
 								}
-								if (Animation::animations[Person::players[k]->animTarget].attack == normalattack &&
+								if (assets.graphics.animations[Person::players[k]->animTarget].attack == normalattack &&
 									Person::players[k]->victim == Person::players[i] &&
 									(!Person::players[i]->skeleton.free ||
 										Person::players[k]->animTarget == killanim ||
@@ -2841,7 +2841,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 								!Person::players[k]->victim->skeleton.free &&
 								Person::players[k]->victim->animTarget != getupfrombackanim &&
 								Person::players[k]->victim->animTarget != getupfromfrontanim &&
-								Animation::animations[Person::players[k]->victim->animTarget].height != lowheight &&
+								assets.graphics.animations[Person::players[k]->victim->animTarget].height != lowheight &&
 								!Person::players[k]->isPlayerControlled() && //wat???
 								normaldotproduct(Person::players[k]->facing, Person::players[k]->victim->coords - Person::players[k]->coords) > 0 &&
 								Person::players[k]->rabbitkickenabled) ||
@@ -2851,7 +2851,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 						}
 					}
 					//update counts
-					if (Animation::animations[Person::players[k]->animTarget].attack && k == 0) {
+					if (assets.graphics.animations[Person::players[k]->animTarget].attack && k == 0) {
 						numattacks++;
 						switch (attackweapon) {
 						case 0:
@@ -2882,15 +2882,15 @@ void doPlayerCollisions(GameState& gamestate, GameAssets& assets)
 		for (unsigned k = 0; k < Person::players.size(); k++) {
 			for (unsigned i = k + 1; i < Person::players.size(); i++) {
 				//neither player is part of a reversal
-				if ((Animation::animations[Person::players[i]->animTarget].attack != reversed &&
-					Animation::animations[Person::players[i]->animTarget].attack != reversal &&
-					Animation::animations[Person::players[k]->animTarget].attack != reversed &&
-					Animation::animations[Person::players[k]->animTarget].attack != reversal) ||
+				if ((assets.graphics.animations[Person::players[i]->animTarget].attack != reversed &&
+					assets.graphics.animations[Person::players[i]->animTarget].attack != reversal &&
+					assets.graphics.animations[Person::players[k]->animTarget].attack != reversed &&
+					assets.graphics.animations[Person::players[k]->animTarget].attack != reversal) ||
 					(i != 0 && k != 0)) {
-					if ((Animation::animations[Person::players[i]->animCurrent].attack != reversed &&
-						Animation::animations[Person::players[i]->animCurrent].attack != reversal &&
-						Animation::animations[Person::players[k]->animCurrent].attack != reversed &&
-						Animation::animations[Person::players[k]->animCurrent].attack != reversal) ||
+					if ((assets.graphics.animations[Person::players[i]->animCurrent].attack != reversed &&
+						assets.graphics.animations[Person::players[i]->animCurrent].attack != reversal &&
+						assets.graphics.animations[Person::players[k]->animCurrent].attack != reversed &&
+						assets.graphics.animations[Person::players[k]->animCurrent].attack != reversal) ||
 						(i != 0 && k != 0)) {
 						//neither is sleeping
 						if (Person::players[i]->howactive <= typesleeping && Person::players[k]->howactive <= typesleeping) {
@@ -2976,16 +2976,16 @@ void doPlayerCollisions(GameState& gamestate, GameAssets& assets)
 																			k == 0 && magnitudeSquared(&rotatetarget) > 50 && Person::players[0]->rabbitkickragdoll) &&
 																			normaldotproduct(rotatetarget, Person::players[k]->coords - Person::players[i]->coords) > 0) &&
 																			(k == 0 ||
-																				k != 0 && Person::players[i]->skeleton.oldfree == 1 && Animation::animations[Person::players[k]->animCurrent].attack == neutral ||
-																				/*i!=0&&*/ Person::players[k]->skeleton.oldfree == 1 && Animation::animations[Person::players[i]->animCurrent].attack == neutral)) ||
+																				k != 0 && Person::players[i]->skeleton.oldfree == 1 && assets.graphics.animations[Person::players[k]->animCurrent].attack == neutral ||
+																				/*i!=0&&*/ Person::players[k]->skeleton.oldfree == 1 && assets.graphics.animations[Person::players[i]->animCurrent].attack == neutral)) ||
 																			(Person::players[i]->animTarget == jumpupanim || Person::players[i]->animTarget == jumpdownanim || Person::players[i]->isFlip()) &&
 																			(Person::players[k]->animTarget == jumpupanim || Person::players[k]->animTarget == jumpdownanim || Person::players[k]->isFlip()) &&
 																			k == 0 && !Person::players[i]->skeleton.oldfree && !Person::players[k]->skeleton.oldfree) {
 																			//If hit by body
 																			if ((i != 0 || Person::players[i]->skeleton.free) &&
 																				(k != 0 || Person::players[k]->skeleton.free) ||
-																				(Animation::animations[Person::players[i]->animTarget].height == highheight &&
-																					Animation::animations[Person::players[k]->animTarget].height == highheight)) {
+																				(assets.graphics.animations[Person::players[i]->animTarget].height == highheight &&
+																					assets.graphics.animations[Person::players[k]->animTarget].height == highheight)) {
 																				if (!Tutorial::active) {
 																					emit_sound_at(heavyimpactsound, Person::players[i]->coords);
 																				}
@@ -3010,10 +3010,10 @@ void doPlayerCollisions(GameState& gamestate, GameAssets& assets)
 																			}
 																		}
 																	}
-																	if ((Animation::animations[Person::players[i]->animTarget].attack == neutral ||
-																		Animation::animations[Person::players[i]->animTarget].attack == normalattack) &&
-																		(Animation::animations[Person::players[k]->animTarget].attack == neutral ||
-																			Animation::animations[Person::players[k]->animTarget].attack == normalattack)) {
+																	if ((assets.graphics.animations[Person::players[i]->animTarget].attack == neutral ||
+																		assets.graphics.animations[Person::players[i]->animTarget].attack == normalattack) &&
+																		(assets.graphics.animations[Person::players[k]->animTarget].attack == neutral ||
+																			assets.graphics.animations[Person::players[k]->animTarget].attack == normalattack)) {
 																		//If bumped
 																		if (Person::players[i]->skeleton.oldfree == 0 && Person::players[k]->skeleton.oldfree == 0) {
 																			if (distsq(&Person::players[k]->coords, &Person::players[i]->coords) < .5 * sq((Person::players[i]->scale + Person::players[k]->scale) * 2.5)) {
@@ -3203,7 +3203,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 			}
 			talkdelay -= gamestate.multiplier;
 
-			if (talkdelay <= 0 && !Dialog::inDialog() && Animation::animations[Person::players[0]->animTarget].height != highheight) {
+			if (talkdelay <= 0 && !Dialog::inDialog() && assets.graphics.animations[Person::players[0]->animTarget].height != highheight) {
 				for (unsigned i = 0; i < Dialog::dialogs.size(); i++) {
 					Dialog::dialogs[i].tick(i, gamestate, assets);
 				}
@@ -3564,7 +3564,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 
 			doPlayerCollisions(gamestate, assets);
 
-			doJumpReversals();
+			doJumpReversals(assets);
 
 			for (unsigned k = 0; k < Person::players.size(); k++) {
 				if (k != 0 && Person::players[k]->immobile) {
@@ -3606,7 +3606,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 					oldtargetyaw = Person::players[i]->targetyaw;
 					if (i == 0 && !Dialog::inDialog()) {
 						//TODO: refactor repetitive code
-						if (!Animation::animations[Person::players[0]->animTarget].attack &&
+						if (!assets.graphics.animations[Person::players[0]->animTarget].attack &&
 							Person::players[0]->animTarget != staggerbackhighanim &&
 							Person::players[0]->animTarget != staggerbackhardanim &&
 							Person::players[0]->animTarget != crouchremoveknifeanim &&
@@ -3641,7 +3641,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 						Person::players[i]->targetheadpitch = gamestate.pitch;
 					}
 					if (i != 0 && Person::players[i]->isPlayerControlled() && !Dialog::inDialog()) {
-						if (!Animation::animations[Person::players[i]->animTarget].attack &&
+						if (!assets.graphics.animations[Person::players[i]->animTarget].attack &&
 							Person::players[i]->animTarget != staggerbackhighanim &&
 							Person::players[i]->animTarget != staggerbackhardanim &&
 							Person::players[i]->animTarget != crouchremoveknifeanim &&
@@ -3719,7 +3719,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 
 					Person::players[i]->doAI(*assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate, assets);
 
-					if (Animation::animations[Person::players[i]->animTarget].attack == reversed) {
+					if (assets.graphics.animations[Person::players[i]->animTarget].attack == reversed) {
 						//Person::players[i]->targetyaw=Person::players[i]->yaw;
 						Person::players[i]->forwardkeydown = 0;
 						Person::players[i]->leftkeydown = 0;
@@ -3767,7 +3767,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 						Person::players[i]->aitype == attacktypecutoff &&
 						!Person::players[i]->dead &&
 						!Person::players[i]->skeleton.free &&
-						Animation::animations[Person::players[i]->animTarget].attack == neutral) {
+						assets.graphics.animations[Person::players[i]->animTarget].attack == neutral) {
 						numresponded = 1;
 					}
 
@@ -4130,7 +4130,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 					}
 					movekey = 0;
 					//Do controls
-					if (!Animation::animations[Person::players[i]->animTarget].attack &&
+					if (!assets.graphics.animations[Person::players[i]->animTarget].attack &&
 						Person::players[i]->animTarget != staggerbackhighanim &&
 						Person::players[i]->animTarget != staggerbackhardanim &&
 						Person::players[i]->animTarget != backhandspringanim &&
@@ -5002,7 +5002,7 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 	gamestate.viewerfacing = facing;
 
 	if (!gamestate.cameramode) {
-		if ((Animation::animations[Person::players[0]->animTarget].attack != 3 && Animation::animations[Person::players[0]->animCurrent].attack != 3) || Person::players[0]->skeleton.free) {
+		if ((assets.graphics.animations[Person::players[0]->animTarget].attack != 3 && assets.graphics.animations[Person::players[0]->animCurrent].attack != 3) || Person::players[0]->skeleton.free) {
 			target = Person::players[0]->coords + Person::players[0]->currentoffset * (1 - Person::players[0]->target) * Person::players[0]->scale + Person::players[0]->targetoffset * Person::players[0]->target * Person::players[0]->scale - Person::players[0]->facing * .05;
 		}
 		else {

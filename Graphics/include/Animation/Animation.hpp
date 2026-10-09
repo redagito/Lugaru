@@ -27,6 +27,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 
+struct GraphicsState;
+
 struct AnimationFrameJointInfo
 {
     Vector3 position;
@@ -52,8 +54,7 @@ struct AnimationFrame
 class Animation
 {
 public:
-    static std::vector<Animation> animations;
-    static void loadAll(ProgressCallback callback);
+    static void loadAll(ProgressCallback callback, GraphicsState& graphics);
 
     anim_height_type height;
     anim_attack_type attack;

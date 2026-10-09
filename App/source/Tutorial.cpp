@@ -475,7 +475,7 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 			}
 			break;
 		case 28:
-			if (Animation::animations[Person::players[0]->animTarget].attack == reversed && Person::players[0]->feint) {
+			if (assets.graphics.animations[Person::players[0]->animTarget].attack == reversed && Person::players[0]->feint) {
 				success = 1;
 			}
 			break;
@@ -492,12 +492,12 @@ void Tutorial::Do(float timemultiplier, bool bloodtoggleflag, GameState& gamesta
 		case 44:
 		case 45:
 		case 46:
-			if (Animation::animations[Person::players[0]->animTarget].attack == reversal) {
+			if (assets.graphics.animations[Person::players[0]->animTarget].attack == reversal) {
 				success = 1;
 			}
 			break;
 		case 35:
-			if (Animation::animations[Person::players[0]->animTarget].attack == reversal) {
+			if (assets.graphics.animations[Person::players[0]->animTarget].attack == reversal) {
 				success = 1;
 				gamestate.reversaltrain = 0;
 				gamestate.cananger = 0;

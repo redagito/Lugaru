@@ -303,7 +303,7 @@ Vector3 temppoint1, temppoint2;
 
 							emit_sound_at(fleshstabsound, position, 128.);
 
-							if (Animation::animations[Person::players[0]->animTarget].height == highheight) {
+							if (assets.graphics.animations[Person::players[0]->animTarget].height == highheight) {
 								awardNinja();
 							}
 							else {

@@ -27,6 +27,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Animation/Animation.hpp"
 #include "Animation/Skeleton.hpp"
 #include "Environment/Terrain.hpp"
+#include "GameAssets.hpp"
 #include "Graphic/Models.hpp"
 #include "Graphic/Sprite.hpp"
 #include "Graphic/gamegl.hpp"
@@ -353,8 +354,8 @@ public:
     inline Joint& joint(int bodypart) { return skeleton.joints[skeleton.jointlabels[bodypart]]; }
     inline Vector3& jointPos(int bodypart) { return joint(bodypart).position; }
     inline Vector3& jointVel(int bodypart) { return joint(bodypart).velocity; }
-    inline AnimationFrame& currentFrame() { return Animation::animations.at(animCurrent).frames.at(frameCurrent); }
-    inline AnimationFrame& targetFrame() { return Animation::animations.at(animTarget).frames.at(frameTarget); }
+    inline AnimationFrame& currentFrame(GameAssets& assets) { return assets.graphics.animations.at(animCurrent).frames.at(frameCurrent); }
+    inline AnimationFrame& targetFrame(GameAssets& assets) { return assets.graphics.animations.at(animTarget).frames.at(frameTarget); }
 
     void setProportions(float head, float body, float arms, float legs);
     float getProportion(int part) const;
