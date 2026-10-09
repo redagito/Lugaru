@@ -305,7 +305,7 @@ Person::Person(GameState& gamestate, GameAssets& assets)
 
 	, jumpclimb(false)
 {
-	damagetolerance = PersonType::types[creature].defaultDamageTolerance;
+	damagetolerance = assets.graphics.types[creature].defaultDamageTolerance;
 	setProportions(1, 1, 1, 1);
 }
 
@@ -404,10 +404,10 @@ Person::Person(FILE* tfile, int mapvers, unsigned i, GameState& gamestate, GameA
 
 	loaded = true;
 
-	damagetolerance = PersonType::types[creature].defaultDamageTolerance;
+	damagetolerance = assets.graphics.types[creature].defaultDamageTolerance;
 
 	if (scale < 0) {
-		scale = PersonType::types[creature].defaultScale;
+		scale = assets.graphics.types[creature].defaultScale;
 	}
 
 	oldcoords = coords;
@@ -419,29 +419,29 @@ void Person::changeCreatureType(person_type type, bool tutorialActive, GameState
 	creature = type;
 	whichskin = 0;
 	skeletonLoad(tutorialActive, gamestate, assets);
-	scale = PersonType::types[creature].defaultScale;
-	damagetolerance = PersonType::types[creature].defaultDamageTolerance;
+	scale = assets.graphics.types[creature].defaultScale;
+	damagetolerance = assets.graphics.types[creature].defaultDamageTolerance;
 }
 
 void Person::skeletonLoad(bool tutorialActive, GameState& gamestate, GameAssets& assets)
 {
 	skeleton.id = id;
 	skeleton.Load(
-		PersonType::types[creature].figureFileName,
-		PersonType::types[creature].lowFigureFileName,
-		PersonType::types[creature].clothesFileName,
-		PersonType::types[creature].modelFileNames[0],
-		PersonType::types[creature].modelFileNames[1],
-		PersonType::types[creature].modelFileNames[2],
-		PersonType::types[creature].modelFileNames[3],
-		PersonType::types[creature].modelFileNames[4],
-		PersonType::types[creature].modelFileNames[5],
-		PersonType::types[creature].modelFileNames[6],
-		PersonType::types[creature].lowModelFileName,
-		PersonType::types[creature].modelClothesFileName,
-		PersonType::types[creature].clothes, tutorialActive, [&]() {Game::LoadingScreen(gamestate, assets); });
+		assets.graphics.types[creature].figureFileName,
+		assets.graphics.types[creature].lowFigureFileName,
+		assets.graphics.types[creature].clothesFileName,
+		assets.graphics.types[creature].modelFileNames[0],
+		assets.graphics.types[creature].modelFileNames[1],
+		assets.graphics.types[creature].modelFileNames[2],
+		assets.graphics.types[creature].modelFileNames[3],
+		assets.graphics.types[creature].modelFileNames[4],
+		assets.graphics.types[creature].modelFileNames[5],
+		assets.graphics.types[creature].modelFileNames[6],
+		assets.graphics.types[creature].lowModelFileName,
+		assets.graphics.types[creature].modelClothesFileName,
+		assets.graphics.types[creature].clothes, tutorialActive, [&]() {Game::LoadingScreen(gamestate, assets); });
 
-	skeleton.drawmodel.textureptr.load(PersonType::types[creature].skins[whichskin], 1, &skeleton.skinText[0], &skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
+	skeleton.drawmodel.textureptr.load(assets.graphics.types[creature].skins[whichskin], 1, &skeleton.skinText[0], &skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 }
 
 void Person::setProportions(float head, float body, float arms, float legs)
@@ -457,9 +457,9 @@ float Person::getProportion(int part) const
 	return proportions[part];
 }
 
-Vector3 Person::getProportionXYZ(int part, GameState& gamestate) const
+Vector3 Person::getProportionXYZ(int part, GameState& gamestate, GameAssets& assets) const
 {
-	Vector3 prop = PersonType::types[creature].proportions[part] * proportions[part];
+	Vector3 prop = assets.graphics.types[creature].proportions[part] * proportions[part];
 	if (gamestate.cellophane) {
 		prop.z = 0;
 	}
@@ -478,13 +478,13 @@ void Person::CheckKick(Terrain& terrainref, bool tutorialActive, bool inDialog, 
 	}
 
 	if (Animation::animations[victim->animTarget].height != lowheight) {
-		float damagemult = PersonType::types[creature].power * power * power;
+		float damagemult = assets.graphics.types[creature].power * power * power;
 		Vector3 relative = velocity;
 		relative.y = 0;
 		Normalise(&relative);
 
 		victim->spurt = 1;
-		DoBlood(.2, 250, tutorialActive, gamestate);
+		DoBlood(.2, 250, tutorialActive, gamestate, assets);
 		if (!tutorialActive) {
 			emit_sound_at(heavyimpactsound, victim->coords);
 		}
@@ -568,15 +568,15 @@ void Person::CatchFire(GameState& gamestate)
  */
 int Person::getIdle(bool inDialog, GameAssets& assets)
 {
-	if (inDialog && (howactive == typeactive) && PersonType::types[creature].hasAnimTalkIdle()) {
-		return PersonType::types[creature].animTalkIdle;
+	if (inDialog && (howactive == typeactive) && assets.graphics.types[creature].hasAnimTalkIdle()) {
+		return assets.graphics.types[creature].animTalkIdle;
 	}
 	if (hasvictim && (victim != this->shared_from_this())) {
 		if ((!victim->dead && victim->aitype != passivetype &&
 			victim->aitype != searchtype && aitype != passivetype && aitype != searchtype &&
 			victim->id < Person::players.size())) {
 			if ((isPlayerControlled() && (stunned <= 0) && !hasWeapon()) || pause) {
-				return PersonType::types[creature].animFightIdle;
+				return assets.graphics.types[creature].animFightIdle;
 			}
 			if (isPlayerControlled() && (stunned <= 0) && hasWeapon()) {
 				if (assets.weapons.weapons[weaponids[weaponactive]].getType() == knife) {
@@ -597,8 +597,8 @@ int Person::getIdle(bool inDialog, GameAssets& assets)
 			}
 		}
 	}
-	if ((damage > permanentdamage || damage > damagetolerance * .8 || deathbleeding > 0) && PersonType::types[creature].hasAnimHurtIdle()) {
-		return PersonType::types[creature].animHurtIdle;
+	if ((damage > permanentdamage || damage > damagetolerance * .8 || deathbleeding > 0) && assets.graphics.types[creature].hasAnimHurtIdle()) {
+		return assets.graphics.types[creature].animHurtIdle;
 	}
 	if (howactive == typesitting) {
 		return sitanim;
@@ -621,27 +621,27 @@ int Person::getIdle(bool inDialog, GameAssets& assets)
 	if (howactive == typedead4) {
 		return dead4anim;
 	}
-	return PersonType::types[creature].animBounceIdle;
+	return assets.graphics.types[creature].animBounceIdle;
 }
 
 /* FUNCTION
  * crouch animation for this creature
  */
-int Person::getCrouch()
+int Person::getCrouch(GameAssets& assets)
 {
-	return PersonType::types[creature].animCrouch;
+	return assets.graphics.types[creature].animCrouch;
 }
 
 /* FUNCTION
  * running animation for this creature (can be upright or all fours)
  */
-int Person::getRun()
+int Person::getRun(GameAssets& assets)
 {
 	if (superruntoggle && (!hasWeapon())) {
-		return PersonType::types[creature].animRunning;
+		return assets.graphics.types[creature].animRunning;
 	}
 	else {
-		return PersonType::types[creature].animRun;
+		return assets.graphics.types[creature].animRun;
 	}
 }
 
@@ -660,23 +660,23 @@ bool Person::shouldTurnTowardTarget() const
 			animTarget == walkanim);
 }
 
-int Person::getStop()
+int Person::getStop(GameAssets& assets)
 {
-	return PersonType::types[creature].animStop;
+	return assets.graphics.types[creature].animStop;
 }
 
 /* FUNCTION
  */
-int Person::getLanding()
+int Person::getLanding(GameAssets& assets)
 {
-	return PersonType::types[creature].animLanding;
+	return assets.graphics.types[creature].animLanding;
 }
 
 /* FUNCTION
  */
-int Person::getLandhard()
+int Person::getLandhard(GameAssets& assets)
 {
-	return PersonType::types[creature].animLandingHard;
+	return assets.graphics.types[creature].animLandingHard;
 }
 
 /* EFFECT
@@ -698,7 +698,7 @@ SolidHitBonus(int playerid)
 /* EFFECT
  * spawns blood effects
  */
-void Person::DoBlood(float howmuch, int which, bool tutorialActive, GameState& gamestate)
+void Person::DoBlood(float howmuch, int which, bool tutorialActive, GameState& gamestate, GameAssets& assets)
 {
 	// FIXME: should abstract out inputs
 	static int bleedxint, bleedyint;
@@ -754,7 +754,7 @@ void Person::DoBlood(float howmuch, int which, bool tutorialActive, GameState& g
 			bleeding = howmuch + (float)abs(rand() % 100) / 200 - .25;
 			bleedxint = 0;
 			bleedyint = 0;
-			while (PersonType::types[creature].bloodText[bleedxint * 512 * 3 + bleedyint * 3 + 0] > which + 4 || PersonType::types[creature].bloodText[bleedxint * 512 * 3 + bleedyint * 3 + 0] < which - 4 || bleedxint < 10 || bleedyint < 10 || bleedxint > 500 || bleedyint > 500) {
+			while (assets.graphics.types[creature].bloodText[bleedxint * 512 * 3 + bleedyint * 3 + 0] > which + 4 || assets.graphics.types[creature].bloodText[bleedxint * 512 * 3 + bleedyint * 3 + 0] < which - 4 || bleedxint < 10 || bleedyint < 10 || bleedxint > 500 || bleedyint > 500) {
 				bleedxint = abs(rand() % 512);
 				bleedyint = abs(rand() % 512);
 			}
@@ -774,7 +774,7 @@ void Person::DoBlood(float howmuch, int which, bool tutorialActive, GameState& g
  * spawns big blood effects and ???
  * modifies character's skin texture
  */
-void Person::DoBloodBig(float howmuch, int which, bool tutorialActive, GameState& gamestate)
+void Person::DoBloodBig(float howmuch, int which, bool tutorialActive, GameState& gamestate, GameAssets& assets)
 {
 	static int bleedxint, bleedyint, i, j;
 	static Vector3 bloodvel;
@@ -872,7 +872,7 @@ void Person::DoBloodBig(float howmuch, int which, bool tutorialActive, GameState
 		GLubyte color;
 		for (i = 0; i < 512; i++) {
 			for (j = 0; j < 512; j++) {
-				if (PersonType::types[creature].bloodText[i * 512 * 3 + j * 3 + 0] <= which + 4 && PersonType::types[creature].bloodText[i * 512 * 3 + j * 3 + 0] >= which - 4) {
+				if (assets.graphics.types[creature].bloodText[i * 512 * 3 + j * 3 + 0] <= which + 4 && assets.graphics.types[creature].bloodText[i * 512 * 3 + j * 3 + 0] >= which - 4) {
 					if (i < startx) {
 						startx = i;
 					}
@@ -922,7 +922,7 @@ void Person::DoBloodBig(float howmuch, int which, bool tutorialActive, GameState
 		int where;
 		for (i = startx; i < endx; i++) {
 			for (j = starty; j < endy; j++) {
-				if (PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] <= which + 4 && PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] >= which - 4) {
+				if (assets.graphics.types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] <= which + 4 && assets.graphics.types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] >= which - 4) {
 					color = rand() % 85 + 170;
 					where = i * skeleton.skinsize * 3 + j * 3;
 					if (skeleton.skinText[where + 0] > color / 2) {
@@ -938,7 +938,7 @@ void Person::DoBloodBig(float howmuch, int which, bool tutorialActive, GameState
 
 		bleedxint = 0;
 		bleedyint = 0;
-		while (PersonType::types[creature].bloodText[bleedxint * 512 * 3 + bleedyint * 3 + 0] > which + 4 || PersonType::types[creature].bloodText[bleedxint * 512 * 3 + bleedyint * 3 + 0] < which - 4 || bleedxint < 10 || bleedyint < 10 || bleedxint > 500 || bleedyint > 500) {
+		while (assets.graphics.types[creature].bloodText[bleedxint * 512 * 3 + bleedyint * 3 + 0] > which + 4 || assets.graphics.types[creature].bloodText[bleedxint * 512 * 3 + bleedyint * 3 + 0] < which - 4 || bleedxint < 10 || bleedyint < 10 || bleedxint > 500 || bleedyint > 500) {
 			bleedxint = abs(rand() % 512);
 			bleedyint = abs(rand() % 512);
 		}
@@ -982,7 +982,7 @@ void Person::DoBloodBig(float howmuch, int which, bool tutorialActive, GameState
 /* EFFECT
  * similar to DoBloodBig
  */
-bool Person::DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutorialActive, GameState& gamestate)
+bool Person::DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutorialActive, GameState& gamestate, GameAssets& assets)
 {
 	static int i, j;
 	static Vector3 bloodvel;
@@ -1081,7 +1081,7 @@ bool Person::DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutor
 		GLubyte color;
 		for (i = 0; i < 512; i++) {
 			for (j = 0; j < 512; j++) {
-				if (PersonType::types[creature].bloodText[i * 512 * 3 + j * 3 + 0] <= which + 4 && PersonType::types[creature].bloodText[i * 512 * 3 + j * 3 + 0] >= which - 4) {
+				if (assets.graphics.types[creature].bloodText[i * 512 * 3 + j * 3 + 0] <= which + 4 && assets.graphics.types[creature].bloodText[i * 512 * 3 + j * 3 + 0] >= which - 4) {
 					if (i < startx) {
 						startx = i;
 					}
@@ -1130,7 +1130,7 @@ bool Person::DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutor
 		int texoffset;
 		for (i = startx; i < endx; i++) {
 			for (j = starty; j < endy; j++) {
-				if (PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] <= which + 4 && PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] >= which - 4) {
+				if (assets.graphics.types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] <= which + 4 && assets.graphics.types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] >= which - 4) {
 					color = rand() % 85 + 170;
 					texoffset = i * skeleton.skinsize * 3 + j * 3;
 					if (skeleton.skinText[texoffset + 0] > color / 2) {
@@ -1139,7 +1139,7 @@ bool Person::DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutor
 					skeleton.skinText[texoffset + 1] = 0;
 					skeleton.skinText[texoffset + 2] = 0;
 				}
-				else if (PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] <= 160 + 4 && PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] >= 160 - 4) {
+				else if (assets.graphics.types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] <= 160 + 4 && assets.graphics.types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] >= 160 - 4) {
 					color = rand() % 85 + 170;
 					texoffset = i * skeleton.skinsize * 3 + j * 3;
 					if (skeleton.skinText[texoffset + 0] > color / 2) {
@@ -1538,10 +1538,10 @@ void Person::DoDamage(float howmuch, Terrain& terrainref, bool tutorialActive, b
 	}
 	// visual effects
 	if (permanentdamage > damagetolerance / 2 && permanentdamage - howmuch < damagetolerance / 2 && rand() % 2) {
-		DoBlood(1, 255, tutorialActive, gamestate);
+		DoBlood(1, 255, tutorialActive, gamestate, assets);
 	}
 	if ((permanentdamage > damagetolerance * .8 && rand() % 2 && !deathbleeding) || spurt) {
-		DoBlood(1, 255, tutorialActive, gamestate);
+		DoBlood(1, 255, tutorialActive, gamestate, assets);
 	}
 	spurt = 0;
 	if (id == 0) {
@@ -2109,11 +2109,11 @@ Reverse(tutorialActive, gamestate, assets);
 					if (victim->aitype == gethelptype) {
 						victim->DoDamage(victim->damagetolerance - victim->damage, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate, assets);
 					}
-					if (PersonType::types[creature].hasClaws) {
-						DoBloodBig(0, 255, tutorialActive, gamestate);
+					if (assets.graphics.types[creature].hasClaws) {
+						DoBloodBig(0, 255, tutorialActive, gamestate, assets);
 						emit_sound_at(clawslicesound, victim->coords);
 						victim->spurt = 1;
-						victim->DoBloodBig(1 / victim->armorhead, 210, tutorialActive, gamestate);
+						victim->DoBloodBig(1 / victim->armorhead, 210, tutorialActive, gamestate, assets);
 					}
 					award_bonus(id, TackleBonus,
 						victim->aitype == gethelptype ? 50 : 0);
@@ -2228,7 +2228,7 @@ Reverse(tutorialActive, gamestate, assets);
 							if (targetFrame().label == 4 && !isPlayerControlled()) {
 								if (Animation::animations[animTarget].attack != neutral) {
 									unsigned r = abs(rand() % 4);
-									whichsound = PersonType::types[creature].soundsAttack[r];
+									whichsound = assets.graphics.types[creature].soundsAttack[r];
 									speechdelay = .3;
 								}
 							}
@@ -2453,7 +2453,7 @@ Reverse(tutorialActive, gamestate, assets);
 			}
 
 			//Move impacts
-			float damagemult = PersonType::types[creature].power * power;
+			float damagemult = assets.graphics.types[creature].power * power;
 			if (hasvictim) {
 				damagemult /= victim->damagetolerance / 200;
 			}
@@ -2464,20 +2464,20 @@ Reverse(tutorialActive, gamestate, assets);
 						if (id == 0) {
 							gamestate.camerashake += .4;
 						}
-						if (rand() % 2 || PersonType::types[creature].hasClaws) {
+						if (rand() % 2 || assets.graphics.types[creature].hasClaws) {
 							victim->spurt = 1;
-							DoBlood(.2, 250, tutorialActive, gamestate);
-							if (PersonType::types[creature].hasClaws) {
-								DoBloodBig(0, 250, tutorialActive, gamestate);
+							DoBlood(.2, 250, tutorialActive, gamestate, assets);
+							if (assets.graphics.types[creature].hasClaws) {
+								DoBloodBig(0, 250, tutorialActive, gamestate, assets);
 							}
 						}
 						if (!tutorialActive) {
 							emit_sound_at(heavyimpactsound, victim->coords, 128.);
 						}
-						if (PersonType::types[creature].hasClaws) {
+						if (assets.graphics.types[creature].hasClaws) {
 							emit_sound_at(clawslicesound, victim->coords, 128.);
 							victim->spurt = 1;
-							victim->DoBloodBig(2 / victim->armorhead, 175, tutorialActive, gamestate);
+							victim->DoBloodBig(2 / victim->armorhead, 175, tutorialActive, gamestate, assets);
 						}
 						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate, assets);
 						Vector3 relative;
@@ -2502,17 +2502,17 @@ Reverse(tutorialActive, gamestate, assets);
 						if (id == 0) {
 							gamestate.camerashake += .4;
 						}
-						if (rand() % 2 || PersonType::types[creature].hasClaws) {
+						if (rand() % 2 || assets.graphics.types[creature].hasClaws) {
 							victim->spurt = 1;
-							if (PersonType::types[creature].hasClaws) {
-								DoBloodBig(0, 235, tutorialActive, gamestate);
+							if (assets.graphics.types[creature].hasClaws) {
+								DoBloodBig(0, 235, tutorialActive, gamestate, assets);
 							}
 						}
 						emit_sound_at(whooshhitsound, victim->coords);
-						if (PersonType::types[creature].hasClaws) {
+						if (assets.graphics.types[creature].hasClaws) {
 							emit_sound_at(clawslicesound, victim->coords, 128.);
 							victim->spurt = 1;
-							victim->DoBloodBig(2, 175, tutorialActive, gamestate);
+							victim->DoBloodBig(2, 175, tutorialActive, gamestate, assets);
 						}
 						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate, assets);
 						Vector3 relative;
@@ -2538,14 +2538,14 @@ Reverse(tutorialActive, gamestate, assets);
 							gamestate.camerashake += .4;
 						}
 						victim->spurt = 1;
-						DoBlood(.2, 250, tutorialActive, gamestate);
+						DoBlood(.2, 250, tutorialActive, gamestate, assets);
 						if (!tutorialActive) {
 							emit_sound_at(heavyimpactsound, victim->coords, 160.);
 						}
-						if (PersonType::types[creature].hasClaws) {
+						if (assets.graphics.types[creature].hasClaws) {
 							emit_sound_at(clawslicesound, victim->coords, 128.);
 							victim->spurt = 1;
-							victim->DoBloodBig(2 / victim->armorhead, 175, tutorialActive, gamestate);
+							victim->DoBloodBig(2 / victim->armorhead, 175, tutorialActive, gamestate, assets);
 						}
 						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate, assets);
 						Vector3 relative;
@@ -2576,14 +2576,14 @@ Reverse(tutorialActive, gamestate, assets);
 							gamestate.camerashake += .4;
 						}
 						victim->spurt = 1;
-						DoBlood(.2, 250, tutorialActive, gamestate);
+						DoBlood(.2, 250, tutorialActive, gamestate, assets);
 						if (!tutorialActive) {
 							emit_sound_at(heavyimpactsound, victim->coords, 160.);
 						}
-						if (PersonType::types[creature].hasClaws) {
+						if (assets.graphics.types[creature].hasClaws) {
 							emit_sound_at(clawslicesound, victim->coords, 128.);
 							victim->spurt = 1;
-							victim->DoBloodBig(2 / victim->armorhead, 175, tutorialActive, gamestate);
+							victim->DoBloodBig(2 / victim->armorhead, 175, tutorialActive, gamestate, assets);
 						}
 						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate, assets);
 						Vector3 relative;
@@ -2615,7 +2615,7 @@ Reverse(tutorialActive, gamestate, assets);
 						}
 						if (rand() % 2) {
 							victim->spurt = 1;
-							DoBlood(.2, 235, tutorialActive, gamestate);
+							DoBlood(.2, 235, tutorialActive, gamestate, assets);
 						}
 						emit_sound_at(whooshhitsound, victim->coords);
 						victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate, assets);
@@ -2899,7 +2899,7 @@ Reverse(tutorialActive, gamestate, assets);
 								footpoint = (assets.weapons.weapons[weaponids[weaponactive]].tippoint * .8 + assets.weapons.weapons[weaponids[weaponactive]].position * .2);
 							}
 						}
-						hasvictim = victim->DoBloodBigWhere(2, 220, footpoint, tutorialActive, gamestate);
+						hasvictim = victim->DoBloodBigWhere(2, 220, footpoint, tutorialActive, gamestate, assets);
 						if (hasvictim) {
 							if (distsq(&coords, &victim->coords) < (scale * 5) * (scale * 5) * 3) {
 								victim->skeleton.longdead = 0;
@@ -2944,7 +2944,7 @@ Reverse(tutorialActive, gamestate, assets);
 						}
 						if (rand() % 2) {
 							victim->spurt = 1;
-							DoBlood(.2, 235, tutorialActive, gamestate);
+							DoBlood(.2, 235, tutorialActive, gamestate, assets);
 						}
 						if (!tutorialActive) {
 							emit_sound_at(heavyimpactsound, victim->coords, 128);
@@ -3080,7 +3080,7 @@ Reverse(tutorialActive, gamestate, assets);
 						if (distsq(&coords, &victim->coords) < (scale * 5) * (scale * 5) * 4.5 && victim->animTarget != dodgebackanim && victim->animTarget != rollanim) {
 							escapednum = 0;
 							if (!tutorialActive) {
-								victim->DoBloodBig(1.5 / victim->armorhigh, 225, tutorialActive, gamestate);
+								victim->DoBloodBig(1.5 / victim->armorhigh, 225, tutorialActive, gamestate, assets);
 							}
 
 							award_bonus(id, Slicebonus);
@@ -3141,10 +3141,10 @@ Reverse(tutorialActive, gamestate, assets);
 							escapednum = 0;
 							if (!tutorialActive) {
 								if (normaldotproduct(victim->facing, victim->coords - coords) < 0) {
-									victim->DoBloodBig(2 / victim->armorhigh, 190, tutorialActive, gamestate);
+									victim->DoBloodBig(2 / victim->armorhigh, 190, tutorialActive, gamestate, assets);
 								}
 								else {
-									victim->DoBloodBig(2 / victim->armorhigh, 185, tutorialActive, gamestate);
+									victim->DoBloodBig(2 / victim->armorhigh, 185, tutorialActive, gamestate, assets);
 								}
 								victim->deathbleeding = 1;
 								emit_sound_at(swordslicesound, victim->coords);
@@ -3231,7 +3231,7 @@ Reverse(tutorialActive, gamestate, assets);
 							if (id == 0) {
 								gamestate.camerashake += .4;
 							}
-							if (rand() % 2 || PersonType::types[creature].hasClaws) {
+							if (rand() % 2 || assets.graphics.types[creature].hasClaws) {
 								victim->spurt = 1;
 							}
 							emit_sound_at(staffheadsound, victim->coords);
@@ -3266,7 +3266,7 @@ Reverse(tutorialActive, gamestate, assets);
 							if (id == 0) {
 								gamestate.camerashake += .4;
 							}
-							if (rand() % 2 || PersonType::types[creature].hasClaws) {
+							if (rand() % 2 || assets.graphics.types[creature].hasClaws) {
 								victim->spurt = 1;
 							}
 							emit_sound_at(staffheadsound, victim->coords);
@@ -3301,7 +3301,7 @@ Reverse(tutorialActive, gamestate, assets);
 							if (id == 0) {
 								gamestate.camerashake += .4;
 							}
-							if (rand() % 2 || PersonType::types[creature].hasClaws) {
+							if (rand() % 2 || assets.graphics.types[creature].hasClaws) {
 								victim->spurt = 1;
 							}
 							emit_sound_at(staffbodysound, victim->coords);
@@ -3359,7 +3359,7 @@ Reverse(tutorialActive, gamestate, assets);
 						if (Animation::animations[victim->animTarget].height == lowheight) {
 							if (rand() % 2) {
 								victim->spurt = 1;
-								DoBlood(.2, 250, tutorialActive, gamestate);
+								DoBlood(.2, 250, tutorialActive, gamestate, assets);
 							}
 							victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate, assets);
 							for (unsigned i = 0; i < victim->skeleton.joints.size(); i++) {
@@ -3374,10 +3374,10 @@ Reverse(tutorialActive, gamestate, assets);
 							if (victim->howactive == typesleeping) {
 								victim->DoDamage(damagemult * 150 / victim->protectionhead, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate, assets);
 							}
-							if (PersonType::types[creature].hasClaws) {
+							if (assets.graphics.types[creature].hasClaws) {
 								emit_sound_at(clawslicesound, victim->coords, 128.);
 								victim->spurt = 1;
-								victim->DoBloodBig(2 / victim->armorhead, 175, tutorialActive, gamestate);
+								victim->DoBloodBig(2 / victim->armorhead, 175, tutorialActive, gamestate, assets);
 							}
 						}
 						else {
@@ -3397,10 +3397,10 @@ Reverse(tutorialActive, gamestate, assets);
 							}
 							victim->Puff(abdomen, gamestate);
 							victim->DoDamage(damagemult * 30 / victim->protectionhigh, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate, assets);
-							if (PersonType::types[creature].hasClaws) {
+							if (assets.graphics.types[creature].hasClaws) {
 								emit_sound_at(clawslicesound, victim->coords, 128.);
 								victim->spurt = 1;
-								victim->DoBloodBig(2 / victim->armorhigh, 170, tutorialActive, gamestate);
+								victim->DoBloodBig(2 / victim->armorhigh, 170, tutorialActive, gamestate, assets);
 							}
 						}
 					}
@@ -3476,15 +3476,15 @@ Reverse(tutorialActive, gamestate, assets);
 					}
 					if (rand() % 2) {
 						victim->spurt = 1;
-						DoBlood(.2, 230, tutorialActive, gamestate);
+						DoBlood(.2, 230, tutorialActive, gamestate, assets);
 					}
 					if (!tutorialActive) {
 						emit_sound_at(heavyimpactsound, victim->coords, 128.);
 					}
-					if (PersonType::types[creature].hasClaws) {
+					if (assets.graphics.types[creature].hasClaws) {
 						emit_sound_at(clawslicesound, victim->coords, 128);
 						victim->spurt = 1;
-						victim->DoBloodBig(2 / victim->armorhigh, 170, tutorialActive, gamestate);
+						victim->DoBloodBig(2 / victim->armorhigh, 170, tutorialActive, gamestate, assets);
 					}
 					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate, assets);
 					Vector3 relative;
@@ -3521,7 +3521,7 @@ Reverse(tutorialActive, gamestate, assets);
 					}
 					if (rand() % 2) {
 						victim->spurt = 1;
-						DoBlood(.2, 230, tutorialActive, gamestate);
+						DoBlood(.2, 230, tutorialActive, gamestate, assets);
 					}
 					emit_sound_at(whooshhitsound, victim->coords, 128.);
 					victim->RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate, assets);
@@ -3544,7 +3544,7 @@ Reverse(tutorialActive, gamestate, assets);
 					}
 					if (rand() % 2) {
 						victim->spurt = 1;
-						DoBlood(.2, 230, tutorialActive, gamestate);
+						DoBlood(.2, 230, tutorialActive, gamestate, assets);
 					}
 
 					award_bonus(id, staffreversebonus);
@@ -3597,16 +3597,16 @@ Reverse(tutorialActive, gamestate, assets);
 						doslice = (assets.weapons.weapons[weaponids[0]].getType() != staff);
 					}
 					else {
-						doslice = PersonType::types[creature].hasClaws;
+						doslice = assets.graphics.types[creature].hasClaws;
 					}
 					if (doslice) {
 						if (!hasWeapon()) {
 							emit_sound_at(clawslicesound, victim->coords, 128.);
 							victim->spurt = 1;
-							victim->DoBloodBig(2 / victim->armorhigh, 175, tutorialActive, gamestate);
+							victim->DoBloodBig(2 / victim->armorhigh, 175, tutorialActive, gamestate, assets);
 						}
 						else {
-							victim->DoBloodBig(2 / victim->armorhigh, 225, tutorialActive, gamestate);
+							victim->DoBloodBig(2 / victim->armorhigh, 225, tutorialActive, gamestate, assets);
 							emit_sound_at(knifeslicesound, victim->coords);
 							if (gamestate.bloodtoggle && !assets.weapons.weapons[weaponids[weaponactive]].bloody) {
 								assets.weapons.weapons[weaponids[weaponactive]].bloody = 1;
@@ -3646,7 +3646,7 @@ Reverse(tutorialActive, gamestate, assets);
 					}
 					if (rand() % 2) {
 						victim->spurt = 1;
-						DoBlood(.2, 230, tutorialActive, gamestate);
+						DoBlood(.2, 230, tutorialActive, gamestate, assets);
 					}
 					if (!tutorialActive) {
 						emit_sound_at(heavyimpactsound, victim->coords, 128.);
@@ -3688,16 +3688,16 @@ Reverse(tutorialActive, gamestate, assets);
 						doslice = (assets.weapons.weapons[weaponids[0]].getType() != staff);
 					}
 					else {
-						doslice = PersonType::types[creature].hasClaws;
+						doslice = assets.graphics.types[creature].hasClaws;
 					}
 					if (doslice) {
 						if (!hasWeapon()) {
 							emit_sound_at(clawslicesound, victim->coords, 128.);
 							victim->spurt = 1;
-							victim->DoBloodBig(2, 175, tutorialActive, gamestate);
+							victim->DoBloodBig(2, 175, tutorialActive, gamestate, assets);
 						}
 						else {
-							victim->DoBloodBig(200, 225, tutorialActive, gamestate);
+							victim->DoBloodBig(200, 225, tutorialActive, gamestate, assets);
 							emit_sound_at(knifeslicesound, victim->coords, tutorialActive);
 							if (gamestate.bloodtoggle) {
 								assets.weapons.weapons[weaponids[weaponactive]].bloody = 2;
@@ -3712,7 +3712,7 @@ Reverse(tutorialActive, gamestate, assets);
 					if (hasWeapon() && victim->bloodloss < victim->damagetolerance) {
 						escapednum = 0;
 						if (animTarget == knifefollowanim) {
-							victim->DoBloodBig(200, 210, tutorialActive, gamestate);
+							victim->DoBloodBig(200, 210, tutorialActive, gamestate, assets);
 						}
 						if (animTarget == knifesneakattackanim) {
 							Vector3 footvel, footpoint;
@@ -3726,7 +3726,7 @@ Reverse(tutorialActive, gamestate, assets);
 							Sprite::MakeSprite(bloodsprite, footpoint, DoRotation(footvel * 3, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .05, .9, gamestate.bloodtoggle);
 							Sprite::MakeSprite(bloodflamesprite, footpoint, footvel * 5, 1, 1, 1, .3, 1, gamestate.bloodtoggle);
 							Sprite::MakeSprite(bloodflamesprite, footpoint, footvel * 2, 1, 1, 1, .3, 1, gamestate.bloodtoggle);
-							victim->DoBloodBig(200, 195, tutorialActive, gamestate);
+							victim->DoBloodBig(200, 195, tutorialActive, gamestate, assets);
 							award_bonus(id, tracheotomy);
 						}
 						if (animTarget == knifefollowanim) {
@@ -3803,8 +3803,8 @@ Reverse(tutorialActive, gamestate, assets);
 						Sprite::MakeSprite(bloodsprite, footpoint, DoRotation(footvel * 3, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .05, .9, gamestate.bloodtoggle);
 						Sprite::MakeSprite(bloodflamesprite, footpoint, DoRotation(footvel * 5, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .3, 1, gamestate.bloodtoggle);
 						Sprite::MakeSprite(bloodflamesprite, footpoint, DoRotation(footvel * 3, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .3, 1, gamestate.bloodtoggle);
-						victim->DoBloodBig(200, 180, tutorialActive, gamestate);
-						victim->DoBloodBig(200, 215, tutorialActive, gamestate);
+						victim->DoBloodBig(200, 180, tutorialActive, gamestate, assets);
+						victim->DoBloodBig(200, 215, tutorialActive, gamestate, assets);
 						victim->bloodloss += 10000;
 						victim->velocity = 0;
 						emit_sound_at(fleshstabsound, victim->coords);
@@ -3849,7 +3849,7 @@ Reverse(tutorialActive, gamestate, assets);
 					}
 					if (rand() % 2) {
 						victim->spurt = 1;
-						DoBlood(.2, 240, tutorialActive, gamestate);
+						DoBlood(.2, 240, tutorialActive, gamestate, assets);
 					}
 					if (!hasWeapon()) {
 						if (!tutorialActive) {
@@ -3861,16 +3861,16 @@ Reverse(tutorialActive, gamestate, assets);
 						doslice = (assets.weapons.weapons[weaponids[0]].getType() != staff);
 					}
 					else {
-						doslice = PersonType::types[creature].hasClaws;
+						doslice = assets.graphics.types[creature].hasClaws;
 					}
 					if (doslice) {
 						if (!hasWeapon()) {
 							emit_sound_at(clawslicesound, victim->coords, 128.);
 							victim->spurt = 1;
-							victim->DoBloodBig(2 / victim->armorhead, 175, tutorialActive, gamestate);
+							victim->DoBloodBig(2 / victim->armorhead, 175, tutorialActive, gamestate, assets);
 						}
 						else {
-							victim->DoBloodBig(2 / victim->armorhead, 225, tutorialActive, gamestate);
+							victim->DoBloodBig(2 / victim->armorhead, 225, tutorialActive, gamestate, assets);
 							emit_sound_at(knifeslicesound, victim->coords);
 							if (gamestate.bloodtoggle && !assets.weapons.weapons[weaponids[weaponactive]].bloody) {
 								assets.weapons.weapons[weaponids[weaponactive]].bloody = 1;
@@ -3947,7 +3947,7 @@ Reverse(tutorialActive, gamestate, assets);
 					animTarget = getIdle(inDialog, assets);
 				}
 				if (animCurrent == crouchremoveknifeanim) {
-					animTarget = getCrouch();
+					animTarget = getCrouch(assets);
 				}
 				if (animCurrent == backhandspringanim) {
 					animTarget = getIdle(inDialog, assets);
@@ -3961,7 +3961,7 @@ Reverse(tutorialActive, gamestate, assets);
 				if (animCurrent == drawrightanim || animCurrent == crouchdrawrightanim) {
 					animTarget = getIdle(inDialog, assets);
 					if (animCurrent == crouchdrawrightanim) {
-						animTarget = getCrouch();
+						animTarget = getCrouch(assets);
 					}
 					if (!hasWeapon()) {
 						weaponactive = 0;
@@ -3979,7 +3979,7 @@ Reverse(tutorialActive, gamestate, assets);
 					}
 				}
 				if (animCurrent == rollanim) {
-					animTarget = getCrouch();
+					animTarget = getCrouch(assets);
 					FootLand(leftfoot, 1, terrainref, gamestate);
 					FootLand(rightfoot, 1, terrainref, gamestate);
 				}
@@ -3993,7 +3993,7 @@ Reverse(tutorialActive, gamestate, assets);
 					animTarget = jumpdownanim;
 				}
 				if (animCurrent == climbanim) {
-					animTarget = getCrouch();
+					animTarget = getCrouch(assets);
 					frameTarget = 1;
 					coords += facing * .1;
 					if (!isnormal(coords.x)) {
@@ -4008,11 +4008,11 @@ Reverse(tutorialActive, gamestate, assets);
 					avoidcollided = 0;
 				}
 				if (animTarget == rabbitkickreversalanim) {
-					animTarget = getCrouch();
+					animTarget = getCrouch(assets);
 					lastfeint = 0;
 				}
 				if (animTarget == jumpreversalanim) {
-					animTarget = getCrouch();
+					animTarget = getCrouch(assets);
 					lastfeint = 0;
 				}
 				if (animTarget == walljumprightanim || animTarget == walljumpbackanim || animTarget == walljumpfrontanim) {
@@ -4123,8 +4123,8 @@ Reverse(tutorialActive, gamestate, assets);
 					}
 				}
 				if (animTarget == sneakattackanim) {
-					animCurrent = getCrouch();
-					animTarget = getCrouch();
+					animCurrent = getCrouch(assets);
+					animTarget = getCrouch(assets);
 					frameTarget = 1;
 					frameCurrent = 0;
 					targetyaw += 180;
@@ -4155,7 +4155,7 @@ Reverse(tutorialActive, gamestate, assets);
 				}
 				if (Animation::animations[animTarget].attack == reversal && animCurrent != sneakattackanim && animCurrent != knifesneakattackanim && animCurrent != swordsneakattackanim && animCurrent != knifefollowanim) {
 					float ycoords = oldcoords.y;
-					animTarget = getStop();
+					animTarget = getStop(assets);
 					targetyaw += 180;
 					yaw += 180;
 					targettilt2 *= -1;
@@ -4263,7 +4263,7 @@ Reverse(tutorialActive, gamestate, assets);
 					normalsupdatedelay = 0;
 				}
 				if (animCurrent == upunchanim) {
-					animTarget = getStop();
+					animTarget = getStop(assets);
 					normalsupdatedelay = 0;
 					lastfeint = 0;
 				}
@@ -4511,7 +4511,7 @@ Reverse(tutorialActive, gamestate, assets);
 			if (id == 0) {
 				gamestate.camerashake += .4;
 			}
-			animTarget = getLandhard();
+			animTarget = getLandhard(assets);
 			frameTarget = 0;
 			target = 0;
 			landhard = 0;
@@ -4604,7 +4604,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 			superruntoggle = 0;
 		}
 		if (animTarget == wolfrunninganim && !superruntoggle) {
-			animTarget = getRun();
+			animTarget = getRun(assets);
 			frameTarget = 0;
 		}
 	}
@@ -5234,7 +5234,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 		}
 	}
 	if (permanentdamage > damagetolerance && dead != 2) {
-		DoBlood(1, 255, tutorialActive, gamestate);
+		DoBlood(1, 255, tutorialActive, gamestate, assets);
 
 		if (hasWeapon()) {
 			assets.weapons.weapons[weaponids[0]].drop(velocity * scale * -.3, velocity * scale);
@@ -5346,7 +5346,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 				if (dead == 2 && bloodloss < damagetolerance) {
 					Vector3 headpoint;
 					headpoint = (jointPos(head) + jointPos(neck)) / 2 * scale + coords;
-					DoBlood(1, 255, tutorialActive, gamestate);
+					DoBlood(1, 255, tutorialActive, gamestate, assets);
 					if (gamestate.bloodtoggle && !bled) {
 						terrainref.MakeDecal(blooddecal, headpoint, .2 * 1.2, .5, 0, gamestate.environment);
 						for (unsigned int l = 0; l < terrainref.patchobjects[whichpatchx][whichpatchz].size(); l++) {
@@ -5364,7 +5364,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 					Vector3 headpoint;
 					headpoint = (jointPos(abdomen) + jointPos(neck)) / 2 * scale + coords;
 					if (bleeding <= 0) {
-						DoBlood(1, 255, tutorialActive, gamestate);
+						DoBlood(1, 255, tutorialActive, gamestate, assets);
 					}
 					if (gamestate.bloodtoggle && !bled) {
 						terrainref.MakeDecal(blooddecalslow, headpoint, .8, .5, 0, gamestate.environment);
@@ -5777,7 +5777,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 			if (speechdelay <= 0) {
 				unsigned int i = abs(rand() % 4);
 				if (i < 2) {
-					whichsound = PersonType::types[creature].soundsTalk[i];
+					whichsound = assets.graphics.types[creature].soundsTalk[i];
 				}
 			}
 			speechdelay = .3;
@@ -6088,9 +6088,9 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 		else if (isRun()) {
 			velocity += facing * timemultiplier * speed * 700 * scale;
 			velspeed = findLength(&velocity);
-			if (velspeed > speed * PersonType::types[creature].maxRunSpeed * scale) {
+			if (velspeed > speed * assets.graphics.types[creature].maxRunSpeed * scale) {
 				velocity /= velspeed;
-				velspeed = speed * PersonType::types[creature].maxRunSpeed * scale;
+				velspeed = speed * assets.graphics.types[creature].maxRunSpeed * scale;
 				velocity *= velspeed;
 			}
 			velocity.y += gamestate.gravity * timemultiplier * 20;
@@ -6241,7 +6241,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 				if (isFlip()) {
 					jumppower = -4;
 				}
-				animTarget = getLanding();
+				animTarget = getLanding(assets);
 				emit_sound_at(landsound, coords, 128.);
 
 				if (id == 0) {
@@ -6568,24 +6568,24 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 							glMatrixMode(GL_MODELVIEW);
 							glPushMatrix();
 							if (p1 == abdomen || p2 == abdomen) {
-								glTranslatef((v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(1, gamestate).x,
-									(v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(1, gamestate).y,
-									(v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(1, gamestate).z);
+								glTranslatef((v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(1, gamestate, assets).x,
+									(v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(1, gamestate, assets).y,
+									(v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(1, gamestate, assets).z);
 							}
 							if (p1 == lefthand || p1 == righthand || p1 == leftwrist || p1 == rightwrist || p1 == leftelbow || p1 == rightelbow || p2 == leftelbow || p2 == rightelbow) {
-								glTranslatef((v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(2, gamestate).x,
-									(v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(2, gamestate).y,
-									(v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(2, gamestate).z);
+								glTranslatef((v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(2, gamestate, assets).x,
+									(v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(2, gamestate, assets).y,
+									(v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(2, gamestate, assets).z);
 							}
 							if (p1 == leftfoot || p1 == rightfoot || p1 == leftankle || p1 == rightankle || p1 == leftknee || p1 == rightknee || p2 == leftknee || p2 == rightknee) {
-								glTranslatef((v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(3, gamestate).x,
-									(v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(3, gamestate).y,
-									(v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(3, gamestate).z);
+								glTranslatef((v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(3, gamestate, assets).x,
+									(v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(3, gamestate, assets).y,
+									(v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(3, gamestate, assets).z);
 							}
 							if (p1 == head || p2 == head) {
-								glTranslatef((v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(0, gamestate).x,
-									(v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(0, gamestate).y,
-									(v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(0, gamestate).z);
+								glTranslatef((v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(0, gamestate, assets).x,
+									(v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(0, gamestate, assets).y,
+									(v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(0, gamestate, assets).z);
 							}
 							glGetFloatv(GL_MODELVIEW_MATRIX, M);
 							skeleton.drawmodel.vertex[skeleton.muscles[i].vertices[j]].x = M[12] * scale;
@@ -6600,24 +6600,24 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 							glMatrixMode(GL_MODELVIEW);
 							glPushMatrix();
 							if (p1 == abdomen || p2 == abdomen) {
-								glTranslatef(v0.x * getProportionXYZ(1, gamestate).x,
-									v0.y * getProportionXYZ(1, gamestate).y,
-									v0.z * getProportionXYZ(1, gamestate).z);
+								glTranslatef(v0.x * getProportionXYZ(1, gamestate, assets).x,
+									v0.y * getProportionXYZ(1, gamestate, assets).y,
+									v0.z * getProportionXYZ(1, gamestate, assets).z);
 							}
 							if (p1 == lefthand || p1 == righthand || p1 == leftwrist || p1 == rightwrist || p1 == leftelbow || p1 == rightelbow || p2 == leftelbow || p2 == rightelbow) {
-								glTranslatef(v0.x * getProportionXYZ(2, gamestate).x,
-									v0.y * getProportionXYZ(2, gamestate).y,
-									v0.z * getProportionXYZ(2, gamestate).z);
+								glTranslatef(v0.x * getProportionXYZ(2, gamestate, assets).x,
+									v0.y * getProportionXYZ(2, gamestate, assets).y,
+									v0.z * getProportionXYZ(2, gamestate, assets).z);
 							}
 							if (p1 == leftfoot || p1 == rightfoot || p1 == leftankle || p1 == rightankle || p1 == leftknee || p1 == rightknee || p2 == leftknee || p2 == rightknee) {
-								glTranslatef(v0.x * getProportionXYZ(3, gamestate).x,
-									v0.y * getProportionXYZ(3, gamestate).y,
-									v0.z * getProportionXYZ(3, gamestate).z);
+								glTranslatef(v0.x * getProportionXYZ(3, gamestate, assets).x,
+									v0.y * getProportionXYZ(3, gamestate, assets).y,
+									v0.z * getProportionXYZ(3, gamestate, assets).z);
 							}
 							if (p1 == head || p2 == head) {
-								glTranslatef(v0.x * getProportionXYZ(0, gamestate).x,
-									v0.y * getProportionXYZ(0, gamestate).y,
-									v0.z * getProportionXYZ(0, gamestate).z);
+								glTranslatef(v0.x * getProportionXYZ(0, gamestate, assets).x,
+									v0.y * getProportionXYZ(0, gamestate, assets).y,
+									v0.z * getProportionXYZ(0, gamestate, assets).z);
 							}
 
 							glGetFloatv(GL_MODELVIEW_MATRIX, M);
@@ -6656,24 +6656,24 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 						glMatrixMode(GL_MODELVIEW);
 						glPushMatrix();
 						if (p1 == abdomen || p2 == abdomen) {
-							glTranslatef(v0.x * getProportionXYZ(1, gamestate).x,
-								v0.y * getProportionXYZ(1, gamestate).y,
-								v0.z * getProportionXYZ(1, gamestate).z);
+							glTranslatef(v0.x * getProportionXYZ(1, gamestate, assets).x,
+								v0.y * getProportionXYZ(1, gamestate, assets).y,
+								v0.z * getProportionXYZ(1, gamestate, assets).z);
 						}
 						if (p1 == lefthand || p1 == righthand || p1 == leftwrist || p1 == rightwrist || p1 == leftelbow || p1 == rightelbow || p2 == leftelbow || p2 == rightelbow) {
-							glTranslatef(v0.x * getProportionXYZ(2, gamestate).x,
-								v0.y * getProportionXYZ(2, gamestate).y,
-								v0.z * getProportionXYZ(2, gamestate).z);
+							glTranslatef(v0.x * getProportionXYZ(2, gamestate, assets).x,
+								v0.y * getProportionXYZ(2, gamestate, assets).y,
+								v0.z * getProportionXYZ(2, gamestate, assets).z);
 						}
 						if (p1 == leftfoot || p1 == rightfoot || p1 == leftankle || p1 == rightankle || p1 == leftknee || p1 == rightknee || p2 == leftknee || p2 == rightknee) {
-							glTranslatef(v0.x * getProportionXYZ(3, gamestate).x,
-								v0.y * getProportionXYZ(3, gamestate).y,
-								v0.z * getProportionXYZ(3, gamestate).z);
+							glTranslatef(v0.x * getProportionXYZ(3, gamestate, assets).x,
+								v0.y * getProportionXYZ(3, gamestate, assets).y,
+								v0.z * getProportionXYZ(3, gamestate, assets).z);
 						}
 						if (p1 == head || p2 == head) {
-							glTranslatef(v0.x * getProportionXYZ(0, gamestate).x,
-								v0.y * getProportionXYZ(0, gamestate).y,
-								v0.z * getProportionXYZ(0, gamestate).z);
+							glTranslatef(v0.x * getProportionXYZ(0, gamestate, assets).x,
+								v0.y * getProportionXYZ(0, gamestate, assets).y,
+								v0.z * getProportionXYZ(0, gamestate, assets).z);
 						}
 						glGetFloatv(GL_MODELVIEW_MATRIX, M);
 						skeleton.drawmodelclothes.vertex[skeleton.muscles[i].verticesclothes[j]].x = M[12] * scale;
@@ -7214,7 +7214,7 @@ int Person::SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, fl
 									if (isFlip()) {
 										jumppower = -4;
 									}
-									animTarget = getLanding();
+									animTarget = getLanding(assets);
 									emit_sound_at(landsound, coords, 128.);
 
 									if (id == 0) {
@@ -7850,7 +7850,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 					}
 					if (j == -1) {
 						velocity = 0;
-						setTargetAnimation(getStop());
+						setTargetAnimation(getStop(assets));
 						targetyaw += 180;
 						stunned = .5;
 						//aitype=passivetype;
@@ -8268,7 +8268,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 					}
 					if (j == -1) {
 						velocity = 0;
-						setTargetAnimation(getStop());
+						setTargetAnimation(getStop(assets));
 						targetyaw += 180;
 						stunned = .5;
 						aitype = pathfindtype;
@@ -8536,11 +8536,11 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 	}
 }
 
-bool Person::catchKnife()
+bool Person::catchKnife(GameAssets& assets)
 {
 	return
-		((PersonType::types[creature].knifeCatchingType == 0) && (rand() % 2 != 0) && (!hasWeapon()) && (aitype == attacktypecutoff)) ||
-		((PersonType::types[creature].knifeCatchingType == 1) && (rand() % 3 != 0) && (!hasWeapon()) && (isIdle() || isRun() || animTarget == walkanim));
+		((assets.graphics.types[creature].knifeCatchingType == 0) && (rand() % 2 != 0) && (!hasWeapon()) && (aitype == attacktypecutoff)) ||
+		((assets.graphics.types[creature].knifeCatchingType == 1) && (rand() % 3 != 0) && (!hasWeapon()) && (isIdle() || isRun() || animTarget == walkanim));
 }
 
 Person::Person(Json::Value value, int /*mapvers*/, unsigned i, GameState& gamestate, GameAssets& assets)
@@ -8612,10 +8612,10 @@ Person::Person(Json::Value value, int /*mapvers*/, unsigned i, GameState& gamest
 
 	loaded = true;
 
-	damagetolerance = PersonType::types[creature].defaultDamageTolerance;
+	damagetolerance = assets.graphics.types[creature].defaultDamageTolerance;
 
 	if (scale < 0) {
-		scale = PersonType::types[creature].defaultScale;
+		scale = assets.graphics.types[creature].defaultScale;
 	}
 
 	oldcoords = coords;

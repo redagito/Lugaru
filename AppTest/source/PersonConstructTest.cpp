@@ -14,27 +14,27 @@
 namespace
 {
 
-// Person's constructor reads PersonType::types[creature], so the table must be
-// populated before any Person can be built.
-void ensurePersonTypesLoaded()
+// Person's constructor reads assets.graphics.types[creature], so the table
+// must be populated before any Person can be built.
+void ensurePersonTypesLoaded(GameAssets& assets)
 {
 	static bool loaded = false;
 	if (!loaded) {
-		PersonType::Load();
+		PersonType::Load(assets.graphics);
 		loaded = true;
 	}
 }
 
 std::shared_ptr<Person> makePerson()
 {
-	ensurePersonTypesLoaded();
+	static GameState gamestate;
+	static GameAssets assets;
+	ensurePersonTypesLoaded(assets);
 	// Person only needs the GameState and the GameAssets for their loading-progress
 	// callback, which it consumes synchronously in its constructor. Both static so
 	// they unambiguously outlive every Person the helper hands out. A GameAssets
 	// that never loads anything holds no GL object, so building and dropping one
 	// here needs no context.
-	static GameState gamestate;
-	static GameAssets assets;
 	return std::make_shared<Person>(gamestate, assets);
 }
 

@@ -1347,7 +1347,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets, Console& co
 				}
 
 				Person::players[closest]->skeleton.drawmodel.textureptr.load(
-					PersonType::types[Person::players[closest]->creature].skins[Person::players[closest]->whichskin], 1,
+					assets.graphics.types[Person::players[closest]->creature].skins[Person::players[closest]->whichskin], 1,
 					&Person::players[closest]->skeleton.skinText[0], &Person::players[closest]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 			}
 
@@ -1362,7 +1362,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets, Console& co
 			}
 
 			if (closest >= 0) {
-				person_type nextType = static_cast<person_type>((Person::players[closest]->creature + 1) % PersonType::types.size());
+				person_type nextType = static_cast<person_type>((Person::players[closest]->creature + 1) % assets.graphics.types.size());
 				Person::players[closest]->changeCreatureType(nextType, Tutorial::active, gamestate, assets);
 			}
 		}
@@ -1415,7 +1415,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets, Console& co
 				Person::players[closest]->RagDoll(0, *assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
 				Person::players[closest]->dead = 2;
 				Person::players[closest]->headless = 1;
-				Person::players[closest]->DoBloodBig(3, 165, Tutorial::active, gamestate);
+				Person::players[closest]->DoBloodBig(3, 165, Tutorial::active, gamestate, assets);
 
 				gamestate.camerashake += .3;
 			}
@@ -2104,7 +2104,7 @@ void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 								if (Person::players[k]->isFlip()) {
 									Person::players[k]->jumppower = -4;
 								}
-								Person::players[k]->animTarget = Person::players[k]->getLanding();
+								Person::players[k]->animTarget = Person::players[k]->getLanding(assets);
 								emit_sound_at(landsound, Person::players[k]->coords, 128.);
 								if (k == 0) {
 									addEnvSound(Person::players[k]->coords);
@@ -3025,7 +3025,7 @@ void doPlayerCollisions(GameState& gamestate, GameAssets& assets)
 																				if (Person::players[k]->howactive == typeactive || gamestate.hostile) {
 																					if (Person::players[k]->isIdle()) {
 																						if (Person::players[k]->howactive < typesleeping) {
-																							Person::players[k]->setTargetAnimation(Person::players[k]->getStop());
+																							Person::players[k]->setTargetAnimation(Person::players[k]->getStop(assets));
 																						}
 																						else if (Person::players[k]->howactive == typesleeping) {
 																							Person::players[k]->setTargetAnimation(getupfromfrontanim);
@@ -3038,7 +3038,7 @@ void doPlayerCollisions(GameState& gamestate, GameAssets& assets)
 																				if (Person::players[i]->howactive == typeactive || gamestate.hostile) {
 																					if (Person::players[i]->isIdle()) {
 																						if (Person::players[i]->howactive < typesleeping) {
-																							Person::players[i]->setTargetAnimation(Person::players[k]->getStop());
+																							Person::players[i]->setTargetAnimation(Person::players[k]->getStop(assets));
 																						}
 																						else {
 																							Person::players[i]->setTargetAnimation(getupfromfrontanim);
@@ -4183,7 +4183,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 							Person::players[i]->lowreversaldelay = .5;
 
 							if (Person::players[i]->isIdle()) {
-								Person::players[i]->setTargetAnimation(Person::players[i]->getCrouch());
+								Person::players[i]->setTargetAnimation(Person::players[i]->getCrouch(assets));
 								Person::players[i]->transspeed = 10;
 							}
 							if (Person::players[i]->isRun() ||
@@ -4230,7 +4230,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 
 								if (Person::players[i]->isCrouch()) {
 									if (!Person::players[i]->wasCrouch()) {
-										Person::players[i]->animCurrent = Person::players[i]->getCrouch();
+										Person::players[i]->animCurrent = Person::players[i]->getCrouch(assets);
 										Person::players[i]->frameCurrent = 0;
 									}
 									Person::players[i]->setTargetAnimation(Person::players[i]->getIdle(Dialog::inDialog(), assets));
@@ -4257,7 +4257,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 									Person::players[i]->setTargetAnimation(walkanim);
 								}
 								else {
-									Person::players[i]->setTargetAnimation(Person::players[i]->getRun());
+									Person::players[i]->setTargetAnimation(Person::players[i]->getRun(assets));
 								}
 							}
 							if (Person::players[i]->isCrouch()) {
@@ -4289,7 +4289,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 									Person::players[i]->frameTarget > 0 &&
 									!Person::players[i]->jumpkeydown &&
 									Person::players[i]->crouchkeydown)) {
-								Person::players[i]->setTargetAnimation(Person::players[i]->getRun());
+								Person::players[i]->setTargetAnimation(Person::players[i]->getRun(assets));
 							}
 							if (Person::players[i]->isCrouch()) {
 								Person::players[i]->animTarget = sneakanim;
@@ -4321,7 +4321,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 									Person::players[i]->frameTarget > 0 &&
 									!Person::players[i]->jumpkeydown &&
 									Person::players[i]->crouchkeydown)) {
-								Person::players[i]->setTargetAnimation(Person::players[i]->getRun());
+								Person::players[i]->setTargetAnimation(Person::players[i]->getRun(assets));
 							}
 							if (Person::players[i]->isCrouch()) {
 								Person::players[i]->animTarget = sneakanim;
@@ -4353,7 +4353,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 									Person::players[i]->frameTarget > 0 &&
 									!Person::players[i]->jumpkeydown &&
 									Person::players[i]->crouchkeydown)) {
-								Person::players[i]->setTargetAnimation(Person::players[i]->getRun());
+								Person::players[i]->setTargetAnimation(Person::players[i]->getRun(assets));
 							}
 							if (Person::players[i]->isCrouch()) {
 								Person::players[i]->animTarget = sneakanim;
@@ -4457,7 +4457,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 								emit_sound_at(jumpsound, Person::players[i]->coords, 128.);
 							}
 							if ((Person::players[i]->isIdle()) && Person::players[i]->jumppower > 1) {
-								Person::players[i]->setTargetAnimation(Person::players[i]->getLanding());
+								Person::players[i]->setTargetAnimation(Person::players[i]->getLanding(assets));
 								Person::players[i]->frameTarget = 2;
 								Person::players[i]->landhard = 0;
 								Person::players[i]->jumpstart = 1;
@@ -4484,10 +4484,10 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 
 						if (!movekey) {
 							if (Person::players[i]->isRun() || Person::players[i]->animTarget == walkanim) {
-								Person::players[i]->setTargetAnimation(Person::players[i]->getStop());
+								Person::players[i]->setTargetAnimation(Person::players[i]->getStop(assets));
 							}
 							if (Person::players[i]->animTarget == sneakanim) {
-								Person::players[i]->animTarget = Person::players[i]->getCrouch();
+								Person::players[i]->animTarget = Person::players[i]->getCrouch(assets);
 								if (Person::players[i]->animCurrent == sneakanim) {
 									Person::players[i]->target = 0;
 								}
@@ -4499,10 +4499,10 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 								Person::players[i]->aitype == searchtype ||
 								(Person::players[i]->aitype == passivetype &&
 									Person::players[i]->numwaypoints <= 1))) {
-							Person::players[i]->setTargetAnimation(Person::players[i]->getStop());
+							Person::players[i]->setTargetAnimation(Person::players[i]->getStop(assets));
 						}
 						if (Person::players[i]->isRun() && (Person::players[i]->aitype == passivetype)) {
-							Person::players[i]->setTargetAnimation(Person::players[i]->getStop());
+							Person::players[i]->setTargetAnimation(Person::players[i]->getStop(assets));
 						}
 					}
 				}
@@ -4524,7 +4524,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 
 				//stop to turn in right direction
 				if (fabs(Person::players[k]->yaw - Person::players[k]->targetyaw) > 90 && (Person::players[k]->isRun() || Person::players[k]->animTarget == walkanim)) {
-					Person::players[k]->setTargetAnimation(Person::players[k]->getStop());
+					Person::players[k]->setTargetAnimation(Person::players[k]->getStop(assets));
 				}
 
 				if (Person::players[k]->animTarget == backhandspringanim || Person::players[k]->animTarget == dodgebackanim) {

@@ -108,7 +108,7 @@ static void set_noclothes(int pnum, const char*, GameState& gamestate, GameAsset
 	Person::players[pnum]->clothestintg.clear();
 	Person::players[pnum]->clothestintb.clear();
 	Person::players[pnum]->skeleton.drawmodel.textureptr.load(
-		PersonType::types[Person::players[pnum]->creature].skins[Person::players[pnum]->whichskin], 1,
+		assets.graphics.types[Person::players[pnum]->creature].skins[Person::players[pnum]->whichskin], 1,
 		&Person::players[pnum]->skeleton.skinText[0], &Person::players[pnum]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 }
 
@@ -697,7 +697,7 @@ void ch_default(const char*, GameState& gamestate, GameAssets& assets, Console&)
 	Person::players[0]->metallow = 1;
 	Person::players[0]->power = 1;
 	Person::players[0]->speedmult = 1;
-	Person::players[0]->scale = PersonType::types[Person::players[0]->creature].defaultScale;
+	Person::players[0]->scale = assets.graphics.types[Person::players[0]->creature].defaultScale;
 
 	Person::players[0]->setProportions(1, 1, 1, 1);
 
@@ -706,7 +706,7 @@ void ch_default(const char*, GameState& gamestate, GameAssets& assets, Console&)
 	Person::players[0]->clothestintg.clear();
 	Person::players[0]->clothestintb.clear();
 	Person::players[0]->skeleton.drawmodel.textureptr.load(
-		PersonType::types[Person::players[0]->creature].skins[Person::players[0]->whichskin], 1,
+		assets.graphics.types[Person::players[0]->creature].skins[Person::players[0]->whichskin], 1,
 		&Person::players[0]->skeleton.skinText[0], &Person::players[0]->skeleton.skinsize, gamestate.trilinear, [&]() {Game::LoadingScreen(gamestate, assets); });
 
 	gamestate.editoractive = typeactive;

@@ -5,6 +5,7 @@
 #include "Graphic/Models.hpp"
 #include "Graphic/Text.hpp"
 #include "Graphic/Texture.hpp"
+#include "GraphicsState.hpp"
 #include "Objects/Weapons.hpp"
 
 #include <memory>
@@ -90,6 +91,13 @@ struct GameAssets
 	Model eye;
 	Model cornea;
 	Model iris;
+
+	// Neither an Animation nor a PersonType owns an OpenGL handle: their
+	// members are enums, Vector3s, std::strings, ints, floats and plain
+	// vectors, so the Graphics state they live in is not tied to a live GL
+	// context either. It therefore needs no placement rule against the
+	// GL-touching members above and is simply declared after them.
+	GraphicsState graphics;
 
 	std::unique_ptr<Terrain> terrain;
 	Weapons weapons;

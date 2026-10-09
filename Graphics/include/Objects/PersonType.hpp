@@ -30,6 +30,8 @@ enum person_type
     wolftype = 1
 };
 
+struct GraphicsState;
+
 class PersonType
 {
 public:
@@ -72,8 +74,7 @@ public:
     bool hasAnimTalkIdle();
     bool hasAnimHurtIdle();
 
-    static std::vector<PersonType> types;
-    static void Load();
+    static void Load(GraphicsState& graphics);
 };
 
 #endif

@@ -19,7 +19,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Objects/PersonType.hpp"
 
-std::vector<PersonType> PersonType::types;
+#include "GraphicsState.hpp"
 
 PersonType::PersonType()
 {
@@ -37,113 +37,113 @@ bool PersonType::hasAnimHurtIdle()
     return (animHurtIdle != tempanim);
 }
 
-void PersonType::Load()
+void PersonType::Load(GraphicsState& graphics)
 {
-    types.resize(2);
+    graphics.types.resize(2);
 
     /* Wolf */
-    types[wolftype].proportions[0] = 1.1f;
-    types[wolftype].proportions[1] = 1.1f;
-    types[wolftype].proportions[2] = 1.1f;
-    types[wolftype].proportions[3] = 1.1f;
+    graphics.types[wolftype].proportions[0] = 1.1f;
+    graphics.types[wolftype].proportions[1] = 1.1f;
+    graphics.types[wolftype].proportions[2] = 1.1f;
+    graphics.types[wolftype].proportions[3] = 1.1f;
 
-    types[wolftype].animRun = wolfrunanim;
-    types[wolftype].animRunning = wolfrunninganim;
-    types[wolftype].animCrouch = wolfcrouchanim;
-    types[wolftype].animStop = wolfstopanim;
-    types[wolftype].animLanding = wolflandanim;
-    types[wolftype].animLandingHard = wolflandhardanim;
-    types[wolftype].animFightIdle = wolfidle;
-    types[wolftype].animBounceIdle = wolfidle;
+    graphics.types[wolftype].animRun = wolfrunanim;
+    graphics.types[wolftype].animRunning = wolfrunninganim;
+    graphics.types[wolftype].animCrouch = wolfcrouchanim;
+    graphics.types[wolftype].animStop = wolfstopanim;
+    graphics.types[wolftype].animLanding = wolflandanim;
+    graphics.types[wolftype].animLandingHard = wolflandhardanim;
+    graphics.types[wolftype].animFightIdle = wolfidle;
+    graphics.types[wolftype].animBounceIdle = wolfidle;
 
-    types[wolftype].soundsAttack[0] = barksound;
-    types[wolftype].soundsAttack[1] = bark2sound;
-    types[wolftype].soundsAttack[2] = bark3sound;
-    types[wolftype].soundsAttack[3] = barkgrowlsound;
-    types[wolftype].soundsTalk[0] = growlsound;
-    types[wolftype].soundsTalk[1] = growl2sound;
+    graphics.types[wolftype].soundsAttack[0] = barksound;
+    graphics.types[wolftype].soundsAttack[1] = bark2sound;
+    graphics.types[wolftype].soundsAttack[2] = bark3sound;
+    graphics.types[wolftype].soundsAttack[3] = barkgrowlsound;
+    graphics.types[wolftype].soundsTalk[0] = growlsound;
+    graphics.types[wolftype].soundsTalk[1] = growl2sound;
 
-    types[wolftype].figureFileName = "Skeleton/BasicFigureWolf";
-    types[wolftype].lowFigureFileName = "Skeleton/BasicFigureWolfLow";
-    types[wolftype].clothesFileName = "Skeleton/RabbitBelt";
-    types[wolftype].modelFileNames[0] = "Models/Wolf.solid";
-    types[wolftype].modelFileNames[1] = "Models/Wolf2.solid";
-    types[wolftype].modelFileNames[2] = "Models/Wolf3.solid";
-    types[wolftype].modelFileNames[3] = "Models/Wolf4.solid";
-    types[wolftype].modelFileNames[4] = "Models/Wolf5.solid";
-    types[wolftype].modelFileNames[5] = "Models/Wolf6.solid";
-    types[wolftype].modelFileNames[6] = "Models/Wolf7.solid";
-    types[wolftype].lowModelFileName = "Models/WolfLow.solid";
-    types[wolftype].modelClothesFileName = "Models/Belt.solid";
+    graphics.types[wolftype].figureFileName = "Skeleton/BasicFigureWolf";
+    graphics.types[wolftype].lowFigureFileName = "Skeleton/BasicFigureWolfLow";
+    graphics.types[wolftype].clothesFileName = "Skeleton/RabbitBelt";
+    graphics.types[wolftype].modelFileNames[0] = "Models/Wolf.solid";
+    graphics.types[wolftype].modelFileNames[1] = "Models/Wolf2.solid";
+    graphics.types[wolftype].modelFileNames[2] = "Models/Wolf3.solid";
+    graphics.types[wolftype].modelFileNames[3] = "Models/Wolf4.solid";
+    graphics.types[wolftype].modelFileNames[4] = "Models/Wolf5.solid";
+    graphics.types[wolftype].modelFileNames[5] = "Models/Wolf6.solid";
+    graphics.types[wolftype].modelFileNames[6] = "Models/Wolf7.solid";
+    graphics.types[wolftype].lowModelFileName = "Models/WolfLow.solid";
+    graphics.types[wolftype].modelClothesFileName = "Models/Belt.solid";
 
-    types[wolftype].skins.resize(3);
-    types[wolftype].skins[0] = "Textures/FurWolfGrey.jpg";
-    types[wolftype].skins[1] = "Textures/FurWolfDark.jpg";
-    types[wolftype].skins[2] = "Textures/FurWolfSnow.jpg";
+    graphics.types[wolftype].skins.resize(3);
+    graphics.types[wolftype].skins[0] = "Textures/FurWolfGrey.jpg";
+    graphics.types[wolftype].skins[1] = "Textures/FurWolfDark.jpg";
+    graphics.types[wolftype].skins[2] = "Textures/FurWolfSnow.jpg";
 
-    types[wolftype].power = 2.5f;
-    types[wolftype].defaultDamageTolerance = 300;
-    types[wolftype].defaultScale = .23f;
-    types[wolftype].hasClaws = true;
-    types[wolftype].clothes = false;
-    types[wolftype].maxRunSpeed = 75;
-    types[wolftype].knifeCatchingType = 1;
+    graphics.types[wolftype].power = 2.5f;
+    graphics.types[wolftype].defaultDamageTolerance = 300;
+    graphics.types[wolftype].defaultScale = .23f;
+    graphics.types[wolftype].hasClaws = true;
+    graphics.types[wolftype].clothes = false;
+    graphics.types[wolftype].maxRunSpeed = 75;
+    graphics.types[wolftype].knifeCatchingType = 1;
 
     /* Rabbit */
-    types[rabbittype].proportions[0] = 1.2f;
-    types[rabbittype].proportions[1] = 1.05f;
-    types[rabbittype].proportions[2] = 1;
-    types[rabbittype].proportions[3] = 1.1f;
-    types[rabbittype].proportions[3].y = 1.05f;
+    graphics.types[rabbittype].proportions[0] = 1.2f;
+    graphics.types[rabbittype].proportions[1] = 1.05f;
+    graphics.types[rabbittype].proportions[2] = 1;
+    graphics.types[rabbittype].proportions[3] = 1.1f;
+    graphics.types[rabbittype].proportions[3].y = 1.05f;
 
-    types[rabbittype].animRun = runanim;
-    types[rabbittype].animRunning = rabbitrunninganim;
-    types[rabbittype].animCrouch = crouchanim;
-    types[rabbittype].animStop = stopanim;
-    types[rabbittype].animLanding = landanim;
-    types[rabbittype].animLandingHard = landhardanim;
-    types[rabbittype].animFightIdle = fightidleanim;
-    types[rabbittype].animBounceIdle = bounceidleanim;
-    types[rabbittype].animTalkIdle = talkidleanim;
-    types[rabbittype].animHurtIdle = hurtidleanim;
+    graphics.types[rabbittype].animRun = runanim;
+    graphics.types[rabbittype].animRunning = rabbitrunninganim;
+    graphics.types[rabbittype].animCrouch = crouchanim;
+    graphics.types[rabbittype].animStop = stopanim;
+    graphics.types[rabbittype].animLanding = landanim;
+    graphics.types[rabbittype].animLandingHard = landhardanim;
+    graphics.types[rabbittype].animFightIdle = fightidleanim;
+    graphics.types[rabbittype].animBounceIdle = bounceidleanim;
+    graphics.types[rabbittype].animTalkIdle = talkidleanim;
+    graphics.types[rabbittype].animHurtIdle = hurtidleanim;
 
-    types[rabbittype].soundsAttack[0] = rabbitattacksound;
-    types[rabbittype].soundsAttack[1] = rabbitattack2sound;
-    types[rabbittype].soundsAttack[2] = rabbitattack3sound;
-    types[rabbittype].soundsAttack[3] = rabbitattack4sound;
-    types[rabbittype].soundsTalk[0] = rabbitchitter;
-    types[rabbittype].soundsTalk[1] = rabbitchitter2;
+    graphics.types[rabbittype].soundsAttack[0] = rabbitattacksound;
+    graphics.types[rabbittype].soundsAttack[1] = rabbitattack2sound;
+    graphics.types[rabbittype].soundsAttack[2] = rabbitattack3sound;
+    graphics.types[rabbittype].soundsAttack[3] = rabbitattack4sound;
+    graphics.types[rabbittype].soundsTalk[0] = rabbitchitter;
+    graphics.types[rabbittype].soundsTalk[1] = rabbitchitter2;
 
-    types[rabbittype].figureFileName = "Skeleton/BasicFigure";
-    types[rabbittype].lowFigureFileName = "Skeleton/BasicFigureLow";
-    types[rabbittype].clothesFileName = "Skeleton/RabbitBelt";
-    types[rabbittype].modelFileNames[0] = "Models/Body.solid";
-    types[rabbittype].modelFileNames[1] = "Models/Body2.solid";
-    types[rabbittype].modelFileNames[2] = "Models/Body3.solid";
-    types[rabbittype].modelFileNames[3] = "Models/Body4.solid";
-    types[rabbittype].modelFileNames[4] = "Models/Body5.solid";
-    types[rabbittype].modelFileNames[5] = "Models/Body6.solid";
-    types[rabbittype].modelFileNames[6] = "Models/Body7.solid";
-    types[rabbittype].lowModelFileName = "Models/BodyLow.solid";
-    types[rabbittype].modelClothesFileName = "Models/Belt.solid";
+    graphics.types[rabbittype].figureFileName = "Skeleton/BasicFigure";
+    graphics.types[rabbittype].lowFigureFileName = "Skeleton/BasicFigureLow";
+    graphics.types[rabbittype].clothesFileName = "Skeleton/RabbitBelt";
+    graphics.types[rabbittype].modelFileNames[0] = "Models/Body.solid";
+    graphics.types[rabbittype].modelFileNames[1] = "Models/Body2.solid";
+    graphics.types[rabbittype].modelFileNames[2] = "Models/Body3.solid";
+    graphics.types[rabbittype].modelFileNames[3] = "Models/Body4.solid";
+    graphics.types[rabbittype].modelFileNames[4] = "Models/Body5.solid";
+    graphics.types[rabbittype].modelFileNames[5] = "Models/Body6.solid";
+    graphics.types[rabbittype].modelFileNames[6] = "Models/Body7.solid";
+    graphics.types[rabbittype].lowModelFileName = "Models/BodyLow.solid";
+    graphics.types[rabbittype].modelClothesFileName = "Models/Belt.solid";
 
-    types[rabbittype].skins.resize(10);
-    types[rabbittype].skins[0] = "Textures/FurBrown.jpg";
-    types[rabbittype].skins[1] = "Textures/FurWhite.jpg";
-    types[rabbittype].skins[2] = "Textures/FurBlack.jpg";
-    types[rabbittype].skins[3] = "Textures/FurLynx.jpg";
-    types[rabbittype].skins[4] = "Textures/FurOtter.jpg";
-    types[rabbittype].skins[5] = "Textures/FurOpal.jpg";
-    types[rabbittype].skins[6] = "Textures/FurSable.jpg";
-    types[rabbittype].skins[7] = "Textures/FurChocolate.jpg";
-    types[rabbittype].skins[8] = "Textures/FurBlackWhite.jpg";
-    types[rabbittype].skins[9] = "Textures/FurBrownWhite.jpg";
+    graphics.types[rabbittype].skins.resize(10);
+    graphics.types[rabbittype].skins[0] = "Textures/FurBrown.jpg";
+    graphics.types[rabbittype].skins[1] = "Textures/FurWhite.jpg";
+    graphics.types[rabbittype].skins[2] = "Textures/FurBlack.jpg";
+    graphics.types[rabbittype].skins[3] = "Textures/FurLynx.jpg";
+    graphics.types[rabbittype].skins[4] = "Textures/FurOtter.jpg";
+    graphics.types[rabbittype].skins[5] = "Textures/FurOpal.jpg";
+    graphics.types[rabbittype].skins[6] = "Textures/FurSable.jpg";
+    graphics.types[rabbittype].skins[7] = "Textures/FurChocolate.jpg";
+    graphics.types[rabbittype].skins[8] = "Textures/FurBlackWhite.jpg";
+    graphics.types[rabbittype].skins[9] = "Textures/FurBrownWhite.jpg";
 
-    types[rabbittype].power = 1;
-    types[rabbittype].defaultDamageTolerance = 200;
-    types[rabbittype].defaultScale = .2f;
-    types[rabbittype].hasClaws = false;
-    types[rabbittype].clothes = true;
-    types[rabbittype].maxRunSpeed = 55;
-    types[rabbittype].knifeCatchingType = 0;
+    graphics.types[rabbittype].power = 1;
+    graphics.types[rabbittype].defaultDamageTolerance = 200;
+    graphics.types[rabbittype].defaultScale = .2f;
+    graphics.types[rabbittype].hasClaws = false;
+    graphics.types[rabbittype].clothes = true;
+    graphics.types[rabbittype].maxRunSpeed = 55;
+    graphics.types[rabbittype].knifeCatchingType = 0;
 }

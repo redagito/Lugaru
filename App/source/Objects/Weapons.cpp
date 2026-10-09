@@ -244,7 +244,7 @@ Vector3 temppoint1, temppoint2;
 					distsq(position, Person::players[j]->coords) < 4 && Person::players[j]->weaponstuck == -1 &&
 					!Person::players[j]->skeleton.free && (int(j) != oldowner)) {
 					if ((Person::players[j]->aitype != attacktypecutoff || abs(rand() % 6) == 0 || (Person::players[j]->animTarget != backhandspringanim && Person::players[j]->animTarget != rollanim && Person::players[j]->animTarget != flipanim && rand() % 2 == 0)) && !missed) {
-						if (Person::players[j]->catchKnife()) {
+						if (Person::players[j]->catchKnife(assets)) {
 							emit_sound_at(knifedrawsound, Person::players[j]->coords, 128.);
 
 							Person::players[j]->animTarget = removeknifeanim;
@@ -288,10 +288,10 @@ Vector3 temppoint1, temppoint2;
 
 							if (!tutorialActive) {
 								if (Person::players[j]->weaponstuckwhere == 0) {
-									Person::players[j]->DoBloodBig(2, 205, tutorialActive, gamestate);
+									Person::players[j]->DoBloodBig(2, 205, tutorialActive, gamestate, assets);
 								}
 								if (Person::players[j]->weaponstuckwhere == 1) {
-									Person::players[j]->DoBloodBig(2, 200, tutorialActive, gamestate);
+									Person::players[j]->DoBloodBig(2, 200, tutorialActive, gamestate, assets);
 								}
 								Person::players[j]->damage += 200 / Person::players[j]->armorhigh;
 								Person::players[j]->deathbleeding = 1;

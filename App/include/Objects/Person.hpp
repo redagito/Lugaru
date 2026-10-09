@@ -358,15 +358,15 @@ public:
 
     void setProportions(float head, float body, float arms, float legs);
     float getProportion(int part) const;
-    Vector3 getProportionXYZ(int part, GameState& gamestate) const;
+    Vector3 getProportionXYZ(int part, GameState& gamestate, GameAssets& assets) const;
 
     void changeCreatureType(person_type type, bool tutorialActive, GameState& gamestate, GameAssets& assets);
 
     void CheckKick(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
     void CatchFire(GameState& gamestate);
-    void DoBlood(float howmuch, int which, bool tutorialActive, GameState& gamestate);
-    void DoBloodBig(float howmuch, int which, bool tutorialActive, GameState& gamestate);
-    bool DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutorialActive, GameState& gamestate);
+    void DoBlood(float howmuch, int which, bool tutorialActive, GameState& gamestate, GameAssets& assets);
+    void DoBloodBig(float howmuch, int which, bool tutorialActive, GameState& gamestate, GameAssets& assets);
+    bool DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutorialActive, GameState& gamestate, GameAssets& assets);
 
     bool wasIdle() { return animation_bits[animCurrent] & ab_idle; }
     bool isIdle() { return animation_bits[animTarget] & ab_idle; }
@@ -378,26 +378,26 @@ public:
 
     bool wasCrouch() { return animation_bits[animCurrent] & ab_crouch; }
     bool isCrouch() { return animation_bits[animTarget] & ab_crouch; }
-    int getCrouch();
+    int getCrouch(GameAssets& assets);
 
     bool wasStop() { return animation_bits[animCurrent] & ab_stop; }
     bool isStop() { return animation_bits[animTarget] & ab_stop; }
-    int getStop();
+    int getStop(GameAssets& assets);
 
     bool wasRun() const { return animation_bits[animCurrent] & ab_run; }
     bool isRun() const { return animation_bits[animTarget] & ab_run; }
-    int getRun();
+    int getRun(GameAssets& assets);
 
     /** True when this character should steer its yaw toward `targetyaw` this frame. */
     bool shouldTurnTowardTarget() const;
 
     bool wasLanding() { return animation_bits[animCurrent] & ab_land; }
     bool isLanding() { return animation_bits[animTarget] & ab_land; }
-    int getLanding();
+    int getLanding(GameAssets& assets);
 
     bool wasLandhard() { return animation_bits[animCurrent] & ab_landhard; }
     bool isLandhard() { return animation_bits[animTarget] & ab_landhard; }
-    int getLandhard();
+    int getLandhard(GameAssets& assets);
 
     bool wasFlip() { return animation_bits[animCurrent] & ab_flip; }
     bool isFlip() { return animation_bits[animTarget] & ab_flip; }
@@ -429,7 +429,7 @@ public:
 
     void doAI(const Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, GameState& gamestate, GameAssets& assets);
 
-    bool catchKnife();
+    bool catchKnife(GameAssets& assets);
 
     bool hasWeapon() { return (weaponactive != -1); }
     bool isPlayerControlled() { return (aitype == playercontrolled); }

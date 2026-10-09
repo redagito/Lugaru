@@ -355,7 +355,7 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 						whichtri = Person::players[j]->skeleton.drawmodel.LineCheck(&startpoint, &endpoint, &footpoint, &movepoint, &rotationpoint);
 						if (whichtri != -1) {
 							spritehit = 1;
-							Person::players[j]->DoBloodBigWhere(0, 160, sprites[i]->oldposition, tutorialActive, gamestate);
+							Person::players[j]->DoBloodBigWhere(0, 160, sprites[i]->oldposition, tutorialActive, gamestate, assets);
 							DeleteSprite(i);
 							continue;
 						}

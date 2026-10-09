@@ -590,7 +590,7 @@ void Game::InitGame(GameState& gamestate, GameAssets& assets, KeyCapture& keycap
 
 	Animation::loadAll([&]() {Game::LoadingScreen(gamestate, assets); });
 
-	PersonType::Load();
+	PersonType::Load(assets.graphics);
 
 	Person::players.emplace_back(new Person(gamestate, assets));
 }
@@ -736,8 +736,8 @@ void Game::LoadStuff(GameState& gamestate, GameAssets& assets)
 	assets.iris.Scale(.03, .03, .03);
 	assets.iris.CalculateNormals(0, [&]() { LoadingScreen(gamestate, assets); });
 
-	LoadSave("Textures/WolfBloodFur.png", &PersonType::types[wolftype].bloodText[0], gamestate, assets);
-	LoadSave("Textures/BloodFur.png", &PersonType::types[rabbittype].bloodText[0], gamestate, assets);
+	LoadSave("Textures/WolfBloodFur.png", &assets.graphics.types[wolftype].bloodText[0], gamestate, assets);
+	LoadSave("Textures/BloodFur.png", &assets.graphics.types[rabbittype].bloodText[0], gamestate, assets);
 
 	gamestate.oldenvironment = -4;
 
