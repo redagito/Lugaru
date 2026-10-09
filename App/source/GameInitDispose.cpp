@@ -654,7 +654,7 @@ void Game::LoadStuff(GameState& gamestate, GameAssets& assets)
 
 	gamestate.realtexdetail = gamestate.texdetail;
 
-	Weapon::Load(gamestate.trilinear, [&]() { Game::LoadingScreen(gamestate, assets); });
+	Weapon::Load(gamestate.trilinear, [&]() { Game::LoadingScreen(gamestate, assets); }, assets);
 
 	assets.terrain->shadowtexture.load("Textures/Shadow.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });
 	assets.terrain->bloodtexture.load("Textures/Blood.png", 0, gamestate.trilinear, [&]() {LoadingScreen(gamestate, assets); });

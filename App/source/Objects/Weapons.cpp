@@ -45,19 +45,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <Graphic/Texture.hpp>
 #include "Level/Awards.hpp"
 
-Model Weapon::throwingknifemodel;
-Texture Weapon::knifetextureptr;
-Texture Weapon::lightbloodknifetextureptr;
-Texture Weapon::bloodknifetextureptr;
-
-Model Weapon::swordmodel;
-Texture Weapon::swordtextureptr;
-Texture Weapon::lightbloodswordtextureptr;
-Texture Weapon::bloodswordtextureptr;
-
-Model Weapon::staffmodel;
-Texture Weapon::stafftextureptr;
-
 Weapon::Weapon(int t, int o)
 	: owner(o)
 {
@@ -93,38 +80,38 @@ void Weapon::setType(int t)
 }
 
 /* Load weapons models and textures */
-void Weapon::Load(bool usetrilinear, ProgressCallback callback)
+void Weapon::Load(bool usetrilinear, ProgressCallback callback, GameAssets& assets)
 {
-	knifetextureptr.load("Textures/Knife.png", 0, usetrilinear, callback);
-	bloodknifetextureptr.load("Textures/BloodKnife.png", 0, usetrilinear, callback);
-	lightbloodknifetextureptr.load("Textures/BloodKnifeLight.png", 0, usetrilinear, callback);
-	swordtextureptr.load("Textures/Sword.jpg", 1, usetrilinear, callback);
-	bloodswordtextureptr.load("Textures/SwordBlood.jpg", 1, usetrilinear, callback);
-	lightbloodswordtextureptr.load("Textures/SwordBloodLight.jpg", 1, usetrilinear, callback);
-	stafftextureptr.load("Textures/Staff.jpg", 1, usetrilinear, callback);
+	assets.weapons.knifetextureptr.load("Textures/Knife.png", 0, usetrilinear, callback);
+	assets.weapons.bloodknifetextureptr.load("Textures/BloodKnife.png", 0, usetrilinear, callback);
+	assets.weapons.lightbloodknifetextureptr.load("Textures/BloodKnifeLight.png", 0, usetrilinear, callback);
+	assets.weapons.swordtextureptr.load("Textures/Sword.jpg", 1, usetrilinear, callback);
+	assets.weapons.bloodswordtextureptr.load("Textures/SwordBlood.jpg", 1, usetrilinear, callback);
+	assets.weapons.lightbloodswordtextureptr.load("Textures/SwordBloodLight.jpg", 1, usetrilinear, callback);
+	assets.weapons.stafftextureptr.load("Textures/Staff.jpg", 1, usetrilinear, callback);
 
-	throwingknifemodel.load("Models/ThrowingKnife.solid", callback);
-	throwingknifemodel.Scale(.001, .001, .001);
-	throwingknifemodel.Rotate(90, 0, 0);
-	throwingknifemodel.Rotate(0, 90, 0);
-	throwingknifemodel.flat = 0;
-	throwingknifemodel.CalculateNormals(1, callback);
+	assets.weapons.throwingknifemodel.load("Models/ThrowingKnife.solid", callback);
+	assets.weapons.throwingknifemodel.Scale(.001, .001, .001);
+	assets.weapons.throwingknifemodel.Rotate(90, 0, 0);
+	assets.weapons.throwingknifemodel.Rotate(0, 90, 0);
+	assets.weapons.throwingknifemodel.flat = 0;
+	assets.weapons.throwingknifemodel.CalculateNormals(1, callback);
 
-	swordmodel.load("Models/Sword.solid", callback);
-	swordmodel.Scale(.001, .001, .001);
-	swordmodel.Rotate(90, 0, 0);
-	swordmodel.Rotate(0, 90, 0);
-	swordmodel.Rotate(0, 0, 90);
-	swordmodel.flat = 1;
-	swordmodel.CalculateNormals(1, callback);
+	assets.weapons.swordmodel.load("Models/Sword.solid", callback);
+	assets.weapons.swordmodel.Scale(.001, .001, .001);
+	assets.weapons.swordmodel.Rotate(90, 0, 0);
+	assets.weapons.swordmodel.Rotate(0, 90, 0);
+	assets.weapons.swordmodel.Rotate(0, 0, 90);
+	assets.weapons.swordmodel.flat = 1;
+	assets.weapons.swordmodel.CalculateNormals(1, callback);
 
-	staffmodel.load("Models/Staff.solid", callback);
-	staffmodel.Scale(.005, .005, .005);
-	staffmodel.Rotate(90, 0, 0);
-	staffmodel.Rotate(0, 90, 0);
-	staffmodel.Rotate(0, 0, 90);
-	staffmodel.flat = 1;
-	staffmodel.CalculateNormals(1, callback);
+	assets.weapons.staffmodel.load("Models/Staff.solid", callback);
+	assets.weapons.staffmodel.Scale(.005, .005, .005);
+	assets.weapons.staffmodel.Rotate(90, 0, 0);
+	assets.weapons.staffmodel.Rotate(0, 90, 0);
+	assets.weapons.staffmodel.Rotate(0, 0, 90);
+	assets.weapons.staffmodel.flat = 1;
+	assets.weapons.staffmodel.CalculateNormals(1, callback);
 }
 
 void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26], GameState& gamestate, GameAssets& assets)
@@ -1149,36 +1136,36 @@ void Weapon::draw(GameState& gamestate, GameAssets& assets)
 
 			glEnable(GL_LIGHTING);
 			switch (type) {
-			case knife:
-				if (!bloody || !gamestate.bloodtoggle) {
-					throwingknifemodel.drawdifftex(knifetextureptr);
-				}
-				if (gamestate.bloodtoggle) {
-					if (bloody == 1) {
-						throwingknifemodel.drawdifftex(lightbloodknifetextureptr);
-					}
-					if (bloody == 2) {
-						throwingknifemodel.drawdifftex(bloodknifetextureptr);
-					}
-				}
-				break;
-			case sword:
-				if (!bloody || !gamestate.bloodtoggle) {
-					swordmodel.drawdifftex(swordtextureptr);
-				}
-				if (gamestate.bloodtoggle) {
-					if (bloody == 1) {
-						swordmodel.drawdifftex(lightbloodswordtextureptr);
-					}
-					if (bloody == 2) {
-						swordmodel.drawdifftex(bloodswordtextureptr);
-					}
-				}
-				break;
-			case staff:
-				staffmodel.drawdifftex(stafftextureptr);
-				break;
+		case knife:
+			if (!bloody || !gamestate.bloodtoggle) {
+				assets.weapons.throwingknifemodel.drawdifftex(assets.weapons.knifetextureptr);
 			}
+			if (gamestate.bloodtoggle) {
+				if (bloody == 1) {
+					assets.weapons.throwingknifemodel.drawdifftex(assets.weapons.lightbloodknifetextureptr);
+				}
+				if (bloody == 2) {
+					assets.weapons.throwingknifemodel.drawdifftex(assets.weapons.bloodknifetextureptr);
+				}
+			}
+			break;
+		case sword:
+			if (!bloody || !gamestate.bloodtoggle) {
+				assets.weapons.swordmodel.drawdifftex(assets.weapons.swordtextureptr);
+			}
+			if (gamestate.bloodtoggle) {
+				if (bloody == 1) {
+					assets.weapons.swordmodel.drawdifftex(assets.weapons.lightbloodswordtextureptr);
+				}
+				if (bloody == 2) {
+					assets.weapons.swordmodel.drawdifftex(assets.weapons.bloodswordtextureptr);
+				}
+			}
+			break;
+		case staff:
+			assets.weapons.staffmodel.drawdifftex(assets.weapons.stafftextureptr);
+			break;
+		}
 
 			glPopMatrix();
 		}

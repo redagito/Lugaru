@@ -45,7 +45,7 @@ class Weapon
 public:
     Weapon(int type, int owner);
 
-    static void Load(bool usetrilinear, ProgressCallback callback);
+    static void Load(bool usetrilinear, ProgressCallback callback, GameAssets& assets);
 
     void draw(GameState& gamestate, GameAssets& assets);
     void doStuff(int, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26], GameState& gamestate, GameAssets& assets);
@@ -85,19 +85,6 @@ public:
     float smallrotation2;
 
 private:
-    static Model throwingknifemodel;
-    static Texture knifetextureptr;
-    static Texture lightbloodknifetextureptr;
-    static Texture bloodknifetextureptr;
-
-    static Model swordmodel;
-    static Texture swordtextureptr;
-    static Texture lightbloodswordtextureptr;
-    static Texture bloodswordtextureptr;
-
-    static Model staffmodel;
-    static Texture stafftextureptr;
-
     int type;
 
     Vector3 oldtippoint;
@@ -123,10 +110,23 @@ private:
     int lastdrawnanim;
 };
 
-class Weapons 
+class Weapons
 {
 public:
     std::vector<Weapon> weapons;
+
+    Model throwingknifemodel;
+    Texture knifetextureptr;
+    Texture lightbloodknifetextureptr;
+    Texture bloodknifetextureptr;
+
+    Model swordmodel;
+    Texture swordtextureptr;
+    Texture lightbloodswordtextureptr;
+    Texture bloodswordtextureptr;
+
+    Model staffmodel;
+    Texture stafftextureptr;
 
     void Draw(GameState& gamestate, GameAssets& assets);
     void DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye, GameState& gamestate, GameAssets& assets);
