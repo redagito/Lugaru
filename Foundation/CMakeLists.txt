@@ -4,11 +4,11 @@ file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
 	${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/source/*.cxx
 	${CMAKE_CURRENT_SOURCE_DIR}/source/*.h
-	${CMAKE_CURRENT_SOURCE_DIR}/source/*.def
+	${CMAKE_CURRENT_SOURCE_DIR}/source/*.inc
 	${CMAKE_CURRENT_SOURCE_DIR}/source/*.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/include/*.def
+	${CMAKE_CURRENT_SOURCE_DIR}/include/*.inc
 )
 
 # Unit tests live in the sibling FoundationTest project.

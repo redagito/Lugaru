@@ -38,7 +38,7 @@ int channels[100];
 
 static const char* sound_data[sounds_count] = {
 #define DECLARE_SOUND(id, filename) filename,
-#include "Audio/Sounds.def"
+#include "Audio/Sounds.inc"
 #undef DECLARE_SOUND
 };
 

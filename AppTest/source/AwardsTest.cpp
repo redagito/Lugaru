@@ -24,7 +24,7 @@ std::vector<BonusEntry> bonusTable()
 {
 	std::vector<BonusEntry> table;
 #define DECLARE_BONUS(id, name, value) table.push_back(BonusEntry{ id, name, value });
-#include "Level/Bonuses.def"
+#include "Level/Bonuses.inc"
 #undef DECLARE_BONUS
 	return table;
 }
@@ -33,7 +33,7 @@ std::vector<std::string> awardNames()
 {
 	std::vector<std::string> names;
 #define DECLARE_AWARD(id, name) names.emplace_back(name);
-#include "Level/Awards.def"
+#include "Level/Awards.inc"
 #undef DECLARE_AWARD
 	return names;
 }
@@ -85,7 +85,7 @@ TEST_CASE("the bonus table is well formed", "[awards]")
 
 	SECTION("the escalating combo chain keeps its documented order")
 	{
-		// Bonuses.def notes that these five must stay in order, because the
+		// Bonuses\.inc notes that these five must stay in order, because the
 		// combo logic advances through them by index.
 		REQUIRE(solidhit < twoxcombo);
 		REQUIRE(twoxcombo < threexcombo);

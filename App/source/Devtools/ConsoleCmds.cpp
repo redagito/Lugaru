@@ -38,13 +38,13 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 const char* cmd_names[cmd_count] = {
 #define DECLARE_COMMAND(cmd) #cmd,
-#include "Devtools/ConsoleCmds.def"
+#include "Devtools/ConsoleCmds.inc"
 #undef DECLARE_COMMAND
 };
 
 console_handler cmd_handlers[cmd_count] = {
 #define DECLARE_COMMAND(cmd) ch_##cmd,
-#include "Devtools/ConsoleCmds.def"
+#include "Devtools/ConsoleCmds.inc"
 #undef DECLARE_COMMAND
 };
 

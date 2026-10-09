@@ -23,7 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 enum bonus_types
 {
 #define DECLARE_BONUS(id, ...) id,
-#include "Bonuses.def"
+#include "Bonuses.inc"
 #undef DECLARE_BONUS
     bonus_count
 };
@@ -42,7 +42,7 @@ void award_bonus(int playerid, int bonusid, int alt_value = 0);
 enum award_types
 {
 #define DECLARE_AWARD(id, name) id,
-#include "Awards.def"
+#include "Awards.inc"
 #undef DECLARE_AWARD
     award_count
 };

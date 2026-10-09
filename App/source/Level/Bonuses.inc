@@ -45,3 +45,8 @@ DECLARE_BONUS(Wolfbonus, "WOLF SLAYER!", 300)
 DECLARE_BONUS(FinishedBonus, "SLAIN!", 200)
 DECLARE_BONUS(TackleBonus, "Tackle!", 5)
 DECLARE_BONUS(AboveBonus, "Death from Above!", 50)
+
+// X-macro list. Included more than once, each time with a different DECLARE_*
+// macro defined to expand one artifact - an enum, a name table, a value table.
+// It therefore carries no include guard and must never be given one: a guard
+// would make every expansion after the first silently vanish.

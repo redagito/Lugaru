@@ -25,7 +25,7 @@ std::vector<std::string> commandNames()
 {
 	std::vector<std::string> names;
 #define DECLARE_COMMAND(id) names.emplace_back(#id);
-#include "Devtools/ConsoleCmds.def"
+#include "Devtools/ConsoleCmds.inc"
 #undef DECLARE_COMMAND
 	return names;
 }
@@ -117,7 +117,7 @@ TEST_CASE("every console command is documented", "[console][docs]")
 
 	SECTION("the sweep found the whole command table")
 	{
-		// Without this, a .def that failed to parse or a regex that matched
+		// Without this, an include list that failed to parse or a regex that matched
 		// nothing would satisfy the sweep below by finding no commands at all.
 		REQUIRE(names.size() == static_cast<std::size_t>(cmd_count));
 		REQUIRE(names.size() >= 40);

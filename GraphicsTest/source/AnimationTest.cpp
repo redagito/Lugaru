@@ -26,7 +26,7 @@ std::vector<AnimEntry> animationTable()
 {
 	std::vector<AnimEntry> table;
 #define DECLARE_ANIM(id, name, height, type, bits) table.push_back(AnimEntry{ id, name, bits });
-#include "Animation/Animation.def"
+#include "Animation/Animation.inc"
 #undef DECLARE_ANIM
 	return table;
 }

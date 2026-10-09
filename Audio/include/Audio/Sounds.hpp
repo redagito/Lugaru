@@ -25,7 +25,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 enum sound_type
 {
 #define DECLARE_SOUND(id, filename) id,
-#include "Audio/Sounds.def"
+#include "Audio/Sounds.inc"
 #undef DECLARE_SOUND
     sounds_count
 };

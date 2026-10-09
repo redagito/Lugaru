@@ -38,3 +38,8 @@ DECLARE_AWARD(awardrealfast, "Real fast")
 DECLARE_AWARD(awarddamnfast, "Damn fast")
 DECLARE_AWARD(awardstrategy, "Divide and conquer")
 DECLARE_AWARD(awardbojutsu, "Bojutsu")
+
+// X-macro list. Included more than once, each time with a different DECLARE_*
+// macro defined to expand one artifact - an enum, a name table, a value table.
+// It therefore carries no include guard and must never be given one: a guard
+// would make every expansion after the first silently vanish.

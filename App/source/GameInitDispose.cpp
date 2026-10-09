@@ -46,7 +46,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <Platform/Platform.hpp>
 #include <Utils/ImageIO.hpp>
 #include <User/Account.hpp>
-#include <Animation/Animation.def>
+#include <Animation/Animation.inc>
 #include <Animation/Joint.hpp>
 #include <Environment/Skybox.hpp>
 #include <Graphic/Text.hpp>

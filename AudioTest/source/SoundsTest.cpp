@@ -20,7 +20,7 @@ std::vector<std::string> soundFilenames()
 {
 	std::vector<std::string> names;
 #define DECLARE_SOUND(id, filename) names.emplace_back(filename);
-#include "Audio/Sounds.def"
+#include "Audio/Sounds.inc"
 #undef DECLARE_SOUND
 	return names;
 }

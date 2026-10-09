@@ -39,7 +39,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <Math/Frustum.hpp>
 #include <Math/Vector3.hpp>
 #include <Utils/Callbacks.h>
-#include <Animation/Animation.def>
+#include <Animation/Animation.inc>
 #include <Animation/AnimationDefinitions.h>
 #include <Animation/Joint.hpp>
 #include <Graphic/DecalType.h>

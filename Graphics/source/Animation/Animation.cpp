@@ -29,7 +29,7 @@ void Animation::loadAll(ProgressCallback callback)
 #define DECLARE_ANIM(id, file, height, attack, ...) \
     if constexpr (id < loadable_anim_end)                     \
         animations.emplace_back(file, height, attack, callback);
-#include "Animation/Animation.def"
+#include "Animation/Animation.inc"
 #undef DECLARE_ANIM
 }
 

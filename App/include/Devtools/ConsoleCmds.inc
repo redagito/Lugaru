@@ -85,3 +85,8 @@ DECLARE_COMMAND(mapgosomewhere)
 DECLARE_COMMAND(skytint)
 DECLARE_COMMAND(skylight)
 DECLARE_COMMAND(skybox)
+
+// X-macro list. Included more than once, each time with a different DECLARE_*
+// macro defined to expand one artifact - an enum, a name table, a value table.
+// It therefore carries no include guard and must never be given one: a guard
+// would make every expansion after the first silently vanish.

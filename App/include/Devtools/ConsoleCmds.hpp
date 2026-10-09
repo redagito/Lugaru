@@ -23,7 +23,7 @@ struct GameAssets;
 struct GameState;
 
 /*
- * The command table is generated from ConsoleCmds.def and is dispatched by
+ \* The command table is generated from ConsoleCmds\.inc and is dispatched by
  * Game::cmd_dispatch, which is the seam that hands the caller-injected
  * GameState and GameAssets down to the commands that write or draw through
  * them. Commands that never touch GameState leave the parameter unnamed, so
@@ -32,14 +32,14 @@ struct GameState;
 typedef void (*console_handler)(const char* args, GameState& gamestate, GameAssets& assets, Console& console);
 
 #define DECLARE_COMMAND(cmd) void ch_##cmd(const char* args, GameState& gamestate, GameAssets& assets, Console& console);
-#include "ConsoleCmds.def"
+#include "ConsoleCmds.inc"
 #undef DECLARE_COMMAND
 
 /* FIXME - This is only to get cmd_count, not very clean */
 enum console_command
 {
 #define DECLARE_COMMAND(cmd) cmd_##cmd,
-#include "ConsoleCmds.def"
+#include "ConsoleCmds.inc"
 #undef DECLARE_COMMAND
     cmd_count
 };
