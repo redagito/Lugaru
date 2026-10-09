@@ -75,6 +75,9 @@ struct GameState
 	int mousecoordh = 0;
 	int mousecoordv = 0;
 
+	// whether the attack key was held on the previous tick
+	bool oldattackkey = false;
+
 	// scoring
 	bool scoreadded = false;
 	bool againbonus = false;
@@ -93,6 +96,11 @@ struct GameState
 
 	// campaign choice
 	int whichchoice = 0;
+
+	// whether the current level is part of a campaign, and which level of that
+	// campaign it is
+	bool campaign = false;
+	int actuallevel = 0;
 
 	// time scale
 	float gamespeed = 0;
@@ -122,6 +130,10 @@ struct GameState
 	// which level to switch to once the current one finishes
 	int targetlevel = 0;
 
+	// which level is loaded, and which music stream its theme selected
+	int whichlevel = 0;
+	int musicselected = 0;
+
 	// level clock
 	float loadtime = 0;
 	float leveltime = 0;
@@ -130,6 +142,11 @@ struct GameState
 	// freeze
 	bool freeze = false;
 	bool winfreeze = false;
+
+	// whether the level has been won, and by which of the two ways it can be
+	bool won = false;
+	bool winhotspot = false;
+	bool windialogue = false;
 
 	// tutorial gating
 	bool cananger = false;
@@ -152,6 +169,12 @@ struct GameState
 	// how much blood and blood decals are drawn: 0 off, 1 low detail, 2 high
 	int bloodtoggle = 0;
 
+	// which of the two ping-pong buffers the scene is being drawn into, and
+	// where the real motion blur pass is in its transition: 1 entering it, 2
+	// coming out of it, 0 steady
+	int drawtoggle = 0;
+	int change = 0;
+
 	// devtools: console, level editor and debug info
 	bool devtools = false;
 
@@ -171,11 +194,20 @@ struct GameState
 	// whether the level pits the player against hostile characters
 	int hostile = 0;
 
+	// whether an active hostile is close enough and visible enough to be a real
+	// threat
+	bool realthreat = false;
+
 	// whether the skybox is drawn textured rather than as a flat colour
 	bool skyboxtexture = false;
 
 	// texture detail the blood and decal code addresses the skin texture with
 	float realtexdetail = 0;
+
+	// tint the clothes texture is drawn in, as a scale per channel
+	float tintr = 1;
+	float tintg = 1;
+	float tintb = 1;
 
 	// motion blur
 	bool alwaysblur = false;
@@ -253,6 +285,9 @@ struct GameState
 	float mapradius = 0;
 	int maptype = 0;
 
+	// how many segments the boundary ring is drawn with
+	int numboundaries = 0;
+
 	// editor camera
 	float editoryaw = 0;
 	float editorpitch = 0;
@@ -261,6 +296,9 @@ struct GameState
 	// and written back to
 	float yaw = 0;
 	float pitch = 0;
+
+	// how far back from the player the camera is pulled
+	float cameradist = 0;
 
 	// where the camera is, and the direction it faces. Together these are what
 	// every culled, faded or wind-blown thing in the world is measured against,

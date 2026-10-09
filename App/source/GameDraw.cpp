@@ -33,12 +33,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Utils/Input.hpp"
 #include "WindowContext.hpp"
 
-extern bool campaign;
-
-int drawtoggle = 0;
-int numboundaries = 0;
 Vector3 boundary[360];
-int change = 0;
 
 enum drawmodes
 {
@@ -100,14 +95,14 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 
 	if (!gamestate.mainmenu) {
 		if (gamestate.editorenabled) {
-			numboundaries = gamestate.mapradius * 2;
-			if (numboundaries > 360) {
-				numboundaries = 360;
+			gamestate.numboundaries = gamestate.mapradius * 2;
+			if (gamestate.numboundaries > 360) {
+				gamestate.numboundaries = 360;
 			}
-			for (int i = 0; i < numboundaries; i++) {
+			for (int i = 0; i < gamestate.numboundaries; i++) {
 				boundary[i] = 0;
 				boundary[i].z = 1;
-				boundary[i] = gamestate.mapcenter + DoRotation(boundary[i] * gamestate.mapradius, 0, i * (360 / ((float)(numboundaries))), 0);
+				boundary[i] = gamestate.mapcenter + DoRotation(boundary[i] * gamestate.mapradius, 0, i * (360 / ((float)(gamestate.numboundaries))), 0);
 			}
 		}
 
@@ -145,18 +140,18 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 			drawmode = normalmode;
 			if (gamestate.ismotionblur && gamestate.alwaysblur) {
 				if (olddrawmode != realmotionblurmode) {
-					change = 1;
+					gamestate.change = 1;
 				}
 				else {
-					change = 0;
+					gamestate.change = 0;
 				}
 				drawmode = realmotionblurmode;
 			}
 			else if (olddrawmode == realmotionblurmode) {
-				change = 2;
+				gamestate.change = 2;
 			}
 			else {
-				change = 0;
+				gamestate.change = 0;
 			}
 		}
 
@@ -171,8 +166,8 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 			drawmode = normalmode;
 		}
 
-		if (drawtoggle != 2) {
-			drawtoggle = 1 - drawtoggle;
+		if (gamestate.drawtoggle != 2) {
+			gamestate.drawtoggle = 1 - gamestate.drawtoggle;
 		}
 
 		if (!texcoordwidth) {
@@ -736,7 +731,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 			}
 
 			if (!Tutorial::active && !gamestate.winfreeze && !Dialog::inDialog() && !gamestate.mainmenu) {
-				if (campaign) {
+				if (gamestate.campaign) {
 					if (gamestate.scoreadded) {
 						string = "Score: " + std::to_string(int(Account::active().getCampaignScore()));
 					}
@@ -1132,7 +1127,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 			}
 			if (gamestate.editorenabled) {
 				assets.Mapcircletexture.bind();
-				for (int i = 0; i < numboundaries; i++) {
+				for (int i = 0; i < gamestate.numboundaries; i++) {
 					glColor4f(0, 0, 0, opac / 3);
 					glPushMatrix();
 					glTranslatef(boundary[i].x / assets.terrain->scale / 256 * -2 + 1, boundary[i].z / assets.terrain->scale / 256 * 2 - 1, 0);
@@ -1201,7 +1196,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 			glDepthMask(1);
 		}
 
-		if (gamestate.loading && !gamestate.stealthloading && (!campaign || Person::players[0]->dead)) {
+		if (gamestate.loading && !gamestate.stealthloading && (!gamestate.campaign || Person::players[0]->dead)) {
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE);
 			glDisable(GL_LIGHTING);
@@ -1251,7 +1246,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 			drawmode = normalmode;
 		}
 
-		if (gamestate.winfreeze && !campaign) {
+		if (gamestate.winfreeze && !gamestate.campaign) {
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE);
 			glDisable(GL_LIGHTING);
@@ -1322,7 +1317,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 		if (drawmode != normalmode) {
 			glEnable(GL_TEXTURE_2D);
 			glFinish();
-			if (!drawtoggle || drawmode != realmotionblurmode || (drawtoggle == 2 || change == 1)) {
+			if (!gamestate.drawtoggle || drawmode != realmotionblurmode || (gamestate.drawtoggle == 2 || gamestate.change == 1)) {
 				if (assets.screentexture) {
 
 					glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
@@ -1336,7 +1331,7 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 					glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, texviewwidth, texviewheight);
 				}
 			}
-			if ((drawtoggle || change == 1) && drawmode == realmotionblurmode) {
+			if ((gamestate.drawtoggle || gamestate.change == 1) && drawmode == realmotionblurmode) {
 				if (assets.screentexture2) {
 					glBindTexture(GL_TEXTURE_2D, assets.screentexture2);
 					glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, texviewwidth, texviewheight);
@@ -1613,8 +1608,8 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 
 	assets.weapons.DoStuff(Tutorial::active, Dialog::inDialog(), gamestate.whichjointstartarray, []() { award_bonus(0, ninja); }, []() { award_bonus(0, Bullseyebonus); }, gamestate, assets);
 
-	if (drawtoggle == 2) {
-		drawtoggle = 0;
+	if (gamestate.drawtoggle == 2) {
+		gamestate.drawtoggle = 0;
 	}
 
 	if (gamestate.freeze || gamestate.winfreeze || (gamestate.mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {

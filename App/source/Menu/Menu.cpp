@@ -535,7 +535,7 @@ void Menu::startChallengeLevel(int challengelevel, GameState& gamestate, GameAss
         LoadStuff(gamestate, assets);
     }
     LoadLevel(challengelevel, gamestate, assets, console);
-    campaign = 0;
+    gamestate.campaign = 0;
 
     gamestate.mainmenu = 0;
     gamestate.gameon = 1;
@@ -790,11 +790,11 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
                         LoadStuff(gamestate, assets);
                     }
                     gamestate.whichchoice = gamestate.selected - NB_CAMPAIGN_MENU_ITEM - Account::active().getCampaignChoicesMade();
-                    actuallevel = (Account::active().getCampaignChoicesMade() > 0 ? campaignlevels[Account::active().getCampaignChoicesMade() - 1].nextlevel[gamestate.whichchoice] : 0);
+                    gamestate.actuallevel = (Account::active().getCampaignChoicesMade() > 0 ? campaignlevels[Account::active().getCampaignChoicesMade() - 1].nextlevel[gamestate.whichchoice] : 0);
                     gamestate.visibleloading = true;
                     gamestate.stillloading = 1;
-                    LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate, assets, console);
-                    campaign = 1;
+                    LoadLevel(campaignlevels[gamestate.actuallevel].mapname.c_str(), false, gamestate, assets, console);
+                    gamestate.campaign = 1;
                     gamestate.mainmenu = 0;
                     gamestate.gameon = 1;
                     pause_sound(stream_menutheme);

@@ -54,16 +54,6 @@ console_handler cmd_handlers[cmd_count] = {
 
 using namespace Game;
 
-/* globals */
-
-extern bool campaign;
-
-/* defined in GameTick.cpp */
-
-extern int whichlevel;
-
-float tintr = 1, tintg = 1, tintb = 1;
-
 /* Helpers used in console commands */
 
 /* Return true if PFX is a prefix of STR (case-insensitive).  */
@@ -141,9 +131,9 @@ static void set_clothes(int pnum, const char* args, GameState& gamestate, GameAs
 
 	int id = (int)Person::players[pnum]->clothes.size();
 	Person::players[pnum]->clothes.push_back(std::string(buf));
-	Person::players[pnum]->clothestintr.push_back(tintr);
-	Person::players[pnum]->clothestintg.push_back(tintg);
-	Person::players[pnum]->clothestintb.push_back(tintb);
+	Person::players[pnum]->clothestintr.push_back(gamestate.tintr);
+	Person::players[pnum]->clothestintg.push_back(gamestate.tintg);
+	Person::players[pnum]->clothestintb.push_back(gamestate.tintb);
 
 	if (!Person::players[pnum]->addClothes(id, gamestate, assets)) {
 		return;
@@ -176,8 +166,8 @@ void ch_map(const char* args, GameState& gamestate, GameAssets& assets, Console&
 	if (!LoadLevel(args, false, gamestate, assets, console)) {
 		console.push(std::string("Could not load the requested level '") + args + "', aborting.");
 	}
-	whichlevel = -2;
-	campaign = 0;
+	gamestate.whichlevel = -2;
+	gamestate.campaign = 0;
 }
 
 void ch_save_json(const char* args, GameState& gamestate, GameAssets& assets, Console&)
@@ -385,24 +375,24 @@ void ch_save(const char* args, GameState& gamestate, GameAssets& assets, Console
 	fclose(tfile);
 }
 
-void ch_tint(const char* args, GameState&, GameAssets&, Console&)
+void ch_tint(const char* args, GameState& gamestate, GameAssets&, Console&)
 {
-	sscanf(args, "%f%f%f", &tintr, &tintg, &tintb);
+	sscanf(args, "%f%f%f", &gamestate.tintr, &gamestate.tintg, &gamestate.tintb);
 }
 
-void ch_tintr(const char* args, GameState&, GameAssets&, Console&)
+void ch_tintr(const char* args, GameState& gamestate, GameAssets&, Console&)
 {
-	tintr = atof(args);
+	gamestate.tintr = atof(args);
 }
 
-void ch_tintg(const char* args, GameState&, GameAssets&, Console&)
+void ch_tintg(const char* args, GameState& gamestate, GameAssets&, Console&)
 {
-	tintg = atof(args);
+	gamestate.tintg = atof(args);
 }
 
-void ch_tintb(const char* args, GameState&, GameAssets&, Console&)
+void ch_tintb(const char* args, GameState& gamestate, GameAssets&, Console&)
 {
-	tintb = atof(args);
+	gamestate.tintb = atof(args);
 }
 
 void ch_speed(const char* args, GameState&, GameAssets&, Console&)

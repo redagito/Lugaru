@@ -26,9 +26,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 struct GameAssets;
 struct GameState;
 
-extern bool campaign;
-
-extern int actuallevel;
 extern std::string campaignEndText[3];
 
 std::vector<std::string> ListCampaigns();

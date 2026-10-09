@@ -29,8 +29,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 // Global canpaign values
 std::vector<CampaignLevel> campaignlevels;
-bool campaign = false;
-int actuallevel = 0;
 std::string campaignEndText[3];
 
 std::vector<std::string> ListCampaigns()

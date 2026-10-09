@@ -71,17 +71,9 @@ using namespace Game;
 
 int leveltheme;
 
-bool won = false;
-bool winhotspot = false;
-bool windialogue = false;
-bool realthreat = 0;
 Vector3 cameraloc;
-float cameradist = 0;
-bool oldattackkey = 0;
-int whichlevel = 0;
 float musicvolume[4] = {};
 float oldmusicvolume[4] = {};
-int musicselected = 0;
 
 static_assert(rabbittype == 0 && wolftype == 1);
 
@@ -375,7 +367,7 @@ void Setenvironment(int which, GameState& gamestate, GameAssets& assets)
 bool Game::LoadLevel(int which, GameState& gamestate, GameAssets& assets, Console& console)
 {
 	gamestate.stealthloading = 0;
-	whichlevel = which;
+	gamestate.whichlevel = which;
 
 	if (which == -1) {
 		return LoadLevel("tutorial", true, gamestate, assets, console);
@@ -403,9 +395,9 @@ void Game::ResetBeforeLevelLoad(bool tutorial, GameState& gamestate)
 	}
 
 	gamestate.scoreadded = 0;
-	windialogue = false;
+	gamestate.windialogue = false;
 	gamestate.hostiletime = 0;
-	won = 0;
+	gamestate.won = 0;
 
 	Dialog::dialogs.clear();
 
@@ -1108,7 +1100,7 @@ void Game::ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& ke
 	}
 
 	/* Challenge mode */
-	if (!campaign && !gamestate.mainmenu) {
+	if (!gamestate.campaign && !gamestate.mainmenu) {
 		if ((Input::isKeyPressed(gamestate.jumpkey) || Input::isKeyPressed(SDL_SCANCODE_SPACE))) {
 			if (gamestate.winfreeze) {
 				gamestate.winfreeze = 0;
@@ -1527,7 +1519,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets, Console& co
 
 	/* Skip level (only for challenges) */
 	// FIXME: Allow skipping levels in campaigns too
-	if (whichlevel != -2 && Input::isKeyPressed(SDL_SCANCODE_K) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !gamestate.editorenabled) {
+	if (gamestate.whichlevel != -2 && Input::isKeyPressed(SDL_SCANCODE_K) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !gamestate.editorenabled) {
 		gamestate.targetlevel++;
 		if (gamestate.targetlevel > gamestate.numchallengelevels - 1) {
 			gamestate.targetlevel = 0;
@@ -2305,21 +2297,21 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 	static bool playerrealattackkeydown = 0;
 
 	if (!Input::isKeyDown(gamestate.attackkey)) {
-		oldattackkey = 0;
+		gamestate.oldattackkey = 0;
 	}
-	if (oldattackkey) {
+	if (gamestate.oldattackkey) {
 		Person::players[0]->attackkeydown = 0;
 	}
-	if (oldattackkey) {
+	if (gamestate.oldattackkey) {
 		playerrealattackkeydown = 0;
 	}
-	if (!oldattackkey) {
+	if (!gamestate.oldattackkey) {
 		playerrealattackkeydown = Input::isKeyDown(gamestate.attackkey);
 	}
 	if ((Person::players[0]->parriedrecently <= 0 ||
 		!Person::players[0]->hasWeapon()) &&
-		(!oldattackkey ||
-			(realthreat &&
+		(!gamestate.oldattackkey ||
+			(gamestate.realthreat &&
 				Person::players[0]->lastattack != swordslashanim &&
 				Person::players[0]->lastattack != knifeslashstartanim &&
 				Person::players[0]->lastattack != staffhitanim &&
@@ -2327,7 +2319,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 		Person::players[0]->attackkeydown = Input::isKeyDown(gamestate.attackkey);
 	}
 	if (Input::isKeyDown(gamestate.attackkey) &&
-		!oldattackkey &&
+		!gamestate.oldattackkey &&
 		!Person::players[0]->backkeydown) {
 		for (unsigned k = 0; k < Person::players.size(); k++) {
 			if ((Person::players[k]->animTarget == swordslashanim ||
@@ -2659,7 +2651,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 									if (Animation::animations[Person::players[k]->animTarget].attack == normalattack &&
 										Person::players[k]->victim == Person::players[i] &&
 										(!Person::players[i]->skeleton.free)) {
-										oldattackkey = 1;
+										gamestate.oldattackkey = 1;
 										Person::players[k]->frameTarget = 0;
 										Person::players[k]->target = 0;
 
@@ -2671,7 +2663,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 									}
 									if (Person::players[k]->animTarget == knifefollowanim &&
 										Person::players[k]->victim == Person::players[i]) {
-										oldattackkey = 1;
+										gamestate.oldattackkey = 1;
 										Person::players[k]->targetyaw = roughDirectionTo(Person::players[k]->coords, Person::players[i]->coords);
 										Person::players[k]->targettilt2 = pitchTo(Person::players[k]->coords, Person::players[i]->coords);
 										Person::players[k]->victim = Person::players[i];
@@ -2711,7 +2703,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 							if ((playerrealattackkeydown || Person::players[i]->dead || !hasstaff) &&
 								Animation::animations[Person::players[k]->animTarget].attack == neutral) {
 								const float distance = distsq(&Person::players[k]->coords, &Person::players[i]->coords);
-								if (!Person::players[i]->dead || !realthreat || (!attackweapon && Person::players[k]->crouchkeydown)) {
+								if (!Person::players[i]->dead || !gamestate.realthreat || (!attackweapon && Person::players[k]->crouchkeydown)) {
 									if (Person::players[i]->skeleton.free) {
 										if (distance < 3.5 * sq(Person::players[k]->scale * 5) &&
 											(Person::players[i]->dead ||
@@ -2783,7 +2775,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 										Person::players[k]->animTarget == swordgroundstabanim ||
 										Person::players[k]->animTarget == staffgroundsmashanim ||
 										Person::players[k]->animTarget == dropkickanim)) {
-									oldattackkey = 1;
+									gamestate.oldattackkey = 1;
 									Person::players[k]->frameTarget = 0;
 									Person::players[k]->target = 0;
 
@@ -2854,7 +2846,7 @@ void doAttacks(GameState& gamestate, GameAssets& assets)
 								normaldotproduct(Person::players[k]->facing, Person::players[k]->victim->coords - Person::players[k]->coords) > 0 &&
 								Person::players[k]->rabbitkickenabled) ||
 								Person::players[k]->jumpkeydown)) {
-							oldattackkey = 1;
+							gamestate.oldattackkey = 1;
 							Person::players[k]->setTargetAnimation(rabbitkickanim);
 						}
 					}
@@ -3141,7 +3133,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 			gamestate.mainmenu = 10;
 		}
 		//go to level select after completing a campaign level
-		if (campaign && gamestate.winfreeze && gamestate.mainmenu == 0 && campaignlevels[actuallevel].choosenext == 1) {
+		if (gamestate.campaign && gamestate.winfreeze && gamestate.mainmenu == 0 && campaignlevels[gamestate.actuallevel].choosenext == 1) {
 			gamestate.mainmenu = 5;
 			gamestate.gameon = 0;
 			gamestate.winfreeze = 0;
@@ -3533,7 +3525,7 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 							gamestate.hostile = 1;
 						}
 						if (Dialog::currentDialog().type > 29 && Dialog::currentDialog().type < 40) {
-							windialogue = true;
+							gamestate.windialogue = true;
 						}
 						if (Dialog::currentDialog().type > 49 && Dialog::currentDialog().type < 60) {
 							gamestate.hostile = 1;
@@ -3591,15 +3583,15 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 			//respawn
 			static bool respawnkeydown;
 			if (!gamestate.editorenabled &&
-				(whichlevel != -2 &&
+				(gamestate.whichlevel != -2 &&
 					(Input::isKeyDown(SDL_SCANCODE_K) &&
 						Input::isKeyDown(SDL_SCANCODE_LALT) &&
 						gamestate.devtools) ||
 					(Input::isKeyDown(gamestate.jumpkey) &&
 						!respawnkeydown &&
-						!oldattackkey &&
+						!gamestate.oldattackkey &&
 						Person::players[0]->dead))) {
-				gamestate.targetlevel = whichlevel;
+				gamestate.targetlevel = gamestate.whichlevel;
 				gamestate.loading = 1;
 				gamestate.leveltime = 5;
 			}
@@ -4675,7 +4667,7 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 			leveltheme = stream_deserttheme;
 		}
 
-		realthreat = 0;
+		gamestate.realthreat = 0;
 
 		gamestate.musictype = leveltheme;
 		for (unsigned i = 0; i < Person::players.size(); i++) {
@@ -4688,7 +4680,7 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 					Person::players[i]->animTarget != knifesneakattackedanim &&
 					Person::players[i]->animTarget != swordsneakattackedanim)) {
 				gamestate.musictype = stream_fighttheme;
-				realthreat = 1;
+				gamestate.realthreat = 1;
 			}
 		}
 		if (Person::players[0]->dead) {
@@ -4719,21 +4711,21 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 				emit_sound_np(alarmsound);
 			}
 		}
-		musicselected = gamestate.musictype;
+		gamestate.musicselected = gamestate.musictype;
 
-		if (musicselected == leveltheme) {
+		if (gamestate.musicselected == leveltheme) {
 			musicvolume[0] += gamestate.multiplier * 450;
 		}
 		else {
 			musicvolume[0] -= gamestate.multiplier * 450;
 		}
-		if (musicselected == stream_fighttheme) {
+		if (gamestate.musicselected == stream_fighttheme) {
 			musicvolume[1] += gamestate.multiplier * 450;
 		}
 		else {
 			musicvolume[1] -= gamestate.multiplier * 450;
 		}
-		if (musicselected == stream_menutheme) {
+		if (gamestate.musicselected == stream_menutheme) {
 			musicvolume[2] += gamestate.multiplier * 450;
 		}
 		else {
@@ -4813,11 +4805,11 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 			Hotspot::killhotspot = 0;
 		}
 
-		winhotspot = false;
+		gamestate.winhotspot = false;
 		for (unsigned i = 0; i < Hotspot::hotspots.size(); i++) {
 			if (Hotspot::hotspots[i].type == -1) {
 				if (distsq(&Person::players[0]->coords, &Hotspot::hotspots[i].position) < Hotspot::hotspots[i].size) {
-					winhotspot = true;
+					gamestate.winhotspot = true;
 				}
 			}
 		}
@@ -4832,10 +4824,10 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 			maxalarmed = numalarmed;
 		}
 
-		if (gamestate.changedelay <= 0 && !gamestate.loading && !gamestate.editorenabled && gamestate.gameon && !Tutorial::active && gamestate.changedelay != -999 && !won) {
+		if (gamestate.changedelay <= 0 && !gamestate.loading && !gamestate.editorenabled && gamestate.gameon && !Tutorial::active && gamestate.changedelay != -999 && !gamestate.won) {
 			if (Person::players[0]->dead) {
 				gamestate.changedelay = 1;
-				gamestate.targetlevel = whichlevel;
+				gamestate.targetlevel = gamestate.whichlevel;
 			}
 			alldead = true;
 			for (unsigned i = 1; i < Person::players.size(); i++) {
@@ -4847,14 +4839,14 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 
 			if (alldead && !Person::players[0]->dead && gamestate.maptype == mapkilleveryone) {
 				gamestate.changedelay = 1;
-				gamestate.targetlevel = whichlevel + 1;
+				gamestate.targetlevel = gamestate.whichlevel + 1;
 				if (gamestate.targetlevel > gamestate.numchallengelevels - 1) {
 					gamestate.targetlevel = 0;
 				}
 			}
-			if (winhotspot || windialogue) {
+			if (gamestate.winhotspot || gamestate.windialogue) {
 				gamestate.changedelay = 0.1;
-				gamestate.targetlevel = whichlevel + 1;
+				gamestate.targetlevel = gamestate.whichlevel + 1;
 				if (gamestate.targetlevel > gamestate.numchallengelevels - 1) {
 					gamestate.targetlevel = 0;
 				}
@@ -4862,23 +4854,23 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 
 			if (Hotspot::killhotspot) {
 				gamestate.changedelay = 1;
-				gamestate.targetlevel = whichlevel + 1;
+				gamestate.targetlevel = gamestate.whichlevel + 1;
 				if (gamestate.targetlevel > gamestate.numchallengelevels - 1) {
 					gamestate.targetlevel = 0;
 				}
 			}
 
-			if (gamestate.changedelay > 0 && !Person::players[0]->dead && !won) {
+			if (gamestate.changedelay > 0 && !Person::players[0]->dead && !gamestate.won) {
 				//high scores, awards, win
-				if (campaign) {
+				if (gamestate.campaign) {
 					Account::active().winCampaignLevel(gamestate.whichchoice, bonustotal, gamestate.leveltime);
 					gamestate.scoreadded = 1;
 				}
 				else {
 					gamestate.wonleveltime = gamestate.leveltime;
-					Account::active().winLevel(whichlevel, bonustotal - startbonustotal, gamestate.leveltime, gamestate.devtools);
+					Account::active().winLevel(gamestate.whichlevel, bonustotal - startbonustotal, gamestate.leveltime, gamestate.devtools);
 				}
-				won = 1;
+				gamestate.won = 1;
 				Account::saveFile(Folders::getUserSavePath());
 			}
 		}
@@ -4889,7 +4881,7 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 				gamestate.loading = 0;
 				gamestate.changedelay = .1;
 				alldead = false;
-				winhotspot = false;
+				gamestate.winhotspot = false;
 				Hotspot::killhotspot = 0;
 			}
 
@@ -4898,14 +4890,14 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 					gamestate.changedelay -= gamestate.multiplier / 7;
 				}
 				if (Person::players[0]->dead) {
-					gamestate.targetlevel = whichlevel;
+					gamestate.targetlevel = gamestate.whichlevel;
 				}
-				if (gamestate.loading == 2 && !campaign) {
+				if (gamestate.loading == 2 && !gamestate.campaign) {
 					flash(gamestate);
 
 					fireSound(firestartsound);
 
-					if (!Person::players[0]->dead && gamestate.targetlevel != whichlevel) {
+					if (!Person::players[0]->dead && gamestate.targetlevel != gamestate.whichlevel) {
 						startbonustotal = bonustotal;
 					}
 
@@ -4914,7 +4906,7 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 
 					gamestate.loading = 3;
 				}
-				if (gamestate.loading == 2 && gamestate.targetlevel == whichlevel) {
+				if (gamestate.loading == 2 && gamestate.targetlevel == gamestate.whichlevel) {
 					flash(gamestate);
 					gamestate.loadtime = 0;
 
@@ -4927,21 +4919,21 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 					gamestate.loading = 3;
 				}
 				if (gamestate.changedelay <= -999 &&
-					whichlevel != -2 &&
+					gamestate.whichlevel != -2 &&
 					!gamestate.loading &&
 					(Person::players[0]->dead ||
 						(alldead && gamestate.maptype == mapkilleveryone) ||
-						(winhotspot) ||
+						(gamestate.winhotspot) ||
 						(Hotspot::killhotspot))) {
 					gamestate.loading = 1;
 				}
 				if ((Person::players[0]->dead ||
 					(alldead && gamestate.maptype == mapkilleveryone) ||
-					(winhotspot) ||
-					(windialogue) ||
+					(gamestate.winhotspot) ||
+					(gamestate.windialogue) ||
 					(Hotspot::killhotspot)) &&
 					gamestate.changedelay <= 0) {
-					if (whichlevel != -2 && !gamestate.loading && !Person::players[0]->dead) {
+					if (gamestate.whichlevel != -2 && !gamestate.loading && !Person::players[0]->dead) {
 						gamestate.winfreeze = true;
 						gamestate.changedelay = -999;
 					}
@@ -4951,18 +4943,18 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 				}
 			}
 
-			if (campaign) {
+			if (gamestate.campaign) {
 				// campaignchoosenext determines what to do when the level is complete:
 				// 0 = load next level
 				// 1 = go back to level select screen
 				// 2 = stealthload next level
-				if (gamestate.mainmenu == 0 && gamestate.winfreeze && (campaignlevels[actuallevel].choosenext) == 1) {
-					if (campaignlevels[actuallevel].nextlevel.empty()) {
+				if (gamestate.mainmenu == 0 && gamestate.winfreeze && (campaignlevels[gamestate.actuallevel].choosenext) == 1) {
+					if (campaignlevels[gamestate.actuallevel].nextlevel.empty()) {
 						gamestate.endgame = 1;
 					}
 				}
 				else if (gamestate.mainmenu == 0 && gamestate.winfreeze) {
-					gamestate.stealthloading = (campaignlevels[actuallevel].choosenext == 2);
+					gamestate.stealthloading = (campaignlevels[gamestate.actuallevel].choosenext == 2);
 
 					if (!gamestate.stealthloading) {
 						fireSound(firestartsound);
@@ -4981,11 +4973,11 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 						LoadStuff(gamestate, assets);
 					}
 					gamestate.whichchoice = 0;
-					actuallevel = campaignlevels[actuallevel].nextlevel.front();
+					gamestate.actuallevel = campaignlevels[gamestate.actuallevel].nextlevel.front();
 					gamestate.visibleloading = true;
 					gamestate.stillloading = 1;
-					LoadLevel(campaignlevels[actuallevel].mapname.c_str(), false, gamestate, assets, console);
-					campaign = 1;
+					LoadLevel(campaignlevels[gamestate.actuallevel].mapname.c_str(), false, gamestate, assets, console);
+					gamestate.campaign = 1;
 					gamestate.mainmenu = 0;
 					gamestate.gameon = 1;
 					pause_sound(stream_menutheme);
@@ -5049,11 +5041,11 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 			if (gamestate.editorenabled) {
 				cameraloc = target;
 			}
-			cameradist += gamestate.multiplier * 5;
-			if (cameradist > 2.3) {
-				cameradist = 2.3;
+			gamestate.cameradist += gamestate.multiplier * 5;
+			if (gamestate.cameradist > 2.3) {
+				gamestate.cameradist = 2.3;
 			}
-			gamestate.viewer = cameraloc - facing * cameradist;
+			gamestate.viewer = cameraloc - facing * gamestate.cameradist;
 			colviewer = gamestate.viewer;
 			coltarget = cameraloc;
 			Object::SphereCheckPossible(&colviewer, findDistance(&colviewer, &coltarget), *assets.terrain);
@@ -5072,7 +5064,7 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 					gamestate.viewer = colviewer;
 				}
 			}
-			cameradist = findDistance(&gamestate.viewer, &target);
+			gamestate.cameradist = findDistance(&gamestate.viewer, &target);
 			gamestate.viewer.y = max((double)gamestate.viewer.y, assets.terrain->getHeight(gamestate.viewer.x, gamestate.viewer.z) + .6);
 			if (cameraloc.y < assets.terrain->getHeight(cameraloc.x, cameraloc.z)) {
 				cameraloc.y = assets.terrain->getHeight(cameraloc.x, cameraloc.z);
