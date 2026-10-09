@@ -32,19 +32,19 @@ float bonusnum[100];
 
 const char* bonus_names[bonus_count] = {
 #define DECLARE_BONUS(id, name, ...) name,
-#include "Bonuses.inc"
+#include "Level/Bonuses.inc"
 #undef DECLARE_BONUS
 };
 
 const char* award_names[award_count] = {
 #define DECLARE_AWARD(id, name) name,
-#include "Awards.inc"
+#include "Level/Awards.inc"
 #undef DECLARE_AWARD
 };
 
 static const int bonus_values[bonus_count] = {
 #define DECLARE_BONUS(id, name, value) value,
-#include "Bonuses.inc"
+#include "Level/Bonuses.inc"
 #undef DECLARE_BONUS
 };
 
