@@ -17,6 +17,7 @@ class LugaruConan(ConanFile):
         "jsoncpp/1.9.5",
         "glext/cci.20210420",
         "glu/system",
+        "spdlog/1.15.3",
     )
 
     test_requires = "catch2/3.16.0"

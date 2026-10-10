@@ -25,6 +25,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Game.hpp"
 #include "GameAssets.hpp"
 #include "GameState.hpp"
+#include "Utils/Log.hpp"
 
 #include "Level/Awards.hpp"
 
@@ -309,7 +310,7 @@ Person::Person(GameState& gamestate, GameAssets& assets)
 	setProportions(1, 1, 1, 1);
 }
 
-/* Read a person in tfile. Throws an error if it’s not valid */
+/* Read a person in tfile. Throws an error if itÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s not valid */
 Person::Person(FILE* tfile, int mapvers, unsigned i, GameState& gamestate, GameAssets& assets)
 	: Person(gamestate, assets)
 {
@@ -1930,7 +1931,7 @@ void Person::RagDoll(bool checkcollision, Terrain& terrainref, bool tutorialActi
 void Person::FootLand(bodypart whichfoot, float opacity, Terrain& terrainref, GameState& gamestate)
 {
 	if ((whichfoot != leftfoot) && (whichfoot != rightfoot)) {
-		std::cerr << "FootLand called on wrong bodypart" << std::endl;
+		Log::error("FootLand called on wrong bodypart");
 		return;
 	}
 	static Vector3 terrainlight;

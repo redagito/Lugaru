@@ -8,6 +8,7 @@
 #include <setjmp.h>
 
 #include "Utils/ImageIO.hpp"
+#include "Utils/Log.hpp"
 
 struct my_error_mgr
 {
@@ -33,7 +34,7 @@ bool load_jpg(const char* file_name, ImageRec& tex)
 	FILE* infile = fopen(file_name, "rb");
 
 	if (infile == NULL) {
-		perror((std::string("Couldn't open file ") + file_name).c_str());
+		Log::error(std::string("Couldn't open file ") + file_name);
 		return false;
 	}
 

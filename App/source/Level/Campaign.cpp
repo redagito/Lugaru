@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Game.hpp"
 #include "GameAssets.hpp"
 #include "GameState.hpp"
+#include "Utils/Log.hpp"
 #include "Utils/Folders.hpp"
 
 #include "Utils/dirent.h"
@@ -37,7 +38,7 @@ std::vector<std::string> ListCampaigns()
 	DIR* campaigns = opendir(Folders::getResourcePath("Campaigns").c_str());
 	struct dirent* campaignEntry = NULL;
 	if (!campaigns) {
-		perror(("Problem while loading campaigns from " + Folders::getResourcePath("Campaigns")).c_str());
+		Log::error("Problem while loading campaigns from " + Folders::getResourcePath("Campaigns"));
 		exit(EXIT_FAILURE);
 	}
 	std::vector<std::string> campaignNames;
@@ -62,10 +63,10 @@ void LoadCampaign(GameState& gamestate, GameAssets& assets)
 	std::ifstream ipstream(Folders::getResourcePath("Campaigns/" + Account::active().getCurrentCampaign() + ".txt"));
 	if (!ipstream.good()) {
 		if (Account::active().getCurrentCampaign() == "main") {
-			std::cerr << "Could not find main campaign!" << std::endl;
+			Log::error("Could not find main campaign!");
 			return;
 		}
-		std::cerr << "Could not find campaign \"" << Account::active().getCurrentCampaign() << "\", falling back to main." << std::endl;
+		Log::error("Could not find campaign \"" + Account::active().getCurrentCampaign() + "\", falling back to main.");
 		Account::active().setCurrentCampaign("main");
 		return LoadCampaign(gamestate, assets);
 	}

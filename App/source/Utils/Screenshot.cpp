@@ -11,6 +11,7 @@
 
 #include "Utils/Folders.hpp"
 #include "Platform/Platform.hpp"
+#include "Utils/Log.hpp"
 #include "WindowContext.hpp"
 
 bool save_screenshot(const char* file_name)
@@ -22,7 +23,7 @@ bool save_screenshot(const char* file_name)
 		}
 	}
 
-	std::cerr << "Unsupported image type" << std::endl;
+	Log::error("Unsupported image type");
 	return false;
 }
 
@@ -36,7 +37,7 @@ bool save_screenshot_png(const char* file_name)
 	errno = 0;
 	fp = fopen(file_name, "wb");
 	if (fp == NULL) {
-		perror((std::string("Couldn't open file ") + file_name).c_str());
+		Log::error(std::string("Couldn't open file ") + file_name);
 		return false;
 	}
 

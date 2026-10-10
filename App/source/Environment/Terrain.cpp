@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Objects/Object.hpp"
 #include "Utils/Folders.hpp"
+#include "Utils/Log.hpp"
 
 #include <iostream>
 
@@ -418,12 +419,11 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 	// loops below assume a square image, so reject anything that does not fit
 	// rather than writing past the end of them.
 	if (texture.sizeX != texture.sizeY) {
-		std::cerr << "Terrain heightmap must be square, got " << texture.sizeX << "x" << texture.sizeY << std::endl;
+		Log::error("Terrain heightmap must be square, got " + std::to_string(texture.sizeX) + "x" + std::to_string(texture.sizeY));
 		return false;
 	}
 	if (texture.sizeX == 0 || texture.sizeX > max_terrain_size) {
-		std::cerr << "Terrain heightmap must be between 1 and " << max_terrain_size
-				  << " pixels, got " << texture.sizeX << std::endl;
+		Log::error("Terrain heightmap must be between 1 and " + std::to_string(max_terrain_size) + " pixels, got " + std::to_string(texture.sizeX));
 		return false;
 	}
 

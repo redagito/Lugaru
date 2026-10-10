@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "GameState.hpp"
 #include "Graphic/Stereo.hpp"
 #include "Utils/Folders.hpp"
+#include "Utils/Log.hpp"
 #include "Utils/Input.hpp"
 #include "WindowContext.hpp"
 
@@ -85,7 +86,7 @@ void SaveSettings(GameState& gamestate)
 	errno = 0;
 	std::ofstream opstream(Folders::getConfigFilePath());
 	if (opstream.fail()) {
-		perror(("Couldn't save config file " + Folders::getConfigFilePath()).c_str());
+		Log::error("Couldn't save config file " + Folders::getConfigFilePath());
 		return;
 	}
 	opstream << "Screenwidth:\n";
@@ -176,13 +177,13 @@ bool LoadSettings(GameState& gamestate)
 	errno = 0;
 	std::ifstream ipstream(Folders::getConfigFilePath(), std::ios::in);
 	if (ipstream.fail()) {
-		perror(("Couldn't read config file " + Folders::getConfigFilePath()).c_str());
+		Log::error("Couldn't read config file " + Folders::getConfigFilePath());
 		return false;
 	}
 	char setting[256];
 	char string[256];
 
-	printf("Loading config\n");
+	Log::info("Loading config");
 	while (!ipstream.eof()) {
 		ipstream.getline(setting, sizeof(setting));
 

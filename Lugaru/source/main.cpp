@@ -26,14 +26,16 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Console.hpp"
 
 #include "Audio/AudioState.hpp"
-#include "Audio/openal_wrapper.hpp"
-#include "CommandLine.hpp"
-#include "Graphic/gamegl.hpp"
-#include "Platform/Platform.hpp"
-#include "User/Settings.hpp"
-#include "WindowContext.hpp"
-#include "Menu/Menu.hpp"
-#include "Version.hpp"
+  #include "Audio/openal_wrapper.hpp"
+  #include "CommandLine.hpp"
+  #include "Graphic/gamegl.hpp"
+  #include "Platform/Platform.hpp"
+  #include "User/Settings.hpp"
+  #include "Utils/Folders.hpp"
+  #include "Utils/Log.hpp"
+  #include "WindowContext.hpp"
+  #include "Menu/Menu.hpp"
+  #include "Version.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -152,16 +154,16 @@ bool SetUp(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 
 	if (WindowContext::resolutions.empty()) {
 		const std::string error = "No suitable video resolutions found.";
-		std::cerr << error << std::endl;
+		Log::error(error);
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Lugaru init failed!", error.c_str(), NULL);
 		SDL_Quit();
 		return false;
 	}
 
 	if (commandLineOptions[SHOWRESOLUTIONS]) {
-		printf("Available resolutions:\n");
+		Log::info("Available resolutions:");
 		for (auto resolution = WindowContext::resolutions.begin(); resolution != WindowContext::resolutions.end(); resolution++) {
-			printf("  %d x %d\n", (int)resolution->first, (int)resolution->second);
+			Log::info("  " + std::to_string((int)resolution->first) + " x " + std::to_string((int)resolution->second));
 		}
 	}
 
@@ -231,7 +233,7 @@ bool SetUp(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 	gamestate.newscreenwidth = gamestate.screenwidth;
 	gamestate.newscreenheight = gamestate.screenheight;
 
-	/* If saved resolution is not in the list, add it to the list (so that it’s selectable in the options) */
+	/* If saved resolution is not in the list, add it to the list (so that itÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢s selectable in the options) */
 	pair<int, int> startresolution(width, height);
 	if (WindowContext::resolutions.find(startresolution) == WindowContext::resolutions.end()) {
 		WindowContext::resolutions.insert(startresolution);
@@ -366,9 +368,11 @@ void DoUpdate(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture, 
 
 // --------------------------------------------------------------------------
 
-void CleanUp(void)
-{
+  void CleanUp(void)
+  {
 	delete[] commandLineOptionsBuffer;
+
+	Log::shutdown();
 
 	SDL_Quit();
 }
@@ -471,7 +475,7 @@ static inline void chdirToAppPath(const char* argv0)
 #endif
 		errno = 0;
 		if (chdir(dir) != 0) {
-			printf("Error changing dir to '%s' (%s).\n", dir, strerror(errno));
+			Log::error("Error changing dir to '" + std::string(dir) + "' (" + strerror(errno) + ")");
 		}
 		free(dir);
 	}
@@ -501,7 +505,7 @@ int main(int argc, char** argv)
 	argv += (argc > 0); // skip program name argv[0] if present
 	option::Stats stats(true, usage, argc, argv);
 	if (commandLineOptionsNumber != stats.options_max) {
-		std::cerr << "Found incorrect command line option number" << std::endl;
+		Log::error("Found incorrect command line option number");
 		return 1;
 	}
 	commandLineOptionsBuffer = new option::Option[stats.buffer_max];
@@ -512,16 +516,21 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	// Always start by printing the version and info to the stdout
-	std::cout << "--------------------------------------------------------------------------\n"
-		<< "Lugaru HD: The Rabbit's Foot, by Wolfire Games and the OSS Lugaru project.\n\n"
-		<< "Licensed under the GPL 2.0+ and CC-BY-SA 3.0 and 4.0 licenses.\n"
-		<< "More information, updates and bug reports at http://osslugaru.gitlab.io\n"
-		<< std::endl;
+	// The log goes next to the user data, not next to the executable: an
+	// installed game may live somewhere read-only, and a launcher can start it
+	// with no console at all.
+	Folders::makeDirectory(Folders::getUserDataPath());
+	Log::init(Folders::getUserDataPath() + "/Lugaru.log");
 
-	std::cout << "Version " + VERSION_STRING + " -- " + VERSION_BUILD_TYPE + " build\n"
-		<< "--------------------------------------------------------------------------\n"
-		<< std::endl;
+	// Always start by logging the version and info. This is the line that
+	// identifies the build when a log comes back from someone else's machine,
+	// which is why it is here and not merely on the console.
+	Log::info("--------------------------------------------------------------------------");
+	Log::info("Lugaru HD: The Rabbit's Foot, by Wolfire Games and the OSS Lugaru project.");
+	Log::info("Licensed under the GPL 2.0+ and CC-BY-SA 3.0 and 4.0 licenses.");
+	Log::info("More information, updates and bug reports at http://osslugaru.gitlab.io");
+	Log::info("Version " + std::string(VERSION_STRING) + " -- " + std::string(VERSION_BUILD_TYPE) + " build");
+	Log::info("--------------------------------------------------------------------------");
 
 	if (commandLineOptions[VERSION]) {
 		// That was enough, quit.
@@ -530,14 +539,18 @@ int main(int argc, char** argv)
 	}
 
 	if (commandLineOptions[HELP]) {
-		option::printUsage(std::cout, usage);
+		std::ostringstream stream;
+		option::printUsage(stream, usage);
+		Log::info(stream.str());
 		delete[] commandLineOptionsBuffer;
 		return 0;
 	}
 
 	if (option::Option* opt = commandLineOptions[UNKNOWN]) {
-		std::cerr << "Unknown option: " << opt->name << "\n";
-		option::printUsage(std::cerr, usage);
+		Log::error("Unknown option: " + std::string(opt->name));
+		std::ostringstream stream;
+		option::printUsage(stream, usage);
+		Log::info(stream.str());
 		delete[] commandLineOptionsBuffer;
 		return 1;
 	}
@@ -664,7 +677,7 @@ int main(int argc, char** argv)
 		std::string e = "Caught std::exception: ";
 		e += error.what();
 
-		std::cerr << e << std::endl;
+		Log::error(e);
 
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Exception caught", error.what(), NULL);
 

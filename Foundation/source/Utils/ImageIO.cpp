@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "utils/LoadPng.h"
 #include "utils/LoadJpeg.h"
 #include "Platform/Platform.hpp"
+#include "Utils/Log.hpp"
 
 #include <cstdio>
 #include <iostream>
@@ -80,7 +81,7 @@ bool load_image(const char* file_name, ImageRec& tex, ProgressCallback callback)
 		}
 	}
 
-	std::cerr << "Unsupported image type" << std::endl;
+	Log::error("Unsupported image type");
 	return false;
 }
 

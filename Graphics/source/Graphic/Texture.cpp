@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Utils/Folders.hpp"
 #include "Utils/ImageIO.hpp"
+#include "Utils/Log.hpp"
 
 void TextureRes::load(bool trilinear, ProgressCallback callback)
 {
@@ -29,7 +30,7 @@ void TextureRes::load(bool trilinear, ProgressCallback callback)
 
     //load image into 'texture'
     if (!load_image(filename.c_str(), texture, callback)) {
-        std::cerr << "Texture " << filename << " loading failed" << std::endl;
+        Log::error("Texture " + filename + " loading failed");
         return;
     }
 

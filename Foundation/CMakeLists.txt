@@ -21,11 +21,12 @@ target_compile_definitions(${PROJECT_NAME}
 	PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
 )
 
-target_link_libraries(${PROJECT_NAME}
-    PUBLIC JsonCpp::JsonCpp
-    PUBLIC PNG::PNG # should be private
-    PRIVATE JPEG::JPEG
-)
+  target_link_libraries(${PROJECT_NAME}
+      PUBLIC JsonCpp::JsonCpp
+      PUBLIC spdlog::spdlog
+      PUBLIC PNG::PNG # should be private
+      PRIVATE JPEG::JPEG
+  )
 
 target_include_directories(${PROJECT_NAME} 
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/source

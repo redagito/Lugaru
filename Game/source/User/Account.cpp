@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Platform/Platform.hpp"
 #include "Utils/binio.h"
+#include "Utils/Log.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -187,7 +188,7 @@ void Account::setActive(int i)
     if ((i >= 0) && (i < int(accounts.size()))) {
         i_active = i;
     } else {
-        std::cerr << "Tried to set active account to " << i << " but there is not such account" << std::endl;
+        Log::error("Tried to set active account to " + std::to_string(i) + " but there is not such account");
         i_active = -1;
     }
 }
@@ -198,7 +199,7 @@ void Account::destroyActive()
         accounts.erase(accounts.begin() + i_active);
         i_active = -1;
     } else {
-        std::cerr << "Tried to destroy active account " << i_active << " but there is not such account" << std::endl;
+        Log::error("Tried to destroy active account " + std::to_string(i_active) + " but there is not such account");
         i_active = -1;
     }
 }
@@ -267,7 +268,7 @@ errno = 0;
         fclose(tfile);
         setActive(iactive);
     } else {
-        perror(("Couldn't load users from " + filename).c_str());
+        Log::error("Couldn't load users from " + filename);
         i_active = -1;
     }
 }
@@ -283,13 +284,13 @@ void Account::saveFile(std::string filename)
         fpackf(tfile, "Bi", i_active);
 
         for (int i = 0; i < getNbAccounts(); i++) {
-            printf("writing account %d/%d (%s)\n", i + 1, getNbAccounts(), accounts[i].getName().c_str());
+            Log::debug("writing account " + std::to_string(i + 1) + "/" + std::to_string(getNbAccounts()) + " (" + accounts[i].getName() + ")");
             accounts[i].save(tfile);
         }
 
         fclose(tfile);
     } else {
-        perror(("Couldn't save users in " + filename).c_str());
+        Log::error("Couldn't save users in " + filename);
     }
 }
 

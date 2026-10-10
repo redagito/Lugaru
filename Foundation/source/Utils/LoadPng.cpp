@@ -6,6 +6,7 @@
 
 #include "Utils/ImageIO.hpp"
 #include "Platform/Platform.hpp"
+#include "Utils/Log.hpp"
 
 /* stolen from public domain example.c code in libpng distribution. */
 bool load_png(const char* file_name, ImageRec& tex)
@@ -21,7 +22,7 @@ bool load_png(const char* file_name, ImageRec& tex)
 	FILE* fp = fopen(file_name, "rb");
 
 	if (fp == NULL) {
-		perror((std::string("Couldn't open file ") + file_name).c_str());
+		Log::error(std::string("Couldn't open file ") + file_name);
 		return false;
 	}
 
@@ -100,7 +101,7 @@ bool load_png(const char* file_name, ImageRec& tex)
 
 png_done:
 	if (!retval) {
-		std::cerr << "There was a problem loading " << file_name << std::endl;
+		Log::error(std::string("There was a problem loading ") + file_name);
 	}
 	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 	if (fp) {

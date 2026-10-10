@@ -26,6 +26,7 @@ find_package(vorbis REQUIRED)
 find_package(jsoncpp REQUIRED)
 find_package(glext REQUIRED)
 find_package(glu REQUIRED)
+find_package(spdlog REQUIRED)
 
 # Warnings-as-errors is on everywhere. These are the codes we suppress, with reasons.
 set(LUGARU_MSVC_WARNINGS

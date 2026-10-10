@@ -25,6 +25,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Animation/Animation.hpp"
 #include "Audio/AudioState.hpp"
+#include "Utils/Log.hpp"
 #include "Audio/openal_wrapper.hpp"
 #include "Devtools/ConsoleCmds.hpp"
 #include "Console.hpp"
@@ -197,7 +198,7 @@ void Game::cmd_dispatch(const std::string cmd, GameState& gamestate, GameAssets&
 
 	for (i = 0; i < n_cmds; i++) {
 		if (cmd.substr(0, cmd.find(' ')) == std::string(cmd_names[i])) {
-			std::cout << "|" << cmd.substr(cmd.find(' ') + 1) << "|" << std::endl;
+			Log::trace("|" + cmd.substr(cmd.find(' ') + 1) + "|");
 			cmd_handlers[i](cmd.substr(cmd.find(' ') + 1).c_str(), gamestate, assets, console);
 			break;
 		}
@@ -458,7 +459,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	}
 	const std::string level_path = Folders::findMapPath(name, "");
 	if (level_path.empty()) {
-		perror(std::string("LoadLevel: Could not find map '" + name + "' in the user data or Data Maps folders").c_str());
+		Log::error("LoadLevel: Could not find map '" + name + "' in the user data or Data Maps folders");
 		return false;
 	}
 
@@ -512,7 +513,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 
 	funpackf(tfile, "Bi", &mapvers);
 	if (mapvers < 12) {
-		std::cerr << name << " has obsolete map version " << mapvers << std::endl;
+		Log::warn(name + " has obsolete map version " + std::to_string(mapvers));
 	}
 	if (mapvers >= 15) {
 		funpackf(tfile, "Bi", &indemo);
@@ -631,7 +632,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 		int numhotspots;
 		funpackf(tfile, "Bi", &numhotspots);
 		if (numhotspots < 0) {
-			std::cerr << "Map " << name << " has an invalid number of hotspots" << std::endl;
+			Log::error("Map " + name + " has an invalid number of hotspots");
 			numhotspots = 0;
 		}
 		Hotspot::hotspots.resize(numhotspots);
@@ -667,7 +668,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	int numplayers;
 	funpackf(tfile, "Bi", &numplayers);
 	if (numplayers > maxplayers) {
-		std::cout << "Warning: this level contains more players than allowed" << std::endl;
+		Log::warn("this level contains more players than allowed");
 	}
 	unsigned j = 1;
 	for (int i = 1; i < numplayers; i++) {
@@ -676,7 +677,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 			j++;
 		}
 		catch (InvalidPersonException& e) {
-			std::cerr << "Invalid Person found in " << name << ":" << e.what() << std::endl;
+			Log::error("Invalid Person found in " + name + ": " + e.what());
 		}
 	}
 	Game::LoadingScreen(gamestate, assets);
@@ -849,7 +850,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 {
 	const std::string level_path = Folders::findMapPath(name, ".json");
 	if (level_path.empty()) {
-		perror(std::string("LoadLevel: Could not find map '" + name + ".json' in the user data or Data Maps folders").c_str());
+		Log::error("LoadLevel: Could not find map '" + name + ".json' in the user data or Data Maps folders");
 		return false;
 	}
 
@@ -897,7 +898,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	}
 
 	if (mapvers < 13) {
-		std::cerr << name << " has obsolete map version " << mapvers << std::endl;
+		Log::warn(name + " has obsolete map version " + std::to_string(mapvers));
 	}
 	gamestate.maptype = map_data["map"].get("type", mapkilleveryone).asInt();
 	gamestate.hostile = map_data["map"].get("hostile", 1).asInt();
@@ -946,7 +947,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	Game::LoadingScreen(gamestate, assets);
 
 	if (map_data["map"]["players"].size() > maxplayers) {
-		std::cout << "Warning: this level contains more players than allowed" << std::endl;
+		Log::warn("this level contains more players than allowed");
 	}
 
 	Vector3 playerCoords;
@@ -966,7 +967,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 			j++;
 		}
 		catch (InvalidPersonException&) {
-			std::cerr << "Invalid Person found in " << name << std::endl;
+			Log::error("Invalid Person found in " + name);
 		}
 	}
 	if (gamestate.stealthloading) {
@@ -1139,11 +1140,11 @@ void Game::ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& ke
 	if (Input::isKeyPressed(SDL_SCANCODE_F6)) {
 		if (Input::isKeyDown(SDL_SCANCODE_LSHIFT)) {
 			gamestate.stereoreverse = true;
-			printf("Stereo reversed\n");
+			Log::debug("Stereo reversed");
 		}
 		else {
 			gamestate.stereoreverse = false;
-			printf("Stereo unreversed\n");
+			Log::debug("Stereo unreversed");
 		}
 	}
 
@@ -1154,7 +1155,7 @@ void Game::ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& ke
 		else {
 			gamestate.stereoseparation -= 0.010;
 		}
-		printf("Stereo separation decreased to %f\n", gamestate.stereoseparation);
+		Log::debug("Stereo separation decreased to " + std::to_string(gamestate.stereoseparation));
 	}
 
 	if (Input::isKeyDown(SDL_SCANCODE_F8)) {
@@ -1164,7 +1165,7 @@ void Game::ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& ke
 		else {
 			gamestate.stereoseparation += 0.010;
 		}
-		printf("Stereo separation increased to %f\n", gamestate.stereoseparation);
+		Log::debug("Stereo separation increased to " + std::to_string(gamestate.stereoseparation));
 	}
 
 	/* Devtools */
@@ -1398,8 +1399,8 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets, Console& co
 					flatvelocity2.x += (float)(abs(rand() % 100) - 50) / 10;
 					flatvelocity2.y += (float)(abs(rand() % 100) - 50) / 10;
 					flatvelocity2.z += (float)(abs(rand() % 100) - 50) / 10;
-					printf("Test: %f\n", flatvelocity2.x);
-					printf("Test orig: %f\n", flatvelocity2_orig.x);
+					Log::trace("Test: " + std::to_string(flatvelocity2.x));
+					Log::trace("Test orig: " + std::to_string(flatvelocity2_orig.x));
 					Sprite::MakeSprite(bloodflamesprite, flatfacing2, flatvelocity2, 1, 1, 1, .6, 1, gamestate.bloodtoggle);
 					flatvelocity2 += headspurtdirection * 8;
 					Sprite::MakeSprite(bloodsprite, flatfacing2, flatvelocity2 / 2, 1, 1, 1, .16, 1, gamestate.bloodtoggle);
@@ -1636,7 +1637,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets, Console& co
 				Person::players.back()->numwaypoints++;
 			}
 			else {
-				printf("Add waypoint: Reached max number of waypoints (90), aborting.");
+				Log::warn("Add waypoint: reached the maximum number of waypoints, aborting");
 			}
 		}
 
@@ -1673,7 +1674,7 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets, Console& co
 				}
 			}
 			else {
-				printf("Connect waypoint: Reached max number of path points (30), aborting.");
+				Log::warn("Connect waypoint: reached the maximum number of path points, aborting");
 			}
 		}
 

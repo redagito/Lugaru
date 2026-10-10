@@ -24,6 +24,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Math/Vector3.hpp"
 
 #include "Audio/AudioState.hpp"
+#include "Utils/Log.hpp"
 
 #include <cstdio>
 #include <cstdlib>
@@ -165,10 +166,10 @@ AL_API signed char OPENAL_Init(int mixrate, int maxsoftwarechannels, unsigned in
     alcProcessContext(ctx);
 
     if (printInfo) {
-        printf("AL_VENDOR: %s\n", (char*)alGetString(AL_VENDOR));
-        printf("AL_RENDERER: %s\n", (char*)alGetString(AL_RENDERER));
-        printf("AL_VERSION: %s\n", (char*)alGetString(AL_VERSION));
-        printf("AL_EXTENSIONS: %s\n", (char*)alGetString(AL_EXTENSIONS));
+        Log::info("AL_VENDOR: " + std::string((char*)alGetString(AL_VENDOR)));
+        Log::info("AL_RENDERER: " + std::string((char*)alGetString(AL_RENDERER)));
+        Log::info("AL_VERSION: " + std::string((char*)alGetString(AL_VERSION)));
+        Log::debug("AL_EXTENSIONS: " + std::string((char*)alGetString(AL_EXTENSIONS)));
     }
 
     num_channels = maxsoftwarechannels;

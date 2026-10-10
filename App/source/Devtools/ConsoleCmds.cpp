@@ -26,9 +26,10 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "GameAssets.hpp"
 #include "GameState.hpp"
 #include "Level/Dialog.hpp"
-#include "Level/Hotspot.hpp"
-#include "Tutorial.hpp"
-#include "Utils/Folders.hpp"
+  #include "Level/Hotspot.hpp"
+  #include "Tutorial.hpp"
+  #include "Utils/Folders.hpp"
+  #include "Utils/Log.hpp"
 
 
 #include <json/value.h>
@@ -121,7 +122,7 @@ static void set_clothes(int pnum, const char* args, GameState& gamestate, GameAs
 	FILE* tfile = nullptr;
 	tfile = fopen(file_path.c_str(), "rb");
 	if (tfile == NULL) {
-		perror((std::string("Couldn't find file ") + file_path + " to assign as clothes").c_str());
+		Log::error("Couldn't find file " + file_path + " to assign as clothes");
 
 		console.push(std::string("Could not load the requested texture '") + args + "', aborting.");
 
@@ -144,13 +145,13 @@ static void set_clothes(int pnum, const char* args, GameState& gamestate, GameAs
 
 static void list_clothes(int pnum)
 {
-	printf("Clothes from player %d:\n", pnum);
+	Log::debug("Clothes from player " + std::to_string(pnum) + ":");
 	for (unsigned i = 0; i < Person::players[pnum]->clothes.size(); i++) {
-		printf("%s (%f %f %f)\n",
-			Person::players[pnum]->clothes[i].c_str(),
-			Person::players[pnum]->clothestintr[i],
-			Person::players[pnum]->clothestintg[i],
-			Person::players[pnum]->clothestintb[i]);
+		std::string clothes = Person::players[pnum]->clothes[i] + " (" +
+			std::to_string(Person::players[pnum]->clothestintr[i]) + " " +
+			std::to_string(Person::players[pnum]->clothestintg[i]) + " " +
+			std::to_string(Person::players[pnum]->clothestintb[i]) + ")";
+		Log::debug(clothes);
 	}
 }
 
@@ -178,11 +179,11 @@ void ch_save_json(const char* args, GameState& gamestate, GameAssets& assets, Co
 
 	std::ofstream map_file(map_path);
 	if (map_file.fail()) {
-		perror((std::string("Couldn't open file ") + map_path + " for saving").c_str());
+		Log::error("Couldn't open file " + map_path + " for saving");
 		return;
 	}
 	else {
-		std::cout << "saving in " << map_path << std::endl;
+		Log::info("saving in " + map_path);
 	}
 
 	Json::Value map_data;
@@ -218,7 +219,7 @@ void ch_save_json(const char* args, GameState& gamestate, GameAssets& assets, Co
 	}
 
 	if (Person::players.size() > maxplayers) {
-		std::cout << "Warning: this level contains more players than allowed" << std::endl;
+		Log::warn("this level contains more players than allowed");
 	}
 	for (unsigned j = 0; j < Person::players.size(); j++) {
 		map_data["map"]["players"][j] = Person::players[j]->save(assets);
@@ -260,7 +261,7 @@ void ch_save(const char* args, GameState& gamestate, GameAssets& assets, Console
 	FILE* tfile;
 	tfile = fopen(map_path.c_str(), "wb");
 	if (tfile == NULL) {
-		perror((std::string("Couldn't open file ") + map_path + " for saving").c_str());
+		Log::error("Couldn't open file " + map_path + " for saving");
 		return;
 	}
 	fpackf(tfile, "Bi", mapvers);
@@ -318,7 +319,7 @@ void ch_save(const char* args, GameState& gamestate, GameAssets& assets, Console
 
 	fpackf(tfile, "Bi", Person::players.size());
 	if (Person::players.size() > maxplayers) {
-		std::cout << "Warning: this level contains more players than allowed" << std::endl;
+		Log::warn("this level contains more players than allowed");
 	}
 	for (unsigned j = 1; j < Person::players.size(); j++) {
 		fpackf(tfile, "Bi Bi Bf Bf Bf Bi Bi Bf Bb Bf", Person::players[j]->whichskin, Person::players[j]->creature,

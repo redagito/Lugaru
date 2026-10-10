@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Game.hpp"
 #include "GameAssets.hpp"
 #include "GameState.hpp"
+#include "Utils/Log.hpp"
 #include "KeyCapture.hpp"
 
 #include "Audio/openal_wrapper.hpp"
@@ -911,7 +912,7 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
                     if (gamestate.selected == 0) {
                         gamestate.newstereomode = (StereoMode)(gamestate.newstereomode + 1);
                         while (!CanInitStereo(gamestate.newstereomode)) {
-                            printf("Failed to initialize mode %s (%i)\n", StereoModeName(gamestate.newstereomode).c_str(), gamestate.newstereomode);
+                            Log::error(std::string("Failed to initialize stereo mode ") + StereoModeName(gamestate.newstereomode) + " (" + std::to_string(gamestate.newstereomode) + ")");
                             gamestate.newstereomode = (StereoMode)(gamestate.newstereomode + 1);
                             if (gamestate.newstereomode >= stereoCount) {
                                 gamestate.newstereomode = stereoNone;
@@ -1108,7 +1109,7 @@ void Menu::joinKeySelectThread()
 void Menu::setKeySelected(KeyCapture& keycapture)
 {
     keycapture.waiting = true;
-    printf("launch thread\n");
+    Log::debug("launch thread");
     Menu::joinKeySelectThread();
     KeySelectArgs* args = new KeySelectArgs{ &keycapture };
     keyselectthread = SDL_CreateThread(setKeySelected_thread, NULL, args);
