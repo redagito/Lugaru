@@ -33,7 +33,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 // Foundation
 #include "Utils/Folders.hpp"
 
-Skeleton::Skeleton()
+	Skeleton::Skeleton()
 	: selected(0)
 	, id(0)
 	, num_models(0)
@@ -51,7 +51,9 @@ Skeleton::Skeleton()
 	memset(forwardjoints, 0, sizeof(forwardjoints));
 	memset(lowforwardjoints, 0, sizeof(lowforwardjoints));
 	memset(jointlabels, 0, sizeof(jointlabels));
-	memset(skinText, 0, sizeof(skinText));
+
+	skinText_storage.reset(new GLubyte[512 * 512 * 3]());
+	skinText = skinText_storage.get();
 }
 
 /* EFFECT

@@ -1485,24 +1485,59 @@ Terrain::Terrain()
 
 	scale = 1.0f;
 	type = 0;
-	memset(heightmap, 0, sizeof(heightmap));
-	memset(normals, 0, sizeof(normals));
-	memset(facenormals, 0, sizeof(facenormals));
-	memset(triangles, 0, sizeof(triangles));
-	memset(colors, 0, sizeof(colors));
-	memset(opacityother, 0, sizeof(opacityother));
-	memset(texoffsetx, 0, sizeof(texoffsetx));
-	memset(texoffsety, 0, sizeof(texoffsety));
-	memset(numtris, 0, sizeof(numtris));
-	memset(textureness, 0, sizeof(textureness));
-
-	memset(vArray, 0, sizeof(vArray));
-
-	memset(visible, 0, sizeof(visible));
-	memset(avgypatch, 0, sizeof(avgypatch));
-	memset(maxypatch, 0, sizeof(maxypatch));
-	memset(minypatch, 0, sizeof(minypatch));
-	memset(heightypatch, 0, sizeof(heightypatch));
-
 	patch_elements = 0;
+
+	// Every array used to be an inline member that the constructor memset to
+	// zero. They are heap blocks now, and new[] value-initialises, so the same
+	// all-zero state comes out of the allocation alone.
+	vArray_storage.reset(new GLfloat[(max_patch_elements)*subdivision * subdivision]());
+	vArray = vArray_storage.get();
+
+	patchobjects_storage.reset(new std::vector<unsigned int>[subdivision * subdivision]());
+	patchobjects = reinterpret_cast<std::vector<unsigned int> (*)[subdivision]>(patchobjects_storage.get());
+
+	heightmap_storage.reset(new float[(max_terrain_size + 1) * (max_terrain_size + 1)]());
+	heightmap = reinterpret_cast<float (*)[max_terrain_size + 1]>(heightmap_storage.get());
+
+	normals_storage.reset(new Vector3[max_terrain_size * max_terrain_size]());
+	normals = reinterpret_cast<Vector3 (*)[max_terrain_size]>(normals_storage.get());
+
+	facenormals_storage.reset(new Vector3[max_terrain_size * max_terrain_size]());
+	facenormals = reinterpret_cast<Vector3 (*)[max_terrain_size]>(facenormals_storage.get());
+
+	triangles_storage.reset(new Vector3[(max_terrain_size - 1) * (max_terrain_size - 1) * 2 * 3]());
+	triangles = reinterpret_cast<Vector3 (*)[3]>(triangles_storage.get());
+
+	colors_storage.reset(new float[max_terrain_size * max_terrain_size * 4]());
+	colors = reinterpret_cast<float (*)[max_terrain_size][4]>(colors_storage.get());
+
+	opacityother_storage.reset(new float[max_terrain_size * max_terrain_size]());
+	opacityother = reinterpret_cast<float (*)[max_terrain_size]>(opacityother_storage.get());
+
+	texoffsetx_storage.reset(new float[max_terrain_size * max_terrain_size]());
+	texoffsetx = reinterpret_cast<float (*)[max_terrain_size]>(texoffsetx_storage.get());
+
+	texoffsety_storage.reset(new float[max_terrain_size * max_terrain_size]());
+	texoffsety = reinterpret_cast<float (*)[max_terrain_size]>(texoffsety_storage.get());
+
+	numtris_storage.reset(new int[subdivision * subdivision]());
+	numtris = reinterpret_cast<int (*)[subdivision]>(numtris_storage.get());
+
+	textureness_storage.reset(new int[subdivision * subdivision]());
+	textureness = reinterpret_cast<int (*)[subdivision]>(textureness_storage.get());
+
+	visible_storage.reset(new bool[subdivision * subdivision]());
+	visible = reinterpret_cast<bool (*)[subdivision]>(visible_storage.get());
+
+	avgypatch_storage.reset(new float[subdivision * subdivision]());
+	avgypatch = reinterpret_cast<float (*)[subdivision]>(avgypatch_storage.get());
+
+	maxypatch_storage.reset(new float[subdivision * subdivision]());
+	maxypatch = reinterpret_cast<float (*)[subdivision]>(maxypatch_storage.get());
+
+	minypatch_storage.reset(new float[subdivision * subdivision]());
+	minypatch = reinterpret_cast<float (*)[subdivision]>(minypatch_storage.get());
+
+	heightypatch_storage.reset(new float[subdivision * subdivision]());
+	heightypatch = reinterpret_cast<float (*)[subdivision]>(heightypatch_storage.get());
 }

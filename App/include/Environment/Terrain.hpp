@@ -23,6 +23,9 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Environment/Lights.hpp"
 
+#include <memory>
+#include <vector>
+
 // Graphics
 #include "Graphic/Decal.hpp"
 #include "Graphic/Texture.hpp"
@@ -63,28 +66,63 @@ public:
     Texture breaktexture;
     short size;
 
-    std::vector<unsigned int> patchobjects[subdivision][subdivision];
+    // The terrain's data is ~22 MB of fixed arrays. Each one is owned here and
+    // viewed through a matching raw pointer, so the object stays small enough
+    // to sit on the stack and every existing two-dimensional translation still
+    // compiles untouched.
+    std::unique_ptr<GLfloat[]> vArray_storage;
+    GLfloat* vArray = nullptr;
+
+    std::unique_ptr<std::vector<unsigned int>[]> patchobjects_storage;
+    std::vector<unsigned int> (*patchobjects)[subdivision] = nullptr;
+
+    std::unique_ptr<float[]> heightmap_storage;
+    float (*heightmap)[max_terrain_size + 1] = nullptr;
+
+    std::unique_ptr<Vector3[]> normals_storage;
+    Vector3 (*normals)[max_terrain_size] = nullptr;
+
+    std::unique_ptr<Vector3[]> facenormals_storage;
+    Vector3 (*facenormals)[max_terrain_size] = nullptr;
+
+    std::unique_ptr<Vector3[]> triangles_storage;
+    Vector3 (*triangles)[3] = nullptr;
+
+    std::unique_ptr<float[]> colors_storage;
+    float (*colors)[max_terrain_size][4] = nullptr;
+
+    std::unique_ptr<float[]> opacityother_storage;
+    float (*opacityother)[max_terrain_size] = nullptr;
+
+    std::unique_ptr<float[]> texoffsetx_storage;
+    float (*texoffsetx)[max_terrain_size] = nullptr;
+
+    std::unique_ptr<float[]> texoffsety_storage;
+    float (*texoffsety)[max_terrain_size] = nullptr;
+
+    std::unique_ptr<int[]> numtris_storage;
+    int (*numtris)[subdivision] = nullptr;
+
+    std::unique_ptr<int[]> textureness_storage;
+    int (*textureness)[subdivision] = nullptr;
+
+    std::unique_ptr<bool[]> visible_storage;
+    bool (*visible)[subdivision] = nullptr;
+
+    std::unique_ptr<float[]> avgypatch_storage;
+    float (*avgypatch)[subdivision] = nullptr;
+
+    std::unique_ptr<float[]> maxypatch_storage;
+    float (*maxypatch)[subdivision] = nullptr;
+
+    std::unique_ptr<float[]> minypatch_storage;
+    float (*minypatch)[subdivision] = nullptr;
+
+    std::unique_ptr<float[]> heightypatch_storage;
+    float (*heightypatch)[subdivision] = nullptr;
 
     float scale;
     int type;
-    float heightmap[max_terrain_size + 1][max_terrain_size + 1];
-    Vector3 normals[max_terrain_size][max_terrain_size];
-    Vector3 facenormals[max_terrain_size][max_terrain_size];
-    Vector3 triangles[(max_terrain_size - 1) * (max_terrain_size - 1) * 2][3];
-    float colors[max_terrain_size][max_terrain_size][4];
-    float opacityother[max_terrain_size][max_terrain_size];
-    float texoffsetx[max_terrain_size][max_terrain_size];
-    float texoffsety[max_terrain_size][max_terrain_size];
-    int numtris[subdivision][subdivision];
-    int textureness[subdivision][subdivision];
-
-    GLfloat vArray[(max_patch_elements)*subdivision * subdivision];
-
-    bool visible[subdivision][subdivision];
-    float avgypatch[subdivision][subdivision];
-    float maxypatch[subdivision][subdivision];
-    float minypatch[subdivision][subdivision];
-    float heightypatch[subdivision][subdivision];
 
     int patch_elements;
 

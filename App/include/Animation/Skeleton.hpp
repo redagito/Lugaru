@@ -64,8 +64,13 @@ public:
 	bool clothes;
 	bool spinny;
 
-	GLubyte skinText[512 * 512 * 3];
-	int skinsize;
+	// 768 KB of skin pixels, owned here and viewed through a raw pointer, so a
+	// Skeleton no longer has to be the dominant cost of every Person that holds
+	// one by value. The buffer is what the drawing code binds, and the size it
+	// was last loaded at is written into skinsize.
+	std::unique_ptr<GLubyte[]> skinText_storage;
+	GLubyte* skinText = nullptr;
+	int skinsize = 0;
 
 	float checkdelay;
 

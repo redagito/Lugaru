@@ -39,10 +39,11 @@
 // asserted to be trivially copyable and trivially destructible. The two shapes
 // differ, and neither is free:
 //
-//  - A terrain's constructor memsets roughly 2.3 MB of fixed arrays, and
-//    GameAssets is a stack local, so it goes behind a pointer. Constructed in
-//    main(), where the reason for the heap is stated, because until that line
-//    the pointer is null.
+//  - The terrain's ~22 MB of fixed arrays were why it sat behind a pointer:
+//    GameAssets is a stack local, so an inline member made it overflow the
+//    stack. Those arrays are heap blocks owned by Terrain itself now, so a
+//    Terrain is 424 bytes and a value would cost nothing here too. It stays a
+//    pointer until the remaining terrain members are worth the churn.
 //  - A weapons is 24 bytes plus a heap vector, so a value costs nothing.
 //
 // Both were globals whose destructors ran after main returned, which is after
