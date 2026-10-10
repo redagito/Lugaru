@@ -1,4 +1,5 @@
 *.cpp eol=lf
 *.h eol=lf
+*.hpp eol=lf
 *.md eol=lf
 *.txt eol=lf
