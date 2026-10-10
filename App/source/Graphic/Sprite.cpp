@@ -362,8 +362,8 @@ void Sprite::Draw(const Vector3& viewer, float viewdistance, float fadestart, in
 					}
 				}
 
-				whichpatchx = sprites[i]->position.x / (terrain.size / subdivision * terrain.scale);
-				whichpatchz = sprites[i]->position.z / (terrain.size / subdivision * terrain.scale);
+				whichpatchx = terrain.patchFor(sprites[i]->position.x);
+				whichpatchz = terrain.patchFor(sprites[i]->position.z);
 				if (whichpatchx > 0 && whichpatchz > 0 && whichpatchx < subdivision && whichpatchz < subdivision) {
 					if (!spritehit) {
 						for (unsigned int j = 0; j < terrain.patchobjects[whichpatchx][whichpatchz].size(); j++) {

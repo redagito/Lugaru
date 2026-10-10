@@ -1877,8 +1877,8 @@ void Person::RagDoll(bool checkcollision, Terrain& terrainref, bool tutorialActi
 				}
 			}
 
-			whichpatchx = coords.x / (terrainref.size / subdivision * terrainref.scale);
-			whichpatchz = coords.z / (terrainref.size / subdivision * terrainref.scale);
+			whichpatchx = terrainref.patchFor(coords.x);
+			whichpatchz = terrainref.patchFor(coords.z);
 			for (unsigned int l = 0; l < terrainref.patchobjects[whichpatchx][whichpatchz].size(); l++) {
 				i = terrainref.patchobjects[whichpatchx][whichpatchz][l];
 				lowpoint = coords;

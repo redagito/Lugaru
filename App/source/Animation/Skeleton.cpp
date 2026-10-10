@@ -125,8 +125,8 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 	if (free) {
 		freetime += timemultiplier;
 
-		whichpatchx = (int)(coords->x / (terrainref.size / subdivision * terrainref.scale));
-		whichpatchz = (int)(coords->z / (terrainref.size / subdivision * terrainref.scale));
+		whichpatchx = terrainref.patchFor(coords->x);
+		whichpatchz = terrainref.patchFor(coords->z);
 
 		terrainlight = *coords;
 		Object::SphereCheckPossible(&terrainlight, 1, terrainref);

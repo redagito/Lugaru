@@ -4559,8 +4559,8 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 			//do animations
 			for (unsigned k = 0; k < Person::players.size(); k++) {
 				Person::players[k]->DoAnimations(*assets.terrain, Tutorial::active, Dialog::inDialog(), gamestate.multiplier, gamestate.whichjointstartarray, gamestate, assets);
-				Person::players[k]->whichpatchx = Person::players[k]->coords.x / (assets.terrain->size / subdivision * assets.terrain->scale);
-				Person::players[k]->whichpatchz = Person::players[k]->coords.z / (assets.terrain->size / subdivision * assets.terrain->scale);
+				Person::players[k]->whichpatchx = assets.terrain->patchFor(Person::players[k]->coords.x);
+				Person::players[k]->whichpatchz = assets.terrain->patchFor(Person::players[k]->coords.z);
 			}
 
 			//do stuff
