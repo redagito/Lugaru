@@ -1479,6 +1479,25 @@ float Terrain::getHeightByTile(int x, int y) const
 	return heightmap[x + 1][y] * scale + .01f;
 }
 
+int Terrain::patchFor(float coordinate) const
+{
+	// size/subdivision is integer division and the terrain scale is set by the
+	// game after loading, so guard against a terrain that divides badly.
+	const float patchSize = size / subdivision * scale;
+	if (!(patchSize > 0)) {
+		return 0;
+	}
+
+	int patch = static_cast<int>(coordinate / patchSize);
+	if (patch < 0) {
+		patch = 0;
+	}
+	if (patch >= subdivision) {
+		patch = subdivision - 1;
+	}
+	return patch;
+}
+
 Terrain::Terrain()
 {
 	size = 0;
@@ -1499,8 +1518,8 @@ Terrain::Terrain()
 	heightmap_storage.reset(new float[(max_terrain_size + 1) * (max_terrain_size + 1)]());
 	heightmap = reinterpret_cast<float (*)[max_terrain_size + 1]>(heightmap_storage.get());
 
-	normals_storage.reset(new Vector3[max_terrain_size * max_terrain_size]());
-	normals = reinterpret_cast<Vector3 (*)[max_terrain_size]>(normals_storage.get());
+	normals_storage.reset(new Vector3[(max_terrain_size + 1) * (max_terrain_size + 1)]());
+	normals = reinterpret_cast<Vector3 (*)[max_terrain_size + 1]>(normals_storage.get());
 
 	facenormals_storage.reset(new Vector3[max_terrain_size * max_terrain_size]());
 	facenormals = reinterpret_cast<Vector3 (*)[max_terrain_size]>(facenormals_storage.get());
@@ -1508,17 +1527,17 @@ Terrain::Terrain()
 	triangles_storage.reset(new Vector3[(max_terrain_size - 1) * (max_terrain_size - 1) * 2 * 3]());
 	triangles = reinterpret_cast<Vector3 (*)[3]>(triangles_storage.get());
 
-	colors_storage.reset(new float[max_terrain_size * max_terrain_size * 4]());
-	colors = reinterpret_cast<float (*)[max_terrain_size][4]>(colors_storage.get());
+	colors_storage.reset(new float[(max_terrain_size + 1) * (max_terrain_size + 1) * 4]());
+	colors = reinterpret_cast<float (*)[max_terrain_size + 1][4]>(colors_storage.get());
 
-	opacityother_storage.reset(new float[max_terrain_size * max_terrain_size]());
-	opacityother = reinterpret_cast<float (*)[max_terrain_size]>(opacityother_storage.get());
+	opacityother_storage.reset(new float[(max_terrain_size + 1) * (max_terrain_size + 1)]());
+	opacityother = reinterpret_cast<float (*)[max_terrain_size + 1]>(opacityother_storage.get());
 
-	texoffsetx_storage.reset(new float[max_terrain_size * max_terrain_size]());
-	texoffsetx = reinterpret_cast<float (*)[max_terrain_size]>(texoffsetx_storage.get());
+	texoffsetx_storage.reset(new float[(max_terrain_size + 1) * (max_terrain_size + 1)]());
+	texoffsetx = reinterpret_cast<float (*)[max_terrain_size + 1]>(texoffsetx_storage.get());
 
-	texoffsety_storage.reset(new float[max_terrain_size * max_terrain_size]());
-	texoffsety = reinterpret_cast<float (*)[max_terrain_size]>(texoffsety_storage.get());
+	texoffsety_storage.reset(new float[(max_terrain_size + 1) * (max_terrain_size + 1)]());
+	texoffsety = reinterpret_cast<float (*)[max_terrain_size + 1]>(texoffsety_storage.get());
 
 	numtris_storage.reset(new int[subdivision * subdivision]());
 	numtris = reinterpret_cast<int (*)[subdivision]>(numtris_storage.get());

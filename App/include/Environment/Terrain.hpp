@@ -79,8 +79,12 @@ public:
     std::unique_ptr<float[]> heightmap_storage;
     float (*heightmap)[max_terrain_size + 1] = nullptr;
 
+    // The patch code reads one row and column past the last tile, which is why
+    // heightmap has always been a tile larger than the rest. These are the
+    // arrays the same code reaches past the edge of, so they are sized to match
+    // it instead of relying on whatever member happened to be laid out next.
     std::unique_ptr<Vector3[]> normals_storage;
-    Vector3 (*normals)[max_terrain_size] = nullptr;
+    Vector3 (*normals)[max_terrain_size + 1] = nullptr;
 
     std::unique_ptr<Vector3[]> facenormals_storage;
     Vector3 (*facenormals)[max_terrain_size] = nullptr;
@@ -89,16 +93,16 @@ public:
     Vector3 (*triangles)[3] = nullptr;
 
     std::unique_ptr<float[]> colors_storage;
-    float (*colors)[max_terrain_size][4] = nullptr;
+    float (*colors)[max_terrain_size + 1][4] = nullptr;
 
     std::unique_ptr<float[]> opacityother_storage;
-    float (*opacityother)[max_terrain_size] = nullptr;
+    float (*opacityother)[max_terrain_size + 1] = nullptr;
 
     std::unique_ptr<float[]> texoffsetx_storage;
-    float (*texoffsetx)[max_terrain_size] = nullptr;
+    float (*texoffsetx)[max_terrain_size + 1] = nullptr;
 
     std::unique_ptr<float[]> texoffsety_storage;
-    float (*texoffsety)[max_terrain_size] = nullptr;
+    float (*texoffsety)[max_terrain_size + 1] = nullptr;
 
     std::unique_ptr<int[]> numtris_storage;
     int (*numtris)[subdivision] = nullptr;
@@ -148,6 +152,12 @@ public:
 
     float getHeightByTile(int x, int y) const;
     Terrain();
+
+    // The patch a world coordinate falls in, clamped to one that exists. A
+    // coordinate outside the terrain produced an index past the patch table,
+    // and every site that indexes it with a coordinate does so without a
+    // bounds check, so the index has to be right where it is computed.
+    int patchFor(float coordinate) const;
 
 private:
     void DeleteDecal(int which);
