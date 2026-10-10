@@ -89,18 +89,7 @@ namespace Game
 // Presents the back buffer and waits out the rest of the frame. The window is
 // passed in rather than reached for, so the caller names where it comes from -
 // which is WindowContext, the only place the handle is declared.
-inline void swap_gl_buffers(SDL_Window* window)
-{
-	SDL_GL_SwapWindow(window);
-
-	// try to limit this to 60fps, even if vsync fails.
-	Uint32 now;
-	static Uint32 frameticks = 0;
-	const Uint32 endticks = (frameticks + 16);
-	while ((now = SDL_GetTicks()) < endticks) { /* spin. */
-	}
-	frameticks = now;
-}
+void swap_gl_buffers(SDL_Window* window);
 
 enum maptypes
 {

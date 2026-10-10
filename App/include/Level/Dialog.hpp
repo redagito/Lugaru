@@ -52,7 +52,7 @@ public:
 	int participantfocus;
 	int participantaction;
 	Vector3 participantfacing[10];
-	operator Json::Value() { return save(); }
+	operator Json::Value();
 };
 
 class Dialog
@@ -77,9 +77,9 @@ public:
 	static void saveDialogs(FILE*);
 	static Json::Value saveDialogs();
 
-	static bool inDialog() { return (indialogue != -1); }
-	static Dialog& currentDialog() { return dialogs[whichdialogue]; }
-	static DialogScene& currentScene() { return currentDialog().scenes[indialogue]; }
+	static bool inDialog();
+	static Dialog& currentDialog();
+	static DialogScene& currentScene();
 
 	static int indialogue;
 	static int whichdialogue;

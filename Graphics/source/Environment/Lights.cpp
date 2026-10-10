@@ -68,3 +68,15 @@ void SetUpLight(const Light* whichsource, int whichlight)
         glEnable(lightselect);
     }
 }
+
+
+void Light::setColors(GLfloat cr, GLfloat cg, GLfloat cb,
+                      GLfloat ar, GLfloat ag, GLfloat ab)
+{
+    color[0] = cr;
+    color[1] = cg;
+    color[2] = cb;
+    ambient[0] = ar;
+    ambient[1] = ag;
+    ambient[2] = ab;
+}

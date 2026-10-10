@@ -64,29 +64,17 @@ public:
 
     static bool file_exists(const std::string& filepath);
 
-    /* Returns full path for a game resource */
-    static inline std::string getResourcePath(const std::string& filepath)
-    {
-        return dataDir + '/' + filepath;
-    }
+      /* Returns full path for a game resource */
+      static std::string getResourcePath(const std::string& filepath);
 
-    /** Returns full path for user progress save */
-    static inline std::string getUserSavePath()
-    {
-        return getUserDataPath() + "/users";
-    }
+      /** Returns full path for user progress save */
+      static std::string getUserSavePath();
 
-    /** Returns the Maps folder inside the user data directory, where the editor saves */
-    static inline std::string getUserMapsPath()
-    {
-        return getUserDataPath() + "/Maps";
-    }
+      /** Returns the Maps folder inside the user data directory, where the editor saves */
+      static std::string getUserMapsPath();
 
-    /** Returns the Maps folder inside the resource directory */
-    static inline std::string getResourceMapsPath()
-    {
-        return getResourcePath("Maps");
-    }
+      /** Returns the Maps folder inside the resource directory */
+      static std::string getResourceMapsPath();
 
     /** Returns the full path of the named map in userMapsDir, else in resourceMapsDir.
         Returns an empty string when it is in neither. The extension is appended to the

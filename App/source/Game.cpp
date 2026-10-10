@@ -94,7 +94,20 @@ void Game::inputText(std::string& str, unsigned* charselected, GameState& gamest
         }
     }
 
-    if (!keycapture.waiting) {
-        SDL_StopTextInput();
-    }
+      if (!keycapture.waiting) {
+          SDL_StopTextInput();
+      }
+  }
+
+void swap_gl_buffers(SDL_Window* window)
+{
+	SDL_GL_SwapWindow(window);
+
+	// try to limit this to 60fps, even if vsync fails.
+	Uint32 now;
+	static Uint32 frameticks = 0;
+	const Uint32 endticks = (frameticks + 16);
+	while ((now = SDL_GetTicks()) < endticks) { /* spin. */
+	}
+	frameticks = now;
 }

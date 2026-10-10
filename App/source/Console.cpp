@@ -1,6 +1,5 @@
 /*
-Copyright (C) 2003, 2010 - Wolfire Games
-Copyright (C) 2010-2017 - Lugaru contributors (see AUTHORS file)
+Copyright (C) 2016-2017 - Lugaru contributors (see AUTHORS file)
 
 This file is part of Lugaru.
 
@@ -18,24 +17,28 @@ You should have received a copy of the GNU General Public License
 along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _LIGHTS_HPP_
-#define _LIGHTS_HPP_
+#include "Console.hpp"
 
-#include "Graphic/gamegl.hpp"
-#include "Math/Vector3.hpp"
-
-class Light
+void Console::push(std::string text)
 {
-public:
-    GLint type;
-    GLfloat color[3];
-      GLfloat ambient[3];
-      int attach;
-      Vector3 location;
-      void setColors(GLfloat cr, GLfloat cg, GLfloat cb,
-                     GLfloat ar, GLfloat ag, GLfloat ab);
-};
+	historyShift();
+	history.front() = std::move(line);
+	line = std::move(text);
+	selected = 0;
+}
 
-void SetUpLight(const Light* whichsource, int whichlight);
+void Console::submit()
+{
+	if (line.empty()) {
+		return;
+	}
+	historyShift();
+	history.front() = std::move(line);
+	line.clear();
+	selected = 0;
+}
 
-#endif
+void Console::historyShift()
+{
+	std::copy_backward(history.begin(), history.end() - 1, history.end());
+}

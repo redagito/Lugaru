@@ -58,71 +58,24 @@ public:
 
 	// getter and setters
 	int getDifficulty();
-	void setDifficulty(int i)
-	{
-		difficulty = i;
-	};
-	const std::string& getName()
-	{
-		return name;
-	};
-	int getCampaignScore()
-	{
-		return campaignProgress[currentCampaign].score;
-	};
-	int getCampaignChoicesMade()
-	{
-		return (int)campaignProgress[currentCampaign].choices.size();
-	};
+	void setDifficulty(int i);
+	const std::string& getName();
+	int getCampaignScore();
+	int getCampaignChoicesMade();
 
-	int getCampaignChoice(int i)
-	{
-		return campaignProgress[currentCampaign].choices[i];
-	};
+	int getCampaignChoice(int i);
 
-	void setCampaignScore(int s)
-	{
-		campaignProgress[currentCampaign].score = s;
-		if (s > campaignProgress[currentCampaign].highscore) {
-			campaignProgress[currentCampaign].highscore = s;
-		}
-	};
+	void setCampaignScore(int s);
 
-	void setCampaignFinalTime(float t)
-	{
-		campaignProgress[currentCampaign].time = t;
-		if ((t < campaignProgress[currentCampaign].fasttime) || ((campaignProgress[currentCampaign].fasttime == 0) && (t != 0))) {
-			campaignProgress[currentCampaign].fasttime = t;
-		}
-	};
-	float getCampaignFasttime()
-	{
-		return campaignProgress[currentCampaign].fasttime;
-	};
-	void resetFasttime()
-	{
-		campaignProgress[currentCampaign].fasttime = 0;
-	};
-	int getCampaignHighScore()
-	{
-		return campaignProgress[currentCampaign].highscore;
-	};
-	int getHighScore(int i)
-	{
-		return highscore[i];
-	};
-	float getFastTime(int i)
-	{
-		return fasttime[i];
-	};
-	int getProgress()
-	{
-		return progress;
-	};
-	std::string getCurrentCampaign()
-	{
-		return currentCampaign;
-	};
+	void setCampaignFinalTime(float t);
+
+	float getCampaignFasttime();
+	void resetFasttime();
+	int getCampaignHighScore();
+	int getHighScore(int i);
+	float getFastTime(int i);
+	int getProgress();
+	std::string getCurrentCampaign();
 	void setCurrentCampaign(const std::string& name);
 
 private:

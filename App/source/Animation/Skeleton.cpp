@@ -56,6 +56,21 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 	skinText = skinText_storage.get();
 }
 
+Joint& Skeleton::joint(int bodypart)
+{
+	return joints[jointlabels[bodypart]];
+}
+
+Vector3& Skeleton::jointPos(int bodypart)
+{
+	return joint(bodypart).position;
+}
+
+Vector3& Skeleton::jointVel(int bodypart)
+{
+	return joint(bodypart).velocity;
+}
+
 /* EFFECT
  * sets forward, lowforward, specialforward[]
  *

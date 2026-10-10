@@ -46,13 +46,7 @@ struct Console
 	// being typed: the message takes the line the typed text would have gone in,
 	// and the typed text moves into the scrollback behind it. That is the
 	// shift-and-push the three copy-pasted loops all did.
-	void push(std::string text)
-	{
-		historyShift();
-		history.front() = std::move(line);
-		line = std::move(text);
-		selected = 0;
-	}
+	void push(std::string text);
 
 	// Shifts the history up, dropping the oldest, and clears the current line,
 	// moving what was in it into the front of the history. Called once a command
@@ -63,24 +57,12 @@ struct Console
 	// the whole shift-and-clear in `if (!consoletext[0].empty())`, because
 	// shifting a blank in would push an empty string over history[0] and lose
 	// the newest entry, much as dispatch would push it one slot back.
-	void submit()
-	{
-		if (line.empty()) {
-			return;
-		}
-		historyShift();
-		history.front() = std::move(line);
-		line.clear();
-		selected = 0;
-	}
+	void submit();
 
 private:
 	// Makes history[0] free for the newest entry and moves every existing one a
 	// slot toward the back, so the oldest falls off the end. copy_backward is
 	// what makes this safe: a forward loop would copy slot k-1 over slot k and
 	// then read the overwritten value on the next iteration.
-	void historyShift()
-	{
-		std::copy_backward(history.begin(), history.end() - 1, history.end());
-	}
+	void historyShift();
 };

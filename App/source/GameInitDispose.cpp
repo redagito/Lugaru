@@ -817,3 +817,54 @@ void Game::LoadStuff(GameState& gamestate, GameAssets& assets)
 	gamestate.visibleloading = false;
 	gamestate.firstLoadDone = true;
 }
+
+float LoadingClock::advance(float seconds)
+{
+    if (!primed_) {
+        primed_ = true;
+        return 0.0f;
+    }
+    if (!(seconds > 0.0f) || seconds > maxStepSeconds) {
+        return 0.0f;
+    }
+    elapsed_ += seconds;
+    return seconds;
+}
+
+bool LoadingClock::primed() const
+{
+    return primed_;
+}
+
+void LoadingClock::reset()
+{
+    elapsed_ = 0.0f;
+}
+
+float LoadingClock::elapsed() const
+{
+    return elapsed_;
+}
+
+float LoadingClock::ramp() const
+{
+    if (elapsed_ >= rampSeconds) {
+        return 100.0f;
+    }
+    return elapsed_ / rampSeconds * 100.0f;
+}
+
+float LoadingClock::decayFlash(float flash, float seconds)
+{
+    if (!(seconds > 0.0f) || seconds > maxStepSeconds) {
+        return flash;
+    }
+    const float decayed = flash - seconds * flashDecayPerSecond;
+    if (decayed < 0.0f) {
+        return 0.0f;
+    }
+    if (decayed > flash) {
+        return flash;
+    }
+    return decayed;
+}

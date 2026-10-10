@@ -167,7 +167,27 @@ std::string Folders::findMapPath(const std::string& userMapsDir, const std::stri
     return std::string();
 }
 
-std::string Folders::findMapPath(const std::string& name, const std::string& extension)
-{
-    return findMapPath(getUserMapsPath(), getResourceMapsPath(), name, extension);
-}
+  std::string Folders::findMapPath(const std::string& name, const std::string& extension)
+  {
+      return findMapPath(getUserMapsPath(), getResourceMapsPath(), name, extension);
+  }
+
+  std::string Folders::getResourcePath(const std::string& filepath)
+  {
+      return dataDir + '/' + filepath;
+  }
+
+  std::string Folders::getUserSavePath()
+  {
+      return getUserDataPath() + "/users";
+  }
+
+  std::string Folders::getUserMapsPath()
+  {
+      return getUserDataPath() + "/Maps";
+  }
+
+  std::string Folders::getResourceMapsPath()
+  {
+      return getResourcePath("Maps");
+  }

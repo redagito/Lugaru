@@ -8682,3 +8682,145 @@ Json::Value Person::save(GameAssets& assets) {
 
 	return person;
 }
+
+const char* InvalidPersonException::what() const throw()
+{
+    return "Invalid weapon number";
+}
+
+bool PersonLimits::weaponCountIsValid(long long count)
+{
+    return count >= 0 && count <= max_weapons;
+}
+
+bool PersonLimits::waypointCountIsValid(long long count)
+{
+    return count >= 0 && count <= max_waypoints;
+}
+
+Joint& Person::joint(int bodypart)
+{
+    return skeleton.joints[skeleton.jointlabels[bodypart]];
+}
+
+Vector3& Person::jointPos(int bodypart)
+{
+    return joint(bodypart).position;
+}
+
+Vector3& Person::jointVel(int bodypart)
+{
+    return joint(bodypart).velocity;
+}
+
+AnimationFrame& Person::currentFrame(GameAssets& assets)
+{
+    return assets.graphics.animations.at(animCurrent).frames.at(frameCurrent);
+}
+
+AnimationFrame& Person::targetFrame(GameAssets& assets)
+{
+    return assets.graphics.animations.at(animTarget).frames.at(frameTarget);
+}
+
+bool Person::wasIdle()
+{
+    return animation_bits[animCurrent] & ab_idle;
+}
+
+bool Person::isIdle()
+{
+    return animation_bits[animTarget] & ab_idle;
+}
+
+bool Person::isSitting()
+{
+    return animation_bits[animTarget] & ab_sit;
+}
+
+bool Person::isSleeping()
+{
+    return animation_bits[animTarget] & ab_sleep;
+}
+
+bool Person::wasCrouch()
+{
+    return animation_bits[animCurrent] & ab_crouch;
+}
+
+bool Person::isCrouch()
+{
+    return animation_bits[animTarget] & ab_crouch;
+}
+
+bool Person::wasStop()
+{
+    return animation_bits[animCurrent] & ab_stop;
+}
+
+bool Person::isStop()
+{
+    return animation_bits[animTarget] & ab_stop;
+}
+
+bool Person::wasRun() const
+{
+    return animation_bits[animCurrent] & ab_run;
+}
+
+bool Person::isRun() const
+{
+    return animation_bits[animTarget] & ab_run;
+}
+
+bool Person::wasLanding()
+{
+    return animation_bits[animCurrent] & ab_land;
+}
+
+bool Person::isLanding()
+{
+    return animation_bits[animTarget] & ab_land;
+}
+
+bool Person::wasLandhard()
+{
+    return animation_bits[animCurrent] & ab_landhard;
+}
+
+bool Person::isLandhard()
+{
+    return animation_bits[animTarget] & ab_landhard;
+}
+
+bool Person::wasFlip()
+{
+    return animation_bits[animCurrent] & ab_flip;
+}
+
+bool Person::isFlip()
+{
+    return animation_bits[animTarget] & ab_flip;
+}
+
+bool Person::isWallJump()
+{
+    return animation_bits[animTarget] & ab_walljump;
+}
+
+bool Person::hasWeapon()
+{
+    return (weaponactive != -1);
+}
+
+bool Person::isPlayerControlled()
+{
+    return (aitype == playercontrolled);
+}
+
+void Person::DoMipmaps()
+{
+    skeleton.drawmodel.textureptr.bind();
+    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, skeleton.skinsize, skeleton.skinsize, 0, GL_RGB, GL_UNSIGNED_BYTE, &skeleton.skinText[0]);
+}

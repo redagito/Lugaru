@@ -109,6 +109,11 @@ TextureRes::~TextureRes()
     glDeleteTextures(1, &id);
 }
 
+Texture::Texture()
+    : tex(nullptr)
+{
+}
+
 void Texture::load(const std::string& filename, bool hasMipmap, bool trilinear, ProgressCallback callback)
 {
     tex.reset(new TextureRes(Folders::getResourcePath(filename), hasMipmap, trilinear, callback));

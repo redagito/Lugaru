@@ -53,10 +53,7 @@ struct GameState;
 
 struct InvalidPersonException : public std::exception
 {
-    const char* what() const throw()
-    {
-        return "Invalid weapon number";
-    }
+    const char* what() const throw();
 };
 
 /**
@@ -71,15 +68,8 @@ inline constexpr int max_weapons = 4;
 // waypoints[] and waypointtype[] hold 90 entries.
 inline constexpr int max_waypoints = 90;
 
-inline bool weaponCountIsValid(long long count)
-{
-    return count >= 0 && count <= max_weapons;
-}
-
-inline bool waypointCountIsValid(long long count)
-{
-    return count >= 0 && count <= max_waypoints;
-}
+bool weaponCountIsValid(long long count);
+bool waypointCountIsValid(long long count);
 } // namespace PersonLimits
 
 class Person : public std::enable_shared_from_this<Person>
@@ -351,11 +341,11 @@ public:
     void skeletonLoad(bool tutorialActive, GameState& gamestate, GameAssets& assets);
 
     // convenience functions
-    inline Joint& joint(int bodypart) { return skeleton.joints[skeleton.jointlabels[bodypart]]; }
-    inline Vector3& jointPos(int bodypart) { return joint(bodypart).position; }
-    inline Vector3& jointVel(int bodypart) { return joint(bodypart).velocity; }
-    inline AnimationFrame& currentFrame(GameAssets& assets) { return assets.graphics.animations.at(animCurrent).frames.at(frameCurrent); }
-    inline AnimationFrame& targetFrame(GameAssets& assets) { return assets.graphics.animations.at(animTarget).frames.at(frameTarget); }
+    Joint& joint(int bodypart);
+    Vector3& jointPos(int bodypart);
+    Vector3& jointVel(int bodypart);
+    AnimationFrame& currentFrame(GameAssets& assets);
+    AnimationFrame& targetFrame(GameAssets& assets);
 
     void setProportions(float head, float body, float arms, float legs);
     float getProportion(int part) const;
@@ -369,50 +359,45 @@ public:
     void DoBloodBig(float howmuch, int which, bool tutorialActive, GameState& gamestate, GameAssets& assets);
     bool DoBloodBigWhere(float howmuch, int which, Vector3 where, bool tutorialActive, GameState& gamestate, GameAssets& assets);
 
-    bool wasIdle() { return animation_bits[animCurrent] & ab_idle; }
-    bool isIdle() { return animation_bits[animTarget] & ab_idle; }
+    bool wasIdle();
+    bool isIdle();
     int getIdle(bool inDialog, GameAssets& assets);
 
-    bool isSitting() { return animation_bits[animTarget] & ab_sit; }
+    bool isSitting();
 
-    bool isSleeping() { return animation_bits[animTarget] & ab_sleep; }
+    bool isSleeping();
 
-    bool wasCrouch() { return animation_bits[animCurrent] & ab_crouch; }
-    bool isCrouch() { return animation_bits[animTarget] & ab_crouch; }
+    bool wasCrouch();
+    bool isCrouch();
     int getCrouch(GameAssets& assets);
 
-    bool wasStop() { return animation_bits[animCurrent] & ab_stop; }
-    bool isStop() { return animation_bits[animTarget] & ab_stop; }
+    bool wasStop();
+    bool isStop();
     int getStop(GameAssets& assets);
 
-    bool wasRun() const { return animation_bits[animCurrent] & ab_run; }
-    bool isRun() const { return animation_bits[animTarget] & ab_run; }
+    bool wasRun() const;
+    bool isRun() const;
     int getRun(GameAssets& assets);
 
     /** True when this character should steer its yaw toward `targetyaw` this frame. */
     bool shouldTurnTowardTarget() const;
 
-    bool wasLanding() { return animation_bits[animCurrent] & ab_land; }
-    bool isLanding() { return animation_bits[animTarget] & ab_land; }
+    bool wasLanding();
+    bool isLanding();
     int getLanding(GameAssets& assets);
 
-    bool wasLandhard() { return animation_bits[animCurrent] & ab_landhard; }
-    bool isLandhard() { return animation_bits[animTarget] & ab_landhard; }
+    bool wasLandhard();
+    bool isLandhard();
     int getLandhard(GameAssets& assets);
 
-    bool wasFlip() { return animation_bits[animCurrent] & ab_flip; }
-    bool isFlip() { return animation_bits[animTarget] & ab_flip; }
+    bool wasFlip();
+    bool isFlip();
 
-    bool isWallJump() { return animation_bits[animTarget] & ab_walljump; }
+    bool isWallJump();
     void Reverse(bool tutorialActive, GameState& gamestate, GameAssets& assets);
     void DoDamage(float howmuch, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
     void DoHead(float timemultiplier, GameState& gamestate);
-    void DoMipmaps()
-    {
-        skeleton.drawmodel.textureptr.bind();
-        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, skeleton.skinsize, skeleton.skinsize, 0, GL_RGB, GL_UNSIGNED_BYTE, &skeleton.skinText[0]);
-    }
+    void DoMipmaps();
 
     int SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
     int DrawSkeleton(Terrain& terrain, bool tutorialActive, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
@@ -432,8 +417,8 @@ public:
 
     bool catchKnife(GameAssets& assets);
 
-    bool hasWeapon() { return (weaponactive != -1); }
-    bool isPlayerControlled() { return (aitype == playercontrolled); }
+    bool hasWeapon();
+    bool isPlayerControlled();
 
     // Was `operator Json::Value()`. A conversion operator takes no parameters,
     // and the weapon types it has to write out live in the GameAssets weapons, so

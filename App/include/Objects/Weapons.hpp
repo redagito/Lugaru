@@ -50,11 +50,8 @@ public:
     void draw(GameState& gamestate, GameAssets& assets);
     void doStuff(int, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26], GameState& gamestate, GameAssets& assets);
 
-    int getType()
-    {
-        return type;
-    }
-    void setType(int);
+      int getType();
+      void setType(int);
 
     void drop(Vector3 velocity, Vector3 tipvelocity, bool sethitsomething = true);
     void thrown(Vector3 velocity, bool sethitsomething = true);

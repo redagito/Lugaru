@@ -59,11 +59,8 @@ public:
     int getEndY();
     Vector3 getCenter();
     int getWidth();
-    std::istream& operator<<(std::istream& is);
-    friend std::istream& operator>>(std::istream& is, CampaignLevel& cl)
-    {
-        return cl << is;
-    }
-};
+      std::istream& operator<<(std::istream& is);
+      friend std::istream& operator>>(std::istream& is, CampaignLevel& cl);
+  };
 
 extern std::vector<CampaignLevel> campaignlevels;

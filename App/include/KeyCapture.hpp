@@ -67,8 +67,5 @@ struct KeyCapture
 	// value it did not write itself. exchange(false) rather than a plain load
 	// followed by a store, so two takes in a row cannot both report the same
 	// request and rebuild the menu twice from one rebind.
-	bool takeReloadRequest()
-	{
-		return reloadRequested.exchange(false);
-	}
+	bool takeReloadRequest();
 };

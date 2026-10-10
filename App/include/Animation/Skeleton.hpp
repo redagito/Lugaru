@@ -97,9 +97,9 @@ public:
 private:
 	// convenience functions
 	// only for Skeleton.cpp
-	inline Joint& joint(int bodypart) { return joints[jointlabels[bodypart]]; }
-	inline Vector3& jointPos(int bodypart) { return joint(bodypart).position; }
-	inline Vector3& jointVel(int bodypart) { return joint(bodypart).velocity; }
+	Joint& joint(int bodypart);
+	Vector3& jointPos(int bodypart);
+	Vector3& jointVel(int bodypart);
 };
 
 #endif

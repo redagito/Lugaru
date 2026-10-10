@@ -83,3 +83,8 @@ bool load_image(const char* file_name, ImageRec& tex, ProgressCallback callback)
 	std::cerr << "Unsupported image type" << std::endl;
 	return false;
 }
+
+size_t ImageRec::capacity() const
+{
+    return capacity_;
+}

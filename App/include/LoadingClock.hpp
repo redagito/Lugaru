@@ -32,66 +32,27 @@ struct LoadingClock
 	// so a delta measured against a zero-initialised timestamp can never be
 	// counted. Deltas that are not positive finite durations (the clock
 	// standing still, or stepping backwards) also add nothing.
-	float advance(float seconds)
-	{
-		if (!primed_) {
-			primed_ = true;
-			return 0.0f;
-		}
-		if (!(seconds > 0.0f) || seconds > maxStepSeconds) {
-			return 0.0f;
-		}
-		elapsed_ += seconds;
-		return seconds;
-	}
+	float advance(float seconds);
 
 	// True once advance() has been called at least once, i.e. once there is a
 	// baseline to measure against.
-	bool primed() const
-	{
-		return primed_;
-	}
+	bool primed() const;
 
 	// Starts a fresh 0 -> 100 ramp, dropping the time banked so far. The
 	// baseline is left alone: the caller keeps supplying measured deltas, so the
 	// next advance() must still be counted.
-	void reset()
-	{
-		elapsed_ = 0.0f;
-	}
+	void reset();
 
 	// Total real seconds counted since the baseline was taken.
-	float elapsed() const
-	{
-		return elapsed_;
-	}
+	float elapsed() const;
 
 	// Brightness ramp in 0 -> 100, saturating at 100 once rampSeconds have
 	// passed.
-	float ramp() const
-	{
-		if (elapsed_ >= rampSeconds) {
-			return 100.0f;
-		}
-		return elapsed_ / rampSeconds * 100.0f;
-	}
+	float ramp() const;
 
 	// `flash` (0 -> 1 alpha) after `seconds` of decay. Only ever decreases, and
 	// clamps at exactly zero rather than going negative.
-	static float decayFlash(float flash, float seconds)
-	{
-		if (!(seconds > 0.0f) || seconds > maxStepSeconds) {
-			return flash;
-		}
-		const float decayed = flash - seconds * flashDecayPerSecond;
-		if (decayed < 0.0f) {
-			return 0.0f;
-		}
-		if (decayed > flash) {
-			return flash;
-		}
-		return decayed;
-	}
+	static float decayFlash(float flash, float seconds);
 
 private:
 	// Guards against a single absurd delta (a NaN, or a timestamp that wrapped)

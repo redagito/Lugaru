@@ -59,10 +59,7 @@ private:
 	std::shared_ptr<TextureRes> tex;
 
 public:
-	inline Texture()
-		: tex(nullptr)
-	{
-	}
+	Texture();
 	void load(const std::string& filename, bool hasMipmap, bool trilinear, ProgressCallback callback);
 	void load(const std::string& filename, bool hasMipmap, GLubyte* array, int* skinsizep, bool trilinear, ProgressCallback callback);
 	void bind();

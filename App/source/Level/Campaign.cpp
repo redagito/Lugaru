@@ -171,3 +171,11 @@ std::istream& CampaignLevel::operator<<(std::istream& is)
 	is >> location.y;
 	return is;
 }
+
+// Reading a CampaignLevel forwards to its member read. It never needed
+// friendship - the member is public - but keeping the free function in the
+// header made it findable by ADL only, which is why it was a friend there.
+std::istream& operator>>(std::istream& is, CampaignLevel& cl)
+{
+	return cl << is;
+}

@@ -84,25 +84,10 @@ public:
 		Terrain& terrain, int detail, const Vector3& viewerfacing, bool bloodtoggle, const Vector3& windvector, bool tutorialActive,
 		GameState& gamestate, GameAssets& assets);
 
-	static void deleteSprites()
-	{
-		sprites.clear();
-	}
-
-	static void setLastSpriteSpecial(int s)
-	{
-		sprites.back()->special = s;
-	}
-
-	static void setLastSpriteSpeed(float s)
-	{
-		sprites.back()->speed = s;
-	}
-
-	static void setLastSpriteAlivetime(float al)
-	{
-		sprites.back()->alivetime = al;
-	}
+	static void deleteSprites();
+	static void setLastSpriteSpecial(int s);
+	static void setLastSpriteSpeed(float s);
+	static void setLastSpriteAlivetime(float al);
 
 	Sprite();
 	~Sprite() = default;

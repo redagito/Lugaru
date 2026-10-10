@@ -507,3 +507,23 @@ Sprite::Sprite()
 	speed = 0;
 	rotatespeed = 0;
 }
+
+void Sprite::deleteSprites()
+{
+    sprites.clear();
+}
+
+void Sprite::setLastSpriteSpecial(int s)
+{
+    sprites.back()->special = s;
+}
+
+void Sprite::setLastSpriteSpeed(float s)
+{
+    sprites.back()->speed = s;
+}
+
+void Sprite::setLastSpriteAlivetime(float al)
+{
+    sprites.back()->alivetime = al;
+}

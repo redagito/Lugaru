@@ -1242,3 +1242,8 @@ void Weapons::Draw(GameState& gamestate, GameAssets& assets)
 		weapon->draw(gamestate, assets);
 	}
 }
+
+int Weapon::getType()
+{
+    return type;
+}

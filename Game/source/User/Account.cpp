@@ -292,3 +292,79 @@ void Account::saveFile(std::string filename)
         perror(("Couldn't save users in " + filename).c_str());
     }
 }
+
+void Account::setDifficulty(int i)
+{
+    difficulty = i;
+}
+
+const std::string& Account::getName()
+{
+    return name;
+}
+
+int Account::getCampaignScore()
+{
+    return campaignProgress[currentCampaign].score;
+}
+
+int Account::getCampaignChoicesMade()
+{
+    return (int)campaignProgress[currentCampaign].choices.size();
+}
+
+int Account::getCampaignChoice(int i)
+{
+    return campaignProgress[currentCampaign].choices[i];
+}
+
+void Account::setCampaignScore(int s)
+{
+    campaignProgress[currentCampaign].score = s;
+    if (s > campaignProgress[currentCampaign].highscore) {
+        campaignProgress[currentCampaign].highscore = s;
+    }
+}
+
+void Account::setCampaignFinalTime(float t)
+{
+    campaignProgress[currentCampaign].time = t;
+    if ((t < campaignProgress[currentCampaign].fasttime) || ((campaignProgress[currentCampaign].fasttime == 0) && (t != 0))) {
+        campaignProgress[currentCampaign].fasttime = t;
+    }
+}
+
+float Account::getCampaignFasttime()
+{
+    return campaignProgress[currentCampaign].fasttime;
+}
+
+void Account::resetFasttime()
+{
+    campaignProgress[currentCampaign].fasttime = 0;
+}
+
+int Account::getCampaignHighScore()
+{
+    return campaignProgress[currentCampaign].highscore;
+}
+
+int Account::getHighScore(int i)
+{
+    return highscore[i];
+}
+
+float Account::getFastTime(int i)
+{
+    return fasttime[i];
+}
+
+int Account::getProgress()
+{
+    return progress;
+}
+
+std::string Account::getCurrentCampaign()
+{
+    return currentCampaign;
+}

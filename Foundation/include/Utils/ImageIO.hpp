@@ -37,10 +37,7 @@ public:
 	unsigned int sizeY = 0;
 
 	/** Number of bytes currently allocated for `data`. */
-	size_t capacity() const
-	{
-		return capacity_;
-	}
+	size_t capacity() const;
 
 	/**
 	 * Ensures `data` can hold at least `bytes` bytes, reallocating if needed.

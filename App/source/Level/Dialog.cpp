@@ -331,3 +331,23 @@ Json::Value DialogScene::save()
 
 	return dialogscene;
 }
+
+DialogScene::operator Json::Value()
+{
+    return save();
+}
+
+bool Dialog::inDialog()
+{
+    return (indialogue != -1);
+}
+
+Dialog& Dialog::currentDialog()
+{
+    return dialogs[whichdialogue];
+}
+
+DialogScene& Dialog::currentScene()
+{
+    return currentDialog().scenes[indialogue];
+}
