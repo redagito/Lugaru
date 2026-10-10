@@ -25,7 +25,10 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
+#include <chrono>
+#include <cstdio>
 #include <memory>
+#include <utility>
 
 namespace
 {
@@ -58,6 +61,9 @@ void Log::init(const std::string& logFilePath)
     // file harder to read next to the console copy.
     logger->set_pattern("%^%L%$ [%H:%M:%S.%e] %v");
 
+    // Drop any earlier registration first, so a second init - a test that runs
+    // more than one case, or a reload - replaces the logger instead of throwing.
+    spdlog::drop("lugaru");
     spdlog::register_logger(logger);
     spdlog::set_default_logger(logger);
 }
@@ -115,4 +121,21 @@ void Log::error(const std::string& message)
     if (logger) {
         logger->error(message);
     }
+}
+
+Log::ScopedTimer::ScopedTimer(std::string what)
+    : what(std::move(what))
+    , started(std::chrono::steady_clock::now())
+{
+}
+
+Log::ScopedTimer::~ScopedTimer()
+{
+    const auto elapsed = std::chrono::steady_clock::now() - started;
+    const auto ms = std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(elapsed).count();
+    // Fixed two decimals: sub-tenth-of-a-millisecond phases exist, and the
+    // point is comparing them against each other.
+    char buffer[64];
+    std::snprintf(buffer, sizeof(buffer), "%.2f", ms);
+    Log::info(what + ": " + buffer + " ms");
 }

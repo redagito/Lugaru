@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Graphic/gamegl.hpp"
 #include "Utils/Callbacks.h"
+#include "Utils/ImageIO.hpp"
 
 #include <map>
 #include <memory>
@@ -41,8 +42,15 @@ private:
 	int datalen = 0;
 
 	void load(bool trilinear, ProgressCallback callback);
+	// Strips alpha out of a decoded image. Split out of load() because a skin
+	// needs its pixels kept even when there is no context to upload them in.
+	void storeDecodedPixels(ImageRec& texture, GLuint type);
 
 public:
+	// The GL object, or 0 when there is no context. Only the resize path needs
+	// it, so it stays out of the public surface of Texture.
+	GLuint textureId() const { return id; }
+
 	TextureRes(const std::string& filename, bool hasMipmap, bool trilinear, ProgressCallback callback);
 	TextureRes(const std::string& filename, bool hasMipmap, GLubyte* array, int* skinsize, bool trilinear, ProgressCallback callback);
 	~TextureRes();
@@ -62,6 +70,9 @@ public:
 	Texture();
 	void load(const std::string& filename, bool hasMipmap, bool trilinear, ProgressCallback callback);
 	void load(const std::string& filename, bool hasMipmap, GLubyte* array, int* skinsizep, bool trilinear, ProgressCallback callback);
+	// Re-uploads pixels that have changed since the last load, and asks for
+	// mipmaps again. Used when blood decals are painted into a skin.
+	void regenerate(GLsizei width, GLsizei height, const GLubyte* pixels);
 	void bind();
 };
 

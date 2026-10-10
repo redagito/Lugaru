@@ -29,6 +29,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
   #include "Audio/openal_wrapper.hpp"
   #include "CommandLine.hpp"
   #include "Graphic/gamegl.hpp"
+  #include "Graphic/GfxTextures.hpp"
   #include "Platform/Platform.hpp"
   #include "User/Settings.hpp"
   #include "Utils/Folders.hpp"
@@ -199,10 +200,15 @@ bool SetUp(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 	}
 
 	if (!WindowContext::createGLContext()) {
-		fprintf(stderr, "SDL_GL_CreateContext() failed: %s\n", SDL_GetError());
+		Log::error("SDL_GL_CreateContext() failed: " + std::string(SDL_GetError()));
 		SDL_Quit();
 		return false;
 	}
+
+	// The context is live from here on, so the GL-facing implementations can
+	// take over from the no-op defaults. Everything loaded before this point
+	// was deliberately data-only.
+	Gfx::installGlTextures();
 
 	int dblbuf = 0;
 	if ((SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &dblbuf) == -1) || (!dblbuf)) {
@@ -574,11 +580,12 @@ int main(int argc, char** argv)
 			// outlive every frame and go out of scope before SDL_Quit below.
 			GameAssets assets;
 
-			// A Terrain is roughly 2.3 MB of fixed arrays, far past the 1 MB the
-			// Windows stack reserves by default, so it is heap-allocated here
-			// rather than as a member by value. Its constructor needs no GL
-			// context - only its textures do, and they load in LoadStuff - so
-			// this can sit before SetUp creates the context.
+			// The terrain's arrays are heap blocks owned by Terrain itself now,
+			// so a Terrain is 424 bytes and would sit on the stack as a member
+			// by value. It stays behind a pointer because it is one per process
+			// and the load path hands out references to it. Its constructor
+			// needs no GL context - only its textures do, and they load in
+			// LoadStuff - so this can sit before SetUp creates the context.
 			assets.terrain = std::make_unique<Terrain>();
 
 			// The handshake with the one thread in the process, by the same rule and

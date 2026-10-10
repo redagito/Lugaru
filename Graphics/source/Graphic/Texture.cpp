@@ -20,6 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Graphic/Texture.hpp"
 
+#include "Graphic/GfxTextures.hpp"
 #include "Utils/Folders.hpp"
 #include "Utils/ImageIO.hpp"
 #include "Utils/Log.hpp"
@@ -40,40 +41,55 @@ void TextureRes::load(bool trilinear, ProgressCallback callback)
         type = GL_RGB;
     }
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    Gfx::textures().setUnpackAlignment(1);
 
-    glDeleteTextures(1, &id);
-    glGenTextures(1, &id);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    // Everything from here on is context-scoped work, so it goes through the
+    // seam rather than straight at GL.
+    Gfx::textures().deleteTexture(id);
+    id = Gfx::textures().createTexture();
+    if (!id) {
+        // No context, so there is nothing to bind to. The decoded pixels are
+        // still wanted: a skin has to hand them back to its Skeleton.
+        storeDecodedPixels(texture, type);
+        return;
+    }
 
-    glBindTexture(GL_TEXTURE_2D, id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    Gfx::textures().setEnvironmentMode();
+    Gfx::textures().bindTexture(id);
+    Gfx::textures().setMagFilter(id, GL_LINEAR);
     if (hasMipmap) {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (trilinear ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR_MIPMAP_NEAREST));
-        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+        Gfx::textures().setMinFilter(id, trilinear ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR_MIPMAP_NEAREST);
+        Gfx::textures().setGenerateMipmap(id, true);
     } else {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        Gfx::textures().setMinFilter(id, GL_LINEAR);
     }
 
     if (isSkin) {
-        free(data);
-        const int nb = texture.sizeY * texture.sizeX * (texture.bpp / 8);
-        data = (GLubyte*)malloc(nb * sizeof(GLubyte));
-        datalen = 0;
-        for (int i = 0; i < nb; i++) {
-            if ((i + 1) % 4 || type == GL_RGB) {
-                data[datalen++] = texture.data[i];
-            }
-        }
-        glTexImage2D(GL_TEXTURE_2D, 0, type, texture.sizeX, texture.sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        storeDecodedPixels(texture, type);
+        Gfx::textures().upload(id, texture.sizeX, texture.sizeY, type, GL_RGB, GL_UNSIGNED_BYTE, data);
     } else {
-        glTexImage2D(GL_TEXTURE_2D, 0, type, texture.sizeX, texture.sizeY, 0, type, GL_UNSIGNED_BYTE, texture.data);
+        Gfx::textures().upload(id, texture.sizeX, texture.sizeY, type, type, GL_UNSIGNED_BYTE, texture.data);
+    }
+}
+
+// Strips the alpha channel out of a decoded image, which is what a skin wants:
+// the texture itself is opaque and the transparency comes from a separate mask.
+void TextureRes::storeDecodedPixels(ImageRec& texture, GLuint type)
+{
+    free(data);
+    const int nb = texture.sizeY * texture.sizeX * (texture.bpp / 8);
+    data = (GLubyte*)malloc(nb * sizeof(GLubyte));
+    datalen = 0;
+    for (int i = 0; i < nb; i++) {
+        if ((i + 1) % 4 || type == GL_RGB) {
+            data[datalen++] = texture.data[i];
+        }
     }
 }
 
 void TextureRes::bind()
 {
-    glBindTexture(GL_TEXTURE_2D, id);
+    Gfx::textures().bindTexture(id);
 }
 
 TextureRes::TextureRes(const std::string& _filename, bool _hasMipmap, bool trilinear, ProgressCallback callback)
@@ -107,7 +123,7 @@ TextureRes::TextureRes(const std::string& _filename, bool _hasMipmap, GLubyte* a
 TextureRes::~TextureRes()
 {
     free(data);
-    glDeleteTextures(1, &id);
+    Gfx::textures().deleteTexture(id);
 }
 
 Texture::Texture()
@@ -130,6 +146,16 @@ void Texture::bind()
     if (tex) {
         tex->bind();
     } else {
-        glBindTexture(GL_TEXTURE_2D, 0);
+        Gfx::textures().bindTexture(0);
     }
+}
+
+void Texture::regenerate(GLsizei width, GLsizei height, const GLubyte* pixels)
+{
+    if (!tex) {
+        return;
+    }
+    // The skin is an RGB texture, which is what this path exists for.
+    Gfx::textures().setGenerateMipmap(tex->textureId(), true);
+    Gfx::textures().upload(tex->textureId(), width, height, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 }

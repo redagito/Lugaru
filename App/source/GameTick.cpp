@@ -622,6 +622,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	funpackf(tfile, "Bi", &gamestate.environment);
 
 	if (gamestate.environment != gamestate.oldenvironment) {
+		Log::ScopedTimer timer("level: environment textures and heightmap");
 		Setenvironment(gamestate.environment, gamestate, assets);
 	}
 	gamestate.oldenvironment = gamestate.environment;
@@ -699,10 +700,15 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 	SetUpLighting(gamestate);
 
 	if (!gamestate.stealthloading) {
-		Object::AddObjectsToTerrain(gamestate.environment, *assets.terrain, gamestate.detail);
-		assets.terrain->DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
+		{
+			Log::ScopedTimer timer("level: terrain shadows");
+			assets.terrain->DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
+		}
 		Game::LoadingScreen(gamestate, assets);
-		Object::DoShadows(gamestate.skyboxtexture, gamestate.light, *assets.terrain);
+		{
+			Log::ScopedTimer timer("level: object shadows");
+			Object::DoShadows(gamestate.skyboxtexture, gamestate.light, *assets.terrain);
+		}
 		Game::LoadingScreen(gamestate, assets);
 	}
 
@@ -921,11 +927,13 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	gamestate.environment = map_data["map"]["environment"].asInt();
 
 	if (gamestate.environment != gamestate.oldenvironment) {
+		Log::ScopedTimer timer("level: environment textures and heightmap");
 		Setenvironment(gamestate.environment, gamestate, assets);
 	}
 	gamestate.oldenvironment = gamestate.environment;
 
 	if (!gamestate.stealthloading) {
+		Log::ScopedTimer timer("level: world objects");
 		Object::LoadObjectsFromJson(map_data["map"]["objects"], *assets.terrain, [&]() {Game::LoadingScreen(gamestate, assets); });
 	}
 
@@ -961,6 +969,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	assets.weapons.weapons.clear();
 	Person::players.clear();
 	unsigned j = 0;
+	Log::ScopedTimer playerTimer("level: players");
 	for (unsigned i = 0; i < map_data["map"]["players"].size(); i++) {
 		try {
 			Person::players.push_back(std::shared_ptr<Person>(new Person(map_data["map"]["players"][i], mapvers, j, gamestate, assets)));
@@ -995,10 +1004,15 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	SetUpLighting(gamestate);
 
 	if (!gamestate.stealthloading) {
-		Object::AddObjectsToTerrain(gamestate.environment, *assets.terrain, gamestate.detail);
-		assets.terrain->DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
+		{
+			Log::ScopedTimer timer("level: terrain shadows");
+			assets.terrain->DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
+		}
 		Game::LoadingScreen(gamestate, assets);
-		Object::DoShadows(gamestate.skyboxtexture, gamestate.light, *assets.terrain);
+		{
+			Log::ScopedTimer timer("level: object shadows");
+			Object::DoShadows(gamestate.skyboxtexture, gamestate.light, *assets.terrain);
+		}
 		Game::LoadingScreen(gamestate, assets);
 	}
 

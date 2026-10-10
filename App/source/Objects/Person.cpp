@@ -8821,7 +8821,7 @@ bool Person::isPlayerControlled()
 
 void Person::DoMipmaps()
 {
-    skeleton.drawmodel.textureptr.bind();
-    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, skeleton.skinsize, skeleton.skinsize, 0, GL_RGB, GL_UNSIGNED_BYTE, &skeleton.skinText[0]);
+    // Re-uploads the skin now that the blood decals have been drawn into it.
+    // The pixel buffer is the Skeleton's; everything GL is the texture's.
+    skeleton.drawmodel.textureptr.regenerate(skeleton.skinsize, skeleton.skinsize, &skeleton.skinText[0]);
 }

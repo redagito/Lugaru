@@ -38,6 +38,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 // environment variable can lower, because diagnostics are for finding bugs,
 // not for shipping debt.
 
+#include <chrono>
 #include <string>
 
 namespace Log
@@ -60,6 +61,23 @@ void debug(const std::string& message);
 void info(const std::string& message);
 void warn(const std::string& message);
 void error(const std::string& message);
+
+// Times a scope and reports how long it took when it ends. The log used to be
+// silent on the happy path, which meant a slow level load was indistinguishable
+// from a fast one; now every phase reports itself.
+class ScopedTimer
+{
+public:
+    explicit ScopedTimer(std::string what);
+    ~ScopedTimer();
+
+    ScopedTimer(const ScopedTimer&) = delete;
+    ScopedTimer& operator=(const ScopedTimer&) = delete;
+
+private:
+    std::string what;
+    std::chrono::steady_clock::time_point started;
+};
 
 } // namespace Log
 
