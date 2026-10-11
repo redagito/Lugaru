@@ -3157,7 +3157,10 @@ void Game::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
 			if (gamestate.musictoggle) {
 				OPENAL_SetFrequency(OPENAL_ALL);
 				emit_stream_np(stream_menutheme);
+				// Both in-level themes, for the reason given in Menu's end-game
+				// case: the crossfade below never runs again once mainmenu is set.
 				pause_sound(leveltheme);
+				pause_sound(stream_fighttheme);
 			}
 			Menu::Load(gamestate, assets, keycapture);
 		}

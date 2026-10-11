@@ -664,6 +664,16 @@ void Menu::Tick(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture
                         if (gamestate.gameon) { //end game
                             gamestate.gameon = 0;
                             gamestate.mainmenu = 1;
+                            // The music that belongs to a level has to stop
+                            // here. It cannot be left to fade out on its own:
+                            // the crossfade in TickOnceAfter runs only while
+                            // mainmenu is clear, so from this line on nothing
+                            // will ever ramp the volumes down and pause the
+                            // streams. Without this, a fight theme started
+                            // by the combat that ended the level keeps
+                            // playing into the menu.
+                            pause_sound(leveltheme);
+                            pause_sound(stream_fighttheme);
                         } else { //quit
                             gamestate.tryquit = 1;
                             pause_sound(stream_menutheme);
