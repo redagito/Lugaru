@@ -701,6 +701,10 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 
 	if (!gamestate.stealthloading) {
 		{
+			Log::ScopedTimer timer("level: objects onto the terrain");
+			Object::AddObjectsToTerrain(gamestate.environment, *assets.terrain, gamestate.detail);
+		}
+		{
 			Log::ScopedTimer timer("level: terrain shadows");
 			assets.terrain->DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
 		}
@@ -1004,6 +1008,10 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 	SetUpLighting(gamestate);
 
 	if (!gamestate.stealthloading) {
+		{
+			Log::ScopedTimer timer("level: objects onto the terrain");
+			Object::AddObjectsToTerrain(gamestate.environment, *assets.terrain, gamestate.detail);
+		}
 		{
 			Log::ScopedTimer timer("level: terrain shadows");
 			assets.terrain->DoShadows(Tutorial::active, gamestate.texscale, gamestate.light, gamestate.skyboxtexture, [&]() {Game::LoadingScreen(gamestate, assets); });
