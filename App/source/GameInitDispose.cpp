@@ -30,6 +30,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "LoadingClock.hpp"
 #include "Menu/Menu.hpp"
 #include "Utils/Folders.hpp"
+#include "Graphic/GfxResources.hpp"
 #include "Utils/Log.hpp"
 #include "WindowContext.hpp"
 
@@ -72,13 +73,22 @@ void Dispose(GameState& gamestate)
 	OPENAL_Close();
 }
 
-void Game::deleteGame(GameState& gamestate, GameAssets& assets)
-{
-	glDeleteTextures(1, &assets.screentexture);
-	glDeleteTextures(1, &assets.screentexture2);
+  void Game::deleteGame(GameState& gamestate, GameAssets& assets)
+  {
+	// Both of these were deleted by hand here, which worked only because
+	// nobody else ever created a texture that outlived this call. The owner
+	// now tracks every GL object, and the ids go with it - so drop them
+	// here and let the owner release the rest when the context is torn down.
+	if (assets.gfx) {
+		assets.gfx->adoptTexture(assets.screentexture);
+		assets.screentexture = 0;
+		assets.gfx->adoptTexture(assets.screentexture2);
+		assets.screentexture2 = 0;
+		assets.gfx->releaseAll();
+	}
 
 	Dispose(gamestate);
-}
+  }
 
 void LoadSave(const std::string& fileName, GLubyte* array, GameState& gamestate, GameAssets& assets)
 {
@@ -601,7 +611,9 @@ void Game::LoadScreenTexture(GameState& gamestate, GameAssets& assets)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	if (!assets.screentexture) {
-		glGenTextures(1, &assets.screentexture);
+		// Registered with the owner, so this id is released with the rest of
+		// the context's objects rather than by hand in deleteGame.
+		assets.screentexture = assets.gfx ? assets.gfx->createTexture() : 0;
 	}
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 

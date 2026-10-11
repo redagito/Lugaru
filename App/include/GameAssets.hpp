@@ -103,6 +103,11 @@ struct GameAssets
 	std::unique_ptr<Terrain> terrain;
 	Weapons weapons;
 
+	// Every GL object in the program is registered here, so shutdown can
+	// release them all in one defined order. Null in a unit test, which
+	// allocates no GL objects. main() owns the instance and points this at it.
+	class GfxResources* gfx = nullptr;
+
 	// A Model frees its own buffers, so the copy the compiler would generate here
 	// would hand two instances the same four pointers and both destructors would
 	// free them. Both live instances are locals passed by reference, so nothing

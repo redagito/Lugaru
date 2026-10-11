@@ -24,6 +24,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Console.hpp"
 #include "GameAssets.hpp"
 #include "GameState.hpp"
+#include "Graphic/GfxResources.hpp"
 #include "KeyCapture.hpp"
 #include "Level/Awards.hpp"
 #include "Level/Dialog.hpp"
@@ -1339,7 +1340,10 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 				if (!assets.screentexture2) {
 					glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-					glGenTextures(1, &assets.screentexture2);
+					// Registered with the owner for the same reason as
+					// screentexture: it outlives this frame and has to be
+					// released before the context goes away.
+					assets.screentexture2 = assets.gfx ? assets.gfx->createTexture() : 0;
 					glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 					glEnable(GL_TEXTURE_2D);

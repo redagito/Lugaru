@@ -29,7 +29,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
   #include "Audio/openal_wrapper.hpp"
   #include "CommandLine.hpp"
   #include "Graphic/gamegl.hpp"
-  #include "Graphic/GfxTextures.hpp"
+  #include "Graphic/GfxResources.hpp"
+#include "Graphic/GfxTextures.hpp"
   #include "Platform/Platform.hpp"
   #include "User/Settings.hpp"
   #include "Utils/Folders.hpp"
@@ -120,36 +121,44 @@ bool SetUp(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 	gamestate.slomospeed = 0.25;
 	slomofreq = 8012;
 
-	DefaultSettings(gamestate);
+	// Everything before the first asset load: SDL, the config, and walking every
+	// display mode on every monitor. The display walk is the only part here with
+	// any cost, and until this was timed it was indistinguishable from the asset
+	// loading that follows.
+	{
+		Log::ScopedTimer startupTimer("startup: SDL, settings and display modes");
 
-	if (!SDL_WasInit(SDL_INIT_VIDEO)) {
-		if (SDL_Init(SDL_INIT_VIDEO) == -1) {
-			fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
+		DefaultSettings(gamestate);
+
+		if (!SDL_WasInit(SDL_INIT_VIDEO)) {
+			if (SDL_Init(SDL_INIT_VIDEO) == -1) {
+				Log::error("SDL_Init() failed: " + std::string(SDL_GetError()));
+				return false;
+			}
+		}
+		if (!LoadSettings(gamestate)) {
+			Log::error("Failed to load config, creating default");
+			SaveSettings(gamestate);
+		}
+
+		if (SDL_GL_LoadLibrary(NULL) == -1) {
+			Log::error("SDL_GL_LoadLibrary() failed: " + std::string(SDL_GetError()));
+			SDL_Quit();
 			return false;
 		}
-	}
-	if (!LoadSettings(gamestate)) {
-		fprintf(stderr, "Failed to load config, creating default\n");
-		SaveSettings(gamestate);
-	}
 
-	if (SDL_GL_LoadLibrary(NULL) == -1) {
-		fprintf(stderr, "SDL_GL_LoadLibrary() failed: %s\n", SDL_GetError());
-		SDL_Quit();
-		return false;
-	}
-
-	for (int displayIdx = 0; displayIdx < SDL_GetNumVideoDisplays(); ++displayIdx) {
-		for (int i = 0; i < SDL_GetNumDisplayModes(displayIdx); ++i) {
-			SDL_DisplayMode mode;
-			if (SDL_GetDisplayMode(displayIdx, i, &mode) == -1) {
-				continue;
+		for (int displayIdx = 0; displayIdx < SDL_GetNumVideoDisplays(); ++displayIdx) {
+			for (int i = 0; i < SDL_GetNumDisplayModes(displayIdx); ++i) {
+				SDL_DisplayMode mode;
+				if (SDL_GetDisplayMode(displayIdx, i, &mode) == -1) {
+					continue;
+				}
+				if ((mode.w < 640) || (mode.h < 480)) {
+					continue; // sane lower limit.
+				}
+				pair<int, int> resolution(mode.w, mode.h);
+				WindowContext::resolutions.insert(resolution);
 			}
-			if ((mode.w < 640) || (mode.h < 480)) {
-				continue; // sane lower limit.
-			}
-			pair<int, int> resolution(mode.w, mode.h);
-			WindowContext::resolutions.insert(resolution);
 		}
 	}
 
@@ -183,26 +192,32 @@ bool SetUp(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 		sdlflags |= SDL_WINDOW_INPUT_GRABBED;
 	}
 
-	if (!WindowContext::createWindow(WindowContext::kContextWidth, WindowContext::kContextHeight, sdlflags)) {
-		fprintf(stderr, "SDL_CreateWindow() failed: %s\n", SDL_GetError());
-		fprintf(stderr, "forcing 640x480...\n");
-		WindowContext::kContextWidth = 640;
-		WindowContext::kContextHeight = 480;
+	{
+		// Creating the window and the GL context. On some drivers this is the
+		// slow part of startup, and it was previously invisible.
+		Log::ScopedTimer windowTimer("startup: window and GL context");
+
 		if (!WindowContext::createWindow(WindowContext::kContextWidth, WindowContext::kContextHeight, sdlflags)) {
-			fprintf(stderr, "SDL_CreateWindow() failed: %s\n", SDL_GetError());
-			fprintf(stderr, "forcing 640x480 windowed mode...\n");
-			sdlflags &= ~SDL_WINDOW_FULLSCREEN;
+			Log::error("SDL_CreateWindow() failed: " + std::string(SDL_GetError()));
+			Log::error("forcing 640x480...");
+			WindowContext::kContextWidth = 640;
+			WindowContext::kContextHeight = 480;
 			if (!WindowContext::createWindow(WindowContext::kContextWidth, WindowContext::kContextHeight, sdlflags)) {
-				fprintf(stderr, "SDL_CreateWindow() failed: %s\n", SDL_GetError());
-				return false;
+				Log::error("SDL_CreateWindow() failed: " + std::string(SDL_GetError()));
+				Log::error("forcing 640x480 windowed mode...");
+				sdlflags &= ~SDL_WINDOW_FULLSCREEN;
+				if (!WindowContext::createWindow(WindowContext::kContextWidth, WindowContext::kContextHeight, sdlflags)) {
+					Log::error("SDL_CreateWindow() failed: " + std::string(SDL_GetError()));
+					return false;
+				}
 			}
 		}
-	}
 
-	if (!WindowContext::createGLContext()) {
-		Log::error("SDL_GL_CreateContext() failed: " + std::string(SDL_GetError()));
-		SDL_Quit();
-		return false;
+		if (!WindowContext::createGLContext()) {
+			Log::error("SDL_GL_CreateContext() failed: " + std::string(SDL_GetError()));
+			SDL_Quit();
+			return false;
+		}
 	}
 
 	// The context is live from here on, so the GL-facing implementations can
@@ -226,26 +241,34 @@ bool SetUp(GameState& gamestate, GameAssets& assets, KeyCapture& keycapture)
 		SDL_SetRelativeMouseMode(SDL_TRUE);
 	}
 
-	initGL(gamestate);
+	{
+		// GL state setup plus InitGame. InitGame loads the fonts, the sounds and
+		// the account file, so this is the first place real work happens and it
+		// was previously merged into the unmeasured gap.
+		Log::ScopedTimer glTimer("startup: GL state and InitGame");
 
-	GLint width = WindowContext::kContextWidth;
-	GLint height = WindowContext::kContextHeight;
-	gMidPoint.h = width / 2;
-	gMidPoint.v = height / 2;
-	gamestate.screenwidth = width;
-	gamestate.screenheight = height;
+		initGL(gamestate);
 
-	gamestate.newdetail = gamestate.detail;
-	gamestate.newscreenwidth = gamestate.screenwidth;
-	gamestate.newscreenheight = gamestate.screenheight;
+		GLint width = WindowContext::kContextWidth;
+		GLint height = WindowContext::kContextHeight;
+		gMidPoint.h = width / 2;
+		gMidPoint.v = height / 2;
+		gamestate.screenwidth = width;
+		gamestate.screenheight = height;
 
-	/* If saved resolution is not in the list, add it to the list (so that itÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢s selectable in the options) */
-	pair<int, int> startresolution(width, height);
+		gamestate.newdetail = gamestate.detail;
+		gamestate.newscreenwidth = gamestate.screenwidth;
+		gamestate.newscreenheight = gamestate.screenheight;
+
+		InitGame(gamestate, assets, keycapture);
+	}
+
+	/* If saved resolution is not in the list, add it to the list (so that it'
+	s selectable in the options) */
+	pair<int, int> startresolution(WindowContext::kContextWidth, WindowContext::kContextHeight);
 	if (WindowContext::resolutions.find(startresolution) == WindowContext::resolutions.end()) {
 		WindowContext::resolutions.insert(startresolution);
 	}
-
-	InitGame(gamestate, assets, keycapture);
 
 	return true;
 }
@@ -579,6 +602,14 @@ int main(int argc, char** argv)
 			// draws or loads. Its destructor deletes GL objects, so it has to
 			// outlive every frame and go out of scope before SDL_Quit below.
 			GameAssets assets;
+
+			// Owns every GL object that must not outlive the context. Declared
+			// after assets so that it is destroyed BEFORE them: anything holding
+			// a GL id stops being reachable before the ids themselves are
+			// released. This is the rule that used to live in comments about
+			// member order inside GameAssets.
+			GfxResources gfxResources;
+			assets.gfx = &gfxResources;
 
 			// The terrain's arrays are heap blocks owned by Terrain itself now,
 			// so a Terrain is 424 bytes and would sit on the stack as a member
