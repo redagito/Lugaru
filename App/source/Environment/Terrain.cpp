@@ -1252,21 +1252,45 @@ void Terrain::DeleteDecal(int which)
 	decals.erase(decals.begin() + which);
 }
 
+namespace
+{
+// The heightmap tile a world coordinate falls on, clamped to one the heightmap
+// actually has.
+//
+// Decal::Decal indexes heightmap[whichx + 1][whichy + 1], so the tile itself must
+// leave room for that row and column. A decal placed from outside the terrain -
+// a ragdoll that has been thrown, a body below the floor - produced an index of
+// any magnitude and read past the array; one placed exactly on the far edge
+// overran it by a single row. Clamping is what makes both cases safe, and it
+// costs nothing for the interior case that dominates.
+int heightmapTileFor(float coordinate)
+{
+    int tile = static_cast<int>(coordinate);
+    if (tile < 0) {
+        tile = 0;
+    }
+    if (tile > max_terrain_size - 1) {
+        tile = max_terrain_size - 1;
+    }
+    return tile;
+}
+}
+
 void Terrain::MakeDecal(decal_type decaltype, Vector3 where, float decalradius, float opacity, float rotation, int environment)
 {
 	if (opacity > 0 && decalradius > 0) {
 		int patchx[4];
 		int patchy[4];
 
-		patchx[0] = (where.x + decalradius) / scale;
-		patchx[1] = (where.x - decalradius) / scale;
-		patchx[2] = (where.x - decalradius) / scale;
-		patchx[3] = (where.x + decalradius) / scale;
+		patchx[0] = heightmapTileFor(where.x + decalradius);
+		patchx[1] = heightmapTileFor(where.x - decalradius);
+		patchx[2] = heightmapTileFor(where.x - decalradius);
+		patchx[3] = heightmapTileFor(where.x + decalradius);
 
-		patchy[0] = (where.z - decalradius) / scale;
-		patchy[1] = (where.z - decalradius) / scale;
-		patchy[2] = (where.z + decalradius) / scale;
-		patchy[3] = (where.z + decalradius) / scale;
+		patchy[0] = heightmapTileFor(where.z - decalradius);
+		patchy[1] = heightmapTileFor(where.z - decalradius);
+		patchy[2] = heightmapTileFor(where.z + decalradius);
+		patchy[3] = heightmapTileFor(where.z + decalradius);
 
 		if ((patchx[0] != patchx[1] || patchy[0] != patchy[1]) && (patchx[0] != patchx[2] || patchy[0] != patchy[2]) && (patchx[0] != patchx[3] || patchy[0] != patchy[3])) {
 			MakeDecalLock(decaltype, where, patchx[0], patchy[0], decalradius, opacity, rotation, environment);
