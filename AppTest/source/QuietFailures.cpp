@@ -19,6 +19,16 @@
 // it runs before main, before any test, and works with Catch2's own main. That
 // also means the ordering is guaranteed relative to the tests by construction
 // rather than by anything Catch2 promises.
+//
+// A note on what does NOT work here, because it was tried and measured: a stack
+// buffer overrun reaches this process as STATUS_STACK_BUFFER_OVERRUN (0xC0000409)
+// raised by __fastfail inside the /GS failure path. That exception bypasses the
+// vectored exception dispatcher entirely - registering a handler and printing
+// every code it sees confirms it is only ever called for the OutputDebugString
+// notifications (0x4001000A, 0x40010006), never for the fatal itself. So the
+// handler below is not what keeps that crash quiet, and it should not be edited
+// on the theory that it is. What covers it is SetErrorMode above, which is called
+// before main and covers the process.
 
 #ifdef _WIN32
 
@@ -29,6 +39,25 @@
 
 namespace
 {
+
+// Ends the process without a dialog for non-continuable fatal exceptions that
+// do reach the dispatcher.
+//
+// Everything else is left alone by returning EXCEPTION_CONTINUE_SEARCH - a
+// handler that terminated the process on any exception at all would break every
+// legitimate SEH path in the suite, including Catch2's own. Filtering on
+// EXCEPTION_NONCONTINUABLE is what keeps the reach narrow.
+//
+// Note that this does not cover the /GS stack buffer overrun the reproducers
+// currently die on; see the note at the top of this file. It is here for the
+// fatals that dispatch normally.
+LONG CALLBACK terminateOnUncontinuable(EXCEPTION_POINTERS* info)
+{
+    if (info->ExceptionRecord->ExceptionFlags & EXCEPTION_NONCONTINUABLE) {
+        TerminateProcess(GetCurrentProcess(), 1);
+    }
+    return EXCEPTION_CONTINUE_SEARCH;
+}
 
 struct QuietFailures
 {
@@ -48,6 +77,9 @@ struct QuietFailures
         _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_DEBUG);
         _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG);
         _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
+
+        // Last, so it only ever runs if the process made it this far.
+        AddVectoredExceptionHandler(1, terminateOnUncontinuable);
     }
 };
 

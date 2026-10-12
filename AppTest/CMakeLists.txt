@@ -59,10 +59,21 @@ catch_discover_tests(${PROJECT_NAME}
 
 project(AppTestRepro)
 
-file(GLOB_RECURSE REPRO_FILES CONFIGURE_DEPENDS
+# The suppression lives in source/ alongside the main suite, but this binary is
+# the one that actually crashes - so it needs it even more. A reproducer that
+# stops everything with a dialog is worse than one that exits.
+set(REPRO_FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/source/repro/SimulationTest.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/source/repro/AIRepeatTest.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/source/QuietFailures.cpp
+)
+
+file(GLOB_RECURSE EXTRA_REPRO_FILES CONFIGURE_DEPENDS
 	${CMAKE_CURRENT_SOURCE_DIR}/source/repro/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/source/repro/*.hpp
 )
+list(APPEND REPRO_FILES ${EXTRA_REPRO_FILES})
+list(REMOVE_DUPLICATES REPRO_FILES)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${REPRO_FILES})
 
