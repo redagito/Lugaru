@@ -2,6 +2,11 @@
 
 project(AppTest)
 
+# The tests under source/repro/ are deliberately not part of this binary. They
+# reproduce a live STATUS_STACK_BUFFER_OVERRUN, and a crash takes the whole test
+# binary with it - which would stop every other test in here from completing, not
+# just the reproducer. They live in their own binary, AppTestRepro, so this one
+# stays runnable while the bug is outstanding. Move them here once it is fixed.
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
 	${CMAKE_CURRENT_SOURCE_DIR}/source/*.c
 	${CMAKE_CURRENT_SOURCE_DIR}/source/*.h
@@ -12,6 +17,8 @@ file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
 	${CMAKE_CURRENT_SOURCE_DIR}/source/*.inc
 	${CMAKE_CURRENT_SOURCE_DIR}/source/*.rc
 )
+
+list(FILTER SOURCE_FILES EXCLUDE REGEX "source/repro/")
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES})
 
@@ -42,6 +49,42 @@ target_compile_options(${PROJECT_NAME} PRIVATE
   # -Wextra -Wpedantic
 )
 
+include(Catch)
+catch_discover_tests(${PROJECT_NAME}
+	WORKING_DIRECTORY ${LUGARU_TEST_WORKING_DIR}
+)
+
+# Tests that reproduce a live crash. These fail the process rather than an
+# assertion, so they get their own binary - see the note above.
+
+project(AppTestRepro)
+
+file(GLOB_RECURSE REPRO_FILES CONFIGURE_DEPENDS
+	${CMAKE_CURRENT_SOURCE_DIR}/source/repro/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/source/repro/*.hpp
+)
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${REPRO_FILES})
+
+add_executable(${PROJECT_NAME} ${REPRO_FILES})
+
+target_link_libraries(${PROJECT_NAME}
+	PRIVATE AppLib
+	PRIVATE Catch2::Catch2WithMain
+)
+
+target_include_directories(${PROJECT_NAME}
+	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/source/
+)
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+  PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX ${LUGARU_MSVC_WARNINGS}>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Werror>
+)
+
+# Discovered so a crash shows up as a real failing test in ctest rather than a
+# test that was never registered at all. The expectation is that these fail until
+# the underlying bug is fixed.
 include(Catch)
 catch_discover_tests(${PROJECT_NAME}
 	WORKING_DIRECTORY ${LUGARU_TEST_WORKING_DIR}
