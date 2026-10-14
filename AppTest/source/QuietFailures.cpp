@@ -80,6 +80,8 @@ struct QuietFailures
 
         // Last, so it only ever runs if the process made it this far.
         AddVectoredExceptionHandler(1, terminateOnUncontinuable);
+
+
     }
 };
 

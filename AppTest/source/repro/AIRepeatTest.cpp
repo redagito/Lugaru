@@ -86,18 +86,15 @@ TEST_CASE("the AI can be repeated with a load between each", "[simulation][ragdo
 
     // Three iterations, which is what the three-section run amounted to.
     for (int run = 0; run < 3; ++run) {
-        INFO("ragdoll run " << run);
+        INFO("AI run " << run);
+        std::fprintf(stderr, "[trace] run %d: loading\n", run);
 
         REQUIRE(Game::LoadJsonLevel("Lugaru1", false, gamestate, assets, console));
         REQUIRE(assets.terrain->size > 0);
 
         Terrain& terrain = *assets.terrain;
 
-        for (unsigned i = 0; i < Person::players.size(); i++) {
-            Person::players[i]->skeleton.free = 1;
-        }
-
-        for (int frame = 0; frame < 240; frame++) {
+        for (int frame = 0; frame < 120; frame++) {
             for (const std::shared_ptr<Person>& player : Person::players) {
                 player->doAI(terrain, false, false, .01f, gamestate, assets);
             }

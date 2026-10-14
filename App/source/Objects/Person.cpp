@@ -20,6 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Objects/Person.hpp"
 
+#include <cstdio>
 #include <cstdlib>
 
 #include "Game.hpp"
@@ -310,7 +311,7 @@ Person::Person(GameState& gamestate, GameAssets& assets)
 	setProportions(1, 1, 1, 1);
 }
 
-/* Read a person in tfile. Throws an error if itÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s not valid */
+/* Read a person in tfile. Throws an error if itÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢s not valid */
 Person::Person(FILE* tfile, int mapvers, unsigned i, GameState& gamestate, GameAssets& assets)
 	: Person(gamestate, assets)
 {
@@ -7142,14 +7143,23 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
  */
 int Person::SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate, GameAssets& assets)
 {
-	static float distance;
-	static float olddistance;
-	static int intersecting;
-	static int firstintersecting;
-	static Vector3 point;
-	static Vector3 oldp1;
-	static Vector3 start, end;
-	static float slopethreshold = -.4;
+	// This working state was static, which made it shared by every Person and
+	// every call. Two players colliding in the same frame overwrote each other's
+	// distance and firstintersecting mid-loop, and the RagDoll call at the
+	// landing branch below re-entered this function, destroying the outer call's
+	// state the same way. Neither is visible at a call site, and both change
+	// where a character ends up standing.
+	//
+	// Making it local costs nothing measurable - the function runs per character
+	// per frame, not per triangle - and removes the sharing outright.
+	float distance = 0;
+	float olddistance = 0;
+	int intersecting = 0;
+	int firstintersecting = 0;
+	Vector3 point;
+	Vector3 oldp1;
+	Vector3 start, end;
+	const float slopethreshold = -.4;
 
 	firstintersecting = -1;
 
