@@ -33,6 +33,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <cmath>
+#include <vector>
 
 #include "Console.hpp"
 #include "Game.hpp"
@@ -94,8 +95,16 @@ TEST_CASE("the AI can be repeated with a load between each", "[simulation][ragdo
 
         Terrain& terrain = *assets.terrain;
 
+        // A snapshot, not a range over Person::players. The engine mutates that
+        // vector (Game::ProcessDevInput erases from it, the level load clears it),
+        // and doAI is a thousand lines whose callees are not known here. Holding
+        // an iterator into a vector that may be erased or reallocated would make
+        // this reproducer crash for a reason that has nothing to do with the bug.
+        // Copying the shared_ptrs is immune either way.
+        const std::vector<std::shared_ptr<Person>> characters(Person::players);
+
         for (int frame = 0; frame < 120; frame++) {
-            for (const std::shared_ptr<Person>& player : Person::players) {
+            for (const std::shared_ptr<Person>& player : characters) {
                 player->doAI(terrain, false, false, .01f, gamestate, assets);
             }
         }
