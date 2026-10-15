@@ -52,8 +52,12 @@ struct ModelTexture
 class TexturedTriangle
 {
 public:
-    short vertex[3];
-    float gx[3], gy[3];
+    // A triangle has exactly three vertices, so these are std::array rather than
+    // a C array: the index is nearly always a literal 0, 1 or 2, but the values
+    // are indices into Model::vertex, which comes straight out of a model file.
+    std::array<short, 3> vertex;
+    std::array<float, 3> gx;
+    std::array<float, 3> gy;
     Vector3 facenormal;
 };
 
@@ -75,11 +79,15 @@ public:
 
     ModelType type;
 
-    int* owner;
-    Vector3* vertex;
-    Vector3* normals;
+    // Per-vertex data, sized by vertexNum at load. std::vector rather than raw
+    // malloc'd pointers so an index that runs past the end throws: these are
+    // indexed by vertex IDs read out of the model file, which is untrusted input,
+    // and by TexturedTriangle::vertex, which indexes into this same array.
+    std::vector<int> owner;
+    std::vector<Vector3> vertex;
+    std::vector<Vector3> normals;
     std::vector<TexturedTriangle> Triangles;
-    GLfloat* vArray;
+    std::vector<GLfloat> vArray;
 
     /*
     int owner[max_textured_triangle];

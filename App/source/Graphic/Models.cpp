@@ -44,7 +44,7 @@ int Model::LineCheck(Vector3* p1, Vector3* p2, Vector3* p, Vector3* move, float*
 	}
 
 	for (unsigned int j = 0; j < Triangles.size(); j++) {
-		intersecting = LineFacetHit(p1, p2, &vertex[Triangles[j].vertex[0]], &vertex[Triangles[j].vertex[1]], &vertex[Triangles[j].vertex[2]], &Triangles[j].facenormal, &point);
+		intersecting = LineFacetHit(p1, p2, &vertex[Triangles[j].vertex.at(0)], &vertex[Triangles[j].vertex.at(1)], &vertex[Triangles[j].vertex.at(2)], &Triangles[j].facenormal, &point);
 		distance = (point.x - p1->x) * (point.x - p1->x) + (point.y - p1->y) * (point.y - p1->y) + (point.z - p1->z) * (point.z - p1->z);
 		if ((distance < olddistance || firstintersecting == -1) && intersecting) {
 			olddistance = distance;
@@ -82,7 +82,7 @@ int Model::LineCheckPossible(Vector3* p1, Vector3* p2, Vector3* p, Vector3* move
 	for (unsigned int j = 0; j < possible.size(); j++) {
 		if (possible[j] >= Triangles.size()) continue;
 
-		intersecting = LineFacetHit(p1, p2, &vertex[Triangles[possible[j]].vertex[0]], &vertex[Triangles[possible[j]].vertex[1]], &vertex[Triangles[possible[j]].vertex[2]], &Triangles[possible[j]].facenormal, &point);
+		intersecting = LineFacetHit(p1, p2, &vertex[Triangles[possible[j]].vertex.at(0)], &vertex[Triangles[possible[j]].vertex.at(1)], &vertex[Triangles[possible[j]].vertex.at(2)], &Triangles[possible[j]].facenormal, &point);
 		distance = (point.x - p1->x) * (point.x - p1->x) + (point.y - p1->y) * (point.y - p1->y) + (point.z - p1->z) * (point.z - p1->z);
 		if ((distance < olddistance || firstintersecting == -1) && intersecting) {
 			olddistance = distance;
@@ -121,7 +121,7 @@ int Model::LineCheckSlidePossible(Vector3* p1, Vector3* p2, Vector3* move, float
 
 	for (unsigned int j = 0; j < possible.size(); j++) {
 		if (possible[j] < Triangles.size()) {
-			intersecting = LineFacetHit(p1, p2, &vertex[Triangles[possible[j]].vertex[0]], &vertex[Triangles[possible[j]].vertex[1]], &vertex[Triangles[possible[j]].vertex[2]], &Triangles[possible[j]].facenormal, &point);
+			intersecting = LineFacetHit(p1, p2, &vertex[Triangles[possible[j]].vertex.at(0)], &vertex[Triangles[possible[j]].vertex.at(1)], &vertex[Triangles[possible[j]].vertex.at(2)], &Triangles[possible[j]].facenormal, &point);
 			distance = (point.x - p1->x) * (point.x - p1->x) + (point.y - p1->y) * (point.y - p1->y) + (point.z - p1->z) * (point.z - p1->z);
 			if ((distance < olddistance || firstintersecting == -1) && intersecting) {
 				olddistance = distance;
@@ -131,7 +131,7 @@ int Model::LineCheckSlidePossible(Vector3* p1, Vector3* p2, Vector3* move, float
 	}
 
 	if (firstintersecting > 0) {
-		distance = abs((Triangles[firstintersecting].facenormal.x * p2->x) + (Triangles[firstintersecting].facenormal.y * p2->y) + (Triangles[firstintersecting].facenormal.z * p2->z) - ((Triangles[firstintersecting].facenormal.x * vertex[Triangles[firstintersecting].vertex[0]].x) + (Triangles[firstintersecting].facenormal.y * vertex[Triangles[firstintersecting].vertex[0]].y) + (Triangles[firstintersecting].facenormal.z * vertex[Triangles[firstintersecting].vertex[0]].z)));
+		distance = abs((Triangles[firstintersecting].facenormal.x * p2->x) + (Triangles[firstintersecting].facenormal.y * p2->y) + (Triangles[firstintersecting].facenormal.z * p2->z) - ((Triangles[firstintersecting].facenormal.x * vertex[Triangles[firstintersecting].vertex.at(0)].x) + (Triangles[firstintersecting].facenormal.y * vertex[Triangles[firstintersecting].vertex.at(0)].y) + (Triangles[firstintersecting].facenormal.z * vertex[Triangles[firstintersecting].vertex.at(0)].z)));
 		*p2 -= Triangles[firstintersecting].facenormal * distance;
 	}
 
@@ -166,20 +166,20 @@ int Model::SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, flo
 	for (i = 0; i < 4; i++) {
 		for (unsigned int j = 0; j < Triangles.size(); j++) {
 			intersecting = 0;
-			distance = abs((Triangles[j].facenormal.x * p1->x) + (Triangles[j].facenormal.y * p1->y) + (Triangles[j].facenormal.z * p1->z) - ((Triangles[j].facenormal.x * vertex[Triangles[j].vertex[0]].x) + (Triangles[j].facenormal.y * vertex[Triangles[j].vertex[0]].y) + (Triangles[j].facenormal.z * vertex[Triangles[j].vertex[0]].z)));
+			distance = abs((Triangles[j].facenormal.x * p1->x) + (Triangles[j].facenormal.y * p1->y) + (Triangles[j].facenormal.z * p1->z) - ((Triangles[j].facenormal.x * vertex[Triangles[j].vertex.at(0)].x) + (Triangles[j].facenormal.y * vertex[Triangles[j].vertex.at(0)].y) + (Triangles[j].facenormal.z * vertex[Triangles[j].vertex.at(0)].z)));
 			if (distance < radius) {
 				point = *p1 - Triangles[j].facenormal * distance;
-				if (PointInTriangle(&point, Triangles[j].facenormal, &vertex[Triangles[j].vertex[0]], &vertex[Triangles[j].vertex[1]], &vertex[Triangles[j].vertex[2]])) {
+				if (PointInTriangle(&point, Triangles[j].facenormal, &vertex[Triangles[j].vertex.at(0)], &vertex[Triangles[j].vertex.at(1)], &vertex[Triangles[j].vertex.at(2)])) {
 					intersecting = 1;
 				}
 				if (!intersecting) {
-					intersecting = sphere_line_intersection(&vertex[Triangles[j].vertex[0]], &vertex[Triangles[j].vertex[1]], p1, &radius);
+					intersecting = sphere_line_intersection(&vertex[Triangles[j].vertex.at(0)], &vertex[Triangles[j].vertex.at(1)], p1, &radius);
 				}
 				if (!intersecting) {
-					intersecting = sphere_line_intersection(&vertex[Triangles[j].vertex[1]], &vertex[Triangles[j].vertex[2]], p1, &radius);
+					intersecting = sphere_line_intersection(&vertex[Triangles[j].vertex.at(1)], &vertex[Triangles[j].vertex.at(2)], p1, &radius);
 				}
 				if (!intersecting) {
-					intersecting = sphere_line_intersection(&vertex[Triangles[j].vertex[0]], &vertex[Triangles[j].vertex[2]], p1, &radius);
+					intersecting = sphere_line_intersection(&vertex[Triangles[j].vertex.at(0)], &vertex[Triangles[j].vertex.at(2)], p1, &radius);
 				}
 				if (intersecting) {
 					*p1 += Triangles[j].facenormal * (distance - radius);
@@ -229,20 +229,20 @@ int Model::SphereCheckPossible(Vector3* p1, float radius, Vector3* move, float* 
 
 	for (unsigned int j = 0; j < Triangles.size(); j++) {
 		intersecting = 0;
-		distance = abs((Triangles[j].facenormal.x * p1->x) + (Triangles[j].facenormal.y * p1->y) + (Triangles[j].facenormal.z * p1->z) - ((Triangles[j].facenormal.x * vertex[Triangles[j].vertex[0]].x) + (Triangles[j].facenormal.y * vertex[Triangles[j].vertex[0]].y) + (Triangles[j].facenormal.z * vertex[Triangles[j].vertex[0]].z)));
+		distance = abs((Triangles[j].facenormal.x * p1->x) + (Triangles[j].facenormal.y * p1->y) + (Triangles[j].facenormal.z * p1->z) - ((Triangles[j].facenormal.x * vertex[Triangles[j].vertex.at(0)].x) + (Triangles[j].facenormal.y * vertex[Triangles[j].vertex.at(0)].y) + (Triangles[j].facenormal.z * vertex[Triangles[j].vertex.at(0)].z)));
 		if (distance < radius) {
 			point = *p1 - Triangles[j].facenormal * distance;
-			if (PointInTriangle(&point, Triangles[j].facenormal, &vertex[Triangles[j].vertex[0]], &vertex[Triangles[j].vertex[1]], &vertex[Triangles[j].vertex[2]])) {
+			if (PointInTriangle(&point, Triangles[j].facenormal, &vertex[Triangles[j].vertex.at(0)], &vertex[Triangles[j].vertex.at(1)], &vertex[Triangles[j].vertex.at(2)])) {
 				intersecting = 1;
 			}
 			if (!intersecting) {
-				intersecting = sphere_line_intersection(&vertex[Triangles[j].vertex[0]], &vertex[Triangles[j].vertex[1]], p1, &radius);
+				intersecting = sphere_line_intersection(&vertex[Triangles[j].vertex.at(0)], &vertex[Triangles[j].vertex.at(1)], p1, &radius);
 			}
 			if (!intersecting) {
-				intersecting = sphere_line_intersection(&vertex[Triangles[j].vertex[1]], &vertex[Triangles[j].vertex[2]], p1, &radius);
+				intersecting = sphere_line_intersection(&vertex[Triangles[j].vertex.at(1)], &vertex[Triangles[j].vertex.at(2)], p1, &radius);
 			}
 			if (!intersecting) {
-				intersecting = sphere_line_intersection(&vertex[Triangles[j].vertex[0]], &vertex[Triangles[j].vertex[2]], p1, &radius);
+				intersecting = sphere_line_intersection(&vertex[Triangles[j].vertex.at(0)], &vertex[Triangles[j].vertex.at(2)], p1, &radius);
 			}
 			if (intersecting) {
 				possible.push_back(j);
@@ -275,27 +275,27 @@ void Model::UpdateVertexArray()
 			vArray[j + 2] = Triangles[i].facenormal.x * -1;
 			vArray[j + 3] = Triangles[i].facenormal.y * -1;
 			vArray[j + 4] = Triangles[i].facenormal.z * -1;
-			vArray[j + 5] = vertex[Triangles[i].vertex[0]].x;
-			vArray[j + 6] = vertex[Triangles[i].vertex[0]].y;
-			vArray[j + 7] = vertex[Triangles[i].vertex[0]].z;
+			vArray[j + 5] = vertex[Triangles[i].vertex.at(0)].x;
+			vArray[j + 6] = vertex[Triangles[i].vertex.at(0)].y;
+			vArray[j + 7] = vertex[Triangles[i].vertex.at(0)].z;
 
 			vArray[j + 8] = Triangles[i].gx[1];
 			vArray[j + 9] = Triangles[i].gy[1];
 			vArray[j + 10] = Triangles[i].facenormal.x * -1;
 			vArray[j + 11] = Triangles[i].facenormal.y * -1;
 			vArray[j + 12] = Triangles[i].facenormal.z * -1;
-			vArray[j + 13] = vertex[Triangles[i].vertex[1]].x;
-			vArray[j + 14] = vertex[Triangles[i].vertex[1]].y;
-			vArray[j + 15] = vertex[Triangles[i].vertex[1]].z;
+			vArray[j + 13] = vertex[Triangles[i].vertex.at(1)].x;
+			vArray[j + 14] = vertex[Triangles[i].vertex.at(1)].y;
+			vArray[j + 15] = vertex[Triangles[i].vertex.at(1)].z;
 
 			vArray[j + 16] = Triangles[i].gx[2];
 			vArray[j + 17] = Triangles[i].gy[2];
 			vArray[j + 18] = Triangles[i].facenormal.x * -1;
 			vArray[j + 19] = Triangles[i].facenormal.y * -1;
 			vArray[j + 20] = Triangles[i].facenormal.z * -1;
-			vArray[j + 21] = vertex[Triangles[i].vertex[2]].x;
-			vArray[j + 22] = vertex[Triangles[i].vertex[2]].y;
-			vArray[j + 23] = vertex[Triangles[i].vertex[2]].z;
+			vArray[j + 21] = vertex[Triangles[i].vertex.at(2)].x;
+			vArray[j + 22] = vertex[Triangles[i].vertex.at(2)].y;
+			vArray[j + 23] = vertex[Triangles[i].vertex.at(2)].z;
 		}
 	}
 	else {
@@ -303,30 +303,30 @@ void Model::UpdateVertexArray()
 			unsigned int j = i * 24;
 			vArray[j + 0] = Triangles[i].gx[0];
 			vArray[j + 1] = Triangles[i].gy[0];
-			vArray[j + 2] = normals[Triangles[i].vertex[0]].x;
-			vArray[j + 3] = normals[Triangles[i].vertex[0]].y;
-			vArray[j + 4] = normals[Triangles[i].vertex[0]].z;
-			vArray[j + 5] = vertex[Triangles[i].vertex[0]].x;
-			vArray[j + 6] = vertex[Triangles[i].vertex[0]].y;
-			vArray[j + 7] = vertex[Triangles[i].vertex[0]].z;
+			vArray[j + 2] = normals[Triangles[i].vertex.at(0)].x;
+			vArray[j + 3] = normals[Triangles[i].vertex.at(0)].y;
+			vArray[j + 4] = normals[Triangles[i].vertex.at(0)].z;
+			vArray[j + 5] = vertex[Triangles[i].vertex.at(0)].x;
+			vArray[j + 6] = vertex[Triangles[i].vertex.at(0)].y;
+			vArray[j + 7] = vertex[Triangles[i].vertex.at(0)].z;
 
 			vArray[j + 8] = Triangles[i].gx[1];
 			vArray[j + 9] = Triangles[i].gy[1];
-			vArray[j + 10] = normals[Triangles[i].vertex[1]].x;
-			vArray[j + 11] = normals[Triangles[i].vertex[1]].y;
-			vArray[j + 12] = normals[Triangles[i].vertex[1]].z;
-			vArray[j + 13] = vertex[Triangles[i].vertex[1]].x;
-			vArray[j + 14] = vertex[Triangles[i].vertex[1]].y;
-			vArray[j + 15] = vertex[Triangles[i].vertex[1]].z;
+			vArray[j + 10] = normals[Triangles[i].vertex.at(1)].x;
+			vArray[j + 11] = normals[Triangles[i].vertex.at(1)].y;
+			vArray[j + 12] = normals[Triangles[i].vertex.at(1)].z;
+			vArray[j + 13] = vertex[Triangles[i].vertex.at(1)].x;
+			vArray[j + 14] = vertex[Triangles[i].vertex.at(1)].y;
+			vArray[j + 15] = vertex[Triangles[i].vertex.at(1)].z;
 
 			vArray[j + 16] = Triangles[i].gx[2];
 			vArray[j + 17] = Triangles[i].gy[2];
-			vArray[j + 18] = normals[Triangles[i].vertex[2]].x;
-			vArray[j + 19] = normals[Triangles[i].vertex[2]].y;
-			vArray[j + 20] = normals[Triangles[i].vertex[2]].z;
-			vArray[j + 21] = vertex[Triangles[i].vertex[2]].x;
-			vArray[j + 22] = vertex[Triangles[i].vertex[2]].y;
-			vArray[j + 23] = vertex[Triangles[i].vertex[2]].z;
+			vArray[j + 18] = normals[Triangles[i].vertex.at(2)].x;
+			vArray[j + 19] = normals[Triangles[i].vertex.at(2)].y;
+			vArray[j + 20] = normals[Triangles[i].vertex.at(2)].z;
+			vArray[j + 21] = vertex[Triangles[i].vertex.at(2)].x;
+			vArray[j + 22] = vertex[Triangles[i].vertex.at(2)].y;
+			vArray[j + 23] = vertex[Triangles[i].vertex.at(2)].z;
 		}
 	}
 }
@@ -343,48 +343,48 @@ void Model::UpdateVertexArrayNoTex()
 			vArray[j + 2] = Triangles[i].facenormal.x * -1;
 			vArray[j + 3] = Triangles[i].facenormal.y * -1;
 			vArray[j + 4] = Triangles[i].facenormal.z * -1;
-			vArray[j + 5] = vertex[Triangles[i].vertex[0]].x;
-			vArray[j + 6] = vertex[Triangles[i].vertex[0]].y;
-			vArray[j + 7] = vertex[Triangles[i].vertex[0]].z;
+			vArray[j + 5] = vertex[Triangles[i].vertex.at(0)].x;
+			vArray[j + 6] = vertex[Triangles[i].vertex.at(0)].y;
+			vArray[j + 7] = vertex[Triangles[i].vertex.at(0)].z;
 
 			vArray[j + 10] = Triangles[i].facenormal.x * -1;
 			vArray[j + 11] = Triangles[i].facenormal.y * -1;
 			vArray[j + 12] = Triangles[i].facenormal.z * -1;
-			vArray[j + 13] = vertex[Triangles[i].vertex[1]].x;
-			vArray[j + 14] = vertex[Triangles[i].vertex[1]].y;
-			vArray[j + 15] = vertex[Triangles[i].vertex[1]].z;
+			vArray[j + 13] = vertex[Triangles[i].vertex.at(1)].x;
+			vArray[j + 14] = vertex[Triangles[i].vertex.at(1)].y;
+			vArray[j + 15] = vertex[Triangles[i].vertex.at(1)].z;
 
 			vArray[j + 18] = Triangles[i].facenormal.x * -1;
 			vArray[j + 19] = Triangles[i].facenormal.y * -1;
 			vArray[j + 20] = Triangles[i].facenormal.z * -1;
-			vArray[j + 21] = vertex[Triangles[i].vertex[2]].x;
-			vArray[j + 22] = vertex[Triangles[i].vertex[2]].y;
-			vArray[j + 23] = vertex[Triangles[i].vertex[2]].z;
+			vArray[j + 21] = vertex[Triangles[i].vertex.at(2)].x;
+			vArray[j + 22] = vertex[Triangles[i].vertex.at(2)].y;
+			vArray[j + 23] = vertex[Triangles[i].vertex.at(2)].z;
 		}
 	}
 	else {
 		for (unsigned int i = 0; i < Triangles.size(); i++) {
 			unsigned int j = i * 24;
-			vArray[j + 2] = normals[Triangles[i].vertex[0]].x;
-			vArray[j + 3] = normals[Triangles[i].vertex[0]].y;
-			vArray[j + 4] = normals[Triangles[i].vertex[0]].z;
-			vArray[j + 5] = vertex[Triangles[i].vertex[0]].x;
-			vArray[j + 6] = vertex[Triangles[i].vertex[0]].y;
-			vArray[j + 7] = vertex[Triangles[i].vertex[0]].z;
+			vArray[j + 2] = normals[Triangles[i].vertex.at(0)].x;
+			vArray[j + 3] = normals[Triangles[i].vertex.at(0)].y;
+			vArray[j + 4] = normals[Triangles[i].vertex.at(0)].z;
+			vArray[j + 5] = vertex[Triangles[i].vertex.at(0)].x;
+			vArray[j + 6] = vertex[Triangles[i].vertex.at(0)].y;
+			vArray[j + 7] = vertex[Triangles[i].vertex.at(0)].z;
 
-			vArray[j + 10] = normals[Triangles[i].vertex[1]].x;
-			vArray[j + 11] = normals[Triangles[i].vertex[1]].y;
-			vArray[j + 12] = normals[Triangles[i].vertex[1]].z;
-			vArray[j + 13] = vertex[Triangles[i].vertex[1]].x;
-			vArray[j + 14] = vertex[Triangles[i].vertex[1]].y;
-			vArray[j + 15] = vertex[Triangles[i].vertex[1]].z;
+			vArray[j + 10] = normals[Triangles[i].vertex.at(1)].x;
+			vArray[j + 11] = normals[Triangles[i].vertex.at(1)].y;
+			vArray[j + 12] = normals[Triangles[i].vertex.at(1)].z;
+			vArray[j + 13] = vertex[Triangles[i].vertex.at(1)].x;
+			vArray[j + 14] = vertex[Triangles[i].vertex.at(1)].y;
+			vArray[j + 15] = vertex[Triangles[i].vertex.at(1)].z;
 
-			vArray[j + 18] = normals[Triangles[i].vertex[2]].x;
-			vArray[j + 19] = normals[Triangles[i].vertex[2]].y;
-			vArray[j + 20] = normals[Triangles[i].vertex[2]].z;
-			vArray[j + 21] = vertex[Triangles[i].vertex[2]].x;
-			vArray[j + 22] = vertex[Triangles[i].vertex[2]].y;
-			vArray[j + 23] = vertex[Triangles[i].vertex[2]].z;
+			vArray[j + 18] = normals[Triangles[i].vertex.at(2)].x;
+			vArray[j + 19] = normals[Triangles[i].vertex.at(2)].y;
+			vArray[j + 20] = normals[Triangles[i].vertex.at(2)].z;
+			vArray[j + 21] = vertex[Triangles[i].vertex.at(2)].x;
+			vArray[j + 22] = vertex[Triangles[i].vertex.at(2)].y;
+			vArray[j + 23] = vertex[Triangles[i].vertex.at(2)].z;
 		}
 	}
 }
@@ -397,17 +397,17 @@ void Model::UpdateVertexArrayNoTexNoNorm()
 
 	for (unsigned int i = 0; i < Triangles.size(); i++) {
 		unsigned int j = i * 24;
-		vArray[j + 5] = vertex[Triangles[i].vertex[0]].x;
-		vArray[j + 6] = vertex[Triangles[i].vertex[0]].y;
-		vArray[j + 7] = vertex[Triangles[i].vertex[0]].z;
+		vArray[j + 5] = vertex[Triangles[i].vertex.at(0)].x;
+		vArray[j + 6] = vertex[Triangles[i].vertex.at(0)].y;
+		vArray[j + 7] = vertex[Triangles[i].vertex.at(0)].z;
 
-		vArray[j + 13] = vertex[Triangles[i].vertex[1]].x;
-		vArray[j + 14] = vertex[Triangles[i].vertex[1]].y;
-		vArray[j + 15] = vertex[Triangles[i].vertex[1]].z;
+		vArray[j + 13] = vertex[Triangles[i].vertex.at(1)].x;
+		vArray[j + 14] = vertex[Triangles[i].vertex.at(1)].y;
+		vArray[j + 15] = vertex[Triangles[i].vertex.at(1)].z;
 
-		vArray[j + 21] = vertex[Triangles[i].vertex[2]].x;
-		vArray[j + 22] = vertex[Triangles[i].vertex[2]].y;
-		vArray[j + 23] = vertex[Triangles[i].vertex[2]].z;
+		vArray[j + 21] = vertex[Triangles[i].vertex.at(2)].x;
+		vArray[j + 22] = vertex[Triangles[i].vertex.at(2)].y;
+		vArray[j + 23] = vertex[Triangles[i].vertex.at(2)].z;
 	}
 }
 
@@ -432,10 +432,10 @@ bool Model::loadnotex(const std::string& filename)
 
 	possible.clear();
 
-	owner = (int*)malloc(sizeof(int) * vertexNum);
-	vertex = (Vector3*)malloc(sizeof(Vector3) * vertexNum);
+    owner.resize(vertexNum);
+    vertex.resize(vertexNum);
 	Triangles.resize(triangleNum);
-	vArray = (GLfloat*)malloc(sizeof(GLfloat) * triangleNum * 24);
+    vArray.resize(triangleNum * 24);
 
 	for (i = 0; i < vertexNum; i++) {
 		funpackf(tfile, "Bf Bf Bf", &vertex[i].x, &vertex[i].y, &vertex[i].z);
@@ -444,9 +444,9 @@ bool Model::loadnotex(const std::string& filename)
 	for (i = 0; i < triangleNum; i++) {
 		short triindices[6];
 		funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &triindices[0], &triindices[1], &triindices[2], &triindices[3], &triindices[4], &triindices[5]);
-		Triangles[i].vertex[0] = triindices[0];
-		Triangles[i].vertex[1] = triindices[2];
-		Triangles[i].vertex[2] = triindices[4];
+		Triangles[i].vertex.at(0) = triindices[0];
+		Triangles[i].vertex.at(1) = triindices[2];
+		Triangles[i].vertex.at(2) = triindices[4];
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
 	}
@@ -497,11 +497,11 @@ bool Model::load(const std::string& filename, ProgressCallback callback)
 
 	possible.clear();
 
-	owner = (int*)malloc(sizeof(int) * vertexNum);
-	vertex = (Vector3*)malloc(sizeof(Vector3) * vertexNum);
-	normals = (Vector3*)malloc(sizeof(Vector3) * vertexNum);
+    owner.resize(vertexNum);
+    vertex.resize(vertexNum);
+    normals.resize(vertexNum);
 	Triangles.resize(triangleNum);
-	vArray = (GLfloat*)malloc(sizeof(GLfloat) * triangleNum * 24);
+    vArray.resize(triangleNum * 24);
 
 	for (i = 0; i < vertexNum; i++) {
 		funpackf(tfile, "Bf Bf Bf", &vertex[i].x, &vertex[i].y, &vertex[i].z);
@@ -510,9 +510,9 @@ bool Model::load(const std::string& filename, ProgressCallback callback)
 	for (i = 0; i < triangleNum; i++) {
 		short triindices[6];
 		funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &triindices[0], &triindices[1], &triindices[2], &triindices[3], &triindices[4], &triindices[5]);
-		Triangles[i].vertex[0] = triindices[0];
-		Triangles[i].vertex[1] = triindices[2];
-		Triangles[i].vertex[2] = triindices[4];
+		Triangles[i].vertex.at(0) = triindices[0];
+		Triangles[i].vertex.at(1) = triindices[2];
+		Triangles[i].vertex.at(2) = triindices[4];
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
 	}
@@ -564,11 +564,11 @@ bool Model::loaddecal(const std::string& filename)
 
 	possible.clear();
 
-	owner = (int*)malloc(sizeof(int) * vertexNum);
-	vertex = (Vector3*)malloc(sizeof(Vector3) * vertexNum);
-	normals = (Vector3*)malloc(sizeof(Vector3) * vertexNum);
+    owner.resize(vertexNum);
+    vertex.resize(vertexNum);
+    normals.resize(vertexNum);
 	Triangles.resize(triangleNum);
-	vArray = (GLfloat*)malloc(sizeof(GLfloat) * triangleNum * 24);
+    vArray.resize(triangleNum * 24);
 
 	for (i = 0; i < vertexNum; i++) {
 		funpackf(tfile, "Bf Bf Bf", &vertex[i].x, &vertex[i].y, &vertex[i].z);
@@ -577,9 +577,9 @@ bool Model::loaddecal(const std::string& filename)
 	for (i = 0; i < triangleNum; i++) {
 		short triindices[6];
 		funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &triindices[0], &triindices[1], &triindices[2], &triindices[3], &triindices[4], &triindices[5]);
-		Triangles[i].vertex[0] = triindices[0];
-		Triangles[i].vertex[1] = triindices[2];
-		Triangles[i].vertex[2] = triindices[4];
+		Triangles[i].vertex.at(0) = triindices[0];
+		Triangles[i].vertex.at(1) = triindices[2];
+		Triangles[i].vertex.at(2) = triindices[4];
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
 	}
@@ -629,10 +629,10 @@ bool Model::loadraw(const std::string& filename)
 
 	possible.clear();
 
-	owner = (int*)malloc(sizeof(int) * vertexNum);
-	vertex = (Vector3*)malloc(sizeof(Vector3) * vertexNum);
+    owner.resize(vertexNum);
+    vertex.resize(vertexNum);
 	Triangles.resize(triangleNum);
-	vArray = (GLfloat*)malloc(sizeof(GLfloat) * triangleNum * 24);
+    vArray.resize(triangleNum * 24);
 
 	for (i = 0; i < vertexNum; i++) {
 		funpackf(tfile, "Bf Bf Bf", &vertex[i].x, &vertex[i].y, &vertex[i].z);
@@ -641,9 +641,9 @@ bool Model::loadraw(const std::string& filename)
 	for (i = 0; i < triangleNum; i++) {
 		short triindices[6];
 		funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &triindices[0], &triindices[1], &triindices[2], &triindices[3], &triindices[4], &triindices[5]);
-		Triangles[i].vertex[0] = triindices[0];
-		Triangles[i].vertex[1] = triindices[2];
-		Triangles[i].vertex[2] = triindices[4];
+		Triangles[i].vertex.at(0) = triindices[0];
+		Triangles[i].vertex.at(1) = triindices[2];
+		Triangles[i].vertex.at(2) = triindices[4];
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
 		funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
 	}
@@ -660,12 +660,12 @@ bool Model::loadraw(const std::string& filename)
 void Model::UniformTexCoords()
 {
 	for (unsigned int i = 0; i < Triangles.size(); i++) {
-		Triangles[i].gy[0] = vertex[Triangles[i].vertex[0]].y;
-		Triangles[i].gy[1] = vertex[Triangles[i].vertex[1]].y;
-		Triangles[i].gy[2] = vertex[Triangles[i].vertex[2]].y;
-		Triangles[i].gx[0] = vertex[Triangles[i].vertex[0]].x;
-		Triangles[i].gx[1] = vertex[Triangles[i].vertex[1]].x;
-		Triangles[i].gx[2] = vertex[Triangles[i].vertex[2]].x;
+		Triangles[i].gy[0] = vertex[Triangles[i].vertex.at(0)].y;
+		Triangles[i].gy[1] = vertex[Triangles[i].vertex.at(1)].y;
+		Triangles[i].gy[2] = vertex[Triangles[i].vertex.at(2)].y;
+		Triangles[i].gx[0] = vertex[Triangles[i].vertex.at(0)].x;
+		Triangles[i].gx[1] = vertex[Triangles[i].vertex.at(1)].x;
+		Triangles[i].gx[2] = vertex[Triangles[i].vertex.at(2)].x;
 	}
 	UpdateVertexArray();
 }
@@ -796,19 +796,19 @@ void Model::CalculateNormals(bool facenormalise, ProgressCallback callback)
 	}
 
 	for (unsigned int i = 0; i < Triangles.size(); i++) {
-		CrossProduct(vertex[Triangles[i].vertex[1]] - vertex[Triangles[i].vertex[0]], vertex[Triangles[i].vertex[2]] - vertex[Triangles[i].vertex[0]], &Triangles[i].facenormal);
+		CrossProduct(vertex[Triangles[i].vertex.at(1)] - vertex[Triangles[i].vertex.at(0)], vertex[Triangles[i].vertex.at(2)] - vertex[Triangles[i].vertex.at(0)], &Triangles[i].facenormal);
 
-		normals[Triangles[i].vertex[0]].x += Triangles[i].facenormal.x;
-		normals[Triangles[i].vertex[0]].y += Triangles[i].facenormal.y;
-		normals[Triangles[i].vertex[0]].z += Triangles[i].facenormal.z;
+		normals[Triangles[i].vertex.at(0)].x += Triangles[i].facenormal.x;
+		normals[Triangles[i].vertex.at(0)].y += Triangles[i].facenormal.y;
+		normals[Triangles[i].vertex.at(0)].z += Triangles[i].facenormal.z;
 
-		normals[Triangles[i].vertex[1]].x += Triangles[i].facenormal.x;
-		normals[Triangles[i].vertex[1]].y += Triangles[i].facenormal.y;
-		normals[Triangles[i].vertex[1]].z += Triangles[i].facenormal.z;
+		normals[Triangles[i].vertex.at(1)].x += Triangles[i].facenormal.x;
+		normals[Triangles[i].vertex.at(1)].y += Triangles[i].facenormal.y;
+		normals[Triangles[i].vertex.at(1)].z += Triangles[i].facenormal.z;
 
-		normals[Triangles[i].vertex[2]].x += Triangles[i].facenormal.x;
-		normals[Triangles[i].vertex[2]].y += Triangles[i].facenormal.y;
-		normals[Triangles[i].vertex[2]].z += Triangles[i].facenormal.z;
+		normals[Triangles[i].vertex.at(2)].x += Triangles[i].facenormal.x;
+		normals[Triangles[i].vertex.at(2)].y += Triangles[i].facenormal.y;
+		normals[Triangles[i].vertex.at(2)].z += Triangles[i].facenormal.z;
 		if (facenormalise) {
 			Normalise(&Triangles[i].facenormal);
 		}
@@ -827,39 +827,39 @@ void Model::drawimmediate()
 	for (unsigned int i = 0; i < Triangles.size(); i++) {
 		glTexCoord2f(Triangles[i].gx[0], Triangles[i].gy[0]);
 		if (color) {
-			glColor3f(normals[Triangles[i].vertex[0]].x, normals[Triangles[i].vertex[0]].y, normals[Triangles[i].vertex[0]].z);
+			glColor3f(normals[Triangles[i].vertex.at(0)].x, normals[Triangles[i].vertex.at(0)].y, normals[Triangles[i].vertex.at(0)].z);
 		}
 		else if (flat) {
 			glNormal3f(Triangles[i].facenormal.x, Triangles[i].facenormal.y, Triangles[i].facenormal.y);
 		}
 		else {
-			glNormal3f(normals[Triangles[i].vertex[0]].x, normals[Triangles[i].vertex[0]].y, normals[Triangles[i].vertex[0]].z);
+			glNormal3f(normals[Triangles[i].vertex.at(0)].x, normals[Triangles[i].vertex.at(0)].y, normals[Triangles[i].vertex.at(0)].z);
 		}
-		glVertex3f(vertex[Triangles[i].vertex[0]].x, vertex[Triangles[i].vertex[0]].y, vertex[Triangles[i].vertex[0]].z);
+		glVertex3f(vertex[Triangles[i].vertex.at(0)].x, vertex[Triangles[i].vertex.at(0)].y, vertex[Triangles[i].vertex.at(0)].z);
 
 		glTexCoord2f(Triangles[i].gx[1], Triangles[i].gy[1]);
 		if (color) {
-			glColor3f(normals[Triangles[i].vertex[1]].x, normals[Triangles[i].vertex[1]].y, normals[Triangles[i].vertex[1]].z);
+			glColor3f(normals[Triangles[i].vertex.at(1)].x, normals[Triangles[i].vertex.at(1)].y, normals[Triangles[i].vertex.at(1)].z);
 		}
 		else if (flat) {
 			glNormal3f(Triangles[i].facenormal.x, Triangles[i].facenormal.y, Triangles[i].facenormal.y);
 		}
 		else {
-			glNormal3f(normals[Triangles[i].vertex[1]].x, normals[Triangles[i].vertex[1]].y, normals[Triangles[i].vertex[1]].z);
+			glNormal3f(normals[Triangles[i].vertex.at(1)].x, normals[Triangles[i].vertex.at(1)].y, normals[Triangles[i].vertex.at(1)].z);
 		}
-		glVertex3f(vertex[Triangles[i].vertex[1]].x, vertex[Triangles[i].vertex[1]].y, vertex[Triangles[i].vertex[1]].z);
+		glVertex3f(vertex[Triangles[i].vertex.at(1)].x, vertex[Triangles[i].vertex.at(1)].y, vertex[Triangles[i].vertex.at(1)].z);
 
 		glTexCoord2f(Triangles[i].gx[2], Triangles[i].gy[2]);
 		if (color) {
-			glColor3f(normals[Triangles[i].vertex[2]].x, normals[Triangles[i].vertex[2]].y, normals[Triangles[i].vertex[2]].z);
+			glColor3f(normals[Triangles[i].vertex.at(2)].x, normals[Triangles[i].vertex.at(2)].y, normals[Triangles[i].vertex.at(2)].z);
 		}
 		else if (flat) {
 			glNormal3f(Triangles[i].facenormal.x, Triangles[i].facenormal.y, Triangles[i].facenormal.y);
 		}
 		else {
-			glNormal3f(normals[Triangles[i].vertex[2]].x, normals[Triangles[i].vertex[2]].y, normals[Triangles[i].vertex[2]].z);
+			glNormal3f(normals[Triangles[i].vertex.at(2)].x, normals[Triangles[i].vertex.at(2)].y, normals[Triangles[i].vertex.at(2)].z);
 		}
-		glVertex3f(vertex[Triangles[i].vertex[2]].x, vertex[Triangles[i].vertex[2]].y, vertex[Triangles[i].vertex[2]].z);
+		glVertex3f(vertex[Triangles[i].vertex.at(2)].x, vertex[Triangles[i].vertex.at(2)].y, vertex[Triangles[i].vertex.at(2)].z);
 	}
 	glEnd();
 }
@@ -1004,7 +1004,7 @@ void Model::drawdecals(Texture shadowtexture, Texture bloodtexture, Texture bloo
 		glBegin(GL_TRIANGLES);
 		for (int j = 0; j < 3; j++) {
 			glTexCoord2f(decals[i].texcoords[j][0], decals[i].texcoords[j][1]);
-			glVertex3f(decals[i].vertex[j].x, decals[i].vertex[j].y, decals[i].vertex[j].z);
+			glVertex3f(decals[i].vertex.at(j).x, decals[i].vertex.at(j).y, decals[i].vertex.at(j).z);
 		}
 		glEnd();
 		glPopMatrix();
@@ -1047,16 +1047,16 @@ void Model::MakeDecal(decal_type atype, Vector3* where, float* size, float* opac
 
 
 	for (unsigned int i = 0; i < Triangles.size(); i++) {
-		if (Triangles[i].facenormal.y < -.1 && (vertex[Triangles[i].vertex[0]].y < where->y
-			|| vertex[Triangles[i].vertex[1]].y < where->y
-			|| vertex[Triangles[i].vertex[2]].y < where->y)) {
+		if (Triangles[i].facenormal.y < -.1 && (vertex[Triangles[i].vertex.at(0)].y < where->y
+			|| vertex[Triangles[i].vertex.at(1)].y < where->y
+			|| vertex[Triangles[i].vertex.at(2)].y < where->y)) {
 
 			distance = abs(((Triangles[i].facenormal.x * where->x)
 				+ (Triangles[i].facenormal.y * where->y)
 				+ (Triangles[i].facenormal.z * where->z)
-				- ((Triangles[i].facenormal.x * vertex[Triangles[i].vertex[0]].x)
-					+ (Triangles[i].facenormal.y * vertex[Triangles[i].vertex[0]].y)
-					+ (Triangles[i].facenormal.z * vertex[Triangles[i].vertex[0]].z)))
+				- ((Triangles[i].facenormal.x * vertex[Triangles[i].vertex.at(0)].x)
+					+ (Triangles[i].facenormal.y * vertex[Triangles[i].vertex.at(0)].y)
+					+ (Triangles[i].facenormal.z * vertex[Triangles[i].vertex.at(0)].z)))
 				/ Triangles[i].facenormal.y);
 
 			if ((*opacity - distance / 10) <= 0) continue;
@@ -1095,7 +1095,7 @@ void Model::MakeDecal(decal_type atype, Vector3 where, float size, float opacity
 	if (opacity <= 0)  return;
 	if (distsq(&where, &boundingspherecenter) < (boundingsphereradius + size) * (boundingsphereradius + size)) {
 		for (unsigned int i = 0; i < Triangles.size(); i++) {
-			distance = abs(((Triangles[i].facenormal.x * where.x) + (Triangles[i].facenormal.y * where.y) + (Triangles[i].facenormal.z * where.z) - ((Triangles[i].facenormal.x * vertex[Triangles[i].vertex[0]].x) + (Triangles[i].facenormal.y * vertex[Triangles[i].vertex[0]].y) + (Triangles[i].facenormal.z * vertex[Triangles[i].vertex[0]].z))));
+			distance = abs(((Triangles[i].facenormal.x * where.x) + (Triangles[i].facenormal.y * where.y) + (Triangles[i].facenormal.z * where.z) - ((Triangles[i].facenormal.x * vertex[Triangles[i].vertex.at(0)].x) + (Triangles[i].facenormal.y * vertex[Triangles[i].vertex.at(0)].y) + (Triangles[i].facenormal.z * vertex[Triangles[i].vertex.at(0)].z))));
 			if (distance < .02 && abs(Triangles[i].facenormal.y) > abs(Triangles[i].facenormal.x) && abs(Triangles[i].facenormal.y) > abs(Triangles[i].facenormal.z)) {
 				if ((opacity - distance / 10) <= 0) continue;
 				Decal decal(where, atype, opacity - distance / 10, rotation, size, *this, i, 0);
@@ -1182,7 +1182,7 @@ void Model::MakeDecal(decal_type atype, Vector3 where, float size, float opacity
 
 const Vector3& Model::getTriangleVertex(unsigned triangleId, unsigned vertexId) const
 {
-	return vertex[Triangles[triangleId].vertex[vertexId]];
+	return vertex[Triangles[triangleId].vertex.at(vertexId)];
 }
 
 void Model::deleteDeadDecals()
@@ -1201,25 +1201,22 @@ Model::~Model()
 
 void Model::deallocate()
 {
-	if (owner) {
-		free(owner);
-	}
-	owner = 0;
+	// With std::vector there is nothing to free by hand. The clear() calls both
+	// release the storage and reset the size to zero, which is what the old
+	// "pointer = 0" bookkeeping achieved - and doing it here also means a model
+	// that is reused after deallocate() does not keep the previous file's
+	// vertices alive.
+	owner.clear();
+	owner.shrink_to_fit();
 
-	if (vertex) {
-		free(vertex);
-	}
-	vertex = 0;
+	vertex.clear();
+	vertex.shrink_to_fit();
 
-	if (normals) {
-		free(normals);
-	}
-	normals = 0;
+	normals.clear();
+	normals.shrink_to_fit();
 
-	if (vArray) {
-		free(vArray);
-	}
-	vArray = 0;
+	vArray.clear();
+	vArray.shrink_to_fit();
 
 	decals.clear();
 }
