@@ -160,7 +160,7 @@ void Terrain::UpdateTransparency(int whichx, int whichy, const Vector3& viewer, 
 				if (distance > viewdistsquared) {
 					distance = viewdistsquared;
 				}
-				colors[i][j][3] = (viewdistsquared - (distance - (viewdistsquared * fadestart)) * (1 / (1 - fadestart))) / viewdistsquared;
+				colors->at(i).at(j).at(3) = (viewdistsquared - (distance - (viewdistsquared * fadestart)) * (1 / (1 - fadestart))) / viewdistsquared;
 			}
 		}
 	}
@@ -170,17 +170,17 @@ void Terrain::UpdateTransparency(int whichx, int whichy, const Vector3& viewer, 
 			a = (i - (patch_size * whichx)) / stepsize;
 			b = (j - (patch_size * whichy)) / stepsize;
 			d = (a * 54) + (b * 54 * patch_size / stepsize);
-			vArray[d + c + 6] = colors[i][j][3];
+			vArray[d + c + 6] = colors->at(i).at(j).at(3);
 
-			vArray[d + c + 15] = colors[i][j + stepsize][3];
+			vArray[d + c + 15] = colors->at(i).at(j + stepsize).at(3);
 
-			vArray[d + c + 24] = colors[i + stepsize][j][3];
+			vArray[d + c + 24] = colors->at(i + stepsize).at(j).at(3);
 
-			vArray[d + c + 33] = colors[i + stepsize][j][3];
+			vArray[d + c + 33] = colors->at(i + stepsize).at(j).at(3);
 
-			vArray[d + c + 42] = colors[i][j + stepsize][3];
+			vArray[d + c + 42] = colors->at(i).at(j + stepsize).at(3);
 
-			vArray[d + c + 51] = colors[i + stepsize][j + stepsize][3];
+			vArray[d + c + 51] = colors->at(i + stepsize).at(j + stepsize).at(3);
 		}
 	}
 }
@@ -199,17 +199,17 @@ void Terrain::UpdateTransparencyother(int whichx, int whichy)
 			a = (i - (patch_size * whichx)) / stepsize;
 			b = (j - (patch_size * whichy)) / stepsize;
 			d = (a * 54) + (b * 54 * patch_size / stepsize);
-			vArray[d + c + 6] = colors[i][j][3] * opacityother[i][j];
+			vArray[d + c + 6] = colors->at(i).at(j).at(3) * opacityother->at(i).at(j);
 
-			vArray[d + c + 15] = colors[i][j + stepsize][3] * opacityother[i][j + stepsize];
+			vArray[d + c + 15] = colors->at(i).at(j + stepsize).at(3) * opacityother->at(i).at(j + stepsize);
 
-			vArray[d + c + 24] = colors[i + stepsize][j][3] * opacityother[i + stepsize][j];
+			vArray[d + c + 24] = colors->at(i + stepsize).at(j).at(3) * opacityother->at(i + stepsize).at(j);
 
-			vArray[d + c + 33] = colors[i + stepsize][j][3] * opacityother[i + stepsize][j];
+			vArray[d + c + 33] = colors->at(i + stepsize).at(j).at(3) * opacityother->at(i + stepsize).at(j);
 
-			vArray[d + c + 42] = colors[i][j + stepsize][3] * opacityother[i][j + stepsize];
+			vArray[d + c + 42] = colors->at(i).at(j + stepsize).at(3) * opacityother->at(i).at(j + stepsize);
 
-			vArray[d + c + 51] = colors[i + stepsize][j + stepsize][3] * opacityother[i + stepsize][j + stepsize];
+			vArray[d + c + 51] = colors->at(i + stepsize).at(j + stepsize).at(3) * opacityother->at(i + stepsize).at(j + stepsize);
 		}
 	}
 }
@@ -238,7 +238,7 @@ void Terrain::UpdateTransparencyotherother(int whichx, int whichy, const Vector3
 				if (distance > viewdistsquared) {
 					distance = viewdistsquared;
 				}
-				colors[i][j][3] = (viewdistsquared - (distance - (viewdistsquared * fadestart)) * (1 / (1 - fadestart))) / viewdistsquared;
+				colors->at(i).at(j).at(3) = (viewdistsquared - (distance - (viewdistsquared * fadestart)) * (1 / (1 - fadestart))) / viewdistsquared;
 			}
 		}
 	}
@@ -248,17 +248,17 @@ void Terrain::UpdateTransparencyotherother(int whichx, int whichy, const Vector3
 			a = (i - (patch_size * whichx)) / stepsize;
 			b = (j - (patch_size * whichy)) / stepsize;
 			d = (a * 54) + (b * 54 * patch_size / stepsize);
-			vArray[d + c + 6] = colors[i][j][3];
+			vArray[d + c + 6] = colors->at(i).at(j).at(3);
 
-			vArray[d + c + 15] = colors[i][j + stepsize][3];
+			vArray[d + c + 15] = colors->at(i).at(j + stepsize).at(3);
 
-			vArray[d + c + 24] = colors[i + stepsize][j][3];
+			vArray[d + c + 24] = colors->at(i + stepsize).at(j).at(3);
 
-			vArray[d + c + 33] = colors[i + stepsize][j][3];
+			vArray[d + c + 33] = colors->at(i + stepsize).at(j).at(3);
 
-			vArray[d + c + 42] = colors[i][j + stepsize][3];
+			vArray[d + c + 42] = colors->at(i).at(j + stepsize).at(3);
 
-			vArray[d + c + 51] = colors[i + stepsize][j + stepsize][3];
+			vArray[d + c + 51] = colors->at(i + stepsize).at(j + stepsize).at(3);
 		}
 	}
 }
@@ -267,7 +267,7 @@ void Terrain::UpdateVertexArray(int whichx, int whichy, float texscale)
 {
 	static int i, j, a, b, c, patch_size, stepsize;
 
-	numtris[whichx][whichy] = 0;
+	numtris->at(whichx).at(whichy) = 0;
 
 	patch_size = size / subdivision;
 
@@ -280,109 +280,109 @@ void Terrain::UpdateVertexArray(int whichx, int whichy, float texscale)
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 0] = i * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 1] = heightmap->at(i).at(j) * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 2] = j * scale;
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 3] = colors[i][j][0];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 4] = colors[i][j][1];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 5] = colors[i][j][2];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 6] = colors[i][j][3];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 7] = i * scale * texscale + texoffsetx[i][j];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 8] = j * scale * texscale + texoffsety[i][j];
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 3] = colors->at(i).at(j).at(0);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 4] = colors->at(i).at(j).at(1);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 5] = colors->at(i).at(j).at(2);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 6] = colors->at(i).at(j).at(3);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 7] = i * scale * texscale + texoffsetx->at(i).at(j);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 8] = j * scale * texscale + texoffsety->at(i).at(j);
 
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 9] = i * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 10] = heightmap->at(i).at(j + stepsize) * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 11] = j * scale + stepsize * scale;
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 12] = colors[i][j + stepsize][0];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 13] = colors[i][j + stepsize][1];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 14] = colors[i][j + stepsize][2];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 15] = colors[i][j + stepsize][3];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 16] = i * scale * texscale + texoffsetx[i][j + stepsize];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 17] = j * scale * texscale + stepsize * scale * texscale + texoffsety[i][j + stepsize];
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 12] = colors->at(i).at(j + stepsize).at(0);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 13] = colors->at(i).at(j + stepsize).at(1);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 14] = colors->at(i).at(j + stepsize).at(2);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 15] = colors->at(i).at(j + stepsize).at(3);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 16] = i * scale * texscale + texoffsetx->at(i).at(j + stepsize);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 17] = j * scale * texscale + stepsize * scale * texscale + texoffsety->at(i).at(j + stepsize);
 
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 18] = i * scale + stepsize * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 19] = heightmap->at(i + stepsize).at(j) * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 20] = j * scale;
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 21] = colors[i + stepsize][j][0];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 22] = colors[i + stepsize][j][1];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 23] = colors[i + stepsize][j][2];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 24] = colors[i + stepsize][j][3];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 25] = i * scale * texscale + stepsize * scale * texscale + texoffsetx[i + stepsize][j];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 26] = j * scale * texscale + texoffsety[i + stepsize][j];
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 21] = colors->at(i + stepsize).at(j).at(0);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 22] = colors->at(i + stepsize).at(j).at(1);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 23] = colors->at(i + stepsize).at(j).at(2);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 24] = colors->at(i + stepsize).at(j).at(3);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 25] = i * scale * texscale + stepsize * scale * texscale + texoffsetx->at(i + stepsize).at(j);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 26] = j * scale * texscale + texoffsety->at(i + stepsize).at(j);
 
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 27] = i * scale + stepsize * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 28] = heightmap->at(i + stepsize).at(j) * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 29] = j * scale;
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 30] = colors[i + stepsize][j][0];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 31] = colors[i + stepsize][j][1];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 32] = colors[i + stepsize][j][2];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 33] = colors[i + stepsize][j][3];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 34] = i * scale * texscale + stepsize * scale * texscale + texoffsetx[i + stepsize][j];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 35] = j * scale * texscale + texoffsety[i + stepsize][j];
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 30] = colors->at(i + stepsize).at(j).at(0);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 31] = colors->at(i + stepsize).at(j).at(1);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 32] = colors->at(i + stepsize).at(j).at(2);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 33] = colors->at(i + stepsize).at(j).at(3);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 34] = i * scale * texscale + stepsize * scale * texscale + texoffsetx->at(i + stepsize).at(j);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 35] = j * scale * texscale + texoffsety->at(i + stepsize).at(j);
 
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 36] = i * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 37] = heightmap->at(i).at(j + stepsize) * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 38] = j * scale + stepsize * scale;
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 39] = colors[i][j + stepsize][0];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 40] = colors[i][j + stepsize][1];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 41] = colors[i][j + stepsize][2];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 42] = colors[i][j + stepsize][3];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 43] = i * scale * texscale + texoffsetx[i][j + stepsize];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 44] = j * scale * texscale + stepsize * scale * texscale + texoffsety[i][j + stepsize];
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 39] = colors->at(i).at(j + stepsize).at(0);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 40] = colors->at(i).at(j + stepsize).at(1);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 41] = colors->at(i).at(j + stepsize).at(2);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 42] = colors->at(i).at(j + stepsize).at(3);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 43] = i * scale * texscale + texoffsetx->at(i).at(j + stepsize);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 44] = j * scale * texscale + stepsize * scale * texscale + texoffsety->at(i).at(j + stepsize);
 
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 45] = i * scale + stepsize * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 46] = heightmap->at(i + stepsize).at(j + stepsize) * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 47] = j * scale + stepsize * scale;
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 48] = colors[i + stepsize][j + stepsize][0];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 49] = colors[i + stepsize][j + stepsize][1];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 50] = colors[i + stepsize][j + stepsize][2];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 51] = colors[i + stepsize][j + stepsize][3];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 52] = i * scale * texscale + stepsize * scale * texscale + texoffsetx[i + stepsize][j + stepsize];
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 53] = j * scale * texscale + stepsize * scale * texscale + texoffsety[i + stepsize][j + stepsize];
-			numtris[whichx][whichy] += 2;
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 48] = colors->at(i + stepsize).at(j + stepsize).at(0);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 49] = colors->at(i + stepsize).at(j + stepsize).at(1);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 50] = colors->at(i + stepsize).at(j + stepsize).at(2);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 51] = colors->at(i + stepsize).at(j + stepsize).at(3);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 52] = i * scale * texscale + stepsize * scale * texscale + texoffsetx->at(i + stepsize).at(j + stepsize);
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 53] = j * scale * texscale + stepsize * scale * texscale + texoffsety->at(i + stepsize).at(j + stepsize);
+			numtris->at(whichx).at(whichy) += 2;
 		}
 	}
 
-	maxypatch[whichx][whichy] = -10000;
-	minypatch[whichx][whichy] = 10000;
+	maxypatch->at(whichx).at(whichy) = -10000;
+	minypatch->at(whichx).at(whichy) = 10000;
 	for (a = 0; a < size / subdivision; a++) {
 		for (b = 0; b < size / subdivision; b++) {
-			if (heightmap->at((size / subdivision) * whichx + a).at((size / subdivision) * whichy + b) * scale > maxypatch[whichx][whichy]) {
-				maxypatch[whichx][whichy] = heightmap->at((size / subdivision) * whichx + a).at((size / subdivision) * whichy + b) * scale;
+			if (heightmap->at((size / subdivision) * whichx + a).at((size / subdivision) * whichy + b) * scale > maxypatch->at(whichx).at(whichy)) {
+				maxypatch->at(whichx).at(whichy) = heightmap->at((size / subdivision) * whichx + a).at((size / subdivision) * whichy + b) * scale;
 			}
-			if (heightmap->at((size / subdivision) * whichx + a).at((size / subdivision) * whichy + b) * scale < minypatch[whichx][whichy]) {
-				minypatch[whichx][whichy] = heightmap->at((size / subdivision) * whichx + a).at((size / subdivision) * whichy + b) * scale;
+			if (heightmap->at((size / subdivision) * whichx + a).at((size / subdivision) * whichy + b) * scale < minypatch->at(whichx).at(whichy)) {
+				minypatch->at(whichx).at(whichy) = heightmap->at((size / subdivision) * whichx + a).at((size / subdivision) * whichy + b) * scale;
 			}
 		}
 	}
-	heightypatch[whichx][whichy] = (maxypatch[whichx][whichy] - minypatch[whichx][whichy]);
-	if (heightypatch[whichx][whichy] < size / subdivision * scale) {
-		heightypatch[whichx][whichy] = size / subdivision * scale;
+	heightypatch->at(whichx).at(whichy) = (maxypatch->at(whichx).at(whichy) - minypatch->at(whichx).at(whichy));
+	if (heightypatch->at(whichx).at(whichy) < size / subdivision * scale) {
+		heightypatch->at(whichx).at(whichy) = size / subdivision * scale;
 	}
-	avgypatch[whichx][whichy] = (minypatch[whichx][whichy] + maxypatch[whichx][whichy]) / 2;
+	avgypatch->at(whichx).at(whichy) = (minypatch->at(whichx).at(whichy) + maxypatch->at(whichx).at(whichy)) / 2;
 
 	for (i = whichx * size / subdivision; i < (whichx + 1) * size / subdivision - 1; i++) {
 		for (j = whichy * size / subdivision; j < (whichy + 1) * size / subdivision - 1; j++) {
-			triangles[(i * (size - 1) * 2) + (j * 2)][0].x = i * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2)][0].y = heightmap->at(i).at(j) * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2)][0].z = j * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2)).at(0).x = i * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2)).at(0).y = heightmap->at(i).at(j) * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2)).at(0).z = j * scale;
 
-			triangles[(i * (size - 1) * 2) + (j * 2)][1].x = i * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2)][1].y = heightmap->at(i).at(j + 1) * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2)][1].z = j * scale + scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2)).at(1).x = i * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2)).at(1).y = heightmap->at(i).at(j + 1) * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2)).at(1).z = j * scale + scale;
 
-			triangles[(i * (size - 1) * 2) + (j * 2)][2].x = i * scale + 1 * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2)][2].y = heightmap->at(i + 1).at(j) * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2)][2].z = j * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2)).at(2).x = i * scale + 1 * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2)).at(2).y = heightmap->at(i + 1).at(j) * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2)).at(2).z = j * scale;
 
-			triangles[(i * (size - 1) * 2) + (j * 2) + 1][0].x = i * scale + 1 * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2) + 1][0].y = heightmap->at(i + 1).at(j) * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2) + 1][0].z = j * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2) + 1).at(0).x = i * scale + 1 * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2) + 1).at(0).y = heightmap->at(i + 1).at(j) * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2) + 1).at(0).z = j * scale;
 
-			triangles[(i * (size - 1) * 2) + (j * 2) + 1][1].x = i * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2) + 1][1].y = heightmap->at(i).at(j + 1) * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2) + 1][1].z = j * scale + 1 * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2) + 1).at(1).x = i * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2) + 1).at(1).y = heightmap->at(i).at(j + 1) * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2) + 1).at(1).z = j * scale + 1 * scale;
 
-			triangles[(i * (size - 1) * 2) + (j * 2) + 1][2].x = i * scale + 1 * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2) + 1][2].y = heightmap->at(i + 1).at(j + 1) * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2) + 1][2].z = j * scale + 1 * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2) + 1).at(2).x = i * scale + 1 * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2) + 1).at(2).y = heightmap->at(i + 1).at(j + 1) * scale;
+			triangles->at((i * (size - 1) * 2) + (j * 2) + 1).at(2).z = j * scale + 1 * scale;
 		}
 	}
 }
@@ -441,7 +441,7 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 
 	for (i = 0; i < subdivision; i++) {
 		for (j = 0; j < subdivision; j++) {
-			textureness[i][j] = -1;
+			textureness->at(i).at(j) = -1;
 		}
 	}
 	callback();
@@ -450,29 +450,29 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 		for (j = 0; j < size; j++) {
 			heightmap->at(i).at(j) *= .5;
 
-			texoffsetx[i][j] = (float)abs(rand() % 100) / 1200 / scale * 3;
-			texoffsety[i][j] = (float)abs(rand() % 100) / 1200 / scale * 3;
+			texoffsetx->at(i).at(j) = (float)abs(rand() % 100) / 1200 / scale * 3;
+			texoffsety->at(i).at(j) = (float)abs(rand() % 100) / 1200 / scale * 3;
 
 			slopeness = 0;
 			if (environment == snowyenvironment) {
 				if (j != 0 && heightmap->at(i).at(j) - heightmap->at(i).at(j - 1) > slopeness) {
 					slopeness = heightmap->at(i).at(j) - heightmap->at(i).at(j - 1);
 				}
-				opacityother[i][j] = slopeness * slopeness * 2;
-				if (opacityother[i][j] > 1) {
-					opacityother[i][j] = 1;
+				opacityother->at(i).at(j) = slopeness * slopeness * 2;
+				if (opacityother->at(i).at(j) > 1) {
+					opacityother->at(i).at(j) = 1;
 				}
-				opacityother[i][j] -= (float)abs(rand() % 100) / 300;
+				opacityother->at(i).at(j) -= (float)abs(rand() % 100) / 300;
 			}
 			if (environment == desertenvironment) {
 				if (j != 0 && heightmap->at(i).at(j) - heightmap->at(i).at(j - 1) > slopeness) {
 					slopeness = heightmap->at(i).at(j) - heightmap->at(i).at(j - 1);
 				}
-				opacityother[i][j] = slopeness * slopeness * 2;
-				if (opacityother[i][j] > 1) {
-					opacityother[i][j] = 1;
+				opacityother->at(i).at(j) = slopeness * slopeness * 2;
+				if (opacityother->at(i).at(j) > 1) {
+					opacityother->at(i).at(j) = 1;
 				}
-				opacityother[i][j] -= (float)abs(rand() % 100) / 300;
+				opacityother->at(i).at(j) -= (float)abs(rand() % 100) / 300;
 			}
 			if (environment == grassyenvironment) {
 				if (i != 0 && heightmap->at(i).at(j) - heightmap->at(i - 1).at(j) > slopeness) {
@@ -487,11 +487,11 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 				if (j < size - 1 && heightmap->at(i).at(j) - heightmap->at(i).at(j + 1) > slopeness) {
 					slopeness = heightmap->at(i).at(j) - heightmap->at(i).at(j + 1);
 				}
-				opacityother[i][j] = slopeness * slopeness * 10;
-				if (opacityother[i][j] > 1) {
-					opacityother[i][j] = 1;
+				opacityother->at(i).at(j) = slopeness * slopeness * 10;
+				if (opacityother->at(i).at(j) > 1) {
+					opacityother->at(i).at(j) = 1;
 				}
-				opacityother[i][j] -= (float)abs(rand() % 100) / 100;
+				opacityother->at(i).at(j) -= (float)abs(rand() % 100) / 100;
 			}
 		}
 	}
@@ -500,10 +500,10 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 	for (i = 0; i < size; i++) {
 		for (j = 0; j < size; j++) {
 			if (environment == snowyenvironment) {
-				heightmap->at(i).at(j) -= opacityother[i][j];
+				heightmap->at(i).at(j) -= opacityother->at(i).at(j);
 			}
 			if (environment == desertenvironment) {
-				heightmap->at(i).at(j) -= opacityother[i][j];
+				heightmap->at(i).at(j) -= opacityother->at(i).at(j);
 			}
 		}
 	}
@@ -511,71 +511,71 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 
 	for (i = 0; i < size; i++) {
 		for (j = 0; j < size; j++) {
-			if (opacityother[i][j] < .1) {
-				opacityother[i][j] = 0;
+			if (opacityother->at(i).at(j) < .1) {
+				opacityother->at(i).at(j) = 0;
 			}
-			if (textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == -1) {
-				if (!opacityother[i][j]) {
-					textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = allfirst;
+			if (textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == -1) {
+				if (!opacityother->at(i).at(j)) {
+					textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = allfirst;
 				}
-				if (opacityother[i][j] == 1) {
-					textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = allsecond;
+				if (opacityother->at(i).at(j) == 1) {
+					textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = allsecond;
 				}
 			}
-			if (opacityother[i][j] && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allfirst) {
-				textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+			if (opacityother->at(i).at(j) && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allfirst) {
+				textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 			}
-			if (opacityother[i][j] != 1 && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allsecond) {
-				textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+			if (opacityother->at(i).at(j) != 1 && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allsecond) {
+				textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 			}
 
 			x = i;
 			y = j;
 			if (i > 0) {
 				i--;
-				if (opacityother[x][y] && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allfirst) {
-					textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+				if (opacityother->at(x).at(y) && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allfirst) {
+					textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 				}
-				if (opacityother[x][y] != 1 && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allsecond) {
-					textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+				if (opacityother->at(x).at(y) != 1 && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allsecond) {
+					textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 				}
-				if (opacityother[i][j] && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allfirst) {
-					textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+				if (opacityother->at(i).at(j) && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allfirst) {
+					textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 				}
-				if (opacityother[i][j] != 1 && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allsecond) {
-					textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+				if (opacityother->at(i).at(j) != 1 && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allsecond) {
+					textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 				}
 
 				if (j > 0) {
 					j--;
-					if (opacityother[x][y] && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allfirst) {
-						textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+					if (opacityother->at(x).at(y) && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allfirst) {
+						textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 					}
-					if (opacityother[x][y] != 1 && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allsecond) {
-						textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+					if (opacityother->at(x).at(y) != 1 && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allsecond) {
+						textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 					}
-					if (opacityother[i][j] && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allfirst) {
-						textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+					if (opacityother->at(i).at(j) && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allfirst) {
+						textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 					}
-					if (opacityother[i][j] != 1 && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allsecond) {
-						textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+					if (opacityother->at(i).at(j) != 1 && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allsecond) {
+						textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 					}
 					j++;
 				}
 
 				if (j < size - 1) {
 					j++;
-					if (opacityother[x][y] && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allfirst) {
-						textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+					if (opacityother->at(x).at(y) && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allfirst) {
+						textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 					}
-					if (opacityother[x][y] != 1 && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allsecond) {
-						textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+					if (opacityother->at(x).at(y) != 1 && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allsecond) {
+						textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 					}
-					if (opacityother[i][j] && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allfirst) {
-						textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+					if (opacityother->at(i).at(j) && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allfirst) {
+						textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 					}
-					if (opacityother[i][j] != 1 && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allsecond) {
-						textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+					if (opacityother->at(i).at(j) != 1 && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allsecond) {
+						textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 					}
 					j--;
 				}
@@ -584,49 +584,49 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 
 			if (i < size - 1) {
 				i++;
-				if (opacityother[x][y] && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allfirst) {
-					textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+				if (opacityother->at(x).at(y) && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allfirst) {
+					textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 				}
-				if (opacityother[x][y] != 1 && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allsecond) {
-					textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+				if (opacityother->at(x).at(y) != 1 && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allsecond) {
+					textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 				}
-				if (opacityother[i][j] && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allfirst) {
-					textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+				if (opacityother->at(i).at(j) && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allfirst) {
+					textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 				}
-				if (opacityother[i][j] != 1 && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allsecond) {
-					textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+				if (opacityother->at(i).at(j) != 1 && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allsecond) {
+					textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 				}
 
 				if (j > 0) {
 					j--;
-					if (opacityother[x][y] && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allfirst) {
-						textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+					if (opacityother->at(x).at(y) && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allfirst) {
+						textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 					}
-					if (opacityother[x][y] != 1 && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allsecond) {
-						textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+					if (opacityother->at(x).at(y) != 1 && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allsecond) {
+						textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 					}
-					if (opacityother[i][j] && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allfirst) {
-						textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+					if (opacityother->at(i).at(j) && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allfirst) {
+						textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 					}
-					if (opacityother[i][j] != 1 && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allsecond) {
-						textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+					if (opacityother->at(i).at(j) != 1 && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allsecond) {
+						textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 					}
 					j++;
 				}
 
 				if (j < size - 1) {
 					j++;
-					if (opacityother[x][y] && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allfirst) {
-						textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+					if (opacityother->at(x).at(y) && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allfirst) {
+						textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 					}
-					if (opacityother[x][y] != 1 && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allsecond) {
-						textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+					if (opacityother->at(x).at(y) != 1 && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allsecond) {
+						textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 					}
-					if (opacityother[i][j] && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allfirst) {
-						textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+					if (opacityother->at(i).at(j) && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allfirst) {
+						textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 					}
-					if (opacityother[i][j] != 1 && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allsecond) {
-						textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+					if (opacityother->at(i).at(j) != 1 && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allsecond) {
+						textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 					}
 					j--;
 				}
@@ -635,34 +635,34 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 
 			if (j > 0) {
 				j--;
-				if (opacityother[x][y] && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allfirst) {
-					textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+				if (opacityother->at(x).at(y) && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allfirst) {
+					textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 				}
-				if (opacityother[x][y] != 1 && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allsecond) {
-					textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+				if (opacityother->at(x).at(y) != 1 && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allsecond) {
+					textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 				}
-				if (opacityother[i][j] && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allfirst) {
-					textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+				if (opacityother->at(i).at(j) && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allfirst) {
+					textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 				}
-				if (opacityother[i][j] != 1 && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allsecond) {
-					textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+				if (opacityother->at(i).at(j) != 1 && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allsecond) {
+					textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 				}
 				j++;
 			}
 
 			if (j < size - 1) {
 				j++;
-				if (opacityother[x][y] && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allfirst) {
-					textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+				if (opacityother->at(x).at(y) && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allfirst) {
+					textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 				}
-				if (opacityother[x][y] != 1 && textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] == allsecond) {
-					textureness[(int)(i * subdivision / size)][(int)(j * subdivision / size)] = mixed;
+				if (opacityother->at(x).at(y) != 1 && textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) == allsecond) {
+					textureness->at((int)(i * subdivision / size)).at((int)(j * subdivision / size)) = mixed;
 				}
-				if (opacityother[i][j] && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allfirst) {
-					textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+				if (opacityother->at(i).at(j) && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allfirst) {
+					textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 				}
-				if (opacityother[i][j] != 1 && textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] == allsecond) {
-					textureness[(int)(x * subdivision / size)][(int)(y * subdivision / size)] = mixed;
+				if (opacityother->at(i).at(j) != 1 && textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) == allsecond) {
+					textureness->at((int)(x * subdivision / size)).at((int)(y * subdivision / size)) = mixed;
 				}
 				j--;
 			}
@@ -685,9 +685,9 @@ void Terrain::CalculateNormals()
 
 	for (i = 0; i < size; i++) {
 		for (j = 0; j < size; j++) {
-			normals[i][j].x = 0;
-			normals[i][j].y = 0;
-			normals[i][j].z = 0;
+			normals->at(i).at(j).x = 0;
+			normals->at(i).at(j).y = 0;
+			normals->at(i).at(j).z = 0;
 		}
 	}
 
@@ -712,11 +712,11 @@ void Terrain::CalculateNormals()
 
 			CrossProduct(&p, &q, &facenormal);
 
-			facenormals[i][j] = facenormal;
+			facenormals->at(i).at(j) = facenormal;
 
-			normals[i][j] = normals[i][j] + facenormal;
-			normals[i][j + 1] = normals[i][j + 1] + facenormal;
-			normals[i + 1][j] = normals[i + 1][j] + facenormal;
+			normals->at(i).at(j) = normals->at(i).at(j) + facenormal;
+			normals->at(i).at(j + 1) = normals->at(i).at(j + 1) + facenormal;
+			normals->at(i + 1).at(j) = normals->at(i + 1).at(j) + facenormal;
 
 			a.x = i + 1;
 			a.y = heightmap->at(i + 1).at(j);
@@ -737,17 +737,17 @@ void Terrain::CalculateNormals()
 
 			CrossProduct(&p, &q, &facenormal);
 
-			normals[i + 1][j + 1] = normals[i + 1][j + 1] + facenormal;
-			normals[i][j + 1] = normals[i][j + 1] + facenormal;
-			normals[i + 1][j] = normals[i + 1][j] + facenormal;
+			normals->at(i + 1).at(j + 1) = normals->at(i + 1).at(j + 1) + facenormal;
+			normals->at(i).at(j + 1) = normals->at(i).at(j + 1) + facenormal;
+			normals->at(i + 1).at(j) = normals->at(i + 1).at(j) + facenormal;
 
-			Normalise(&facenormals[i][j]);
+			Normalise(&facenormals->at(i).at(j));
 		}
 	}
 
 	for (i = 0; i < size; i++) {
 		for (j = 0; j < size; j++) {
-			Normalise(&normals[i][j]);
+			Normalise(&normals->at(i).at(j));
 		}
 	}
 }
@@ -773,7 +773,7 @@ void Terrain::drawpatch(int whichx, int whichy, float opacity, const Vector3& vi
 	glTexCoordPointer(2, GL_FLOAT, 9 * sizeof(GLfloat), &vArray[7 + whichx * patch_elements + whichy * patch_elements * subdivision]);
 
 	//Draw
-	glDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
+	glDrawArrays(GL_TRIANGLES, 0, numtris->at(whichx).at(whichy) * 3);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
@@ -799,7 +799,7 @@ void Terrain::drawpatchother(int whichx, int whichy, float opacity, const Vector
 	glTexCoordPointer(2, GL_FLOAT, 9 * sizeof(GLfloat), &vArray[7 + whichx * patch_elements + whichy * patch_elements * subdivision]);
 
 	//Draw
-	glDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
+	glDrawArrays(GL_TRIANGLES, 0, numtris->at(whichx).at(whichy) * 3);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
@@ -826,7 +826,7 @@ void Terrain::drawpatchotherother(int whichx, int whichy, const Vector3& viewer,
 	glTexCoordPointer(2, GL_FLOAT, 9 * sizeof(GLfloat), &vArray[7 + whichx * patch_elements + whichy * patch_elements * subdivision]);
 
 	//Draw
-	glDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
+	glDrawArrays(GL_TRIANGLES, 0, numtris->at(whichx).at(whichy) * 3);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
@@ -902,8 +902,8 @@ float Terrain::getOpacity(float pointx, float pointz) const
 	tilex = pointx;
 	tiley = pointz;
 
-	height1 = opacityother[tilex][tiley] * (1 - (pointx - tilex)) + opacityother[tilex + 1][tiley] * (pointx - tilex);
-	height2 = opacityother[tilex][tiley + 1] * (1 - (pointx - tilex)) + opacityother[tilex + 1][tiley + 1] * (pointx - tilex);
+	height1 = opacityother->at(tilex).at(tiley) * (1 - (pointx - tilex)) + opacityother->at(tilex + 1).at(tiley) * (pointx - tilex);
+	height2 = opacityother->at(tilex).at(tiley + 1) * (1 - (pointx - tilex)) + opacityother->at(tilex + 1).at(tiley + 1) * (pointx - tilex);
 
 	return height1 * (1 - (pointz - tiley)) + height2 * (pointz - tiley);
 }
@@ -923,8 +923,8 @@ Vector3 Terrain::getNormal(float pointx, float pointz) const
 	tilex = pointx;
 	tiley = pointz;
 
-	height1 = normals[tilex][tiley] * (1 - (pointx - tilex)) + normals[tilex + 1][tiley] * (pointx - tilex);
-	height2 = normals[tilex][tiley + 1] * (1 - (pointx - tilex)) + normals[tilex + 1][tiley + 1] * (pointx - tilex);
+	height1 = normals->at(tilex).at(tiley) * (1 - (pointx - tilex)) + normals->at(tilex + 1).at(tiley) * (pointx - tilex);
+	height2 = normals->at(tilex).at(tiley + 1) * (1 - (pointx - tilex)) + normals->at(tilex + 1).at(tiley + 1) * (pointx - tilex);
 	total = height1 * (1 - (pointz - tiley)) + height2 * (pointz - tiley);
 	Normalise(&total);
 	return total;
@@ -945,12 +945,12 @@ Vector3 Terrain::getLighting(float pointx, float pointz) const
 	tilex = pointx;
 	tiley = pointz;
 
-	height1.x = colors[tilex][tiley][0] * (1 - (pointx - tilex)) + colors[tilex + 1][tiley][0] * (pointx - tilex);
-	height1.y = colors[tilex][tiley][1] * (1 - (pointx - tilex)) + colors[tilex + 1][tiley][1] * (pointx - tilex);
-	height1.z = colors[tilex][tiley][2] * (1 - (pointx - tilex)) + colors[tilex + 1][tiley][2] * (pointx - tilex);
-	height2.x = colors[tilex][tiley + 1][0] * (1 - (pointx - tilex)) + colors[tilex + 1][tiley + 1][0] * (pointx - tilex);
-	height2.y = colors[tilex][tiley + 1][1] * (1 - (pointx - tilex)) + colors[tilex + 1][tiley + 1][1] * (pointx - tilex);
-	height2.z = colors[tilex][tiley + 1][2] * (1 - (pointx - tilex)) + colors[tilex + 1][tiley + 1][2] * (pointx - tilex);
+	height1.x = colors->at(tilex).at(tiley).at(0) * (1 - (pointx - tilex)) + colors->at(tilex + 1).at(tiley).at(0) * (pointx - tilex);
+	height1.y = colors->at(tilex).at(tiley).at(1) * (1 - (pointx - tilex)) + colors->at(tilex + 1).at(tiley).at(1) * (pointx - tilex);
+	height1.z = colors->at(tilex).at(tiley).at(2) * (1 - (pointx - tilex)) + colors->at(tilex + 1).at(tiley).at(2) * (pointx - tilex);
+	height2.x = colors->at(tilex).at(tiley + 1).at(0) * (1 - (pointx - tilex)) + colors->at(tilex + 1).at(tiley + 1).at(0) * (pointx - tilex);
+	height2.y = colors->at(tilex).at(tiley + 1).at(1) * (1 - (pointx - tilex)) + colors->at(tilex + 1).at(tiley + 1).at(1) * (pointx - tilex);
+	height2.z = colors->at(tilex).at(tiley + 1).at(2) * (1 - (pointx - tilex)) + colors->at(tilex + 1).at(tiley + 1).at(2) * (pointx - tilex);
 
 	return height1 * (1 - (pointz - tiley)) + height2 * (pointz - tiley);
 }
@@ -1023,20 +1023,20 @@ void Terrain::draw(int layer, const Vector3& viewer, float viewdistance, float f
 				}
 				glMatrixMode(GL_MODELVIEW);
 				glPushMatrix();
-				if (frustum.CubeInFrustum(i * patch_size + patch_size * .5, avgypatch[i][j], j * patch_size + patch_size * .5, heightypatch[i][j] / 2)) {
+				if (frustum.CubeInFrustum(i * patch_size + patch_size * .5, avgypatch->at(i).at(j), j * patch_size + patch_size * .5, heightypatch->at(i).at(j) / 2)) {
 					if (environment == desertenvironment && distance[i][j] > viewdistsquared / 4) {
 						glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, blurness);
 					}
 					else if (environment == desertenvironment) {
 						glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, 0);
 					}
-					if (!layer && textureness[i][j] != allsecond) {
+					if (!layer && textureness->at(i).at(j) != allsecond) {
 						drawpatch(i, j, opacity, viewer, viewdistance, fadestart);
 					}
-					if (layer == 1 && textureness[i][j] != allfirst) {
+					if (layer == 1 && textureness->at(i).at(j) != allfirst) {
 						drawpatchother(i, j, opacity, viewer, viewdistance, fadestart);
 					}
-					if (layer == 2 && textureness[i][j] != allfirst) {
+					if (layer == 2 && textureness->at(i).at(j) != allfirst) {
 						drawpatchotherother(i, j, viewer, viewdistance, fadestart);
 					}
 				}
@@ -1403,7 +1403,7 @@ void Terrain::DoShadows(bool tutorialActive, float texscale, const Light& light,
 				callback();
 			}
 
-			float brightness = dotproduct(&lightloc, &normals[i][j]);
+			float brightness = dotproduct(&lightloc, &normals->at(i).at(j));
 			if (shadowed) {
 				brightness *= 1 - shadowed;
 			}
@@ -1415,27 +1415,27 @@ void Terrain::DoShadows(bool tutorialActive, float texscale, const Light& light,
 				brightness = 0;
 			}
 
-			colors[i][j][0] = light.color[0] * brightness + light.ambient[0];
-			colors[i][j][1] = light.color[1] * brightness + light.ambient[1];
-			colors[i][j][2] = light.color[2] * brightness + light.ambient[2];
+			colors->at(i).at(j).at(0) = light.color[0] * brightness + light.ambient[0];
+			colors->at(i).at(j).at(1) = light.color[1] * brightness + light.ambient[1];
+			colors->at(i).at(j).at(2) = light.color[2] * brightness + light.ambient[2];
 
-			if (colors[i][j][0] > 1) {
-				colors[i][j][0] = 1;
+			if (colors->at(i).at(j).at(0) > 1) {
+				colors->at(i).at(j).at(0) = 1;
 			}
-			if (colors[i][j][1] > 1) {
-				colors[i][j][1] = 1;
+			if (colors->at(i).at(j).at(1) > 1) {
+				colors->at(i).at(j).at(1) = 1;
 			}
-			if (colors[i][j][2] > 1) {
-				colors[i][j][2] = 1;
+			if (colors->at(i).at(j).at(2) > 1) {
+				colors->at(i).at(j).at(2) = 1;
 			}
-			if (colors[i][j][0] < 0) {
-				colors[i][j][0] = 0;
+			if (colors->at(i).at(j).at(0) < 0) {
+				colors->at(i).at(j).at(0) = 0;
 			}
-			if (colors[i][j][1] < 0) {
-				colors[i][j][1] = 0;
+			if (colors->at(i).at(j).at(1) < 0) {
+				colors->at(i).at(j).at(1) = 0;
 			}
-			if (colors[i][j][2] < 0) {
-				colors[i][j][2] = 0;
+			if (colors->at(i).at(j).at(2) < 0) {
+				colors->at(i).at(j).at(2) = 0;
 			}
 		}
 	}
@@ -1449,41 +1449,41 @@ void Terrain::DoShadows(bool tutorialActive, float texscale, const Light& light,
 				float total = 0;
 				unsigned int todivide = 0;
 				if (i != 0) {
-					total += colors[j][i - 1][k];
+					total += colors->at(j).at(i - 1).at(k);
 					todivide++;
 				}
 				if (i != size - 1) {
-					total += colors[j][i + 1][k];
+					total += colors->at(j).at(i + 1).at(k);
 					todivide++;
 				}
 				if (j != 0) {
-					total += colors[j - 1][i][k];
+					total += colors->at(j - 1).at(i).at(k);
 					todivide++;
 				}
 				if (j != size - 1) {
-					total += colors[j + 1][i][k];
+					total += colors->at(j + 1).at(i).at(k);
 					todivide++;
 				}
 				if (i != 0 && j != 0) {
-					total += colors[j - 1][i - 1][k];
+					total += colors->at(j - 1).at(i - 1).at(k);
 					todivide++;
 				}
 				if (i != size - 1 && j != 0) {
-					total += colors[j - 1][i + 1][k];
+					total += colors->at(j - 1).at(i + 1).at(k);
 					todivide++;
 				}
 				if (j != size - 1 && i != size - 1) {
-					total += colors[j + 1][i + 1][k];
+					total += colors->at(j + 1).at(i + 1).at(k);
 					todivide++;
 				}
 				if (j != size - 1 && i != 0) {
-					total += colors[j + 1][i - 1][k];
+					total += colors->at(j + 1).at(i - 1).at(k);
 					todivide++;
 				}
-				total += colors[j][i][k];
+				total += colors->at(j).at(i).at(k);
 				todivide++;
 
-				colors[j][i][k] = total / todivide;
+				colors->at(j).at(i).at(k) = total / todivide;
 			}
 		}
 	}
@@ -1540,48 +1540,22 @@ Terrain::Terrain()
 	patchobjects = reinterpret_cast<std::vector<unsigned int> (*)[subdivision]>(patchobjects_storage.get());
 
     // Value-initialised, as the original new float[...]() did: every tile starts
-    // at zero rather than holding whatever the allocator handed back.
+    // at zero rather than holding whatever the allocator handed back. Each of
+    // these floors was reachable past its end by the patch and decal code, so
+    // each now throws instead of reading whatever member follows.
     heightmap = std::make_unique<std::array<std::array<float, max_terrain_size + 1>, max_terrain_size + 1>>();
-
-	normals_storage.reset(new Vector3[(max_terrain_size + 1) * (max_terrain_size + 1)]());
-	normals = reinterpret_cast<Vector3 (*)[max_terrain_size + 1]>(normals_storage.get());
-
-	facenormals_storage.reset(new Vector3[max_terrain_size * max_terrain_size]());
-	facenormals = reinterpret_cast<Vector3 (*)[max_terrain_size]>(facenormals_storage.get());
-
-	triangles_storage.reset(new Vector3[(max_terrain_size - 1) * (max_terrain_size - 1) * 2 * 3]());
-	triangles = reinterpret_cast<Vector3 (*)[3]>(triangles_storage.get());
-
-	colors_storage.reset(new float[(max_terrain_size + 1) * (max_terrain_size + 1) * 4]());
-	colors = reinterpret_cast<float (*)[max_terrain_size + 1][4]>(colors_storage.get());
-
-	opacityother_storage.reset(new float[(max_terrain_size + 1) * (max_terrain_size + 1)]());
-	opacityother = reinterpret_cast<float (*)[max_terrain_size + 1]>(opacityother_storage.get());
-
-	texoffsetx_storage.reset(new float[(max_terrain_size + 1) * (max_terrain_size + 1)]());
-	texoffsetx = reinterpret_cast<float (*)[max_terrain_size + 1]>(texoffsetx_storage.get());
-
-	texoffsety_storage.reset(new float[(max_terrain_size + 1) * (max_terrain_size + 1)]());
-	texoffsety = reinterpret_cast<float (*)[max_terrain_size + 1]>(texoffsety_storage.get());
-
-	numtris_storage.reset(new int[subdivision * subdivision]());
-	numtris = reinterpret_cast<int (*)[subdivision]>(numtris_storage.get());
-
-	textureness_storage.reset(new int[subdivision * subdivision]());
-	textureness = reinterpret_cast<int (*)[subdivision]>(textureness_storage.get());
-
-	visible_storage.reset(new bool[subdivision * subdivision]());
-	visible = reinterpret_cast<bool (*)[subdivision]>(visible_storage.get());
-
-	avgypatch_storage.reset(new float[subdivision * subdivision]());
-	avgypatch = reinterpret_cast<float (*)[subdivision]>(avgypatch_storage.get());
-
-	maxypatch_storage.reset(new float[subdivision * subdivision]());
-	maxypatch = reinterpret_cast<float (*)[subdivision]>(maxypatch_storage.get());
-
-	minypatch_storage.reset(new float[subdivision * subdivision]());
-	minypatch = reinterpret_cast<float (*)[subdivision]>(minypatch_storage.get());
-
-	heightypatch_storage.reset(new float[subdivision * subdivision]());
-	heightypatch = reinterpret_cast<float (*)[subdivision]>(heightypatch_storage.get());
+    normals = std::make_unique<std::array<std::array<Vector3, max_terrain_size + 1>, max_terrain_size + 1>>();
+    triangles = std::make_unique<std::array<std::array<Vector3, 3>, (max_terrain_size - 1) * (max_terrain_size - 1) * 2>>();
+    facenormals = std::make_unique<std::array<std::array<Vector3, max_terrain_size>, max_terrain_size>>();
+    colors = std::make_unique<std::array<std::array<std::array<float, 4>, max_terrain_size + 1>, max_terrain_size + 1>>();
+    opacityother = std::make_unique<std::array<std::array<float, max_terrain_size + 1>, max_terrain_size + 1>>();
+    texoffsetx = std::make_unique<std::array<std::array<float, max_terrain_size + 1>, max_terrain_size + 1>>();
+    texoffsety = std::make_unique<std::array<std::array<float, max_terrain_size + 1>, max_terrain_size + 1>>();
+    numtris = std::make_unique<std::array<std::array<int, subdivision>, subdivision>>();
+    textureness = std::make_unique<std::array<std::array<int, subdivision>, subdivision>>();
+    visible = std::make_unique<std::array<std::array<bool, subdivision>, subdivision>>();
+    avgypatch = std::make_unique<std::array<std::array<float, subdivision>, subdivision>>();
+    maxypatch = std::make_unique<std::array<std::array<float, subdivision>, subdivision>>();
+    minypatch = std::make_unique<std::array<std::array<float, subdivision>, subdivision>>();
+    heightypatch = std::make_unique<std::array<std::array<float, subdivision>, subdivision>>();
 }

@@ -83,51 +83,34 @@ public:
     // one UpdateVertexArray read past the end of.
     std::unique_ptr<std::array<std::array<float, max_terrain_size + 1>, max_terrain_size + 1>> heightmap;
 
-    // The patch code reads one row and column past the last tile, which is why
-    // heightmap has always been a tile larger than the rest. These are the
-    // arrays the same code reaches past the edge of, so they are sized to match
-    // it instead of relying on whatever member happened to be laid out next.
-    std::unique_ptr<Vector3[]> normals_storage;
-    Vector3 (*normals)[max_terrain_size + 1] = nullptr;
+    // The rest of the same family. Every one of these was reachable past its end
+    // by the patch and decal code; std::array plus .at() turns that into a throw.
+    using HeightRow = std::array<float, max_terrain_size + 1>;
+    using NormalRow = std::array<Vector3, max_terrain_size + 1>;
+    using PatchRow = std::array<int, subdivision>;
+    using PatchScalarRow = std::array<float, subdivision>;
 
-    std::unique_ptr<Vector3[]> facenormals_storage;
-    Vector3 (*facenormals)[max_terrain_size] = nullptr;
+    std::unique_ptr<std::array<NormalRow, max_terrain_size + 1>> normals;
 
-    std::unique_ptr<Vector3[]> triangles_storage;
-    Vector3 (*triangles)[3] = nullptr;
+    // One grid cell per triangle pair: (n-1) * (n-1) cells, two triangles each.
+    std::unique_ptr<std::array<std::array<Vector3, 3>, (max_terrain_size - 1) * (max_terrain_size - 1) * 2>> triangles;
 
-    std::unique_ptr<float[]> colors_storage;
-    float (*colors)[max_terrain_size + 1][4] = nullptr;
+    std::unique_ptr<std::array<std::array<Vector3, max_terrain_size>, max_terrain_size>> facenormals;
 
-    std::unique_ptr<float[]> opacityother_storage;
-    float (*opacityother)[max_terrain_size + 1] = nullptr;
+    // RGBA per tile.
+    std::unique_ptr<std::array<std::array<std::array<float, 4>, max_terrain_size + 1>, max_terrain_size + 1>> colors;
 
-    std::unique_ptr<float[]> texoffsetx_storage;
-    float (*texoffsetx)[max_terrain_size + 1] = nullptr;
+    std::unique_ptr<std::array<HeightRow, max_terrain_size + 1>> opacityother;
+    std::unique_ptr<std::array<HeightRow, max_terrain_size + 1>> texoffsetx;
+    std::unique_ptr<std::array<HeightRow, max_terrain_size + 1>> texoffsety;
 
-    std::unique_ptr<float[]> texoffsety_storage;
-    float (*texoffsety)[max_terrain_size + 1] = nullptr;
-
-    std::unique_ptr<int[]> numtris_storage;
-    int (*numtris)[subdivision] = nullptr;
-
-    std::unique_ptr<int[]> textureness_storage;
-    int (*textureness)[subdivision] = nullptr;
-
-    std::unique_ptr<bool[]> visible_storage;
-    bool (*visible)[subdivision] = nullptr;
-
-    std::unique_ptr<float[]> avgypatch_storage;
-    float (*avgypatch)[subdivision] = nullptr;
-
-    std::unique_ptr<float[]> maxypatch_storage;
-    float (*maxypatch)[subdivision] = nullptr;
-
-    std::unique_ptr<float[]> minypatch_storage;
-    float (*minypatch)[subdivision] = nullptr;
-
-    std::unique_ptr<float[]> heightypatch_storage;
-    float (*heightypatch)[subdivision] = nullptr;
+    std::unique_ptr<std::array<PatchRow, subdivision>> numtris;
+    std::unique_ptr<std::array<PatchRow, subdivision>> textureness;
+    std::unique_ptr<std::array<std::array<bool, subdivision>, subdivision>> visible;
+    std::unique_ptr<std::array<PatchScalarRow, subdivision>> avgypatch;
+    std::unique_ptr<std::array<PatchScalarRow, subdivision>> maxypatch;
+    std::unique_ptr<std::array<PatchScalarRow, subdivision>> minypatch;
+    std::unique_ptr<std::array<PatchScalarRow, subdivision>> heightypatch;
 
     float scale;
     int type;
