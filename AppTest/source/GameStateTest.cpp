@@ -1362,13 +1362,20 @@ TEST_CASE("GameState tranche 8 members start at their historical global defaults
 		}
 	}
 
-	SECTION("declared types are preserved from the migrated globals")
-	{
-		REQUIRE(std::is_same<decltype(s.numpathpoints), int>::value);
-		REQUIRE(std::is_same<decltype(s.pathpoint), Vector3[30]>::value);
-		REQUIRE(std::is_same<decltype(s.numpathpointconnect), int[30]>::value);
-		REQUIRE(std::is_same<decltype(s.pathpointconnect), int[30][30]>::value);
-	}
+SECTION("the pathfinding tables are fixed-size containers")
+{
+    // This used to assert Vector3[30] / int[30] / int[30][30]. That was true and
+    // it was the problem: these tables are filled from the level JSON with no
+    // clamp against 30, then walked with numpathpoints as the bound, so a level
+    // with more than 30 pathpoints wrote past the end. They are std::array now so
+    // that throws.
+    REQUIRE(std::is_same<decltype(s.numpathpoints), int>::value);
+    REQUIRE(std::is_same<decltype(s.pathpoint), std::array<Vector3, 30>>::value);
+    REQUIRE(std::is_same<decltype(s.numpathpointconnect), std::array<int, 30>>::value);
+    REQUIRE(std::is_same<decltype(s.pathpointconnect), std::array<std::array<int, 30>, 30>>::value);
+    REQUIRE(s.pathpoint.size() == 30);
+    REQUIRE(s.pathpointconnect.size() == 30);
+}
 }
 
 // Moving the graph into GameState is only worth anything if two GameStates stop

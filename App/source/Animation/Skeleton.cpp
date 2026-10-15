@@ -48,8 +48,11 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 	, freetime(0)
 	, freefall(false)
 {
-	memset(forwardjoints, 0, sizeof(forwardjoints));
-	memset(lowforwardjoints, 0, sizeof(lowforwardjoints));
+	// forwardjoints and lowforwardjoints are std::array with "= {}" on the
+	// declaration, which value-initialises them. The memsets that used to zero
+	// them here would need the address of the first element and are not wanted -
+	// and note the difference from a bare std::array member, which default-
+	// initialises and leaves its ints indeterminate.
 	// jointlabels is a std::array, so it value-initialises itself to zero; the
 	// memset below would have needed the address of its first element and is not
 	// wanted.
@@ -84,32 +87,32 @@ Vector3& Skeleton::jointVel(int bodypart)
 void Skeleton::FindForwards()
 {
 	//Find forward vectors
-	CrossProduct(joints[forwardjoints[1]].position - joints[forwardjoints[0]].position, joints[forwardjoints[2]].position - joints[forwardjoints[0]].position, &forward);
+	CrossProduct(joints[forwardjoints.at(1)].position - joints[forwardjoints.at(0)].position, joints[forwardjoints.at(2)].position - joints[forwardjoints.at(0)].position, &forward);
 	Normalise(&forward);
 
-	CrossProduct(joints[lowforwardjoints[1]].position - joints[lowforwardjoints[0]].position, joints[lowforwardjoints[2]].position - joints[lowforwardjoints[0]].position, &lowforward);
+	CrossProduct(joints[lowforwardjoints.at(1)].position - joints[lowforwardjoints.at(0)].position, joints[lowforwardjoints.at(2)].position - joints[lowforwardjoints.at(0)].position, &lowforward);
 	Normalise(&lowforward);
 
 	//Special forwards
-	specialforward[0] = forward;
+	specialforward.at(0) = forward;
 
-	specialforward[1] = jointPos(rightshoulder) + jointPos(rightwrist);
-	specialforward[1] = jointPos(rightelbow) - specialforward[1] / 2.f;
-	specialforward[1] += forward * .4f;
-	Normalise(&specialforward[1]);
-	specialforward[2] = jointPos(leftshoulder) + jointPos(leftwrist);
-	specialforward[2] = jointPos(leftelbow) - specialforward[2] / 2.f;
-	specialforward[2] += forward * .4f;
-	Normalise(&specialforward[2]);
+	specialforward.at(1) = jointPos(rightshoulder) + jointPos(rightwrist);
+	specialforward.at(1) = jointPos(rightelbow) - specialforward.at(1) / 2.f;
+	specialforward.at(1) += forward * .4f;
+	Normalise(&specialforward.at(1));
+	specialforward.at(2) = jointPos(leftshoulder) + jointPos(leftwrist);
+	specialforward.at(2) = jointPos(leftelbow) - specialforward.at(2) / 2.f;
+	specialforward.at(2) += forward * .4f;
+	Normalise(&specialforward.at(2));
 
-	specialforward[3] = jointPos(righthip) + jointPos(rightankle);
-	specialforward[3] = specialforward[3] / 2.f - jointPos(rightknee);
-	specialforward[3] += lowforward * .4f;
-	Normalise(&specialforward[3]);
-	specialforward[4] = jointPos(lefthip) + jointPos(leftankle);
-	specialforward[4] = specialforward[4] / 2.f - jointPos(leftknee);
-	specialforward[4] += lowforward * .4f;
-	Normalise(&specialforward[4]);
+	specialforward.at(3) = jointPos(righthip) + jointPos(rightankle);
+	specialforward.at(3) = specialforward.at(3) / 2.f - jointPos(rightknee);
+	specialforward.at(3) += lowforward * .4f;
+	Normalise(&specialforward.at(3));
+	specialforward.at(4) = jointPos(lefthip) + jointPos(leftankle);
+	specialforward.at(4) = specialforward.at(4) / 2.f - jointPos(leftknee);
+	specialforward.at(4) += lowforward * .4f;
+	Normalise(&specialforward.at(4));
 }
 
 /* EFFECT
@@ -584,31 +587,31 @@ void Skeleton::FindRotationMuscle(int which, int animation)
 	const int label2 = muscles[which].parent2->label;
 	switch (label1) {
 	case head:
-		fwd = specialforward[0];
+		fwd = specialforward.at(0);
 		break;
 	case rightshoulder:
 	case rightelbow:
 	case rightwrist:
 	case righthand:
-		fwd = specialforward[1];
+		fwd = specialforward.at(1);
 		break;
 	case leftshoulder:
 	case leftelbow:
 	case leftwrist:
 	case lefthand:
-		fwd = specialforward[2];
+		fwd = specialforward.at(2);
 		break;
 	case righthip:
 	case rightknee:
 	case rightankle:
 	case rightfoot:
-		fwd = specialforward[3];
+		fwd = specialforward.at(3);
 		break;
 	case lefthip:
 	case leftknee:
 	case leftankle:
 	case leftfoot:
-		fwd = specialforward[4];
+		fwd = specialforward.at(4);
 		break;
 	default:
 		if (muscles[which].parent1->lower) {
@@ -805,11 +808,11 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 
 	// read forwardjoints (?)
 	for (j = 0; j < 3; j++) {
-		funpackf(tfile, "Bi", &forwardjoints[j]);
+		funpackf(tfile, "Bi", &forwardjoints.at(j));
 	}
 	// read lowforwardjoints (?)
 	for (j = 0; j < 3; j++) {
-		funpackf(tfile, "Bi", &lowforwardjoints[j]);
+		funpackf(tfile, "Bi", &lowforwardjoints.at(j));
 	}
 
 	// ???

@@ -41,15 +41,15 @@ public:
 
 	int selected;
 
-	int forwardjoints[3];
+	std::array<int, 3> forwardjoints = {};
 	Vector3 forward;
 
 	int id;
 
-	int lowforwardjoints[3];
+	std::array<int, 3> lowforwardjoints = {};
 	Vector3 lowforward;
 
-	Vector3 specialforward[5];
+	std::array<Vector3, 5> specialforward = {};
 	// Maps a skeleton slot to a joint label. std::array because the value is used
 	// as an index into jointlabels and then into joints, and both are unchecked
 	// today: DoConstraints reads jointlabels[jointstartarray[i]] and then

@@ -44,9 +44,9 @@ struct GameState
 	// each other and have to move together. They index pathpointselected too,
 	// which is what the editor keys its link and delete commands off.
 	int numpathpoints = 0;
-	Vector3 pathpoint[30] = {};
-	int numpathpointconnect[30] = {};
-	int pathpointconnect[30][30] = {};
+	std::array<Vector3, 30> pathpoint = {};
+	std::array<int, 30> numpathpointconnect = {};
+	std::array<std::array<int, 30>, 30> pathpointconnect = {};
 
 	// hawk
 	float hawkyaw = 0;
