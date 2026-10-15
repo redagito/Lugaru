@@ -50,7 +50,9 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 {
 	memset(forwardjoints, 0, sizeof(forwardjoints));
 	memset(lowforwardjoints, 0, sizeof(lowforwardjoints));
-	memset(jointlabels, 0, sizeof(jointlabels));
+	// jointlabels is a std::array, so it value-initialises itself to zero; the
+	// memset below would have needed the address of its first element and is not
+	// wanted.
 
 	skinText_storage.reset(new GLubyte[512 * 512 * 3]());
 	skinText = skinText_storage.get();
@@ -120,7 +122,7 @@ void Skeleton::FindForwards()
  * 
  * Tutorial::active
  */
-float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive, bool bloodtoggleflag, float timemultiplier, Terrain& terrainref, int envtype, float shakeamount, bool freeze, int detaillevel, int jointstartarray[26], int jointendarray[26])
+float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive, bool bloodtoggleflag, float timemultiplier, Terrain& terrainref, int envtype, float shakeamount, bool freeze, int detaillevel, std::array<int, 26>& jointstartarray, std::array<int, 26>& jointendarray)
 {
 	const float elasticity = .3f;
 	Vector3 bounceness;
@@ -457,14 +459,14 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 			unsigned int k = terrainref.patchobjects[whichpatchx][whichpatchz][m];
 			if (Object::objects[k]->possible) {
 				for (i = 0; i < 26; i++) {
-					//Make this less stupid
-					Vector3 start = joints[jointlabels[jointstartarray[i]]].position * (*scale) + *coords;
-					Vector3 end = joints[jointlabels[jointendarray[i]]].position * (*scale) + *coords;
-					whichhit = Object::objects[k]->model.LineCheckSlidePossible(&start, &end, &Object::objects[k]->position, &Object::objects[k]->yaw);
-					if (whichhit != -1) {
-						joints[jointlabels[jointendarray[i]]].position = (end - *coords) / (*scale);
-						for (unsigned j = 0; j < muscles.size(); j++) {
-							if ((muscles[j].parent1->label == jointstartarray[i] && muscles[j].parent2->label == jointendarray[i]) || (muscles[j].parent2->label == jointstartarray[i] && muscles[j].parent1->label == jointendarray[i])) {
+				//Make this less stupid
+				Vector3 start = joints[jointlabels[jointstartarray.at(i)]].position * (*scale) + *coords;
+				Vector3 end = joints[jointlabels[jointendarray.at(i)]].position * (*scale) + *coords;
+				whichhit = Object::objects[k]->model.LineCheckSlidePossible(&start, &end, &Object::objects[k]->position, &Object::objects[k]->yaw);
+				if (whichhit != -1) {
+					joints[jointlabels[jointendarray.at(i)]].position = (end - *coords) / (*scale);
+					for (unsigned j = 0; j < muscles.size(); j++) {
+						if ((muscles[j].parent1->label == jointstartarray.at(i) && muscles[j].parent2->label == jointendarray.at(i)) || (muscles[j].parent2->label == jointstartarray.at(i) && muscles[j].parent1->label == jointendarray.at(i))) {
 								muscles[j].DoConstraint(spinny, timemultiplier, freeze);
 							}
 						}

@@ -9,6 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <array>
 #include <cmath>
 #include <cstdio>
 #include <memory>
@@ -207,8 +208,8 @@ TEST_CASE("a skeleton loads and simulates without a GL context", "[skeleton][sim
 		GameState gamestate;
 		Vector3 coords(0, 10, 0);
 		float scale = 1;
-		int jointstartarray[26] = {};
-		int jointendarray[26] = {};
+		std::array<int, 26> jointstartarray = {};
+		std::array<int, 26> jointendarray = {};
 
 		for (int frame = 0; frame < 200; frame++) {
 			skeleton->DoConstraints(&coords, &scale, false, gamestate.bloodtoggle, 0.01f,

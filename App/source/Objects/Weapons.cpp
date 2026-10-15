@@ -114,7 +114,7 @@ void Weapon::Load(bool usetrilinear, ProgressCallback callback, GameAssets& asse
 	assets.weapons.staffmodel.CalculateNormals(1, callback);
 }
 
-void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26], GameState& gamestate, GameAssets& assets)
+void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, std::array<int, 26>& jointstartarray, GameState& gamestate, GameAssets& assets)
 {
 	int whichpatchx, whichpatchz, whichhit;
 	Vector3 start, end, colpoint, normalrot, footvel, footpoint;
@@ -1022,7 +1022,7 @@ Vector3 temppoint1, temppoint2;
 	}
 }
 
-void Weapons::DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye, GameState& gamestate, GameAssets& assets)
+void Weapons::DoStuff(bool tutorialActive, bool inDialog, std::array<int, 26>& jointstartarray, AwardCallback awardNinja, AwardCallback awardBullseye, GameState& gamestate, GameAssets& assets)
 {
 	//Move
 	// TODO What the actual fuck is this?

@@ -353,7 +353,7 @@ public:
 
     void changeCreatureType(person_type type, bool tutorialActive, GameState& gamestate, GameAssets& assets);
 
-    void CheckKick(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
+    void CheckKick(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, std::array<int, 26>& whichjointstartarray, GameState& gamestate, GameAssets& assets);
     void CatchFire(GameState& gamestate);
     void DoBlood(float howmuch, int which, bool tutorialActive, GameState& gamestate, GameAssets& assets);
     void DoBloodBig(float howmuch, int which, bool tutorialActive, GameState& gamestate, GameAssets& assets);
@@ -395,18 +395,18 @@ public:
 
     bool isWallJump();
     void Reverse(bool tutorialActive, GameState& gamestate, GameAssets& assets);
-    void DoDamage(float howmuch, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
+    void DoDamage(float howmuch, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, std::array<int, 26>& whichjointstartarray, GameState& gamestate, GameAssets& assets);
     void DoHead(float timemultiplier, GameState& gamestate);
     void DoMipmaps();
 
-    int SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
-    int DrawSkeleton(Terrain& terrain, bool tutorialActive, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
+    int SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, std::array<int, 26>& whichjointstartarray, GameState& gamestate, GameAssets& assets);
+    int DrawSkeleton(Terrain& terrain, bool tutorialActive, float timemultiplier, std::array<int, 26>& whichjointstartarray, GameState& gamestate, GameAssets& assets);
     void Puff(int whichlabel, GameState& gamestate);
     void FootLand(bodypart whichfoot, float opacity, Terrain& terrain, GameState& gamestate);
-    void DoStuff(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
+    void DoStuff(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, std::array<int, 26>& whichjointstartarray, GameState& gamestate, GameAssets& assets);
     void setTargetAnimation(int);
-    void DoAnimations(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
-    void RagDoll(bool checkcollision, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, int whichjointstartarray[26], GameState& gamestate, GameAssets& assets);
+    void DoAnimations(Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, std::array<int, 26>& whichjointstartarray, GameState& gamestate, GameAssets& assets);
+    void RagDoll(bool checkcollision, Terrain& terrain, bool tutorialActive, bool inDialog, float timemultiplier, std::array<int, 26>& whichjointstartarray, GameState& gamestate, GameAssets& assets);
 
     void takeWeapon(int weaponId, GameAssets& assets);
 

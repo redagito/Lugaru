@@ -311,7 +311,7 @@ Person::Person(GameState& gamestate, GameAssets& assets)
 	setProportions(1, 1, 1, 1);
 }
 
-/* Read a person in tfile. Throws an error if itÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢s not valid */
+/* Read a person in tfile. Throws an error if itÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢s not valid */
 Person::Person(FILE* tfile, int mapvers, unsigned i, GameState& gamestate, GameAssets& assets)
 	: Person(gamestate, assets)
 {
@@ -473,7 +473,7 @@ Vector3 Person::getProportionXYZ(int part, GameState& gamestate, GameAssets& ass
  * USES:
  * GameTick/doPlayerCollisions
  */
-void Person::CheckKick(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate, GameAssets& assets)
+void Person::CheckKick(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, std::array<int, 26>& jointstartarray, GameState& gamestate, GameAssets& assets)
 {
 	if (!(hasvictim && (animTarget == rabbitkickanim && victim && victim != this->shared_from_this() && frameCurrent >= 2 && animCurrent == rabbitkickanim) && distsq(&coords, &victim->coords) < 1.2 && !victim->skeleton.free)) {
 		return;
@@ -1517,7 +1517,7 @@ void Person::Reverse(bool tutorialActive, GameState& gamestate, GameAssets& asse
 /* EFFECT
  * get hurt
  */
-void Person::DoDamage(float howmuch, Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate, GameAssets& assets)
+void Person::DoDamage(float howmuch, Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, std::array<int, 26>& jointstartarray, GameState& gamestate, GameAssets& assets)
 {
 	// stats?
 	if (id == 0) {
@@ -1755,7 +1755,7 @@ void Person::DoHead(float timemultiplier, GameState& gamestate)
 /* EFFECT
  * ragdolls character?
  */
-void Person::RagDoll(bool checkcollision, Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate, GameAssets& assets)
+void Person::RagDoll(bool checkcollision, Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, std::array<int, 26>& jointstartarray, GameState& gamestate, GameAssets& assets)
 {
 	static Vector3 change;
 	static int i;
@@ -2010,7 +2010,7 @@ void Person::setTargetAnimation(int animation)
  * MONSTER
  * TODO: ???
  */
-void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate, GameAssets& assets)
+void Person::DoAnimations(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, std::array<int, 26>& jointstartarray, GameState& gamestate, GameAssets& assets)
 {
 	if (!skeleton.free) {
 		static float oldtarget;
@@ -4526,7 +4526,7 @@ Reverse(tutorialActive, gamestate, assets);
  * MONSTER
  * TODO Wtf is this? Refactor!
  */
-void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate, GameAssets& assets)
+void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, std::array<int, 26>& jointstartarray, GameState& gamestate, GameAssets& assets)
 {
 	static Vector3 terrainnormal;
 	static Vector3 flatfacing;
@@ -6349,7 +6349,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 /* EFFECT
  * inverse kinematics helper function
  */
-static void IKHelper(Person* p, float interp, Terrain& terrainref, bool tutorialActive, float timemultiplier, int jointstartarray[26], GameState& gamestate)
+static void IKHelper(Person* p, float interp, Terrain& terrainref, bool tutorialActive, float timemultiplier, std::array<int, 26>& jointstartarray, GameState& gamestate)
 {
 	Vector3 point, change, change2;
 	float heightleft, heightright;
@@ -6391,7 +6391,7 @@ static void IKHelper(Person* p, float interp, Terrain& terrainref, bool tutorial
  * MONSTER
  * TODO: ???
  */
-int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemultiplier, int jointstartarray[26], GameState& gamestate, GameAssets& assets)
+int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemultiplier, std::array<int, 26>& jointstartarray, GameState& gamestate, GameAssets& assets)
 {
 	int oldplayerdetail;
 	if ((gamestate.frustum.SphereInFrustum(coords.x, coords.y + scale * 3, coords.z, scale * 8) && distsq(&gamestate.viewer, &coords) < gamestate.viewdistance * gamestate.viewdistance) || skeleton.free == 3) {
@@ -7141,7 +7141,7 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 
 /* FUNCTION?
  */
-int Person::SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, int jointstartarray[26], GameState& gamestate, GameAssets& assets)
+int Person::SphereCheck(Vector3* p1, float radius, Vector3* p, Vector3* move, float* rotate, Model* model, Terrain& terrainref, bool tutorialActive, bool inDialog, float timemultiplier, std::array<int, 26>& jointstartarray, GameState& gamestate, GameAssets& assets)
 {
 	// This working state was static, which made it shared by every Person and
 	// every call. Two players colliding in the same frame overwrote each other's

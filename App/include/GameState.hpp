@@ -364,8 +364,12 @@ struct GameState
 	// built once per session by Game::InitGame and read for the rest of it, and
 	// Skeleton::DoConstraints walks them to a fixed 26 rows, so the extent is
 	// part of the contract rather than a stored count.
-	int whichjointstartarray[26] = {};
-	int whichjointendarray[26] = {};
+	// Which joints the ragdoll's constraints run between, filled once at startup
+	// from the joint labels. std::array with checked access rather than a C array
+	// threaded by pointer through a dozen signatures, because the values are used
+	// to index jointlabels and then joints.
+	std::array<int, 26> whichjointstartarray = {};
+	std::array<int, 26> whichjointendarray = {};
 
 	// session control
 	int tryquit = 0;

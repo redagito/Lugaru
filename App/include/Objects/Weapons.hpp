@@ -48,7 +48,7 @@ public:
     static void Load(bool usetrilinear, ProgressCallback callback, GameAssets& assets);
 
     void draw(GameState& gamestate, GameAssets& assets);
-    void doStuff(int, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, int jointstartarray[26], GameState& gamestate, GameAssets& assets);
+    void doStuff(int, bool tutorialActive, bool inDialog, AwardCallback awardNinja, AwardCallback awardBullseye, std::array<int, 26>& jointstartarray, GameState& gamestate, GameAssets& assets);
 
       int getType();
       void setType(int);
@@ -126,7 +126,7 @@ public:
     Texture stafftextureptr;
 
     void Draw(GameState& gamestate, GameAssets& assets);
-    void DoStuff(bool tutorialActive, bool inDialog, int jointstartarray[26], AwardCallback awardNinja, AwardCallback awardBullseye, GameState& gamestate, GameAssets& assets);
+    void DoStuff(bool tutorialActive, bool inDialog, std::array<int, 26>& jointstartarray, AwardCallback awardNinja, AwardCallback awardBullseye, GameState& gamestate, GameAssets& assets);
 };
 
 // There used to be an `extern Weapons weapons;` here as well as in Globals.h.

@@ -1486,11 +1486,22 @@ TEST_CASE("GameState tranche 9 members start at their historical global defaults
 		}
 	}
 
-	SECTION("declared types are preserved from the migrated globals")
-	{
-		REQUIRE(std::is_same<decltype(s.whichjointstartarray), int[26]>::value);
-		REQUIRE(std::is_same<decltype(s.whichjointendarray), int[26]>::value);
-	}
+SECTION("the joint tables do not decay to a bare pointer")
+{
+    // This used to assert the declared type was int[26]. That was true and it was
+    // the problem: a parameter declared int[26] decays to int*, so every function
+    // that threaded these tables through the ragdoll and collision code accepted
+    // any pointer at all, and the values index jointlabels and then joints. The
+    // tables are std::array now specifically so that cannot happen.
+    //
+    // The assertion is that they are the fixed-size container, and that passing
+    // them to a function expecting a raw pointer does not compile - which the
+    // signature change in Person/Skeleton/Weapons already enforces.
+    REQUIRE(std::is_same<decltype(s.whichjointstartarray), std::array<int, 26>>::value);
+    REQUIRE(std::is_same<decltype(s.whichjointendarray), std::array<int, 26>>::value);
+    REQUIRE(s.whichjointstartarray.size() == 26);
+    REQUIRE(s.whichjointendarray.size() == 26);
+}
 }
 
 // Moving the tables into GameState is only worth anything if two GameStates stop

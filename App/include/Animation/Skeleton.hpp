@@ -50,7 +50,15 @@ public:
 	Vector3 lowforward;
 
 	Vector3 specialforward[5];
-	int jointlabels[max_joints];
+	// Maps a skeleton slot to a joint label. std::array because the value is used
+	// as an index into jointlabels and then into joints, and both are unchecked
+	// today: DoConstraints reads jointlabels[jointstartarray[i]] and then
+	// joints[that]. A joint label that ran past the end read whatever followed.
+	//
+	// The "= {}" matters. A std::array member is default-initialised, which leaves
+	// its ints indeterminate, so dropping the memset that used to zero this made
+	// DoConstraints index with garbage until this was restored.
+	std::array<int, max_joints> jointlabels = {};
 
 	Model model[7];
 	Model modellow;
@@ -83,7 +91,7 @@ public:
 	bool freefall;
 
 	void FindForwards();
-	float DoConstraints(Vector3* coords, float* scale, bool tutorialActive, bool bloodtoggle, float timemultiplier, Terrain& terrain, int environment, float camerashake, bool freeze, int detail, int whichjointstartarray[26], int whichjointendarray[26]);
+	float DoConstraints(Vector3* coords, float* scale, bool tutorialActive, bool bloodtoggle, float timemultiplier, Terrain& terrain, int environment, float camerashake, bool freeze, int detail, std::array<int, 26>& whichjointstartarray, std::array<int, 26>& whichjointendarray);
 	void DoGravity(float* scale, float timemultiplier, float gravity);
 	void FindRotationMuscle(int which, int animation);
 	void Load(const std::string& fileName, const std::string& lowfileName, const std::string& clothesfileName, 

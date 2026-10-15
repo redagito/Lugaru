@@ -21,6 +21,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <array>
 #include <cmath>
 
 #include "Console.hpp"
@@ -94,7 +95,7 @@ TEST_CASE("the simulation runs a loaded level without diverging", "[simulation]"
 	Terrain& terrain = *assets.terrain;
 	// The engine has a start array but no end array; GameState carries a
 	// whichjointendarray that nothing in these paths reads.
-	int jointStart[26] = {};
+	std::array<int, 26> jointStart = {};
 
 	SECTION("the AI can be run for many frames on every character")
 	{
