@@ -31,6 +31,7 @@
 #include "Objects/Object.hpp"
 #include "Objects/Person.hpp"
 #include "Objects/PersonType.hpp"
+#include "Animation/Animation.hpp"
 #include "Utils/Folders.hpp"
 
 namespace
@@ -70,6 +71,9 @@ TEST_CASE("the simulation runs a loaded level without diverging", "[simulation]"
 	static bool typesLoaded = false;
 	if (!typesLoaded) {
 		PersonType::Load(assets.graphics);
+        // Person::doAI subscripts assets.graphics.animations, which the level
+        // load leaves empty. Without this the STL's checked subscript fast-fails.
+        Animation::loadAll([]() {}, assets.graphics);
 		typesLoaded = true;
 	}
 	if (!assets.terrain) {

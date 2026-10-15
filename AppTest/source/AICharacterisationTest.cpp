@@ -2,28 +2,34 @@
 //
 // References AppLib and Catch2 only. No GL context, no audio device.
 //
-// NOT YET A USEFUL TEST - this is a narrowing experiment kept in the repro
-// binary until it becomes one. Two things are wrong with it and both are noted
-// here rather than left for someone to rediscover:
+// A characterisation test for Person::doAI.
 //
-//   1. It can only run one character. Restoring the rest of the players makes
-//      it crash with STATUS_STACK_BUFFER_OVERRUN, on the second doAI of the very
-//      first frame. That narrowing - one character runs, two crash - is the most
-//      precise thing currently known about that bug, and it is why this file
-//      lives here instead of in the main suite.
+// doAI is a god-function: roughly a thousand lines, and the single largest
+// obstacle to the roadmap's later tranches. Before it can be split, something has
+// to pin what it currently does, because the existing tests only assert that the
+// simulation does not explode - joints stay finite, bodies stay in the world. A
+// pure-extraction refactor could reorder or drop work and still pass those.
 //
-//   2. As written it fingerprints nothing. The recorded value is the FNV seed
-//      unchanged, which means every frame's trajectory was identical: the fields
-//      describe() reads are not the ones doAI actually moves for this character.
-// Fixing that needs someone to look at what doAI writes, not a better hash.
+// The fingerprint is a hash over a formatted snapshot of observable state, taken
+// after every frame. It asserts on behaviour - the trajectory the characters
+// follow - not on how the code is arranged. If an extraction changes anything, the
+// trajectory changes and the hash changes.
 //
-// It stays in the reproducer binary because a crash takes the whole test binary
-// with it, which would stop the main suite's other fifty-odd cases from
-// completing. Move it up to AppTest once both items above are resolved.
+// THE SETUP IS NOT OPTIONAL, and this is the expensive lesson behind this file.
+// Animation::loadAll has to run before doAI does. Person::doAI subscripts
+// assets.graphics.animations[animTarget] (Person.cpp:8491, among a dozen other
+// sites) and Person::LoadJsonLevel leaves that vector empty. In a Debug build the
+// STL's own checked subscript refuses an out-of-range access and calls
+// __fastfail, which surfaces as STATUS_STACK_BUFFER_OVERRUN - an exception no
+// handler, no /GS and no AddressSanitizer can see, because it is raised before the
+// address is ever formed. A harness that omitted that call produced a crash that
+// looked exactly like a memory-safety bug in the engine and was nothing of the
+// kind.
 //
-// The intent it is meant to serve: pin doAI's behaviour so the function can be
-// split. Splitting a thousand-line god-function with only "joints stay finite",
-// as a net would let a refactor reorder or drop work and still pass.
+// The same lesson is why this test exists at all: the trajectory fingerprint is
+// the check that the setup is right and stays right. If the animations stop being
+// loaded, the numbers stop moving, and that is visible here rather than being
+// silently absorbed.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -36,6 +42,7 @@
 #include <vector>
 
 #include "Console.hpp"
+#include "Animation/Animation.hpp"
 #include "Game.hpp"
 #include "GameAssets.hpp"
 #include "GameState.hpp"
@@ -109,6 +116,9 @@ TEST_CASE("doAI follows the same trajectory now as before it was refactored", "[
 
     if (!typesLoaded) {
         PersonType::Load(assets.graphics);
+        // VERIFYING THE FINDING: without this the vector doAI subscripts is empty,
+        // and the crash was our harness, not the engine.
+        Animation::loadAll([]() {}, assets.graphics);
         typesLoaded = true;
     }
     if (!assets.terrain) {
@@ -133,11 +143,7 @@ TEST_CASE("doAI follows the same trajectory now as before it was refactored", "[
 
     // A snapshot, not a range over the live vector: the load clears it and the
     // simulation may add to it, and either would invalidate an iterator.
-    //
-    // TEMPORARY: one character, because two crash. See the note at the top of
-    // this file - this is the narrowing experiment, not the finished test.
-    std::vector<std::shared_ptr<Person>> characters(Person::players);
-    characters.resize(characters.empty() ? 0 : 1);
+    const std::vector<std::shared_ptr<Person>> characters(Person::players);
 
     std::ostringstream trajectory;
     unsigned fingerprint = fold(std::string());

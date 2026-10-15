@@ -41,6 +41,7 @@
 #include "GameState.hpp"
 #include "Objects/Person.hpp"
 #include "Objects/PersonType.hpp"
+#include "Animation/Animation.hpp"
 #include "Environment/Terrain.hpp"
 #include "Animation/Skeleton.hpp"
 
@@ -71,6 +72,9 @@ TEST_CASE("the AI can be repeated with a load between each", "[simulation][ragdo
 
     if (!typesLoaded) {
         PersonType::Load(assets.graphics);
+        // Person::doAI subscripts assets.graphics.animations, which the level
+        // load leaves empty. Without this the STL's checked subscript fast-fails.
+        Animation::loadAll([]() {}, assets.graphics);
         typesLoaded = true;
     }
     if (!assets.terrain) {
