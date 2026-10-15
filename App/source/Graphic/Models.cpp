@@ -270,63 +270,63 @@ void Model::UpdateVertexArray()
 	if (flat) {
 		for (unsigned int i = 0; i < Triangles.size(); i++) {
 			unsigned int j = i * 24;
-			vArray[j + 0] = Triangles[i].gx[0];
-			vArray[j + 1] = Triangles[i].gy[0];
-			vArray[j + 2] = Triangles[i].facenormal.x * -1;
-			vArray[j + 3] = Triangles[i].facenormal.y * -1;
-			vArray[j + 4] = Triangles[i].facenormal.z * -1;
-			vArray[j + 5] = vertex[Triangles[i].vertex.at(0)].x;
-			vArray[j + 6] = vertex[Triangles[i].vertex.at(0)].y;
-			vArray[j + 7] = vertex[Triangles[i].vertex.at(0)].z;
+			vArray.at(j + 0) = Triangles[i].gx[0];
+			vArray.at(j + 1) = Triangles[i].gy[0];
+			vArray.at(j + 2) = Triangles[i].facenormal.x * -1;
+			vArray.at(j + 3) = Triangles[i].facenormal.y * -1;
+			vArray.at(j + 4) = Triangles[i].facenormal.z * -1;
+			vArray.at(j + 5) = vertex[Triangles[i].vertex.at(0)].x;
+			vArray.at(j + 6) = vertex[Triangles[i].vertex.at(0)].y;
+			vArray.at(j + 7) = vertex[Triangles[i].vertex.at(0)].z;
 
-			vArray[j + 8] = Triangles[i].gx[1];
-			vArray[j + 9] = Triangles[i].gy[1];
-			vArray[j + 10] = Triangles[i].facenormal.x * -1;
-			vArray[j + 11] = Triangles[i].facenormal.y * -1;
-			vArray[j + 12] = Triangles[i].facenormal.z * -1;
-			vArray[j + 13] = vertex[Triangles[i].vertex.at(1)].x;
-			vArray[j + 14] = vertex[Triangles[i].vertex.at(1)].y;
-			vArray[j + 15] = vertex[Triangles[i].vertex.at(1)].z;
+			vArray.at(j + 8) = Triangles[i].gx[1];
+			vArray.at(j + 9) = Triangles[i].gy[1];
+			vArray.at(j + 10) = Triangles[i].facenormal.x * -1;
+			vArray.at(j + 11) = Triangles[i].facenormal.y * -1;
+			vArray.at(j + 12) = Triangles[i].facenormal.z * -1;
+			vArray.at(j + 13) = vertex[Triangles[i].vertex.at(1)].x;
+			vArray.at(j + 14) = vertex[Triangles[i].vertex.at(1)].y;
+			vArray.at(j + 15) = vertex[Triangles[i].vertex.at(1)].z;
 
-			vArray[j + 16] = Triangles[i].gx[2];
-			vArray[j + 17] = Triangles[i].gy[2];
-			vArray[j + 18] = Triangles[i].facenormal.x * -1;
-			vArray[j + 19] = Triangles[i].facenormal.y * -1;
-			vArray[j + 20] = Triangles[i].facenormal.z * -1;
-			vArray[j + 21] = vertex[Triangles[i].vertex.at(2)].x;
-			vArray[j + 22] = vertex[Triangles[i].vertex.at(2)].y;
-			vArray[j + 23] = vertex[Triangles[i].vertex.at(2)].z;
+			vArray.at(j + 16) = Triangles[i].gx[2];
+			vArray.at(j + 17) = Triangles[i].gy[2];
+			vArray.at(j + 18) = Triangles[i].facenormal.x * -1;
+			vArray.at(j + 19) = Triangles[i].facenormal.y * -1;
+			vArray.at(j + 20) = Triangles[i].facenormal.z * -1;
+			vArray.at(j + 21) = vertex[Triangles[i].vertex.at(2)].x;
+			vArray.at(j + 22) = vertex[Triangles[i].vertex.at(2)].y;
+			vArray.at(j + 23) = vertex[Triangles[i].vertex.at(2)].z;
 		}
 	}
 	else {
 		for (unsigned int i = 0; i < Triangles.size(); i++) {
 			unsigned int j = i * 24;
-			vArray[j + 0] = Triangles[i].gx[0];
-			vArray[j + 1] = Triangles[i].gy[0];
-			vArray[j + 2] = normals[Triangles[i].vertex.at(0)].x;
-			vArray[j + 3] = normals[Triangles[i].vertex.at(0)].y;
-			vArray[j + 4] = normals[Triangles[i].vertex.at(0)].z;
-			vArray[j + 5] = vertex[Triangles[i].vertex.at(0)].x;
-			vArray[j + 6] = vertex[Triangles[i].vertex.at(0)].y;
-			vArray[j + 7] = vertex[Triangles[i].vertex.at(0)].z;
+			vArray.at(j + 0) = Triangles[i].gx[0];
+			vArray.at(j + 1) = Triangles[i].gy[0];
+			vArray.at(j + 2) = normals[Triangles[i].vertex.at(0)].x;
+			vArray.at(j + 3) = normals[Triangles[i].vertex.at(0)].y;
+			vArray.at(j + 4) = normals[Triangles[i].vertex.at(0)].z;
+			vArray.at(j + 5) = vertex[Triangles[i].vertex.at(0)].x;
+			vArray.at(j + 6) = vertex[Triangles[i].vertex.at(0)].y;
+			vArray.at(j + 7) = vertex[Triangles[i].vertex.at(0)].z;
 
-			vArray[j + 8] = Triangles[i].gx[1];
-			vArray[j + 9] = Triangles[i].gy[1];
-			vArray[j + 10] = normals[Triangles[i].vertex.at(1)].x;
-			vArray[j + 11] = normals[Triangles[i].vertex.at(1)].y;
-			vArray[j + 12] = normals[Triangles[i].vertex.at(1)].z;
-			vArray[j + 13] = vertex[Triangles[i].vertex.at(1)].x;
-			vArray[j + 14] = vertex[Triangles[i].vertex.at(1)].y;
-			vArray[j + 15] = vertex[Triangles[i].vertex.at(1)].z;
+			vArray.at(j + 8) = Triangles[i].gx[1];
+			vArray.at(j + 9) = Triangles[i].gy[1];
+			vArray.at(j + 10) = normals[Triangles[i].vertex.at(1)].x;
+			vArray.at(j + 11) = normals[Triangles[i].vertex.at(1)].y;
+			vArray.at(j + 12) = normals[Triangles[i].vertex.at(1)].z;
+			vArray.at(j + 13) = vertex[Triangles[i].vertex.at(1)].x;
+			vArray.at(j + 14) = vertex[Triangles[i].vertex.at(1)].y;
+			vArray.at(j + 15) = vertex[Triangles[i].vertex.at(1)].z;
 
-			vArray[j + 16] = Triangles[i].gx[2];
-			vArray[j + 17] = Triangles[i].gy[2];
-			vArray[j + 18] = normals[Triangles[i].vertex.at(2)].x;
-			vArray[j + 19] = normals[Triangles[i].vertex.at(2)].y;
-			vArray[j + 20] = normals[Triangles[i].vertex.at(2)].z;
-			vArray[j + 21] = vertex[Triangles[i].vertex.at(2)].x;
-			vArray[j + 22] = vertex[Triangles[i].vertex.at(2)].y;
-			vArray[j + 23] = vertex[Triangles[i].vertex.at(2)].z;
+			vArray.at(j + 16) = Triangles[i].gx[2];
+			vArray.at(j + 17) = Triangles[i].gy[2];
+			vArray.at(j + 18) = normals[Triangles[i].vertex.at(2)].x;
+			vArray.at(j + 19) = normals[Triangles[i].vertex.at(2)].y;
+			vArray.at(j + 20) = normals[Triangles[i].vertex.at(2)].z;
+			vArray.at(j + 21) = vertex[Triangles[i].vertex.at(2)].x;
+			vArray.at(j + 22) = vertex[Triangles[i].vertex.at(2)].y;
+			vArray.at(j + 23) = vertex[Triangles[i].vertex.at(2)].z;
 		}
 	}
 }
@@ -340,51 +340,51 @@ void Model::UpdateVertexArrayNoTex()
 	if (flat) {
 		for (unsigned int i = 0; i < Triangles.size(); i++) {
 			unsigned int j = i * 24;
-			vArray[j + 2] = Triangles[i].facenormal.x * -1;
-			vArray[j + 3] = Triangles[i].facenormal.y * -1;
-			vArray[j + 4] = Triangles[i].facenormal.z * -1;
-			vArray[j + 5] = vertex[Triangles[i].vertex.at(0)].x;
-			vArray[j + 6] = vertex[Triangles[i].vertex.at(0)].y;
-			vArray[j + 7] = vertex[Triangles[i].vertex.at(0)].z;
+			vArray.at(j + 2) = Triangles[i].facenormal.x * -1;
+			vArray.at(j + 3) = Triangles[i].facenormal.y * -1;
+			vArray.at(j + 4) = Triangles[i].facenormal.z * -1;
+			vArray.at(j + 5) = vertex[Triangles[i].vertex.at(0)].x;
+			vArray.at(j + 6) = vertex[Triangles[i].vertex.at(0)].y;
+			vArray.at(j + 7) = vertex[Triangles[i].vertex.at(0)].z;
 
-			vArray[j + 10] = Triangles[i].facenormal.x * -1;
-			vArray[j + 11] = Triangles[i].facenormal.y * -1;
-			vArray[j + 12] = Triangles[i].facenormal.z * -1;
-			vArray[j + 13] = vertex[Triangles[i].vertex.at(1)].x;
-			vArray[j + 14] = vertex[Triangles[i].vertex.at(1)].y;
-			vArray[j + 15] = vertex[Triangles[i].vertex.at(1)].z;
+			vArray.at(j + 10) = Triangles[i].facenormal.x * -1;
+			vArray.at(j + 11) = Triangles[i].facenormal.y * -1;
+			vArray.at(j + 12) = Triangles[i].facenormal.z * -1;
+			vArray.at(j + 13) = vertex[Triangles[i].vertex.at(1)].x;
+			vArray.at(j + 14) = vertex[Triangles[i].vertex.at(1)].y;
+			vArray.at(j + 15) = vertex[Triangles[i].vertex.at(1)].z;
 
-			vArray[j + 18] = Triangles[i].facenormal.x * -1;
-			vArray[j + 19] = Triangles[i].facenormal.y * -1;
-			vArray[j + 20] = Triangles[i].facenormal.z * -1;
-			vArray[j + 21] = vertex[Triangles[i].vertex.at(2)].x;
-			vArray[j + 22] = vertex[Triangles[i].vertex.at(2)].y;
-			vArray[j + 23] = vertex[Triangles[i].vertex.at(2)].z;
+			vArray.at(j + 18) = Triangles[i].facenormal.x * -1;
+			vArray.at(j + 19) = Triangles[i].facenormal.y * -1;
+			vArray.at(j + 20) = Triangles[i].facenormal.z * -1;
+			vArray.at(j + 21) = vertex[Triangles[i].vertex.at(2)].x;
+			vArray.at(j + 22) = vertex[Triangles[i].vertex.at(2)].y;
+			vArray.at(j + 23) = vertex[Triangles[i].vertex.at(2)].z;
 		}
 	}
 	else {
 		for (unsigned int i = 0; i < Triangles.size(); i++) {
 			unsigned int j = i * 24;
-			vArray[j + 2] = normals[Triangles[i].vertex.at(0)].x;
-			vArray[j + 3] = normals[Triangles[i].vertex.at(0)].y;
-			vArray[j + 4] = normals[Triangles[i].vertex.at(0)].z;
-			vArray[j + 5] = vertex[Triangles[i].vertex.at(0)].x;
-			vArray[j + 6] = vertex[Triangles[i].vertex.at(0)].y;
-			vArray[j + 7] = vertex[Triangles[i].vertex.at(0)].z;
+			vArray.at(j + 2) = normals[Triangles[i].vertex.at(0)].x;
+			vArray.at(j + 3) = normals[Triangles[i].vertex.at(0)].y;
+			vArray.at(j + 4) = normals[Triangles[i].vertex.at(0)].z;
+			vArray.at(j + 5) = vertex[Triangles[i].vertex.at(0)].x;
+			vArray.at(j + 6) = vertex[Triangles[i].vertex.at(0)].y;
+			vArray.at(j + 7) = vertex[Triangles[i].vertex.at(0)].z;
 
-			vArray[j + 10] = normals[Triangles[i].vertex.at(1)].x;
-			vArray[j + 11] = normals[Triangles[i].vertex.at(1)].y;
-			vArray[j + 12] = normals[Triangles[i].vertex.at(1)].z;
-			vArray[j + 13] = vertex[Triangles[i].vertex.at(1)].x;
-			vArray[j + 14] = vertex[Triangles[i].vertex.at(1)].y;
-			vArray[j + 15] = vertex[Triangles[i].vertex.at(1)].z;
+			vArray.at(j + 10) = normals[Triangles[i].vertex.at(1)].x;
+			vArray.at(j + 11) = normals[Triangles[i].vertex.at(1)].y;
+			vArray.at(j + 12) = normals[Triangles[i].vertex.at(1)].z;
+			vArray.at(j + 13) = vertex[Triangles[i].vertex.at(1)].x;
+			vArray.at(j + 14) = vertex[Triangles[i].vertex.at(1)].y;
+			vArray.at(j + 15) = vertex[Triangles[i].vertex.at(1)].z;
 
-			vArray[j + 18] = normals[Triangles[i].vertex.at(2)].x;
-			vArray[j + 19] = normals[Triangles[i].vertex.at(2)].y;
-			vArray[j + 20] = normals[Triangles[i].vertex.at(2)].z;
-			vArray[j + 21] = vertex[Triangles[i].vertex.at(2)].x;
-			vArray[j + 22] = vertex[Triangles[i].vertex.at(2)].y;
-			vArray[j + 23] = vertex[Triangles[i].vertex.at(2)].z;
+			vArray.at(j + 18) = normals[Triangles[i].vertex.at(2)].x;
+			vArray.at(j + 19) = normals[Triangles[i].vertex.at(2)].y;
+			vArray.at(j + 20) = normals[Triangles[i].vertex.at(2)].z;
+			vArray.at(j + 21) = vertex[Triangles[i].vertex.at(2)].x;
+			vArray.at(j + 22) = vertex[Triangles[i].vertex.at(2)].y;
+			vArray.at(j + 23) = vertex[Triangles[i].vertex.at(2)].z;
 		}
 	}
 }
@@ -397,17 +397,17 @@ void Model::UpdateVertexArrayNoTexNoNorm()
 
 	for (unsigned int i = 0; i < Triangles.size(); i++) {
 		unsigned int j = i * 24;
-		vArray[j + 5] = vertex[Triangles[i].vertex.at(0)].x;
-		vArray[j + 6] = vertex[Triangles[i].vertex.at(0)].y;
-		vArray[j + 7] = vertex[Triangles[i].vertex.at(0)].z;
+		vArray.at(j + 5) = vertex[Triangles[i].vertex.at(0)].x;
+		vArray.at(j + 6) = vertex[Triangles[i].vertex.at(0)].y;
+		vArray.at(j + 7) = vertex[Triangles[i].vertex.at(0)].z;
 
-		vArray[j + 13] = vertex[Triangles[i].vertex.at(1)].x;
-		vArray[j + 14] = vertex[Triangles[i].vertex.at(1)].y;
-		vArray[j + 15] = vertex[Triangles[i].vertex.at(1)].z;
+		vArray.at(j + 13) = vertex[Triangles[i].vertex.at(1)].x;
+		vArray.at(j + 14) = vertex[Triangles[i].vertex.at(1)].y;
+		vArray.at(j + 15) = vertex[Triangles[i].vertex.at(1)].z;
 
-		vArray[j + 21] = vertex[Triangles[i].vertex.at(2)].x;
-		vArray[j + 22] = vertex[Triangles[i].vertex.at(2)].y;
-		vArray[j + 23] = vertex[Triangles[i].vertex.at(2)].z;
+		vArray.at(j + 21) = vertex[Triangles[i].vertex.at(2)].x;
+		vArray.at(j + 22) = vertex[Triangles[i].vertex.at(2)].y;
+		vArray.at(j + 23) = vertex[Triangles[i].vertex.at(2)].z;
 	}
 }
 
@@ -875,10 +875,10 @@ void Model::draw()
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	if (color) {
-		glInterleavedArrays(GL_T2F_C3F_V3F, 8 * sizeof(GLfloat), &vArray[0]);
+		glInterleavedArrays(GL_T2F_C3F_V3F, 8 * sizeof(GLfloat), &vArray.at(0));
 	}
 	else {
-		glInterleavedArrays(GL_T2F_N3F_V3F, 8 * sizeof(GLfloat), &vArray[0]);
+		glInterleavedArrays(GL_T2F_N3F_V3F, 8 * sizeof(GLfloat), &vArray.at(0));
 	}
 	textureptr.bind();
 
@@ -900,10 +900,10 @@ void Model::drawdifftex(Texture texture)
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	if (color) {
-		glInterleavedArrays(GL_T2F_C3F_V3F, 8 * sizeof(GLfloat), &vArray[0]);
+		glInterleavedArrays(GL_T2F_C3F_V3F, 8 * sizeof(GLfloat), &vArray.at(0));
 	}
 	else {
-		glInterleavedArrays(GL_T2F_N3F_V3F, 8 * sizeof(GLfloat), &vArray[0]);
+		glInterleavedArrays(GL_T2F_N3F_V3F, 8 * sizeof(GLfloat), &vArray.at(0));
 	}
 
 	texture.bind();

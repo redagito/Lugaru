@@ -55,9 +55,14 @@ public:
     // A triangle has exactly three vertices, so these are std::array rather than
     // a C array: the index is nearly always a literal 0, 1 or 2, but the values
     // are indices into Model::vertex, which comes straight out of a model file.
-    std::array<short, 3> vertex;
-    std::array<float, 3> gx;
-    std::array<float, 3> gy;
+    //
+    // The "= {}" is load-bearing. A std::array member is default-initialised,
+    // which leaves these indeterminate, so a TexturedTriangle built by anything
+    // other than the vector's value-initialising resize starts with garbage
+    // vertex indices and then indexes Model::vertex with them.
+    std::array<short, 3> vertex = {};
+    std::array<float, 3> gx = {};
+    std::array<float, 3> gy = {};
     Vector3 facenormal;
 };
 
@@ -87,6 +92,13 @@ public:
     std::vector<Vector3> vertex;
     std::vector<Vector3> normals;
     std::vector<TexturedTriangle> Triangles;
+    // The renderable vertex buffer: twenty-four floats per triangle, written by
+    // UpdateVertexArray and friends.
+    //
+    // UpdateVertexArray assumes this is already sized to Triangles.size() * 24
+    // and writes into it with no check of its own - the loaders size it, and
+    // nothing says so. The writes are .at() now, so a caller that has not sized it
+    // gets a throw rather than a write past an empty vector.
     std::vector<GLfloat> vArray;
 
     /*
