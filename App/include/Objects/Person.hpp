@@ -75,7 +75,7 @@ bool waypointCountIsValid(long long count);
 class Person : public std::enable_shared_from_this<Person>
 {
 private:
-    float proportions[4];
+    std::array<float, 4> proportions = {};
 
 public:
     static std::vector<std::shared_ptr<Person>> players;
@@ -284,7 +284,7 @@ public:
     int playerdetail;
 
     int num_weapons;
-    int weaponids[PersonLimits::max_weapons];
+    std::array<int, PersonLimits::max_weapons> weaponids = {};
     /* Key of weaponids which is the weapon in hand, if any. -1 otherwise.
      * Always 0 or -1 as activeweapon is moved to position 0 when taken */
     int weaponactive;
@@ -293,8 +293,8 @@ public:
     int weaponstuckwhere;
 
     int numwaypoints;
-    Vector3 waypoints[PersonLimits::max_waypoints];
-    int waypointtype[PersonLimits::max_waypoints];
+    std::array<Vector3, PersonLimits::max_waypoints> waypoints = {};
+    std::array<int, PersonLimits::max_waypoints> waypointtype = {};
     float pausetime;
 
     Vector3 headtarget;

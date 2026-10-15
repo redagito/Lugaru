@@ -347,7 +347,7 @@ Person::Person(FILE* tfile, int mapvers, unsigned i, GameState& gamestate, GameA
 	}
 	if (num_weapons > 0) {
 		for (int j = 0; j < num_weapons; j++) {
-			weaponids[j] =  assets.weapons.weapons.size();
+			weaponids.at(j) =  assets.weapons.weapons.size();
 			int type;
 			funpackf(tfile, "Bi", &type);
 			assets.weapons.weapons.push_back(Weapon(type, id));
@@ -358,14 +358,14 @@ Person::Person(FILE* tfile, int mapvers, unsigned i, GameState& gamestate, GameA
 		throw InvalidPersonException();
 	}
 	for (int j = 0; j < numwaypoints; j++) {
-		funpackf(tfile, "Bf", &waypoints[j].x);
-		funpackf(tfile, "Bf", &waypoints[j].y);
-		funpackf(tfile, "Bf", &waypoints[j].z);
+		funpackf(tfile, "Bf", &waypoints.at(j).x);
+		funpackf(tfile, "Bf", &waypoints.at(j).y);
+		funpackf(tfile, "Bf", &waypoints.at(j).z);
 		if (mapvers >= 5) {
-			funpackf(tfile, "Bi", &waypointtype[j]);
+			funpackf(tfile, "Bi", &waypointtype.at(j));
 		}
 		else {
-			waypointtype[j] = wpkeepwalking;
+			waypointtype.at(j) = wpkeepwalking;
 		}
 	}
 
@@ -380,7 +380,7 @@ Person::Person(FILE* tfile, int mapvers, unsigned i, GameState& gamestate, GameA
 	funpackf(tfile, "Bf Bf", &power, &speedmult);
 
 	if (mapvers >= 4) {
-		funpackf(tfile, "Bf Bf Bf Bf", &proportions[0], &proportions[1], &proportions[2], &proportions[3]);
+		funpackf(tfile, "Bf Bf Bf Bf", &proportions.at(0), &proportions.at(1), &proportions.at(2), &proportions.at(3));
 	}
 	else {
 		setProportions(1, 1, 1, 1);
@@ -448,20 +448,20 @@ void Person::skeletonLoad(bool tutorialActive, GameState& gamestate, GameAssets&
 
 void Person::setProportions(float head, float body, float arms, float legs)
 {
-	proportions[0] = head;
-	proportions[1] = body;
-	proportions[2] = arms;
-	proportions[3] = legs;
+	proportions.at(0) = head;
+	proportions.at(1) = body;
+	proportions.at(2) = arms;
+	proportions.at(3) = legs;
 }
 
 float Person::getProportion(int part) const
 {
-	return proportions[part];
+	return proportions.at(part);
 }
 
 Vector3 Person::getProportionXYZ(int part, GameState& gamestate, GameAssets& assets) const
 {
-	Vector3 prop = assets.graphics.types[creature].proportions[part] * proportions[part];
+	Vector3 prop = assets.graphics.types[creature].proportions[part] * proportions.at(part);
 	if (gamestate.cellophane) {
 		prop.z = 0;
 	}
@@ -581,16 +581,16 @@ int Person::getIdle(bool inDialog, GameAssets& assets)
 				return assets.graphics.types[creature].animFightIdle;
 			}
 			if (isPlayerControlled() && (stunned <= 0) && hasWeapon()) {
-				if (assets.weapons.weapons[weaponids[weaponactive]].getType() == knife) {
+				if (assets.weapons.weapons[weaponids.at(weaponactive)].getType() == knife) {
 					return knifefightidleanim;
 				}
-				if (assets.weapons.weapons[weaponids[weaponactive]].getType() == sword && victim->hasWeapon()) {
+				if (assets.weapons.weapons[weaponids.at(weaponactive)].getType() == sword && victim->hasWeapon()) {
 					return swordfightidlebothanim;
 				}
-				if (assets.weapons.weapons[weaponids[weaponactive]].getType() == sword) {
+				if (assets.weapons.weapons[weaponids.at(weaponactive)].getType() == sword) {
 					return swordfightidleanim;
 				}
-				if (assets.weapons.weapons[weaponids[weaponactive]].getType() == staff) {
+				if (assets.weapons.weapons[weaponids.at(weaponactive)].getType() == staff) {
 					return swordfightidleanim;
 				}
 			}
@@ -1237,10 +1237,10 @@ void Person::Reverse(bool tutorialActive, GameState& gamestate, GameAssets& asse
 			if (tempVelocity.x == 0) {
 				tempVelocity.x = .1;
 			}
-			assets.weapons.weapons[victim->weaponids[0]].drop(tempVelocity, tempVelocity, false);
+			assets.weapons.weapons[victim->weaponids.at(0)].drop(tempVelocity, tempVelocity, false);
 			victim->num_weapons--;
 			if (victim->num_weapons) {
-				victim->weaponids[0] = victim->weaponids[victim->num_weapons];
+				victim->weaponids.at(0) = victim->weaponids.at(victim->num_weapons);
 				if (victim->weaponstuck == victim->num_weapons) {
 					victim->weaponstuck = 0;
 				}
@@ -1264,10 +1264,10 @@ void Person::Reverse(bool tutorialActive, GameState& gamestate, GameAssets& asse
 			if (tempVelocity.x == 0) {
 				tempVelocity.x = .1;
 			}
-			assets.weapons.weapons[victim->weaponids[0]].drop(tempVelocity, tempVelocity, false);
+			assets.weapons.weapons[victim->weaponids.at(0)].drop(tempVelocity, tempVelocity, false);
 			victim->num_weapons--;
 			if (victim->num_weapons) {
-				victim->weaponids[0] = victim->weaponids[victim->num_weapons];
+				victim->weaponids.at(0) = victim->weaponids.at(victim->num_weapons);
 				if (victim->weaponstuck == victim->num_weapons) {
 					victim->weaponstuck = 0;
 				}
@@ -1290,10 +1290,10 @@ void Person::Reverse(bool tutorialActive, GameState& gamestate, GameAssets& asse
 			if (tempVelocity.x == 0) {
 				tempVelocity.x = .1;
 			}
-			assets.weapons.weapons[victim->weaponids[0]].drop(tempVelocity, tempVelocity, false);
+			assets.weapons.weapons[victim->weaponids.at(0)].drop(tempVelocity, tempVelocity, false);
 			victim->num_weapons--;
 			if (victim->num_weapons) {
-				victim->weaponids[0] = victim->weaponids[victim->num_weapons];
+				victim->weaponids.at(0) = victim->weaponids.at(victim->num_weapons);
 				if (victim->weaponstuck == victim->num_weapons) {
 					victim->weaponstuck = 0;
 				}
@@ -1316,10 +1316,10 @@ void Person::Reverse(bool tutorialActive, GameState& gamestate, GameAssets& asse
 			if (tempVelocity.x == 0) {
 				tempVelocity.x = .1;
 			}
-			assets.weapons.weapons[victim->weaponids[0]].drop(tempVelocity, tempVelocity, false);
+			assets.weapons.weapons[victim->weaponids.at(0)].drop(tempVelocity, tempVelocity, false);
 			victim->num_weapons--;
 			if (victim->num_weapons) {
-				victim->weaponids[0] = victim->weaponids[victim->num_weapons];
+				victim->weaponids.at(0) = victim->weaponids.at(victim->num_weapons);
 				if (victim->weaponstuck == victim->num_weapons) {
 					victim->weaponstuck = 0;
 				}
@@ -1373,14 +1373,14 @@ void Person::Reverse(bool tutorialActive, GameState& gamestate, GameAssets& asse
 		victim->victim = this->shared_from_this();
 		victim->targetyaw = targetyaw + 180;
 
-		if (abs(rand() % 20) == 0 || assets.weapons.weapons[victim->weaponids[victim->weaponactive]].getType() == knife) {
+		if (abs(rand() % 20) == 0 || assets.weapons.weapons[victim->weaponids.at(victim->weaponactive)].getType() == knife) {
 			if (victim->hasWeapon()) {
-				if (assets.weapons.weapons[victim->weaponids[0]].getType() == staff || assets.weapons.weapons[weaponids[0]].getType() == staff) {
-					if (assets.weapons.weapons[victim->weaponids[0]].getType() == staff) {
-						assets.weapons.weapons[victim->weaponids[0]].damage += .2 + float(abs(rand() % 100) - 50) / 250;
+				if (assets.weapons.weapons[victim->weaponids.at(0)].getType() == staff || assets.weapons.weapons[weaponids.at(0)].getType() == staff) {
+					if (assets.weapons.weapons[victim->weaponids.at(0)].getType() == staff) {
+						assets.weapons.weapons[victim->weaponids.at(0)].damage += .2 + float(abs(rand() % 100) - 50) / 250;
 					}
-					if (assets.weapons.weapons[weaponids[0]].getType() == staff) {
-						assets.weapons.weapons[weaponids[0]].damage += .2 + float(abs(rand() % 100) - 50) / 250;
+					if (assets.weapons.weapons[weaponids.at(0)].getType() == staff) {
+						assets.weapons.weapons[weaponids.at(0)].damage += .2 + float(abs(rand() % 100) - 50) / 250;
 					}
 					emit_sound_at(swordstaffsound, victim->coords);
 				}
@@ -1397,10 +1397,10 @@ void Person::Reverse(bool tutorialActive, GameState& gamestate, GameAssets& asse
 			victim->target = 0;
 			aim = DoRotation(facing, 0, 90, 0) * 21;
 			aim.y += 7;
-			assets.weapons.weapons[victim->weaponids[0]].drop(aim * -.2, aim);
+			assets.weapons.weapons[victim->weaponids.at(0)].drop(aim * -.2, aim);
 			victim->num_weapons--;
 			if (victim->num_weapons) {
-				victim->weaponids[0] = victim->weaponids[num_weapons];
+				victim->weaponids.at(0) = victim->weaponids.at(num_weapons);
 				if (victim->weaponstuck == victim->num_weapons) {
 					victim->weaponstuck = 0;
 				}
@@ -1413,12 +1413,12 @@ void Person::Reverse(bool tutorialActive, GameState& gamestate, GameAssets& asse
 
 		if (abs(rand() % 20) == 0) {
 			if (hasWeapon()) {
-				if (assets.weapons.weapons[victim->weaponids[0]].getType() == staff || assets.weapons.weapons[weaponids[0]].getType() == staff) {
-					if (assets.weapons.weapons[victim->weaponids[0]].getType() == staff) {
-						assets.weapons.weapons[victim->weaponids[0]].damage += .2 + float(abs(rand() % 100) - 50) / 250;
+				if (assets.weapons.weapons[victim->weaponids.at(0)].getType() == staff || assets.weapons.weapons[weaponids.at(0)].getType() == staff) {
+					if (assets.weapons.weapons[victim->weaponids.at(0)].getType() == staff) {
+						assets.weapons.weapons[victim->weaponids.at(0)].damage += .2 + float(abs(rand() % 100) - 50) / 250;
 					}
-					if (assets.weapons.weapons[weaponids[0]].getType() == staff) {
-						assets.weapons.weapons[weaponids[0]].damage += .2 + float(abs(rand() % 100) - 50) / 250;
+					if (assets.weapons.weapons[weaponids.at(0)].getType() == staff) {
+						assets.weapons.weapons[weaponids.at(0)].damage += .2 + float(abs(rand() % 100) - 50) / 250;
 					}
 
 					emit_sound_at(swordstaffsound, coords);
@@ -1437,10 +1437,10 @@ void Person::Reverse(bool tutorialActive, GameState& gamestate, GameAssets& asse
 			target = 0;
 			aim = DoRotation(facing, 0, 90, 0) * 21;
 			aim.y += 7;
-			assets.weapons.weapons[victim->weaponids[0]].drop(aim * -.2, aim);
+			assets.weapons.weapons[victim->weaponids.at(0)].drop(aim * -.2, aim);
 			num_weapons--;
 			if (num_weapons) {
-				weaponids[0] = weaponids[num_weapons];
+				weaponids.at(0) = weaponids.at(num_weapons);
 				if (weaponstuck == num_weapons) {
 					weaponstuck = 0;
 				}
@@ -1904,11 +1904,11 @@ void Person::RagDoll(bool checkcollision, Terrain& terrainref, bool tutorialActi
 		// drop weapon
 		if (rand() % 2 == 0) {
 			if (hasWeapon() && animTarget != rabbitkickanim && num_weapons > 0) {
-				assets.weapons.weapons[weaponids[0]].drop(jointVel(righthand) * scale * -.3, jointVel(righthand) * scale);
-				assets.weapons.weapons[weaponids[0]].velocity.x += .01;
+				assets.weapons.weapons[weaponids.at(0)].drop(jointVel(righthand) * scale * -.3, jointVel(righthand) * scale);
+				assets.weapons.weapons[weaponids.at(0)].velocity.x += .01;
 				num_weapons--;
 				if (num_weapons) {
-					weaponids[0] = weaponids[num_weapons];
+					weaponids.at(0) = weaponids.at(num_weapons);
 					if (weaponstuck == num_weapons) {
 						weaponstuck = 0;
 					}
@@ -2123,7 +2123,7 @@ Reverse(tutorialActive, gamestate, assets);
 			}
 
 			if (!drawtogglekeydown && drawkeydown && (!hasWeapon() || num_weapons == 1) && (targetFrame(assets).label || (animTarget != animCurrent && animCurrent == rollanim)) && num_weapons > 0 && creature != wolftype) {
-				if (assets.weapons.weapons[weaponids[0]].getType() == knife) {
+				if (assets.weapons.weapons[weaponids.at(0)].getType() == knife) {
 					if (!hasWeapon()) {
 						weaponactive = 0;
 						emit_sound_at(knifedrawsound, coords, 128);
@@ -2275,7 +2275,7 @@ Reverse(tutorialActive, gamestate, assets);
 					bool willwork = true;
 					if (assets.weapons.weapons[i].owner != -1) {
 						if (Person::players[assets.weapons.weapons[i].owner]->weaponstuck != -1) {
-							if (Person::players[assets.weapons.weapons[i].owner]->weaponids[Person::players[assets.weapons.weapons[i].owner]->weaponstuck] == int(i)) {
+							if (Person::players[assets.weapons.weapons[i].owner]->weaponids.at(Person::players[assets.weapons.weapons[i].owner]->weaponstuck) == int(i)) {
 								if (Person::players[assets.weapons.weapons[i].owner]->num_weapons > 1) {
 									willwork = 0;
 								}
@@ -2288,7 +2288,7 @@ Reverse(tutorialActive, gamestate, assets);
 								bool fleshstuck = false;
 								if (assets.weapons.weapons[i].owner != -1) {
 									if (victim->weaponstuck != -1) {
-										if (victim->weaponids[victim->weaponstuck] == int(i)) {
+										if (victim->weaponids.at(victim->weaponstuck) == int(i)) {
 											fleshstuck = true;
 										}
 									}
@@ -2328,7 +2328,7 @@ Reverse(tutorialActive, gamestate, assets);
 									footvel = 0;
 									footpoint = assets.weapons.weapons[i].position;
 									if (victim->weaponstuck != -1) {
-										if (victim->weaponids[victim->weaponstuck] == int(i)) {
+										if (victim->weaponids.at(victim->weaponstuck) == int(i)) {
 											if (gamestate.bloodtoggle) {
 												Sprite::MakeSprite(cloudimpactsprite, footpoint, footvel, 1, 0, 0, .8, .3, gamestate.bloodtoggle);
 											}
@@ -2341,8 +2341,8 @@ Reverse(tutorialActive, gamestate, assets);
 										if (victim->weaponstuck != 0 && victim->weaponstuck != -1) {
 											victim->weaponstuck = 0;
 										}
-										if (victim->weaponids[0] == int(i)) {
-											victim->weaponids[0] = victim->weaponids[victim->num_weapons];
+										if (victim->weaponids.at(0) == int(i)) {
+											victim->weaponids.at(0) = victim->weaponids.at(victim->num_weapons);
 										}
 									}
 
@@ -2367,9 +2367,9 @@ Reverse(tutorialActive, gamestate, assets);
 					weaponactive = -1;
 					if (num_weapons == 2) {
 						int buffer;
-						buffer = weaponids[0];
-						weaponids[0] = weaponids[1];
-						weaponids[1] = buffer;
+						buffer = weaponids.at(0);
+						weaponids.at(0) = weaponids.at(1);
+						weaponids.at(1) = buffer;
 					}
 					emit_sound_at(knifesheathesound, coords, 128.);
 				}
@@ -2746,7 +2746,7 @@ Reverse(tutorialActive, gamestate, assets);
 					}
 
 					if (!hasvictim) {
-						terrainref.MakeDecal(blooddecalfast, (assets.weapons.weapons[weaponids[weaponactive]].tippoint * .8 + assets.weapons.weapons[weaponids[weaponactive]].position * .2), .08, .6, rand() % 360, gamestate.environment);
+						terrainref.MakeDecal(blooddecalfast, (assets.weapons.weapons[weaponids.at(weaponactive)].tippoint * .8 + assets.weapons.weapons[weaponids.at(weaponactive)].position * .2), .08, .6, rand() % 360, gamestate.environment);
 						emit_sound_at(knifesheathesound, coords, 128.);
 					}
 
@@ -2756,8 +2756,8 @@ Reverse(tutorialActive, gamestate, assets);
 							Vector3 where, startpoint, endpoint, movepoint, colpoint;
 							float rotationpoint;
 							int whichtri;
-							if (assets.weapons.weapons[weaponids[weaponactive]].getType() == knife) {
-								where = (assets.weapons.weapons[weaponids[weaponactive]].tippoint * .6 + assets.weapons.weapons[weaponids[weaponactive]].position * .4);
+							if (assets.weapons.weapons[weaponids.at(weaponactive)].getType() == knife) {
+								where = (assets.weapons.weapons[weaponids.at(weaponactive)].tippoint * .6 + assets.weapons.weapons[weaponids.at(weaponactive)].position * .4);
 								where -= victim->coords;
 								if (!victim->skeleton.free) {
 									where = DoRotation(where, 0, -victim->yaw, 0);
@@ -2768,28 +2768,28 @@ Reverse(tutorialActive, gamestate, assets);
 								endpoint = where;
 								endpoint.y -= 100;
 							}
-							if (assets.weapons.weapons[weaponids[weaponactive]].getType() == sword) {
-								where = assets.weapons.weapons[weaponids[weaponactive]].position;
+							if (assets.weapons.weapons[weaponids.at(weaponactive)].getType() == sword) {
+								where = assets.weapons.weapons[weaponids.at(weaponactive)].position;
 								where -= victim->coords;
 								if (!victim->skeleton.free) {
 									where = DoRotation(where, 0, -victim->yaw, 0);
 								}
 								startpoint = where;
-								where = assets.weapons.weapons[weaponids[weaponactive]].tippoint;
+								where = assets.weapons.weapons[weaponids.at(weaponactive)].tippoint;
 								where -= victim->coords;
 								if (!victim->skeleton.free) {
 									where = DoRotation(where, 0, -victim->yaw, 0);
 								}
 								endpoint = where;
 							}
-							if (assets.weapons.weapons[weaponids[weaponactive]].getType() == staff) {
-								where = assets.weapons.weapons[weaponids[weaponactive]].position;
+							if (assets.weapons.weapons[weaponids.at(weaponactive)].getType() == staff) {
+								where = assets.weapons.weapons[weaponids.at(weaponactive)].position;
 								where -= victim->coords;
 								if (!victim->skeleton.free) {
 									where = DoRotation(where, 0, -victim->yaw, 0);
 								}
 								startpoint = where;
-								where = assets.weapons.weapons[weaponids[weaponactive]].tippoint;
+								where = assets.weapons.weapons[weaponids.at(weaponactive)].tippoint;
 								where -= victim->coords;
 								if (!victim->skeleton.free) {
 									where = DoRotation(where, 0, -victim->yaw, 0);
@@ -2808,7 +2808,7 @@ Reverse(tutorialActive, gamestate, assets);
 									}
 								}
 								if (gamestate.bloodtoggle) {
-									assets.weapons.weapons[weaponids[weaponactive]].bloody = 2;
+									assets.weapons.weapons[weaponids.at(weaponactive)].bloody = 2;
 								}
 
 								victim->skeleton.longdead = 0;
@@ -2822,9 +2822,9 @@ Reverse(tutorialActive, gamestate, assets);
 								}
 								emit_sound_at(fleshstabsound, coords, 128);
 							}
-							if (whichtri != -1 || assets.weapons.weapons[weaponids[weaponactive]].bloody) {
-								assets.weapons.weapons[weaponids[weaponactive]].blooddrip += 5;
-								assets.weapons.weapons[weaponids[weaponactive]].blooddripdelay = 0;
+							if (whichtri != -1 || assets.weapons.weapons[weaponids.at(weaponactive)].bloody) {
+								assets.weapons.weapons[weaponids.at(weaponactive)].blooddrip += 5;
+								assets.weapons.weapons[weaponids.at(weaponactive)].blooddripdelay = 0;
 							}
 							if (whichtri == -1) {
 								hasvictim = 0;
@@ -2845,20 +2845,20 @@ Reverse(tutorialActive, gamestate, assets);
 						emit_sound_at(fleshstabremovesound, coords, 128.);
 
 						footvel = 0;
-						footpoint = (assets.weapons.weapons[weaponids[weaponactive]].tippoint * .8 + assets.weapons.weapons[weaponids[weaponactive]].position * .2);
+						footpoint = (assets.weapons.weapons[weaponids.at(weaponactive)].tippoint * .8 + assets.weapons.weapons[weaponids.at(weaponactive)].position * .2);
 
-						if (assets.weapons.weapons[weaponids[weaponactive]].getType() == sword) {
+						if (assets.weapons.weapons[weaponids.at(weaponactive)].getType() == sword) {
 							Vector3 where, startpoint, endpoint, movepoint;
 							float rotationpoint;
 							int whichtri;
 
-							where = assets.weapons.weapons[weaponids[weaponactive]].position;
+							where = assets.weapons.weapons[weaponids.at(weaponactive)].position;
 							where -= victim->coords;
 							if (!victim->skeleton.free) {
 								where = DoRotation(where, 0, -victim->yaw, 0);
 							}
 							startpoint = where;
-							where = assets.weapons.weapons[weaponids[weaponactive]].tippoint;
+							where = assets.weapons.weapons[weaponids.at(weaponactive)].tippoint;
 							where -= victim->coords;
 							if (!victim->skeleton.free) {
 								where = DoRotation(where, 0, -victim->yaw, 0);
@@ -2871,21 +2871,21 @@ Reverse(tutorialActive, gamestate, assets);
 							footpoint += victim->coords;
 
 							if (whichtri == -1) {
-								footpoint = (assets.weapons.weapons[weaponids[weaponactive]].tippoint * .8 + assets.weapons.weapons[weaponids[weaponactive]].position * .2);
+								footpoint = (assets.weapons.weapons[weaponids.at(weaponactive)].tippoint * .8 + assets.weapons.weapons[weaponids.at(weaponactive)].position * .2);
 							}
 						}
-						if (assets.weapons.weapons[weaponids[weaponactive]].getType() == staff) {
+						if (assets.weapons.weapons[weaponids.at(weaponactive)].getType() == staff) {
 							Vector3 where, startpoint, endpoint, movepoint;
 							float rotationpoint;
 							int whichtri;
 
-							where = assets.weapons.weapons[weaponids[weaponactive]].position;
+							where = assets.weapons.weapons[weaponids.at(weaponactive)].position;
 							where -= victim->coords;
 							if (!victim->skeleton.free) {
 								where = DoRotation(where, 0, -victim->yaw, 0);
 							}
 							startpoint = where;
-							where = assets.weapons.weapons[weaponids[weaponactive]].tippoint;
+							where = assets.weapons.weapons[weaponids.at(weaponactive)].tippoint;
 							where -= victim->coords;
 							if (!victim->skeleton.free) {
 								where = DoRotation(where, 0, -victim->yaw, 0);
@@ -2898,7 +2898,7 @@ Reverse(tutorialActive, gamestate, assets);
 							footpoint += victim->coords;
 
 							if (whichtri == -1) {
-								footpoint = (assets.weapons.weapons[weaponids[weaponactive]].tippoint * .8 + assets.weapons.weapons[weaponids[weaponactive]].position * .2);
+								footpoint = (assets.weapons.weapons[weaponids.at(weaponactive)].tippoint * .8 + assets.weapons.weapons[weaponids.at(weaponactive)].position * .2);
 							}
 						}
 						hasvictim = victim->DoBloodBigWhere(2, 220, footpoint, tutorialActive, gamestate, assets);
@@ -2933,8 +2933,8 @@ Reverse(tutorialActive, gamestate, assets);
 						}
 					}
 					if (!hasvictim && onterrain) {
-						assets.weapons.weapons[weaponids[weaponactive]].bloody = 0;
-						assets.weapons.weapons[weaponids[weaponactive]].blooddrip = 0;
+						assets.weapons.weapons[weaponids.at(weaponactive)].bloody = 0;
+						assets.weapons.weapons[weaponids.at(weaponactive)].blooddrip = 0;
 					}
 				}
 
@@ -3043,12 +3043,12 @@ Reverse(tutorialActive, gamestate, assets);
 						}
 
 						if (hasWeapon()) {
-							if (assets.weapons.weapons[victim->weaponids[0]].getType() == staff || assets.weapons.weapons[weaponids[0]].getType() == staff) {
-								if (assets.weapons.weapons[victim->weaponids[0]].getType() == staff) {
-									assets.weapons.weapons[victim->weaponids[0]].damage += .2 + float(abs(rand() % 100) - 50) / 250;
+							if (assets.weapons.weapons[victim->weaponids.at(0)].getType() == staff || assets.weapons.weapons[weaponids.at(0)].getType() == staff) {
+								if (assets.weapons.weapons[victim->weaponids.at(0)].getType() == staff) {
+									assets.weapons.weapons[victim->weaponids.at(0)].damage += .2 + float(abs(rand() % 100) - 50) / 250;
 								}
-								if (assets.weapons.weapons[weaponids[0]].getType() == staff) {
-									assets.weapons.weapons[weaponids[0]].damage += .2 + float(abs(rand() % 100) - 50) / 250;
+								if (assets.weapons.weapons[weaponids.at(0)].getType() == staff) {
+									assets.weapons.weapons[weaponids.at(0)].damage += .2 + float(abs(rand() % 100) - 50) / 250;
 								}
 
 								emit_sound_at(swordstaffsound, victim->coords);
@@ -3068,10 +3068,10 @@ Reverse(tutorialActive, gamestate, assets);
 						Vector3 aim;
 						aim = victim->coords + DoRotation(victim->jointPos(abdomen), 0, victim->yaw, 0) * victim->scale + victim->velocity * findDistance(&victim->coords, &coords) / 50 - (coords + DoRotation(jointPos(righthand), 0, yaw, 0) * scale);
 						Normalise(&aim);
-						assets.weapons.weapons[weaponids[0]].thrown(aim * 50);
+						assets.weapons.weapons[weaponids.at(0)].thrown(aim * 50);
 						num_weapons--;
 						if (num_weapons) {
-							weaponids[0] = weaponids[num_weapons];
+							weaponids.at(0) = weaponids.at(num_weapons);
 						}
 						weaponactive = -1;
 					}
@@ -3105,10 +3105,10 @@ Reverse(tutorialActive, gamestate, assets);
 							}
 
 							if (!tutorialActive) {
-								if (gamestate.bloodtoggle && !assets.weapons.weapons[weaponids[weaponactive]].bloody) {
-									assets.weapons.weapons[weaponids[weaponactive]].bloody = 1;
+								if (gamestate.bloodtoggle && !assets.weapons.weapons[weaponids.at(weaponactive)].bloody) {
+									assets.weapons.weapons[weaponids.at(weaponactive)].bloody = 1;
 								}
-								assets.weapons.weapons[weaponids[weaponactive]].blooddrip += 3;
+								assets.weapons.weapons[weaponids.at(weaponactive)].blooddrip += 3;
 							}
 
 							Vector3 footvel, footpoint;
@@ -3154,10 +3154,10 @@ Reverse(tutorialActive, gamestate, assets);
 								victim->animTarget = staggerbackhardanim;
 								victim->targetyaw = targetyaw + 180;
 								victim->target = 0;
-								if (gamestate.bloodtoggle && !assets.weapons.weapons[weaponids[weaponactive]].bloody) {
-									assets.weapons.weapons[weaponids[weaponactive]].bloody = 1;
+								if (gamestate.bloodtoggle && !assets.weapons.weapons[weaponids.at(weaponactive)].bloody) {
+									assets.weapons.weapons[weaponids.at(weaponactive)].bloody = 1;
 								}
-								assets.weapons.weapons[weaponids[weaponactive]].blooddrip += 3;
+								assets.weapons.weapons[weaponids.at(weaponactive)].blooddrip += 3;
 
 								float bloodlossamount;
 								bloodlossamount = 200 + abs((float)(rand() % 40)) - 20;
@@ -3185,12 +3185,12 @@ Reverse(tutorialActive, gamestate, assets);
 						}
 						else {
 							if (victim->hasWeapon()) {
-								if (assets.weapons.weapons[victim->weaponids[0]].getType() == staff || assets.weapons.weapons[weaponids[0]].getType() == staff) {
-									if (assets.weapons.weapons[victim->weaponids[0]].getType() == staff) {
-										assets.weapons.weapons[victim->weaponids[0]].damage += .2 + float(abs(rand() % 100) - 50) / 250;
+								if (assets.weapons.weapons[victim->weaponids.at(0)].getType() == staff || assets.weapons.weapons[weaponids.at(0)].getType() == staff) {
+									if (assets.weapons.weapons[victim->weaponids.at(0)].getType() == staff) {
+										assets.weapons.weapons[victim->weaponids.at(0)].damage += .2 + float(abs(rand() % 100) - 50) / 250;
 									}
-									if (assets.weapons.weapons[weaponids[0]].getType() == staff) {
-										assets.weapons.weapons[weaponids[0]].damage += .2 + float(abs(rand() % 100) - 50) / 250;
+									if (assets.weapons.weapons[weaponids.at(0)].getType() == staff) {
+										assets.weapons.weapons[weaponids.at(0)].damage += .2 + float(abs(rand() % 100) - 50) / 250;
 									}
 
 									emit_sound_at(swordstaffsound, victim->coords);
@@ -3209,10 +3209,10 @@ Reverse(tutorialActive, gamestate, assets);
 							victim->target = 0;
 							aim = DoRotation(facing, 0, 90, 0) * 21;
 							aim.y += 7;
-							assets.weapons.weapons[victim->weaponids[0]].drop(aim * -.2, aim);
+							assets.weapons.weapons[victim->weaponids.at(0)].drop(aim * -.2, aim);
 							victim->num_weapons--;
 							if (victim->num_weapons) {
-								victim->weaponids[0] = victim->weaponids[num_weapons];
+								victim->weaponids.at(0) = victim->weaponids.at(num_weapons);
 								if (victim->weaponstuck == victim->num_weapons) {
 									victim->weaponstuck = 0;
 								}
@@ -3228,7 +3228,7 @@ Reverse(tutorialActive, gamestate, assets);
 				if (animCurrent == staffhitanim && currentFrame(assets).label == 5 && victim->animTarget != rollanim) {
 					if (distsq(&coords, &victim->coords) < (scale * 5) * (scale * 5) * 6.5 && victim->animTarget != dodgebackanim && victim->animTarget != sweepanim) {
 						if (!tutorialActive) {
-							assets.weapons.weapons[weaponids[0]].damage += .4 + float(abs(rand() % 100) - 50) / 250;
+							assets.weapons.weapons[weaponids.at(0)].damage += .4 + float(abs(rand() % 100) - 50) / 250;
 							escapednum = 0;
 							if (id == 0) {
 								gamestate.camerashake += .4;
@@ -3263,7 +3263,7 @@ Reverse(tutorialActive, gamestate, assets);
 				if (animCurrent == staffspinhitanim && currentFrame(assets).label == 5 && victim->animTarget != rollanim) {
 					if (distsq(&coords, &victim->coords) < (scale * 5) * (scale * 5) * 6.5 && victim->animTarget != dodgebackanim && victim->animTarget != sweepanim) {
 						if (!tutorialActive) {
-							assets.weapons.weapons[weaponids[0]].damage += .6 + float(abs(rand() % 100) - 50) / 250;
+							assets.weapons.weapons[weaponids.at(0)].damage += .6 + float(abs(rand() % 100) - 50) / 250;
 							escapednum = 0;
 							if (id == 0) {
 								gamestate.camerashake += .4;
@@ -3298,7 +3298,7 @@ Reverse(tutorialActive, gamestate, assets);
 						escapednum = 0;
 						if (!tutorialActive) {
 							if (!victim->dead) {
-								assets.weapons.weapons[weaponids[0]].damage += .4 + float(abs(rand() % 100) - 50) / 500;
+								assets.weapons.weapons[weaponids.at(0)].damage += .4 + float(abs(rand() % 100) - 50) / 500;
 							}
 							if (id == 0) {
 								gamestate.camerashake += .4;
@@ -3505,11 +3505,11 @@ Reverse(tutorialActive, gamestate, assets);
 
 				if ((animTarget == swordslashreversalanim || animTarget == knifeslashreversalanim || animTarget == staffhitreversalanim || animTarget == staffspinhitreversalanim) && assets.graphics.animations[animTarget].frames[frameCurrent].label == 5) {
 					if (victim->hasWeapon() && victim->num_weapons > 0) {
-						if (assets.weapons.weapons[victim->weaponids[victim->weaponactive]].owner == int(victim->id)) {
-							takeWeapon(victim->weaponids[victim->weaponactive], assets);
+						if (assets.weapons.weapons[victim->weaponids.at(victim->weaponactive)].owner == int(victim->id)) {
+							takeWeapon(victim->weaponids.at(victim->weaponactive), assets);
 							victim->num_weapons--;
 							if (victim->num_weapons > 0) {
-								victim->weaponids[victim->weaponactive] = victim->weaponids[victim->num_weapons];
+								victim->weaponids.at(victim->weaponactive) = victim->weaponids.at(victim->num_weapons);
 							}
 							victim->weaponactive = -1;
 						}
@@ -3596,7 +3596,7 @@ Reverse(tutorialActive, gamestate, assets);
 
 					bool doslice;
 					if (hasWeapon()) {
-						doslice = (assets.weapons.weapons[weaponids[0]].getType() != staff);
+						doslice = (assets.weapons.weapons[weaponids.at(0)].getType() != staff);
 					}
 					else {
 						doslice = assets.graphics.types[creature].hasClaws;
@@ -3610,10 +3610,10 @@ Reverse(tutorialActive, gamestate, assets);
 						else {
 							victim->DoBloodBig(2 / victim->armorhigh, 225, tutorialActive, gamestate, assets);
 							emit_sound_at(knifeslicesound, victim->coords);
-							if (gamestate.bloodtoggle && !assets.weapons.weapons[weaponids[weaponactive]].bloody) {
-								assets.weapons.weapons[weaponids[weaponactive]].bloody = 1;
+							if (gamestate.bloodtoggle && !assets.weapons.weapons[weaponids.at(weaponactive)].bloody) {
+								assets.weapons.weapons[weaponids.at(weaponactive)].bloody = 1;
 							}
-							assets.weapons.weapons[weaponids[weaponactive]].blooddrip += 3;
+							assets.weapons.weapons[weaponids.at(weaponactive)].blooddrip += 3;
 						}
 					}
 				}
@@ -3687,7 +3687,7 @@ Reverse(tutorialActive, gamestate, assets);
 					victim->permanentdamage = victim->damagetolerance - 1;
 					bool doslice;
 					if (hasWeapon()) {
-						doslice = (assets.weapons.weapons[weaponids[0]].getType() != staff);
+						doslice = (assets.weapons.weapons[weaponids.at(0)].getType() != staff);
 					}
 					else {
 						doslice = assets.graphics.types[creature].hasClaws;
@@ -3702,9 +3702,9 @@ Reverse(tutorialActive, gamestate, assets);
 							victim->DoBloodBig(200, 225, tutorialActive, gamestate, assets);
 							emit_sound_at(knifeslicesound, victim->coords, tutorialActive);
 							if (gamestate.bloodtoggle) {
-								assets.weapons.weapons[weaponids[weaponactive]].bloody = 2;
+								assets.weapons.weapons[weaponids.at(weaponactive)].bloody = 2;
 							}
-							assets.weapons.weapons[weaponids[weaponactive]].blooddrip += 5;
+							assets.weapons.weapons[weaponids.at(weaponactive)].blooddrip += 5;
 						}
 					}
 					award_bonus(id, spinecrusher);
@@ -3719,11 +3719,11 @@ Reverse(tutorialActive, gamestate, assets);
 						if (animTarget == knifesneakattackanim) {
 							Vector3 footvel, footpoint;
 							footvel = 0;
-							footpoint = assets.weapons.weapons[weaponids[0]].tippoint;
+							footpoint = assets.weapons.weapons[weaponids.at(0)].tippoint;
 							if (gamestate.bloodtoggle) {
 								Sprite::MakeSprite(cloudimpactsprite, footpoint, footvel, 1, 0, 0, .9, .3, gamestate.bloodtoggle);
 							}
-							footvel = (assets.weapons.weapons[weaponids[0]].tippoint - assets.weapons.weapons[weaponids[0]].position);
+							footvel = (assets.weapons.weapons[weaponids.at(0)].tippoint - assets.weapons.weapons[weaponids.at(0)].position);
 							Sprite::MakeSprite(bloodsprite, footpoint, DoRotation(footvel * 7, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .05, .9, gamestate.bloodtoggle);
 							Sprite::MakeSprite(bloodsprite, footpoint, DoRotation(footvel * 3, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .05, .9, gamestate.bloodtoggle);
 							Sprite::MakeSprite(bloodflamesprite, footpoint, footvel * 5, 1, 1, 1, .3, 1, gamestate.bloodtoggle);
@@ -3735,11 +3735,11 @@ Reverse(tutorialActive, gamestate, assets);
 							award_bonus(id, Stabbonus);
 							Vector3 footvel, footpoint;
 							footvel = 0;
-							footpoint = assets.weapons.weapons[weaponids[0]].tippoint;
+							footpoint = assets.weapons.weapons[weaponids.at(0)].tippoint;
 							if (gamestate.bloodtoggle) {
 								Sprite::MakeSprite(cloudimpactsprite, footpoint, footvel, 1, 0, 0, .9, .3, gamestate.bloodtoggle);
 							}
-							footvel = (assets.weapons.weapons[weaponids[0]].tippoint - assets.weapons.weapons[weaponids[0]].position) * -1;
+							footvel = (assets.weapons.weapons[weaponids.at(0)].tippoint - assets.weapons.weapons[weaponids.at(0)].position) * -1;
 							Sprite::MakeSprite(bloodsprite, footpoint, DoRotation(footvel * 7, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .05, .9, gamestate.bloodtoggle);
 							Sprite::MakeSprite(bloodsprite, footpoint, DoRotation(footvel * 3, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .05, .9, gamestate.bloodtoggle);
 							Sprite::MakeSprite(bloodflamesprite, footpoint, footvel * 5, 1, 1, 1, .2, 1, gamestate.bloodtoggle);
@@ -3749,9 +3749,9 @@ Reverse(tutorialActive, gamestate, assets);
 						victim->velocity = 0;
 						emit_sound_at(fleshstabsound, victim->coords);
 						if (gamestate.bloodtoggle) {
-							assets.weapons.weapons[weaponids[weaponactive]].bloody = 2;
+							assets.weapons.weapons[weaponids.at(weaponactive)].bloody = 2;
 						}
-						assets.weapons.weapons[weaponids[weaponactive]].blooddrip += 5;
+						assets.weapons.weapons[weaponids.at(weaponactive)].blooddrip += 5;
 					}
 				}
 
@@ -3770,17 +3770,17 @@ Reverse(tutorialActive, gamestate, assets);
 					if (hasWeapon() && assets.graphics.animations[victim->animTarget].attack != reversal) {
 						emit_sound_at(fleshstabremovesound, victim->coords);
 						if (gamestate.bloodtoggle) {
-							assets.weapons.weapons[weaponids[weaponactive]].bloody = 2;
+							assets.weapons.weapons[weaponids.at(weaponactive)].bloody = 2;
 						}
-						assets.weapons.weapons[weaponids[weaponactive]].blooddrip += 5;
+						assets.weapons.weapons[weaponids.at(weaponactive)].blooddrip += 5;
 
 						Vector3 footvel, footpoint;
 						footvel = 0;
-						footpoint = assets.weapons.weapons[weaponids[0]].tippoint;
+						footpoint = assets.weapons.weapons[weaponids.at(0)].tippoint;
 						if (gamestate.bloodtoggle) {
 							Sprite::MakeSprite(cloudimpactsprite, footpoint, footvel, 1, 0, 0, .9, .3, gamestate.bloodtoggle);
 						}
-						footvel = (assets.weapons.weapons[weaponids[0]].tippoint - assets.weapons.weapons[weaponids[0]].position) * -1;
+						footvel = (assets.weapons.weapons[weaponids.at(0)].tippoint - assets.weapons.weapons[weaponids.at(0)].position) * -1;
 						Sprite::MakeSprite(bloodsprite, footpoint, DoRotation(footvel * 7, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .05, .9, gamestate.bloodtoggle);
 						Sprite::MakeSprite(bloodsprite, footpoint, DoRotation(footvel * 3, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .05, .9, gamestate.bloodtoggle);
 						Sprite::MakeSprite(bloodflamesprite, footpoint, footvel * 5, 1, 1, 1, .3, 1, gamestate.bloodtoggle);
@@ -3796,11 +3796,11 @@ Reverse(tutorialActive, gamestate, assets);
 
 						Vector3 footvel, footpoint;
 						footvel = 0;
-						footpoint = (assets.weapons.weapons[weaponids[0]].tippoint + assets.weapons.weapons[weaponids[0]].position) / 2;
+						footpoint = (assets.weapons.weapons[weaponids.at(0)].tippoint + assets.weapons.weapons[weaponids.at(0)].position) / 2;
 						if (gamestate.bloodtoggle) {
 							Sprite::MakeSprite(cloudimpactsprite, footpoint, footvel, 1, 0, 0, .9, .3, gamestate.bloodtoggle);
 						}
-						footvel = (assets.weapons.weapons[weaponids[0]].tippoint - assets.weapons.weapons[weaponids[0]].position);
+						footvel = (assets.weapons.weapons[weaponids.at(0)].tippoint - assets.weapons.weapons[weaponids.at(0)].position);
 						Sprite::MakeSprite(bloodsprite, footpoint, DoRotation(footvel * 7, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .05, .9, gamestate.bloodtoggle);
 						Sprite::MakeSprite(bloodsprite, footpoint, DoRotation(footvel * 3, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .05, .9, gamestate.bloodtoggle);
 						Sprite::MakeSprite(bloodflamesprite, footpoint, DoRotation(footvel * 5, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .3, 1, gamestate.bloodtoggle);
@@ -3811,9 +3811,9 @@ Reverse(tutorialActive, gamestate, assets);
 						victim->velocity = 0;
 						emit_sound_at(fleshstabsound, victim->coords);
 						if (gamestate.bloodtoggle) {
-							assets.weapons.weapons[weaponids[weaponactive]].bloody = 2;
+							assets.weapons.weapons[weaponids.at(weaponactive)].bloody = 2;
 						}
-						assets.weapons.weapons[weaponids[weaponactive]].blooddrip += 5;
+						assets.weapons.weapons[weaponids.at(weaponactive)].blooddrip += 5;
 					}
 				}
 
@@ -3826,17 +3826,17 @@ Reverse(tutorialActive, gamestate, assets);
 					if (hasWeapon()) {
 						emit_sound_at(fleshstabremovesound, victim->coords);
 						if (gamestate.bloodtoggle) {
-							assets.weapons.weapons[weaponids[weaponactive]].bloody = 2;
+							assets.weapons.weapons[weaponids.at(weaponactive)].bloody = 2;
 						}
-						assets.weapons.weapons[weaponids[weaponactive]].blooddrip += 5;
+						assets.weapons.weapons[weaponids.at(weaponactive)].blooddrip += 5;
 
 						Vector3 footvel, footpoint;
 						footvel = 0;
-						footpoint = assets.weapons.weapons[weaponids[0]].tippoint;
+						footpoint = assets.weapons.weapons[weaponids.at(0)].tippoint;
 						if (gamestate.bloodtoggle) {
 							Sprite::MakeSprite(cloudimpactsprite, footpoint, footvel, 1, 0, 0, .9, .3, gamestate.bloodtoggle);
 						}
-						footvel = (assets.weapons.weapons[weaponids[0]].tippoint - assets.weapons.weapons[weaponids[0]].position) * -1;
+						footvel = (assets.weapons.weapons[weaponids.at(0)].tippoint - assets.weapons.weapons[weaponids.at(0)].position) * -1;
 						Sprite::MakeSprite(bloodsprite, footpoint, DoRotation(footvel * 7, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .05, .9, gamestate.bloodtoggle);
 						Sprite::MakeSprite(bloodsprite, footpoint, DoRotation(footvel * 3, (float)(rand() % 20), (float)(rand() % 20), 0), 1, 1, 1, .05, .9, gamestate.bloodtoggle);
 						Sprite::MakeSprite(bloodflamesprite, footpoint, footvel * 5, 1, 1, 1, .3, 1, gamestate.bloodtoggle);
@@ -3860,7 +3860,7 @@ Reverse(tutorialActive, gamestate, assets);
 					}
 					bool doslice;
 					if (hasWeapon()) {
-						doslice = (assets.weapons.weapons[weaponids[0]].getType() != staff);
+						doslice = (assets.weapons.weapons[weaponids.at(0)].getType() != staff);
 					}
 					else {
 						doslice = assets.graphics.types[creature].hasClaws;
@@ -3874,10 +3874,10 @@ Reverse(tutorialActive, gamestate, assets);
 						else {
 							victim->DoBloodBig(2 / victim->armorhead, 225, tutorialActive, gamestate, assets);
 							emit_sound_at(knifeslicesound, victim->coords);
-							if (gamestate.bloodtoggle && !assets.weapons.weapons[weaponids[weaponactive]].bloody) {
-								assets.weapons.weapons[weaponids[weaponactive]].bloody = 1;
+							if (gamestate.bloodtoggle && !assets.weapons.weapons[weaponids.at(weaponactive)].bloody) {
+								assets.weapons.weapons[weaponids.at(weaponactive)].bloody = 1;
 							}
-							assets.weapons.weapons[weaponids[weaponactive]].blooddrip += 3;
+							assets.weapons.weapons[weaponids.at(weaponactive)].blooddrip += 3;
 						}
 					}
 
@@ -3973,9 +3973,9 @@ Reverse(tutorialActive, gamestate, assets);
 						weaponactive = -1;
 						if (num_weapons == 2) {
 							int buffer;
-							buffer = weaponids[0];
-							weaponids[0] = weaponids[1];
-							weaponids[1] = buffer;
+							buffer = weaponids.at(0);
+							weaponids.at(0) = weaponids.at(1);
+							weaponids.at(1) = buffer;
 						}
 						emit_sound_at(knifesheathesound, coords, 128.);
 					}
@@ -4611,7 +4611,7 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 		}
 	}
 	if (!hasWeapon() && num_weapons > 0) {
-		if (assets.weapons.weapons[weaponids[0]].getType() == staff) {
+		if (assets.weapons.weapons[weaponids.at(0)].getType() == staff) {
 			weaponactive = 0;
 		}
 	}
@@ -4728,11 +4728,11 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 		}
 		if (bloodloss > damagetolerance && assets.graphics.animations[animTarget].attack == neutral) {
 			if (hasWeapon()) {
-				assets.weapons.weapons[weaponids[0]].drop(velocity * scale * -.3, velocity * scale);
-				assets.weapons.weapons[weaponids[0]].velocity.x += .01;
+				assets.weapons.weapons[weaponids.at(0)].drop(velocity * scale * -.3, velocity * scale);
+				assets.weapons.weapons[weaponids.at(0)].velocity.x += .01;
 				num_weapons--;
 				if (num_weapons) {
-					weaponids[0] = weaponids[num_weapons];
+					weaponids.at(0) = weaponids.at(num_weapons);
 					if (weaponstuck == num_weapons) {
 						weaponstuck = 0;
 					}
@@ -5182,11 +5182,11 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 		RagDoll(0, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate, assets);
 
 		if (hasWeapon()) {
-			assets.weapons.weapons[weaponids[0]].drop(velocity * scale * -.3, velocity * scale);
-			assets.weapons.weapons[weaponids[0]].velocity.x += .01;
+			assets.weapons.weapons[weaponids.at(0)].drop(velocity * scale * -.3, velocity * scale);
+			assets.weapons.weapons[weaponids.at(0)].velocity.x += .01;
 			num_weapons--;
 			if (num_weapons) {
-				weaponids[0] = weaponids[num_weapons];
+				weaponids.at(0) = weaponids.at(num_weapons);
 				if (weaponstuck == num_weapons) {
 					weaponstuck = 0;
 				}
@@ -5239,11 +5239,11 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 		DoBlood(1, 255, tutorialActive, gamestate, assets);
 
 		if (hasWeapon()) {
-			assets.weapons.weapons[weaponids[0]].drop(velocity * scale * -.3, velocity * scale);
-			assets.weapons.weapons[weaponids[0]].velocity.x += .01;
+			assets.weapons.weapons[weaponids.at(0)].drop(velocity * scale * -.3, velocity * scale);
+			assets.weapons.weapons[weaponids.at(0)].velocity.x += .01;
 			num_weapons--;
 			if (num_weapons) {
-				weaponids[0] = weaponids[num_weapons];
+				weaponids.at(0) = weaponids.at(num_weapons);
 				if (weaponstuck == num_weapons) {
 					weaponstuck = 0;
 				}
@@ -5963,11 +5963,11 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 		}
 
 		if (hasWeapon()) {
-			if (assets.weapons.weapons[weaponids[weaponactive]].getType() != staff) {
+			if (assets.weapons.weapons[weaponids.at(weaponactive)].getType() != staff) {
 				righthandmorphstart = 1;
 				righthandmorphend = 1;
 			}
-			if (assets.weapons.weapons[weaponids[weaponactive]].getType() == staff) {
+			if (assets.weapons.weapons[weaponids.at(weaponactive)].getType() == staff) {
 				righthandmorphstart = 2;
 				righthandmorphend = 2;
 			}
@@ -6888,7 +6888,7 @@ int Person::DrawSkeleton(Terrain& terrainref, bool tutorialActive, float timemul
 
 		if (num_weapons > 0) {
 			for (k = 0; k < num_weapons; k++) {
-				int i = weaponids[k];
+				int i = weaponids.at(k);
 				if (weaponactive == k) {
 					if (assets.weapons.weapons[i].getType() != staff) {
 						for (unsigned j = 0; j < skeleton.muscles.size(); j++) {
@@ -7355,10 +7355,10 @@ void Person::takeWeapon(int weaponId, GameAssets& assets)
 	weaponactive = 0;
 	assets.weapons.weapons[weaponId].owner = id;
 	if (num_weapons > 0) {
-		weaponids[num_weapons] = weaponids[0];
+		weaponids.at(num_weapons) = weaponids.at(0);
 	}
 	num_weapons++;
-	weaponids[0] = weaponId;
+	weaponids.at(0) = weaponId;
 }
 
 void Person::addClothes(GameState& gamestate, GameAssets& assets)
@@ -7668,12 +7668,12 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 
 			if (aiupdatedelay < 0) {
 				if (numwaypoints > 1 && howactive == typeactive && pausetime <= 0) {
-					targetyaw = roughDirectionTo(coords, waypoints[waypoint]);
+					targetyaw = roughDirectionTo(coords, waypoints.at(waypoint));
 					lookyaw = targetyaw;
 					aiupdatedelay = .05;
 
-					if (distsqflat(&coords, &waypoints[waypoint]) < 1) {
-						if (waypointtype[waypoint] == wppause) {
+					if (distsqflat(&coords, &waypoints.at(waypoint)) < 1) {
+						if (waypointtype.at(waypoint) == wppause) {
 							pausetime = 4;
 						}
 						waypoint++;
@@ -7765,11 +7765,11 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 						if (j == 0 || (Person::players[j]->dead && Person::players[j]->bloodloss > 0)) {
 							float smelldistance = 50;
 							if (j == 0 && Person::players[j]->num_weapons > 0) {
-								if (assets.weapons.weapons[Person::players[j]->weaponids[0]].bloody) {
+								if (assets.weapons.weapons[Person::players[j]->weaponids.at(0)].bloody) {
 									smelldistance = 100;
 								}
 								if (Person::players[j]->num_weapons == 2) {
-									if (assets.weapons.weapons[Person::players[j]->weaponids[1]].bloody) {
+									if (assets.weapons.weapons[Person::players[j]->weaponids.at(1)].bloody) {
 										smelldistance = 100;
 									}
 								}
@@ -7866,7 +7866,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 						stunned = .5;
 						//aitype=passivetype;
 						aitype = pathfindtype;
-						finalfinaltarget = waypoints[waypoint];
+						finalfinaltarget = waypoints.at(waypoint);
 						finalpathfindpoint = -1;
 						targetpathfindpoint = -1;
 						lastpathfindpoint = -1;
@@ -7974,7 +7974,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 				//aitype=passivetype;
 				numescaped++;
 				aitype = pathfindtype;
-				finalfinaltarget = waypoints[waypoint];
+				finalfinaltarget = waypoints.at(waypoint);
 				finalpathfindpoint = -1;
 				targetpathfindpoint = -1;
 				lastpathfindpoint = -1;
@@ -8202,7 +8202,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 						crouchkeydown = 1;
 					}
 					if (Person::players[0]->animTarget != rabbitkickanim && Person::players[0]->hasWeapon()) {
-						if (assets.weapons.weapons[Person::players[0]->weaponids[0]].getType() == knife) {
+						if (assets.weapons.weapons[Person::players[0]->weaponids.at(0)].getType() == knife) {
 							if (isIdle() || isCrouch() || isRun() || isFlip()) {
 								if (abs(rand() % 2) == 0) {
 									setTargetAnimation(backhandspringanim);
@@ -8283,7 +8283,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 						targetyaw += 180;
 						stunned = .5;
 						aitype = pathfindtype;
-						finalfinaltarget = waypoints[waypoint];
+						finalfinaltarget = waypoints.at(waypoint);
 						finalpathfindpoint = -1;
 						targetpathfindpoint = -1;
 						lastpathfindpoint = -1;
@@ -8301,7 +8301,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 				assets.graphics.animations[Person::players[0]->animTarget].height != highheight &&
 				!Person::players[0]->onterrain) {
 				aitype = pathfindtype;
-				finalfinaltarget = waypoints[waypoint];
+				finalfinaltarget = waypoints.at(waypoint);
 				finalpathfindpoint = -1;
 				targetpathfindpoint = -1;
 				lastpathfindpoint = -1;
@@ -8359,7 +8359,7 @@ void Person::doAI(const Terrain& terrainref, bool tutorialActive, bool inDialog,
 					}
 					if (rand() % 100 == 0) {
 						aitype = pathfindtype;
-						finalfinaltarget = waypoints[waypoint];
+						finalfinaltarget = waypoints.at(waypoint);
 						finalpathfindpoint = -1;
 						targetpathfindpoint = -1;
 						lastpathfindpoint = -1;
@@ -8566,15 +8566,19 @@ Person::Person(Json::Value value, int /*mapvers*/, unsigned i, GameState& gamest
 	power = value["power"].asFloat();
 	speedmult = value["speedmult"].asFloat();
 
-	numwaypoints = value["waypoints"].size();
-	num_weapons = value["weapons"].size();
-
-	if (!PersonLimits::weaponCountIsValid(value["weapons"].size())) {
-		throw InvalidPersonException();
-	}
+	// Validate before assigning, not after. numwaypoints and num_weapons are the
+	// bounds for the waypoints / waypointtype / weaponids writes a few lines below,
+	// so holding an unvalidated count in them for even a moment is a trap for
+	// whoever edits between here and the throw.
 	if (!PersonLimits::waypointCountIsValid(value["waypoints"].size())) {
 		throw InvalidPersonException();
 	}
+	if (!PersonLimits::weaponCountIsValid(value["weapons"].size())) {
+		throw InvalidPersonException();
+	}
+
+	numwaypoints = value["waypoints"].size();
+	num_weapons = value["weapons"].size();
 
 	if (id == 0) {
 		targetyaw = value["targetyaw"].asFloat();
@@ -8584,8 +8588,8 @@ Person::Person(Json::Value value, int /*mapvers*/, unsigned i, GameState& gamest
 		howactive = value["howactive"].asInt();
 		immobile = value["immobile"].asBool();
 		for (unsigned k = 0; k < value["waypoints"].size(); k++) {
-			waypointtype[k] = value["waypoints"][k]["type"].asInt();
-			waypoints[k] = value["waypoints"][k]["pos"];
+			waypointtype.at(k) = value["waypoints"][k]["type"].asInt();
+			waypoints.at(k) = value["waypoints"][k]["pos"];
 		}
 		waypoint = value["waypoint"].asInt();
 		if (waypoint > int(value["waypoints"].size())) {
@@ -8595,12 +8599,12 @@ Person::Person(Json::Value value, int /*mapvers*/, unsigned i, GameState& gamest
 		// Not sure why scale and proportion are not saved for main player
 		scale = value.get("scale", -1).asFloat();
 		for (int k = 0; k < 4; k++) {
-			proportions[k] = value["proportions"][k].asFloat();
+			proportions.at(k) = value["proportions"][k].asFloat();
 		}
 	}
 
 	for (unsigned j = 0; j < value["weapons"].size(); j++) {
-		weaponids[j] =  assets.weapons.weapons.size();
+		weaponids.at(j) =  assets.weapons.weapons.size();
 		assets.weapons.weapons.push_back(Weapon(value["weapons"][j].asInt(), id));
 	}
 
@@ -8651,8 +8655,8 @@ Json::Value Person::save(GameAssets& assets) {
 		person["immobile"] = immobile;
 		if (numwaypoints < 30) {
 			for (int k = 0; k < numwaypoints; k++) {
-				person["waypoints"][k]["type"] = waypointtype[k];
-				person["waypoints"][k]["pos"] = waypoints[k];
+				person["waypoints"][k]["type"] = waypointtype.at(k);
+				person["waypoints"][k]["pos"] = waypoints.at(k);
 			}
 			person["waypoint"] = waypoint;
 		}
@@ -8671,7 +8675,7 @@ Json::Value Person::save(GameAssets& assets) {
 	}
 
 	for (int k = 0; k < num_weapons; k++) {
-		person["weapons"][k] = assets.weapons.weapons[weaponids[k]].getType();
+		person["weapons"][k] = assets.weapons.weapons[weaponids.at(k)].getType();
 	}
 
 	person["armor"]["head"] = armorhead;

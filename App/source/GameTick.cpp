@@ -1653,11 +1653,11 @@ void Game::ProcessDevInput(GameState& gamestate, GameAssets& assets, Console& co
 
 		/* Add waypoint */
 		if (Input::isKeyPressed(SDL_SCANCODE_P) && Input::isKeyDown(SDL_SCANCODE_LSHIFT) && !Input::isKeyDown(SDL_SCANCODE_LCTRL)) {
-			if (Person::players.back()->numwaypoints < 90) {
-				Person::players.back()->waypoints[Person::players.back()->numwaypoints] = Person::players[0]->coords;
-				Person::players.back()->waypointtype[Person::players.back()->numwaypoints] = gamestate.editorpathtype;
-				Person::players.back()->numwaypoints++;
-			}
+	if (Person::players.back()->numwaypoints < PersonLimits::max_waypoints) {
+		Person::players.back()->waypoints.at(Person::players.back()->numwaypoints) = Person::players[0]->coords;
+		Person::players.back()->waypointtype.at(Person::players.back()->numwaypoints) = gamestate.editorpathtype;
+		Person::players.back()->numwaypoints++;
+	}
 			else {
 				Log::warn("Add waypoint: reached the maximum number of waypoints, aborting");
 			}
