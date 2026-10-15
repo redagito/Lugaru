@@ -37,8 +37,12 @@ public:
 	float alivetime = 0.f;
 	float brightness = 0.f;
 
-	float texcoords[3][2];
-	Vector3 vertex[3];
+	// Fixed-size, so std::array rather than a C array: indexing a C array does not
+	// check anything, and this is a quad whose vertices are computed from a terrain
+	// tile index. A tile outside the range reaches these as an out-of-bounds write.
+	// std::array plus .at() turns that into a throw instead of silent corruption.
+	std::array<std::array<float, 2>, 3> texcoords;
+	std::array<Vector3, 3> vertex;
 
 	Decal();
 	Decal(Vector3 position, decal_type type, float opacity, float rotation, float brightness, int whichx, int whichy, float size, const Terrain& terrain, bool first);

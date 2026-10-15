@@ -45,12 +45,12 @@ Decal::Decal(Vector3 _position, decal_type _type, float _opacity, float _rotatio
     placex = (float)whichx * terrain.scale + terrain.scale;
     placez = (float)whichy * terrain.scale;
 
-    texcoords[0][0] = (placex - position.x) / size / 2.f + .5f;
-    texcoords[0][1] = (placez - position.z) / size / 2.f + .5f;
+    texcoords.at(0).at(0) = (placex - position.x) / size / 2.f + .5f;
+    texcoords.at(0).at(1) = (placez - position.z) / size / 2.f + .5f;
 
-    vertex[0].x = placex;
-    vertex[0].z = placez;
-    vertex[0].y = terrain.heightmap[whichx + 1][whichy] * terrain.scale + .01f;
+    vertex.at(0).x = placex;
+    vertex.at(0).z = placez;
+    vertex.at(0).y = terrain.heightmap[whichx + 1][whichy] * terrain.scale + .01f;
 
     if (first) {
         placex = (float)whichx * terrain.scale + terrain.scale;
@@ -60,36 +60,36 @@ Decal::Decal(Vector3 _position, decal_type _type, float _opacity, float _rotatio
         placez = (float)whichy * terrain.scale;
     }
 
-    texcoords[1][0] = (placex - position.x) / size / 2.f + .5f;
-    texcoords[1][1] = (placez - position.z) / size / 2.f + .5f;
+    texcoords.at(1).at(0) = (placex - position.x) / size / 2.f + .5f;
+    texcoords.at(1).at(1) = (placez - position.z) / size / 2.f + .5f;
 
-    vertex[1].x = placex;
-    vertex[1].z = placez;
+    vertex.at(1).x = placex;
+    vertex.at(1).z = placez;
     if (first) {
-        vertex[1].y = terrain.heightmap[whichx + 1][whichy + 1] * terrain.scale + .01f;
+        vertex.at(1).y = terrain.heightmap[whichx + 1][whichy + 1] * terrain.scale + .01f;
     } else {
-        vertex[1].y = terrain.heightmap[whichx][whichy] * terrain.scale + .01f;
+        vertex.at(1).y = terrain.heightmap[whichx][whichy] * terrain.scale + .01f;
     }
 
     placex = (float)whichx * terrain.scale;
     placez = (float)whichy * terrain.scale + terrain.scale;
 
-    texcoords[2][0] = (placex - position.x) / size / 2.f + .5f;
-    texcoords[2][1] = (placez - position.z) / size / 2.f + .5f;
+    texcoords.at(2).at(0) = (placex - position.x) / size / 2.f + .5f;
+    texcoords.at(2).at(1) = (placez - position.z) / size / 2.f + .5f;
 
-    vertex[2].x = placex;
-    vertex[2].z = placez;
-    vertex[2].y = terrain.heightmap[whichx][whichy + 1] * terrain.scale + .01f;
+    vertex.at(2).x = placex;
+    vertex.at(2).z = placez;
+    vertex.at(2).y = terrain.heightmap[whichx][whichy + 1] * terrain.scale + .01f;
 
     Vector3 rot;
     if (rotation) {
         for (int i = 0; i < 3; i++) {
             rot.y = 0;
-            rot.x = texcoords[i][0] - .5f;
-            rot.z = texcoords[i][1] - .5f;
+            rot.x = texcoords.at(i).at(0) - .5f;
+            rot.z = texcoords.at(i).at(1) - .5f;
             rot = DoRotation(rot, 0, -rotation, 0);
-            texcoords[i][0] = rot.x + .5f;
-            texcoords[i][1] = rot.z + .5f;
+            texcoords.at(i).at(0) = rot.x + .5f;
+            texcoords.at(i).at(1) = rot.z + .5f;
         }
     }
 }
@@ -107,91 +107,91 @@ Decal::Decal(Vector3 _position, decal_type _type, float _opacity, float _rotatio
         placex = model.getTriangleVertex(i, 0).x;
         placez = model.getTriangleVertex(i, 0).z;
 
-        texcoords[0][0] = (placex - position.x) / (size) / 2.f + .5f;
-        texcoords[0][1] = (placez - position.z) / (size) / 2.f + .5f;
+        texcoords.at(0).at(0) = (placex - position.x) / (size) / 2.f + .5f;
+        texcoords.at(0).at(1) = (placez - position.z) / (size) / 2.f + .5f;
 
-        vertex[0].x = placex;
-        vertex[0].z = placez;
-        vertex[0].y = model.getTriangleVertex(i, 0).y;
+        vertex.at(0).x = placex;
+        vertex.at(0).z = placez;
+        vertex.at(0).y = model.getTriangleVertex(i, 0).y;
 
         placex = model.getTriangleVertex(i, 1).x;
         placez = model.getTriangleVertex(i, 1).z;
 
-        texcoords[1][0] = (placex - position.x) / (size) / 2.f + .5f;
-        texcoords[1][1] = (placez - position.z) / (size) / 2.f + .5f;
+        texcoords.at(1).at(0) = (placex - position.x) / (size) / 2.f + .5f;
+        texcoords.at(1).at(1) = (placez - position.z) / (size) / 2.f + .5f;
 
-        vertex[1].x = placex;
-        vertex[1].z = placez;
-        vertex[1].y = model.getTriangleVertex(i, 1).y;
+        vertex.at(1).x = placex;
+        vertex.at(1).z = placez;
+        vertex.at(1).y = model.getTriangleVertex(i, 1).y;
 
         placex = model.getTriangleVertex(i, 2).x;
         placez = model.getTriangleVertex(i, 2).z;
 
-        texcoords[2][0] = (placex - position.x) / (size) / 2.f + .5f;
-        texcoords[2][1] = (placez - position.z) / (size) / 2.f + .5f;
+        texcoords.at(2).at(0) = (placex - position.x) / (size) / 2.f + .5f;
+        texcoords.at(2).at(1) = (placez - position.z) / (size) / 2.f + .5f;
 
-        vertex[2].x = placex;
-        vertex[2].z = placez;
-        vertex[2].y = model.getTriangleVertex(i, 2).y;
+        vertex.at(2).x = placex;
+        vertex.at(2).z = placez;
+        vertex.at(2).y = model.getTriangleVertex(i, 2).y;
     } else if (which == 1) {
         placex = model.getTriangleVertex(i, 0).y;
         placez = model.getTriangleVertex(i, 0).z;
 
-        texcoords[0][0] = (placex - position.y) / (size) / 2.f + .5f;
-        texcoords[0][1] = (placez - position.z) / (size) / 2.f + .5f;
+        texcoords.at(0).at(0) = (placex - position.y) / (size) / 2.f + .5f;
+        texcoords.at(0).at(1) = (placez - position.z) / (size) / 2.f + .5f;
 
-        vertex[0].x = model.getTriangleVertex(i, 0).x;
-        vertex[0].z = placez;
-        vertex[0].y = placex;
+        vertex.at(0).x = model.getTriangleVertex(i, 0).x;
+        vertex.at(0).z = placez;
+        vertex.at(0).y = placex;
 
         placex = model.getTriangleVertex(i, 1).y;
         placez = model.getTriangleVertex(i, 1).z;
 
-        texcoords[1][0] = (placex - position.y) / (size) / 2.f + .5f;
-        texcoords[1][1] = (placez - position.z) / (size) / 2.f + .5f;
+        texcoords.at(1).at(0) = (placex - position.y) / (size) / 2.f + .5f;
+        texcoords.at(1).at(1) = (placez - position.z) / (size) / 2.f + .5f;
 
-        vertex[1].x = model.getTriangleVertex(i, 1).x;
-        vertex[1].z = placez;
-        vertex[1].y = placex;
+        vertex.at(1).x = model.getTriangleVertex(i, 1).x;
+        vertex.at(1).z = placez;
+        vertex.at(1).y = placex;
 
         placex = model.getTriangleVertex(i, 2).y;
         placez = model.getTriangleVertex(i, 2).z;
 
-        texcoords[2][0] = (placex - position.y) / (size) / 2.f + .5f;
-        texcoords[2][1] = (placez - position.z) / (size) / 2.f + .5f;
+        texcoords.at(2).at(0) = (placex - position.y) / (size) / 2.f + .5f;
+        texcoords.at(2).at(1) = (placez - position.z) / (size) / 2.f + .5f;
 
-        vertex[2].x = model.getTriangleVertex(i, 2).x;
-        vertex[2].z = placez;
-        vertex[2].y = placex;
+        vertex.at(2).x = model.getTriangleVertex(i, 2).x;
+        vertex.at(2).z = placez;
+        vertex.at(2).y = placex;
     } else {
         placex = model.getTriangleVertex(i, 0).x;
         placez = model.getTriangleVertex(i, 0).y;
 
-        texcoords[0][0] = (placex - position.x) / (size) / 2.f + .5f;
-        texcoords[0][1] = (placez - position.y) / (size) / 2.f + .5f;
+        texcoords.at(0).at(0) = (placex - position.x) / (size) / 2.f + .5f;
+        texcoords.at(0).at(1) = (placez - position.y) / (size) / 2.f + .5f;
 
-        vertex[0].x = placex;
-        vertex[0].z = model.getTriangleVertex(i, 0).z;
-        vertex[0].y = placez;
+        vertex.at(0).x = placex;
+        vertex.at(0).z = model.getTriangleVertex(i, 0).z;
+        vertex.at(0).y = placez;
 
         placex = model.getTriangleVertex(i, 1).x;
         placez = model.getTriangleVertex(i, 1).y;
 
-        texcoords[1][0] = (placex - position.x) / (size) / 2.f + .5f;
-        texcoords[1][1] = (placez - position.y) / (size) / 2.f + .5f;
+        texcoords.at(1).at(0) = (placex - position.x) / (size) / 2.f + .5f;
+        texcoords.at(1).at(1) = (placez - position.y) / (size) / 2.f + .5f;
 
-        vertex[1].x = placex;
-        vertex[1].z = model.getTriangleVertex(i, 1).z;
-        vertex[1].y = placez;
+        vertex.at(1).x = placex;
+        vertex.at(1).z = model.getTriangleVertex(i, 1).z;
+        vertex.at(1).y = placez;
 
         placex = model.getTriangleVertex(i, 2).x;
         placez = model.getTriangleVertex(i, 2).y;
 
-        texcoords[2][0] = (placex - position.x) / (size) / 2.f + .5f;
-        texcoords[2][1] = (placez - position.y) / (size) / 2.f + .5f;
+        texcoords.at(2).at(0) = (placex - position.x) / (size) / 2.f + .5f;
+        texcoords.at(2).at(1) = (placez - position.y) / (size) / 2.f + .5f;
 
-        vertex[2].x = placex;
-        vertex[2].z = model.getTriangleVertex(i, 2).z;
-        vertex[2].y = placez;
+        vertex.at(2).x = placex;
+        vertex.at(2).z = model.getTriangleVertex(i, 2).z;
+        vertex.at(2).y = placez;
     }
 }
