@@ -60,7 +60,10 @@ public:
 	// DoConstraints index with garbage until this was restored.
 	std::array<int, max_joints> jointlabels = {};
 
-	Model model[7];
+	// One Model per model file a character loads, and num_models is a hardcoded 7
+	// in Skeleton::load. std::array so the bound is stated once: if that count and
+	// this size ever drift apart, the access throws instead of running off the end.
+	std::array<Model, 7> model = {};
 	Model modellow;
 	Model modelclothes;
 	int num_models;

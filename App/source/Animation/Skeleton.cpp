@@ -722,18 +722,18 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 	// load various models
 	// rotate, scale, do normals, do texcoords for each as needed
 
-	model[0].loadnotex(modelfilename);
-	model[1].loadnotex(model2filename);
-	model[2].loadnotex(model3filename);
-	model[3].loadnotex(model4filename);
-	model[4].loadnotex(model5filename);
-	model[5].loadnotex(model6filename);
-	model[6].loadnotex(model7filename);
+	model.at(0).loadnotex(modelfilename);
+	model.at(1).loadnotex(model2filename);
+	model.at(2).loadnotex(model3filename);
+	model.at(3).loadnotex(model4filename);
+	model.at(4).loadnotex(model5filename);
+	model.at(5).loadnotex(model6filename);
+	model.at(6).loadnotex(model7filename);
 
 	for (int i = 0; i < num_models; i++) {
-		model[i].Rotate(180, 0, 0);
-		model[i].Scale(.04f, .04f, .04f);
-		model[i].CalculateNormals(0, callback);
+		model.at(i).Rotate(180, 0, 0);
+		model.at(i).Scale(.04f, .04f, .04f);
+		model.at(i).CalculateNormals(0, callback);
 	}
 
 	drawmodel.load(modelfilename, callback);
@@ -803,7 +803,7 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 
 	// for each muscle...
 	for (int i = 0; i < num_muscles; i++) {
-		muscles[i].load(tfile, model[0].vertexNum, joints);
+		muscles[i].load(tfile, model.at(0).vertexNum, joints);
 	}
 
 	// read forwardjoints (?)
@@ -819,8 +819,8 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 	for (j = 0; j < num_muscles; j++) {
 		for (unsigned i = 0; i < muscles[j].vertices.size(); i++) {
 			for (int k = 0; k < num_models; k++) {
-				if (muscles[j].vertices[i] < model[k].vertexNum) {
-					model[k].owner[muscles[j].vertices[i]] = j;
+				if (muscles[j].vertices[i] < model.at(k).vertexNum) {
+					model.at(k).owner[muscles[j].vertices[i]] = j;
 				}
 			}
 		}
@@ -833,11 +833,11 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 	}
 	// this used to use opengl purely for matrix calculations
 	for (int k = 0; k < num_models; k++) {
-		for (int i = 0; i < model[k].vertexNum; i++) {
-			model[k].vertex[i] = model[k].vertex[i] - muscleMidpoint(muscles[model[k].owner[i]]);
-			model[k].vertex[i] = rotatePointByMuscle(model[k].vertex[i], muscles[model[k].owner[i]]);
+		for (int i = 0; i < model.at(k).vertexNum; i++) {
+			model.at(k).vertex[i] = model.at(k).vertex[i] - muscleMidpoint(muscles[model.at(k).owner[i]]);
+			model.at(k).vertex[i] = rotatePointByMuscle(model.at(k).vertex[i], muscles[model.at(k).owner[i]]);
 		}
-		model[k].CalculateNormals(0, callback);
+		model.at(k).CalculateNormals(0, callback);
 	}
 	fclose(tfile);
 
