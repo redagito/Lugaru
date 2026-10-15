@@ -56,8 +56,8 @@ Dialog::Dialog(Json::Value data)
 	type = data["type"].asInt();
 
 	for (int l = 0; l < 10; l++) {
-		participantlocation[l] = data["participant"][l]["pos"];
-		participantyaw[l] = data["participant"][l]["yaw"].asFloat();
+		participantlocation.at(l) = data["participant"][l]["pos"];
+		participantyaw.at(l) = data["participant"][l]["yaw"].asFloat();
 	}
 	for (unsigned l = 0; l < data["scenes"].size(); l++) {
 		scenes.push_back(DialogScene(data["scenes"][l]));
@@ -71,8 +71,8 @@ Dialog::Dialog(FILE* tfile)
 	funpackf(tfile, "Bi", &numdialogscenes);
 	funpackf(tfile, "Bi", &type);
 	for (int l = 0; l < 10; l++) {
-		funpackf(tfile, "Bf Bf Bf", &participantlocation[l].x, &participantlocation[l].y, &participantlocation[l].z);
-		funpackf(tfile, "Bf", &participantyaw[l]);
+		funpackf(tfile, "Bf Bf Bf", &participantlocation.at(l).x, &participantlocation.at(l).y, &participantlocation.at(l).z);
+		funpackf(tfile, "Bf", &participantyaw.at(l));
 	}
 	for (int l = 0; l < numdialogscenes; l++) {
 		scenes.push_back(DialogScene(tfile));
@@ -127,7 +127,7 @@ DialogScene::DialogScene(FILE* tfile)
 	funpackf(tfile, "Bi", &participantaction);
 
 	for (int m = 0; m < 10; m++) {
-		funpackf(tfile, "Bf Bf Bf", &participantfacing[m].x, &participantfacing[m].y, &participantfacing[m].z);
+		funpackf(tfile, "Bf Bf Bf", &participantfacing.at(m).x, &participantfacing.at(m).y, &participantfacing.at(m).z);
 	}
 
 	funpackf(tfile, "Bf Bf", &camerayaw, &camerapitch);
@@ -149,7 +149,7 @@ DialogScene::DialogScene(Json::Value data)
 	participantaction = data["participantaction"].asInt();
 
 	for (int m = 0; m < 10; m++) {
-		participantfacing[m] = data["participantfacing"][m];
+		participantfacing.at(m) = data["participantfacing"][m];
 	}
 }
 
@@ -164,7 +164,7 @@ Dialog::Dialog(int type, std::string filename)
 	for (int i = 0; i < numscenes; i++) {
 		scenes.push_back(DialogScene(ipstream));
 		for (unsigned j = 0; j < Person::players.size(); j++) {
-			scenes.back().participantfacing[j] = Person::players[j]->facing;
+			scenes.back().participantfacing.at(j) = Person::players[j]->facing;
 		}
 	}
 	ipstream.close();
@@ -219,9 +219,9 @@ void Dialog::play(PlaySoundCallback callback, GameAssets& assets)
 {
 	for (unsigned i = 0; i < scenes.size(); i++) {
 		int playerId = scenes[i].participantfocus;
-		Person::players.at(playerId)->coords = participantlocation[playerId];
-		Person::players[playerId]->yaw = participantyaw[playerId];
-		Person::players[playerId]->targetyaw = participantyaw[playerId];
+		Person::players.at(playerId)->coords = participantlocation.at(playerId);
+		Person::players[playerId]->yaw = participantyaw.at(playerId);
+		Person::players[playerId]->targetyaw = participantyaw.at(playerId);
 		Person::players[playerId]->velocity = 0;
 		Person::players[playerId]->animTarget = Person::players[playerId]->getIdle(inDialog(), assets);
 		Person::players[playerId]->frameTarget = 0;
@@ -261,8 +261,8 @@ void Dialog::save(FILE* tfile)
 	fpackf(tfile, "Bi", scenes.size());
 	fpackf(tfile, "Bi", type);
 	for (int l = 0; l < 10; l++) {
-		fpackf(tfile, "Bf Bf Bf", participantlocation[l].x, participantlocation[l].y, participantlocation[l].z);
-		fpackf(tfile, "Bf", participantyaw[l]);
+		fpackf(tfile, "Bf Bf Bf", participantlocation.at(l).x, participantlocation.at(l).y, participantlocation.at(l).z);
+		fpackf(tfile, "Bf", participantyaw.at(l));
 	}
 	for (unsigned l = 0; l < scenes.size(); l++) {
 		scenes[l].save(tfile);
@@ -276,8 +276,8 @@ Json::Value Dialog::save()
 	dialog["type"] = type;
 
 	for (int l = 0; l < 10; l++) {
-		dialog["participant"][l]["pos"] = participantlocation[l];
-		dialog["participant"][l]["yaw"] = participantyaw[l];
+		dialog["participant"][l]["pos"] = participantlocation.at(l);
+		dialog["participant"][l]["yaw"] = participantyaw.at(l);
 	}
 	for (unsigned l = 0; l < scenes.size(); l++) {
 		dialog["scenes"][l] = scenes[l];
@@ -302,7 +302,7 @@ void DialogScene::save(FILE* tfile)
 	fpackf(tfile, "Bi", participantaction);
 
 	for (int m = 0; m < 10; m++) {
-		fpackf(tfile, "Bf Bf Bf", participantfacing[m].x, participantfacing[m].y, participantfacing[m].z);
+		fpackf(tfile, "Bf Bf Bf", participantfacing.at(m).x, participantfacing.at(m).y, participantfacing.at(m).z);
 	}
 
 	fpackf(tfile, "Bf Bf", camerayaw, camerapitch);
@@ -326,7 +326,7 @@ Json::Value DialogScene::save()
 	dialogscene["participantaction"] = participantaction;
 
 	for (int m = 0; m < 10; m++) {
-		dialogscene["participantfacing"][m] = participantfacing[m];
+		dialogscene["participantfacing"][m] = participantfacing.at(m);
 	}
 
 	return dialogscene;

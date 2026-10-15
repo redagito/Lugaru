@@ -1,3 +1,4 @@
+#include <array>
 /*
 Copyright (C) 2003, 2010 - Wolfire Games
 Copyright (C) 2010-2017 - Lugaru contributors (see AUTHORS file)
@@ -28,8 +29,8 @@ class Light
 {
 public:
     GLint type;
-    GLfloat color[3];
-      GLfloat ambient[3];
+    std::array<GLfloat, 3> color = {};
+      std::array<GLfloat, 3> ambient = {};
       int attach;
       Vector3 location;
       void setColors(GLfloat cr, GLfloat cg, GLfloat cb,

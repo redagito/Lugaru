@@ -1,3 +1,4 @@
+#include <array>
 /*
 Copyright (C) 2003, 2010 - Wolfire Games
 Copyright (C) 2010-2017 - Lugaru contributors (see AUTHORS file)
@@ -25,7 +26,10 @@ class Frustum
 {
 public:
     // 6 planes
-    float frustum[6][4];
+    // Six planes of four coefficients each. std::array because the plane index is
+    // computed from matrix arithmetic rather than validated, and an out-of-range
+    // plane read returned whatever followed rather than a clipped view.
+    std::array<std::array<float, 4>, 6> frustum = {};
     // Calculates and sets frustum from projection and modelview matrix
     void SetFrustum(const float projmatrix[16], const float mvmatrix[16]);
 

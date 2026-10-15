@@ -1,3 +1,4 @@
+#include <array>
 /*
 Copyright (C) 2016-2017 - Lugaru contributors (see AUTHORS file)
 
@@ -48,13 +49,13 @@ public:
     animation_type animTalkIdle;
     animation_type animHurtIdle;
 
-    sound_type soundsAttack[4];
-    sound_type soundsTalk[2];
+    std::array<sound_type, 4> soundsAttack = {};
+    std::array<sound_type, 2> soundsTalk = {};
 
     std::string figureFileName;
     std::string lowFigureFileName;
     std::string clothesFileName;
-    std::string modelFileNames[7];
+    std::array<std::string, 7> modelFileNames = {};
     std::string lowModelFileName;
     std::string modelClothesFileName;
 

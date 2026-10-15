@@ -56,23 +56,23 @@ void PersonType::Load(GraphicsState& graphics)
     graphics.types[wolftype].animFightIdle = wolfidle;
     graphics.types[wolftype].animBounceIdle = wolfidle;
 
-    graphics.types[wolftype].soundsAttack[0] = barksound;
-    graphics.types[wolftype].soundsAttack[1] = bark2sound;
-    graphics.types[wolftype].soundsAttack[2] = bark3sound;
-    graphics.types[wolftype].soundsAttack[3] = barkgrowlsound;
-    graphics.types[wolftype].soundsTalk[0] = growlsound;
-    graphics.types[wolftype].soundsTalk[1] = growl2sound;
+    graphics.types[wolftype].soundsAttack.at(0) = barksound;
+    graphics.types[wolftype].soundsAttack.at(1) = bark2sound;
+    graphics.types[wolftype].soundsAttack.at(2) = bark3sound;
+    graphics.types[wolftype].soundsAttack.at(3) = barkgrowlsound;
+    graphics.types[wolftype].soundsTalk.at(0) = growlsound;
+    graphics.types[wolftype].soundsTalk.at(1) = growl2sound;
 
     graphics.types[wolftype].figureFileName = "Skeleton/BasicFigureWolf";
     graphics.types[wolftype].lowFigureFileName = "Skeleton/BasicFigureWolfLow";
     graphics.types[wolftype].clothesFileName = "Skeleton/RabbitBelt";
-    graphics.types[wolftype].modelFileNames[0] = "Models/Wolf.solid";
-    graphics.types[wolftype].modelFileNames[1] = "Models/Wolf2.solid";
-    graphics.types[wolftype].modelFileNames[2] = "Models/Wolf3.solid";
-    graphics.types[wolftype].modelFileNames[3] = "Models/Wolf4.solid";
-    graphics.types[wolftype].modelFileNames[4] = "Models/Wolf5.solid";
-    graphics.types[wolftype].modelFileNames[5] = "Models/Wolf6.solid";
-    graphics.types[wolftype].modelFileNames[6] = "Models/Wolf7.solid";
+    graphics.types[wolftype].modelFileNames.at(0) = "Models/Wolf.solid";
+    graphics.types[wolftype].modelFileNames.at(1) = "Models/Wolf2.solid";
+    graphics.types[wolftype].modelFileNames.at(2) = "Models/Wolf3.solid";
+    graphics.types[wolftype].modelFileNames.at(3) = "Models/Wolf4.solid";
+    graphics.types[wolftype].modelFileNames.at(4) = "Models/Wolf5.solid";
+    graphics.types[wolftype].modelFileNames.at(5) = "Models/Wolf6.solid";
+    graphics.types[wolftype].modelFileNames.at(6) = "Models/Wolf7.solid";
     graphics.types[wolftype].lowModelFileName = "Models/WolfLow.solid";
     graphics.types[wolftype].modelClothesFileName = "Models/Belt.solid";
 
@@ -107,23 +107,23 @@ void PersonType::Load(GraphicsState& graphics)
     graphics.types[rabbittype].animTalkIdle = talkidleanim;
     graphics.types[rabbittype].animHurtIdle = hurtidleanim;
 
-    graphics.types[rabbittype].soundsAttack[0] = rabbitattacksound;
-    graphics.types[rabbittype].soundsAttack[1] = rabbitattack2sound;
-    graphics.types[rabbittype].soundsAttack[2] = rabbitattack3sound;
-    graphics.types[rabbittype].soundsAttack[3] = rabbitattack4sound;
-    graphics.types[rabbittype].soundsTalk[0] = rabbitchitter;
-    graphics.types[rabbittype].soundsTalk[1] = rabbitchitter2;
+    graphics.types[rabbittype].soundsAttack.at(0) = rabbitattacksound;
+    graphics.types[rabbittype].soundsAttack.at(1) = rabbitattack2sound;
+    graphics.types[rabbittype].soundsAttack.at(2) = rabbitattack3sound;
+    graphics.types[rabbittype].soundsAttack.at(3) = rabbitattack4sound;
+    graphics.types[rabbittype].soundsTalk.at(0) = rabbitchitter;
+    graphics.types[rabbittype].soundsTalk.at(1) = rabbitchitter2;
 
     graphics.types[rabbittype].figureFileName = "Skeleton/BasicFigure";
     graphics.types[rabbittype].lowFigureFileName = "Skeleton/BasicFigureLow";
     graphics.types[rabbittype].clothesFileName = "Skeleton/RabbitBelt";
-    graphics.types[rabbittype].modelFileNames[0] = "Models/Body.solid";
-    graphics.types[rabbittype].modelFileNames[1] = "Models/Body2.solid";
-    graphics.types[rabbittype].modelFileNames[2] = "Models/Body3.solid";
-    graphics.types[rabbittype].modelFileNames[3] = "Models/Body4.solid";
-    graphics.types[rabbittype].modelFileNames[4] = "Models/Body5.solid";
-    graphics.types[rabbittype].modelFileNames[5] = "Models/Body6.solid";
-    graphics.types[rabbittype].modelFileNames[6] = "Models/Body7.solid";
+    graphics.types[rabbittype].modelFileNames.at(0) = "Models/Body.solid";
+    graphics.types[rabbittype].modelFileNames.at(1) = "Models/Body2.solid";
+    graphics.types[rabbittype].modelFileNames.at(2) = "Models/Body3.solid";
+    graphics.types[rabbittype].modelFileNames.at(3) = "Models/Body4.solid";
+    graphics.types[rabbittype].modelFileNames.at(4) = "Models/Body5.solid";
+    graphics.types[rabbittype].modelFileNames.at(5) = "Models/Body6.solid";
+    graphics.types[rabbittype].modelFileNames.at(6) = "Models/Body7.solid";
     graphics.types[rabbittype].lowModelFileName = "Models/BodyLow.solid";
     graphics.types[rabbittype].modelClothesFileName = "Models/Belt.solid";
 

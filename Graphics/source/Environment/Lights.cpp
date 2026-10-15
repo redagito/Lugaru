@@ -26,8 +26,8 @@ void SetUpLight(const Light* whichsource, int whichlight)
 
     //Initialize lights
     if (whichlight == 0) {
-        GLfloat LightAmbient[] = { whichsource->ambient[0], whichsource->ambient[1], whichsource->ambient[2], 1.0f };
-        GLfloat LightDiffuse[] = { whichsource->color[0], whichsource->color[1], whichsource->color[2], 1.0f };
+        GLfloat LightAmbient[] = { whichsource->ambient.at(0), whichsource->ambient.at(1), whichsource->ambient.at(2), 1.0f };
+        GLfloat LightDiffuse[] = { whichsource->color.at(0), whichsource->color.at(1), whichsource->color.at(2), 1.0f };
         GLfloat LightPosition[] = { whichsource->location.x, whichsource->location.y, whichsource->location.z, 0.0f };
 
         glLightfv(GL_LIGHT0, GL_POSITION, LightPosition);
@@ -58,7 +58,7 @@ void SetUpLight(const Light* whichsource, int whichlight)
         }
 
         GLfloat LightAmbient[] = { 0, 0, 0, 1.0f };
-        GLfloat LightDiffuse[] = { whichsource->color[0], whichsource->color[1], whichsource->color[2], 1.0f };
+        GLfloat LightDiffuse[] = { whichsource->color.at(0), whichsource->color.at(1), whichsource->color.at(2), 1.0f };
         GLfloat LightPosition[] = { whichsource->location.x, whichsource->location.y, whichsource->location.z, 1.0f };
 
         glLightfv(lightselect, GL_QUADRATIC_ATTENUATION, qattenuation);

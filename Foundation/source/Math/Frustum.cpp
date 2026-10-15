@@ -47,40 +47,40 @@ void Frustum::SetFrustum(const float projmatrix[16], const float mvmatrix[16])
 	clip[15] = mvmatrix[12] * projmatrix[3] + mvmatrix[13] * projmatrix[7] + mvmatrix[14] * projmatrix[11] + mvmatrix[15] * projmatrix[15];
 
 	// Right plane
-	frustum[0][0] = clip[3] - clip[0];
-	frustum[0][1] = clip[7] - clip[4];
-	frustum[0][2] = clip[11] - clip[8];
-	frustum[0][3] = clip[15] - clip[12];
+	frustum.at(0).at(0) = clip[3] - clip[0];
+	frustum.at(0).at(1) = clip[7] - clip[4];
+	frustum.at(0).at(2) = clip[11] - clip[8];
+	frustum.at(0).at(3) = clip[15] - clip[12];
 
 	// Left plane
-	frustum[1][0] = clip[3] + clip[0];
-	frustum[1][1] = clip[7] + clip[4];
-	frustum[1][2] = clip[11] + clip[8];
-	frustum[1][3] = clip[15] + clip[12];
+	frustum.at(1).at(0) = clip[3] + clip[0];
+	frustum.at(1).at(1) = clip[7] + clip[4];
+	frustum.at(1).at(2) = clip[11] + clip[8];
+	frustum.at(1).at(3) = clip[15] + clip[12];
 
 	// Bottom plane
-	frustum[2][0] = clip[3] + clip[1];
-	frustum[2][1] = clip[7] + clip[5];
-	frustum[2][2] = clip[11] + clip[9];
-	frustum[2][3] = clip[15] + clip[13];
+	frustum.at(2).at(0) = clip[3] + clip[1];
+	frustum.at(2).at(1) = clip[7] + clip[5];
+	frustum.at(2).at(2) = clip[11] + clip[9];
+	frustum.at(2).at(3) = clip[15] + clip[13];
 
 	// Top plane
-	frustum[3][0] = clip[3] - clip[1];
-	frustum[3][1] = clip[7] - clip[5];
-	frustum[3][2] = clip[11] - clip[9];
-	frustum[3][3] = clip[15] - clip[13];
+	frustum.at(3).at(0) = clip[3] - clip[1];
+	frustum.at(3).at(1) = clip[7] - clip[5];
+	frustum.at(3).at(2) = clip[11] - clip[9];
+	frustum.at(3).at(3) = clip[15] - clip[13];
 
 	// Far plane
-	frustum[4][0] = clip[3] - clip[2];
-	frustum[4][1] = clip[7] - clip[6];
-	frustum[4][2] = clip[11] - clip[10];
-	frustum[4][3] = clip[15] - clip[14];
+	frustum.at(4).at(0) = clip[3] - clip[2];
+	frustum.at(4).at(1) = clip[7] - clip[6];
+	frustum.at(4).at(2) = clip[11] - clip[10];
+	frustum.at(4).at(3) = clip[15] - clip[14];
 
 	// Near plane
-	frustum[5][0] = clip[3] + clip[2];
-	frustum[5][1] = clip[7] + clip[6];
-	frustum[5][2] = clip[11] + clip[10];
-	frustum[5][3] = clip[15] + clip[14];
+	frustum.at(5).at(0) = clip[3] + clip[2];
+	frustum.at(5).at(1) = clip[7] + clip[6];
+	frustum.at(5).at(2) = clip[11] + clip[10];
+	frustum.at(5).at(3) = clip[15] + clip[14];
 }
 
 int Frustum::CubeInFrustum(float x, float y, float z, float size) const
@@ -90,28 +90,28 @@ int Frustum::CubeInFrustum(float x, float y, float z, float size) const
 
 	for (int i = 0; i < 6; i++) {
 		c = 0;
-		if (frustum[i][0] * (x - size) + frustum[i][1] * (y - size) + frustum[i][2] * (z - size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x - size) + frustum.at(i).at(1) * (y - size) + frustum.at(i).at(2) * (z - size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x + size) + frustum[i][1] * (y - size) + frustum[i][2] * (z - size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x + size) + frustum.at(i).at(1) * (y - size) + frustum.at(i).at(2) * (z - size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x - size) + frustum[i][1] * (y + size) + frustum[i][2] * (z - size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x - size) + frustum.at(i).at(1) * (y + size) + frustum.at(i).at(2) * (z - size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x + size) + frustum[i][1] * (y + size) + frustum[i][2] * (z - size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x + size) + frustum.at(i).at(1) * (y + size) + frustum.at(i).at(2) * (z - size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x - size) + frustum[i][1] * (y - size) + frustum[i][2] * (z + size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x - size) + frustum.at(i).at(1) * (y - size) + frustum.at(i).at(2) * (z + size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x + size) + frustum[i][1] * (y - size) + frustum[i][2] * (z + size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x + size) + frustum.at(i).at(1) * (y - size) + frustum.at(i).at(2) * (z + size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x - size) + frustum[i][1] * (y + size) + frustum[i][2] * (z + size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x - size) + frustum.at(i).at(1) * (y + size) + frustum.at(i).at(2) * (z + size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x + size) + frustum[i][1] * (y + size) + frustum[i][2] * (z + size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x + size) + frustum.at(i).at(1) * (y + size) + frustum.at(i).at(2) * (z + size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
 		if (c == 0) {
@@ -135,28 +135,28 @@ int Frustum::CubeInFrustum(float x, float y, float z, float size, float height) 
 
 	for (int i = 0; i < 6; i++) {
 		c = 0;
-		if (frustum[i][0] * (x - size) + frustum[i][1] * (y - height) + frustum[i][2] * (z - size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x - size) + frustum.at(i).at(1) * (y - height) + frustum.at(i).at(2) * (z - size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x + size) + frustum[i][1] * (y - height) + frustum[i][2] * (z - size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x + size) + frustum.at(i).at(1) * (y - height) + frustum.at(i).at(2) * (z - size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x - size) + frustum[i][1] * (y + height) + frustum[i][2] * (z - size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x - size) + frustum.at(i).at(1) * (y + height) + frustum.at(i).at(2) * (z - size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x + size) + frustum[i][1] * (y + height) + frustum[i][2] * (z - size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x + size) + frustum.at(i).at(1) * (y + height) + frustum.at(i).at(2) * (z - size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x - size) + frustum[i][1] * (y - height) + frustum[i][2] * (z + size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x - size) + frustum.at(i).at(1) * (y - height) + frustum.at(i).at(2) * (z + size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x + size) + frustum[i][1] * (y - height) + frustum[i][2] * (z + size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x + size) + frustum.at(i).at(1) * (y - height) + frustum.at(i).at(2) * (z + size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x - size) + frustum[i][1] * (y + height) + frustum[i][2] * (z + size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x - size) + frustum.at(i).at(1) * (y + height) + frustum.at(i).at(2) * (z + size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
-		if (frustum[i][0] * (x + size) + frustum[i][1] * (y + height) + frustum[i][2] * (z + size) + frustum[i][3] > 0) {
+		if (frustum.at(i).at(0) * (x + size) + frustum.at(i).at(1) * (y + height) + frustum.at(i).at(2) * (z + size) + frustum.at(i).at(3) > 0) {
 			c++;
 		}
 
@@ -178,7 +178,7 @@ int Frustum::SphereInFrustum(float x, float y, float z, float radius) const
 	int c2 = 0;
 
 	for (int i = 0; i < 6; i++) {
-		if (frustum[i][0] * x + frustum[i][1] * y + frustum[i][2] * z + frustum[i][3] > -1 * radius) {
+		if (frustum.at(i).at(0) * x + frustum.at(i).at(1) * y + frustum.at(i).at(2) * z + frustum.at(i).at(3) > -1 * radius) {
 			c2++;
 		}
 		else {

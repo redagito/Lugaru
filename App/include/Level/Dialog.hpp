@@ -1,3 +1,4 @@
+#include <array>
 /*
 Copyright (C) 2003, 2010 - Wolfire Games
 Copyright (C) 2010-2017 - Lugaru contributors (see AUTHORS file)
@@ -51,7 +52,7 @@ public:
 	float camerapitch;
 	int participantfocus;
 	int participantaction;
-	Vector3 participantfacing[10];
+	std::array<Vector3, 10> participantfacing = {};
 	operator Json::Value();
 };
 
@@ -69,8 +70,8 @@ public:
 	int type;
 	int gonethrough;
 	std::vector<DialogScene> scenes;
-	Vector3 participantlocation[10];
-	float participantyaw[10];
+	std::array<Vector3, 10> participantlocation = {};
+	std::array<float, 10> participantyaw = {};
 
 	static void loadDialogs(FILE*);
 	static void loadDialogs(Json::Value);
