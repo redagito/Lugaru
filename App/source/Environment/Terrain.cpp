@@ -77,30 +77,30 @@ int Terrain::lineTerrain(Vector3 p1, Vector3 p2, Vector3* p) const
 			highest = -1000;
 			lowest = 1000;
 			for (k = 0; k < 2; k++) {
-				if (heightmap[i + k][j] > highest) {
-					highest = heightmap[i + k][j];
+				if (heightmap->at(i + k).at(j) > highest) {
+					highest = heightmap->at(i + k).at(j);
 				}
-				if (heightmap[i + k][j] < lowest) {
-					lowest = heightmap[i + k][j];
+				if (heightmap->at(i + k).at(j) < lowest) {
+					lowest = heightmap->at(i + k).at(j);
 				}
-				if (heightmap[i + k][j + 1] > highest) {
-					highest = heightmap[i + k][j + 1];
+				if (heightmap->at(i + k).at(j + 1) > highest) {
+					highest = heightmap->at(i + k).at(j + 1);
 				}
-				if (heightmap[i + k][j + 1] < lowest) {
-					lowest = heightmap[i + k][j + 1];
+				if (heightmap->at(i + k).at(j + 1) < lowest) {
+					lowest = heightmap->at(i + k).at(j + 1);
 				}
 			}
 			if ((p1.y <= highest || p2.y <= highest) && (p1.y >= lowest || p2.y >= lowest)) {
 				facets[0].x = (float)i;
-				facets[0].y = heightmap[i][j];
+				facets[0].y = heightmap->at(i).at(j);
 				facets[0].z = (float)j;
 
 				facets[1].x = (float)i;
-				facets[1].y = heightmap[i][j + 1];
+				facets[1].y = heightmap->at(i).at(j + 1);
 				facets[1].z = (float)(j + 1);
 
 				facets[2].x = (float)(i + 1);
-				facets[2].y = heightmap[i + 1][j];
+				facets[2].y = heightmap->at(i + 1).at(j);
 				facets[2].z = (float)j;
 
 				intersecting = LineFacet(p1, p2, facets[0], facets[1], facets[2], &point);
@@ -112,15 +112,15 @@ int Terrain::lineTerrain(Vector3 p1, Vector3 p2, Vector3* p) const
 				}
 
 				facets[0].x = (float)(i + 1);
-				facets[0].y = heightmap[i + 1][j];
+				facets[0].y = heightmap->at(i + 1).at(j);
 				facets[0].z = (float)j;
 
 				facets[1].x = (float)i;
-				facets[1].y = heightmap[i][j + 1];
+				facets[1].y = heightmap->at(i).at(j + 1);
 				facets[1].z = (float)(j + 1);
 
 				facets[2].x = (float)(i + 1);
-				facets[2].y = heightmap[i + 1][j + 1];
+				facets[2].y = heightmap->at(i + 1).at(j + 1);
 				facets[2].z = (float)(j + 1);
 
 				intersecting = LineFacet(p1, p2, facets[0], facets[1], facets[2], &point);
@@ -155,7 +155,7 @@ void Terrain::UpdateTransparency(int whichx, int whichy, const Vector3& viewer, 
 			if (i < size && j < size) {
 				vertex.x = i * scale;
 				vertex.z = j * scale;
-				vertex.y = heightmap[i][j] * scale;
+				vertex.y = heightmap->at(i).at(j) * scale;
 				distance = distsq(&viewer, &vertex);
 				if (distance > viewdistsquared) {
 					distance = viewdistsquared;
@@ -233,7 +233,7 @@ void Terrain::UpdateTransparencyotherother(int whichx, int whichy, const Vector3
 			if (i < size && j < size) {
 				vertex.x = i * scale;
 				vertex.z = j * scale;
-				vertex.y = heightmap[i][j] * scale;
+				vertex.y = heightmap->at(i).at(j) * scale;
 				distance = distsq(&viewer, &vertex);
 				if (distance > viewdistsquared) {
 					distance = viewdistsquared;
@@ -278,7 +278,7 @@ void Terrain::UpdateVertexArray(int whichx, int whichy, float texscale)
 			a = (i - ((float)size / subdivision * (float)whichx)) / stepsize;
 			b = (j - ((float)size / subdivision * (float)whichy)) / stepsize;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 0] = i * scale;
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 1] = heightmap[i][j] * scale;
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 1] = heightmap->at(i).at(j) * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 2] = j * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 3] = colors[i][j][0];
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 4] = colors[i][j][1];
@@ -288,7 +288,7 @@ void Terrain::UpdateVertexArray(int whichx, int whichy, float texscale)
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 8] = j * scale * texscale + texoffsety[i][j];
 
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 9] = i * scale;
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 10] = heightmap[i][j + stepsize] * scale;
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 10] = heightmap->at(i).at(j + stepsize) * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 11] = j * scale + stepsize * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 12] = colors[i][j + stepsize][0];
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 13] = colors[i][j + stepsize][1];
@@ -298,7 +298,7 @@ void Terrain::UpdateVertexArray(int whichx, int whichy, float texscale)
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 17] = j * scale * texscale + stepsize * scale * texscale + texoffsety[i][j + stepsize];
 
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 18] = i * scale + stepsize * scale;
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 19] = heightmap[i + stepsize][j] * scale;
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 19] = heightmap->at(i + stepsize).at(j) * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 20] = j * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 21] = colors[i + stepsize][j][0];
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 22] = colors[i + stepsize][j][1];
@@ -308,7 +308,7 @@ void Terrain::UpdateVertexArray(int whichx, int whichy, float texscale)
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 26] = j * scale * texscale + texoffsety[i + stepsize][j];
 
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 27] = i * scale + stepsize * scale;
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 28] = heightmap[i + stepsize][j] * scale;
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 28] = heightmap->at(i + stepsize).at(j) * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 29] = j * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 30] = colors[i + stepsize][j][0];
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 31] = colors[i + stepsize][j][1];
@@ -318,7 +318,7 @@ void Terrain::UpdateVertexArray(int whichx, int whichy, float texscale)
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 35] = j * scale * texscale + texoffsety[i + stepsize][j];
 
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 36] = i * scale;
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 37] = heightmap[i][j + stepsize] * scale;
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 37] = heightmap->at(i).at(j + stepsize) * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 38] = j * scale + stepsize * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 39] = colors[i][j + stepsize][0];
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 40] = colors[i][j + stepsize][1];
@@ -328,7 +328,7 @@ void Terrain::UpdateVertexArray(int whichx, int whichy, float texscale)
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 44] = j * scale * texscale + stepsize * scale * texscale + texoffsety[i][j + stepsize];
 
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 45] = i * scale + stepsize * scale;
-			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 46] = heightmap[i + stepsize][j + stepsize] * scale;
+			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 46] = heightmap->at(i + stepsize).at(j + stepsize) * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 47] = j * scale + stepsize * scale;
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 48] = colors[i + stepsize][j + stepsize][0];
 			vArray[(a * 54) + (b * 54 * patch_size / stepsize) + c + 49] = colors[i + stepsize][j + stepsize][1];
@@ -344,11 +344,11 @@ void Terrain::UpdateVertexArray(int whichx, int whichy, float texscale)
 	minypatch[whichx][whichy] = 10000;
 	for (a = 0; a < size / subdivision; a++) {
 		for (b = 0; b < size / subdivision; b++) {
-			if (heightmap[(size / subdivision) * whichx + a][(size / subdivision) * whichy + b] * scale > maxypatch[whichx][whichy]) {
-				maxypatch[whichx][whichy] = heightmap[(size / subdivision) * whichx + a][(size / subdivision) * whichy + b] * scale;
+			if (heightmap->at((size / subdivision) * whichx + a).at((size / subdivision) * whichy + b) * scale > maxypatch[whichx][whichy]) {
+				maxypatch[whichx][whichy] = heightmap->at((size / subdivision) * whichx + a).at((size / subdivision) * whichy + b) * scale;
 			}
-			if (heightmap[(size / subdivision) * whichx + a][(size / subdivision) * whichy + b] * scale < minypatch[whichx][whichy]) {
-				minypatch[whichx][whichy] = heightmap[(size / subdivision) * whichx + a][(size / subdivision) * whichy + b] * scale;
+			if (heightmap->at((size / subdivision) * whichx + a).at((size / subdivision) * whichy + b) * scale < minypatch[whichx][whichy]) {
+				minypatch[whichx][whichy] = heightmap->at((size / subdivision) * whichx + a).at((size / subdivision) * whichy + b) * scale;
 			}
 		}
 	}
@@ -361,27 +361,27 @@ void Terrain::UpdateVertexArray(int whichx, int whichy, float texscale)
 	for (i = whichx * size / subdivision; i < (whichx + 1) * size / subdivision - 1; i++) {
 		for (j = whichy * size / subdivision; j < (whichy + 1) * size / subdivision - 1; j++) {
 			triangles[(i * (size - 1) * 2) + (j * 2)][0].x = i * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2)][0].y = heightmap[i][j] * scale;
+			triangles[(i * (size - 1) * 2) + (j * 2)][0].y = heightmap->at(i).at(j) * scale;
 			triangles[(i * (size - 1) * 2) + (j * 2)][0].z = j * scale;
 
 			triangles[(i * (size - 1) * 2) + (j * 2)][1].x = i * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2)][1].y = heightmap[i][j + 1] * scale;
+			triangles[(i * (size - 1) * 2) + (j * 2)][1].y = heightmap->at(i).at(j + 1) * scale;
 			triangles[(i * (size - 1) * 2) + (j * 2)][1].z = j * scale + scale;
 
 			triangles[(i * (size - 1) * 2) + (j * 2)][2].x = i * scale + 1 * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2)][2].y = heightmap[i + 1][j] * scale;
+			triangles[(i * (size - 1) * 2) + (j * 2)][2].y = heightmap->at(i + 1).at(j) * scale;
 			triangles[(i * (size - 1) * 2) + (j * 2)][2].z = j * scale;
 
 			triangles[(i * (size - 1) * 2) + (j * 2) + 1][0].x = i * scale + 1 * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2) + 1][0].y = heightmap[i + 1][j] * scale;
+			triangles[(i * (size - 1) * 2) + (j * 2) + 1][0].y = heightmap->at(i + 1).at(j) * scale;
 			triangles[(i * (size - 1) * 2) + (j * 2) + 1][0].z = j * scale;
 
 			triangles[(i * (size - 1) * 2) + (j * 2) + 1][1].x = i * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2) + 1][1].y = heightmap[i][j + 1] * scale;
+			triangles[(i * (size - 1) * 2) + (j * 2) + 1][1].y = heightmap->at(i).at(j + 1) * scale;
 			triangles[(i * (size - 1) * 2) + (j * 2) + 1][1].z = j * scale + 1 * scale;
 
 			triangles[(i * (size - 1) * 2) + (j * 2) + 1][2].x = i * scale + 1 * scale;
-			triangles[(i * (size - 1) * 2) + (j * 2) + 1][2].y = heightmap[i + 1][j + 1] * scale;
+			triangles[(i * (size - 1) * 2) + (j * 2) + 1][2].y = heightmap->at(i + 1).at(j + 1) * scale;
 			triangles[(i * (size - 1) * 2) + (j * 2) + 1][2].z = j * scale + 1 * scale;
 		}
 	}
@@ -431,7 +431,7 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 
 	for (i = 0; i < size; i++) {
 		for (j = 0; j < size; j++) {
-			heightmap[size - 1 - i][j] = (float)((texture.data[(i + (j * size)) * texture.bpp / 8])) / 5;
+			heightmap->at(size - 1 - i).at(j) = (float)((texture.data[(i + (j * size)) * texture.bpp / 8])) / 5;
 		}
 	}
 
@@ -448,15 +448,15 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 
 	for (i = 0; i < size; i++) {
 		for (j = 0; j < size; j++) {
-			heightmap[i][j] *= .5;
+			heightmap->at(i).at(j) *= .5;
 
 			texoffsetx[i][j] = (float)abs(rand() % 100) / 1200 / scale * 3;
 			texoffsety[i][j] = (float)abs(rand() % 100) / 1200 / scale * 3;
 
 			slopeness = 0;
 			if (environment == snowyenvironment) {
-				if (j != 0 && heightmap[i][j] - heightmap[i][j - 1] > slopeness) {
-					slopeness = heightmap[i][j] - heightmap[i][j - 1];
+				if (j != 0 && heightmap->at(i).at(j) - heightmap->at(i).at(j - 1) > slopeness) {
+					slopeness = heightmap->at(i).at(j) - heightmap->at(i).at(j - 1);
 				}
 				opacityother[i][j] = slopeness * slopeness * 2;
 				if (opacityother[i][j] > 1) {
@@ -465,8 +465,8 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 				opacityother[i][j] -= (float)abs(rand() % 100) / 300;
 			}
 			if (environment == desertenvironment) {
-				if (j != 0 && heightmap[i][j] - heightmap[i][j - 1] > slopeness) {
-					slopeness = heightmap[i][j] - heightmap[i][j - 1];
+				if (j != 0 && heightmap->at(i).at(j) - heightmap->at(i).at(j - 1) > slopeness) {
+					slopeness = heightmap->at(i).at(j) - heightmap->at(i).at(j - 1);
 				}
 				opacityother[i][j] = slopeness * slopeness * 2;
 				if (opacityother[i][j] > 1) {
@@ -475,17 +475,17 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 				opacityother[i][j] -= (float)abs(rand() % 100) / 300;
 			}
 			if (environment == grassyenvironment) {
-				if (i != 0 && heightmap[i][j] - heightmap[i - 1][j] > slopeness) {
-					slopeness = heightmap[i][j] - heightmap[i - 1][j];
+				if (i != 0 && heightmap->at(i).at(j) - heightmap->at(i - 1).at(j) > slopeness) {
+					slopeness = heightmap->at(i).at(j) - heightmap->at(i - 1).at(j);
 				}
-				if (j != 0 && heightmap[i][j] - heightmap[i][j - 1] > slopeness) {
-					slopeness = heightmap[i][j] - heightmap[i][j - 1];
+				if (j != 0 && heightmap->at(i).at(j) - heightmap->at(i).at(j - 1) > slopeness) {
+					slopeness = heightmap->at(i).at(j) - heightmap->at(i).at(j - 1);
 				}
-				if (i < size - 1 && heightmap[i][j] - heightmap[i + 1][j] > slopeness) {
-					slopeness = heightmap[i][j] - heightmap[i + 1][j];
+				if (i < size - 1 && heightmap->at(i).at(j) - heightmap->at(i + 1).at(j) > slopeness) {
+					slopeness = heightmap->at(i).at(j) - heightmap->at(i + 1).at(j);
 				}
-				if (j < size - 1 && heightmap[i][j] - heightmap[i][j + 1] > slopeness) {
-					slopeness = heightmap[i][j] - heightmap[i][j + 1];
+				if (j < size - 1 && heightmap->at(i).at(j) - heightmap->at(i).at(j + 1) > slopeness) {
+					slopeness = heightmap->at(i).at(j) - heightmap->at(i).at(j + 1);
 				}
 				opacityother[i][j] = slopeness * slopeness * 10;
 				if (opacityother[i][j] > 1) {
@@ -500,10 +500,10 @@ bool Terrain::load(const std::string& fileName, int environment, ProgressCallbac
 	for (i = 0; i < size; i++) {
 		for (j = 0; j < size; j++) {
 			if (environment == snowyenvironment) {
-				heightmap[i][j] -= opacityother[i][j];
+				heightmap->at(i).at(j) -= opacityother[i][j];
 			}
 			if (environment == desertenvironment) {
-				heightmap[i][j] -= opacityother[i][j];
+				heightmap->at(i).at(j) -= opacityother[i][j];
 			}
 		}
 	}
@@ -694,13 +694,13 @@ void Terrain::CalculateNormals()
 	for (i = 0; i < size - 1; i++) {
 		for (j = 0; j < size - 1; j++) {
 			a.x = i;
-			a.y = heightmap[i][j];
+			a.y = heightmap->at(i).at(j);
 			a.z = j;
 			b.x = i;
-			b.y = heightmap[i][j + 1];
+			b.y = heightmap->at(i).at(j + 1);
 			b.z = j + 1;
 			c.x = i + 1;
-			c.y = heightmap[i + 1][j];
+			c.y = heightmap->at(i + 1).at(j);
 			c.z = j;
 
 			p.x = b.x - a.x;
@@ -719,13 +719,13 @@ void Terrain::CalculateNormals()
 			normals[i + 1][j] = normals[i + 1][j] + facenormal;
 
 			a.x = i + 1;
-			a.y = heightmap[i + 1][j];
+			a.y = heightmap->at(i + 1).at(j);
 			a.z = j;
 			b.x = i;
-			b.y = heightmap[i][j + 1];
+			b.y = heightmap->at(i).at(j + 1);
 			b.z = j + 1;
 			c.x = i + 1;
-			c.y = heightmap[i + 1][j + 1];
+			c.y = heightmap->at(i + 1).at(j + 1);
 			c.z = j + 1;
 
 			p.x = b.x - a.x;
@@ -860,28 +860,28 @@ float Terrain::getHeight(float pointx, float pointz) const
 
 	triangle[0].x = tilex;
 	triangle[0].z = tiley;
-	triangle[0].y = heightmap[tilex][tiley];
+	triangle[0].y = heightmap->at(tilex).at(tiley);
 
 	triangle[1].x = tilex + 1;
 	triangle[1].z = tiley;
-	triangle[1].y = heightmap[tilex + 1][tiley];
+	triangle[1].y = heightmap->at(tilex + 1).at(tiley);
 
 	triangle[2].x = tilex;
 	triangle[2].z = tiley + 1;
-	triangle[2].y = heightmap[tilex][tiley + 1];
+	triangle[2].y = heightmap->at(tilex).at(tiley + 1);
 
 	if (!LineFacetHit(&startpoint, &endpoint, &triangle[0], &triangle[1], &triangle[2], &intersect)) {
 		triangle[0].x = tilex + 1;
 		triangle[0].z = tiley;
-		triangle[0].y = heightmap[tilex + 1][tiley];
+		triangle[0].y = heightmap->at(tilex + 1).at(tiley);
 
 		triangle[1].x = tilex + 1;
 		triangle[1].z = tiley + 1;
-		triangle[1].y = heightmap[tilex + 1][tiley + 1];
+		triangle[1].y = heightmap->at(tilex + 1).at(tiley + 1);
 
 		triangle[2].x = tilex;
 		triangle[2].z = tiley + 1;
-		triangle[2].y = heightmap[tilex][tiley + 1];
+		triangle[2].y = heightmap->at(tilex).at(tiley + 1);
 		LineFacetHit(&startpoint, &endpoint, &triangle[0], &triangle[1], &triangle[2], &intersect);
 	}
 	return intersect.y * scale + getOpacity(pointx * scale, pointz * scale) / 8;
@@ -993,7 +993,7 @@ void Terrain::draw(int layer, const Vector3& viewer, float viewdistance, float f
 		for (i = beginx; i < endx; i++) {
 			for (j = beginz; j < endz; j++) {
 				terrainpoint.x = i * patch_size + (patch_size) / 2;
-				terrainpoint.y = viewer.y; //heightmap[i][j]*scale;
+				terrainpoint.y = viewer.y; //heightmap->at(i).at(j)*scale;
 				terrainpoint.z = j * patch_size + (patch_size) / 2;
 				distance[i][j] = distsq(&viewer, &terrainpoint);
 			}
@@ -1212,10 +1212,10 @@ void Terrain::AddObject(Vector3 where, float radius, int id)
 			if (patchobjects[i][j].size() < 300 - 1) {
 				points[0].x = (size / subdivision) * i;
 				points[0].z = (size / subdivision) * j;
-				points[0].y = heightmap[(int)points[0].x][(int)points[0].z];
+				points[0].y = heightmap->at((int)points[0].x).at((int)points[0].z);
 				points[1].x = (size / subdivision) * (i + 1);
 				points[1].z = (size / subdivision) * (j + 1);
-				points[1].y = heightmap[(int)points[1].x][(int)points[1].z];
+				points[1].y = heightmap->at((int)points[1].x).at((int)points[1].z);
 				points[0] *= scale;
 				points[1] *= scale;
 				if (where.x + radius > points[0].x && where.x - radius < points[1].x && where.z + radius > points[0].z && where.z - radius < points[1].z) {
@@ -1257,7 +1257,7 @@ namespace
 // The heightmap tile a world coordinate falls on, clamped to one the heightmap
 // actually has.
 //
-// Decal::Decal indexes heightmap[whichx + 1][whichy + 1], so the tile itself must
+// Decal::Decal indexes heightmap->at(whichx + 1).at(whichy + 1), so the tile itself must
 // leave room for that row and column. A decal placed from outside the terrain -
 // a ragdoll that has been thrown, a body below the floor - produced an index of
 // any magnitude and read past the array; one placed exactly on the far edge
@@ -1390,7 +1390,7 @@ void Terrain::DoShadows(bool tutorialActive, float texscale, const Light& light,
 			Vector3 terrainpoint;
 			terrainpoint.x = (float)i * scale;
 			terrainpoint.z = (float)j * scale;
-			terrainpoint.y = heightmap[i][j] * scale;
+			terrainpoint.y = heightmap->at(i).at(j) * scale;
 
 			float shadowed = 0;
 			patchx = (float)i * subdivision / size;
@@ -1500,7 +1500,7 @@ float Terrain::getHeightByTile(int x, int y) const
 	if (x + 1 < 0) return 0.f;
 	if (y < 0) return 0.f;
 
-	return heightmap[x + 1][y] * scale + .01f;
+	return heightmap->at(x + 1).at(y) * scale + .01f;
 }
 
 int Terrain::patchFor(float coordinate) const
@@ -1539,8 +1539,9 @@ Terrain::Terrain()
 	patchobjects_storage.reset(new std::vector<unsigned int>[subdivision * subdivision]());
 	patchobjects = reinterpret_cast<std::vector<unsigned int> (*)[subdivision]>(patchobjects_storage.get());
 
-	heightmap_storage.reset(new float[(max_terrain_size + 1) * (max_terrain_size + 1)]());
-	heightmap = reinterpret_cast<float (*)[max_terrain_size + 1]>(heightmap_storage.get());
+    // Value-initialised, as the original new float[...]() did: every tile starts
+    // at zero rather than holding whatever the allocator handed back.
+    heightmap = std::make_unique<std::array<std::array<float, max_terrain_size + 1>, max_terrain_size + 1>>();
 
 	normals_storage.reset(new Vector3[(max_terrain_size + 1) * (max_terrain_size + 1)]());
 	normals = reinterpret_cast<Vector3 (*)[max_terrain_size + 1]>(normals_storage.get());

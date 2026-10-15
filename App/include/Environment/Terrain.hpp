@@ -76,8 +76,12 @@ public:
     std::unique_ptr<std::vector<unsigned int>[]> patchobjects_storage;
     std::vector<unsigned int> (*patchobjects)[subdivision] = nullptr;
 
-    std::unique_ptr<float[]> heightmap_storage;
-    float (*heightmap)[max_terrain_size + 1] = nullptr;
+    // A tile grid of heights, one row and column larger than the terrain itself
+    // because the patch code deliberately reads one past the last tile. Kept as
+    // std::array rather than a C array so every access is bounds-checked: this is
+    // the array that Decal::Decal indexed with an unclamped tile index, and the
+    // one UpdateVertexArray read past the end of.
+    std::unique_ptr<std::array<std::array<float, max_terrain_size + 1>, max_terrain_size + 1>> heightmap;
 
     // The patch code reads one row and column past the last tile, which is why
     // heightmap has always been a tile larger than the rest. These are the

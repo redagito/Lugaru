@@ -50,7 +50,7 @@ Decal::Decal(Vector3 _position, decal_type _type, float _opacity, float _rotatio
 
     vertex.at(0).x = placex;
     vertex.at(0).z = placez;
-    vertex.at(0).y = terrain.heightmap[whichx + 1][whichy] * terrain.scale + .01f;
+    vertex.at(0).y = terrain.heightmap->at(whichx + 1).at(whichy) * terrain.scale + .01f;
 
     if (first) {
         placex = (float)whichx * terrain.scale + terrain.scale;
@@ -66,9 +66,9 @@ Decal::Decal(Vector3 _position, decal_type _type, float _opacity, float _rotatio
     vertex.at(1).x = placex;
     vertex.at(1).z = placez;
     if (first) {
-        vertex.at(1).y = terrain.heightmap[whichx + 1][whichy + 1] * terrain.scale + .01f;
+        vertex.at(1).y = terrain.heightmap->at(whichx + 1).at(whichy + 1) * terrain.scale + .01f;
     } else {
-        vertex.at(1).y = terrain.heightmap[whichx][whichy] * terrain.scale + .01f;
+        vertex.at(1).y = terrain.heightmap->at(whichx).at(whichy) * terrain.scale + .01f;
     }
 
     placex = (float)whichx * terrain.scale;
@@ -79,7 +79,7 @@ Decal::Decal(Vector3 _position, decal_type _type, float _opacity, float _rotatio
 
     vertex.at(2).x = placex;
     vertex.at(2).z = placez;
-    vertex.at(2).y = terrain.heightmap[whichx][whichy + 1] * terrain.scale + .01f;
+    vertex.at(2).y = terrain.heightmap->at(whichx).at(whichy + 1) * terrain.scale + .01f;
 
     Vector3 rot;
     if (rotation) {
