@@ -72,7 +72,7 @@ void clearTerrainPatches(Terrain& terrain)
 {
 	for (int i = 0; i < subdivision; i++) {
 		for (int j = 0; j < subdivision; j++) {
-			terrain.patchobjects[i][j].clear();
+			terrain.patchobjects->at(i).at(j).clear();
 		}
 	}
 }
@@ -138,7 +138,7 @@ int countPatchedObjects(const Terrain& terrain)
 	int count = 0;
 	for (int i = 0; i < subdivision; i++) {
 		for (int j = 0; j < subdivision; j++) {
-			count += static_cast<int>(terrain.patchobjects[i][j].size());
+			count += static_cast<int>(terrain.patchobjects->at(i).at(j).size());
 		}
 	}
 	return count;
@@ -194,7 +194,7 @@ TEST_CASE("a shipped level loads its data and walks the whole terrain surface", 
 			int patchedObjects = 0;
 			for (int i = 0; i < subdivision; i++) {
 				for (int j = 0; j < subdivision; j++) {
-					for (unsigned id : terrain.patchobjects[i][j]) {
+					for (unsigned id : terrain.patchobjects->at(i).at(j)) {
 						REQUIRE(id < Object::objects.size());
 						presentIds.insert(id);
 						patchedObjects++;

@@ -159,6 +159,8 @@ struct GameState
 	bool foliage = false;
 	bool showpoints = false;
 	bool showdamagebar = false;
+	// In-game control reference overlay: F2 toggles it, the game keeps running.
+	bool showControlsHelp = false;
 	bool damageeffects = false;
 	bool immediate = false;
 	bool decalstoggle = false;

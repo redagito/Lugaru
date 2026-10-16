@@ -366,8 +366,8 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 						broken = 1;
 					}
 				}
-				for (unsigned int m = 0; m < terrainref.patchobjects[whichpatchx][whichpatchz].size(); m++) {
-					unsigned int k = terrainref.patchobjects[whichpatchx][whichpatchz][m];
+				for (unsigned int m = 0; m < terrainref.patchobjects->at(whichpatchx).at(whichpatchz).size(); m++) {
+					unsigned int k = terrainref.patchobjects->at(whichpatchx).at(whichpatchz).at(m);
 					if (k < Object::objects.size()) {
 						if (Object::objects[k]->possible) {
 							friction = Object::objects[k]->friction;
@@ -458,8 +458,8 @@ float Skeleton::DoConstraints(Vector3* coords, float* scale, bool tutorialActive
 		}
 		timemultiplier = tempmult;
 
-		for (unsigned int m = 0; m < terrainref.patchobjects[whichpatchx][whichpatchz].size(); m++) {
-			unsigned int k = terrainref.patchobjects[whichpatchx][whichpatchz][m];
+		for (unsigned int m = 0; m < terrainref.patchobjects->at(whichpatchx).at(whichpatchz).size(); m++) {
+			unsigned int k = terrainref.patchobjects->at(whichpatchx).at(whichpatchz).at(m);
 			if (Object::objects[k]->possible) {
 				for (i = 0; i < 26; i++) {
 				//Make this less stupid

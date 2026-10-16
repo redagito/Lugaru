@@ -1209,7 +1209,7 @@ void Terrain::AddObject(Vector3 where, float radius, int id)
 
 	for (int i = 0; i < subdivision; i++) {
 		for (int j = 0; j < subdivision; j++) {
-			if (patchobjects[i][j].size() < 300 - 1) {
+			if (patchobjects->at(i).at(j).size() < 300 - 1) {
 				points[0].x = (size / subdivision) * i;
 				points[0].z = (size / subdivision) * j;
 				points[0].y = heightmap->at((int)points[0].x).at((int)points[0].z);
@@ -1219,7 +1219,7 @@ void Terrain::AddObject(Vector3 where, float radius, int id)
 				points[0] *= scale;
 				points[1] *= scale;
 				if (where.x + radius > points[0].x && where.x - radius < points[1].x && where.z + radius > points[0].z && where.z - radius < points[1].z) {
-					patchobjects[i][j].push_back(id);
+					patchobjects->at(i).at(j).push_back(id);
 				}
 			}
 		}
@@ -1230,15 +1230,15 @@ void Terrain::DeleteObject(unsigned int id)
 {
 	for (int i = 0; i < subdivision; i++) {
 		for (int j = 0; j < subdivision; j++) {
-			for (unsigned int k = 0; k < patchobjects[i][j].size();) {
-				if (patchobjects[i][j][k] == id) {
+			for (unsigned int k = 0; k < patchobjects->at(i).at(j).size();) {
+				if (patchobjects->at(i).at(j).at(k) == id) {
 					/* Remove all occurences of id (there should never be more than 1 though) */
-					patchobjects[i][j].erase(patchobjects[i][j].begin() + k);
+					patchobjects->at(i).at(j).erase(patchobjects->at(i).at(j).begin() + k);
 				}
 				else {
 					/* Update id of other objects if needed */
-					if (patchobjects[i][j][k] > id) {
-						patchobjects[i][j][k]--;
+					if (patchobjects->at(i).at(j).at(k) > id) {
+						patchobjects->at(i).at(j).at(k)--;
 					}
 					k++;
 				}
@@ -1395,9 +1395,9 @@ void Terrain::DoShadows(bool tutorialActive, float texscale, const Light& light,
 			float shadowed = 0;
 			patchx = (float)i * subdivision / size;
 			patchz = (float)j * subdivision / size;
-			if (patchobjects[patchx][patchz].size()) {
-				for (unsigned int k = 0; k < patchobjects[patchx][patchz].size(); k++) {
-					unsigned int l = patchobjects[patchx][patchz][k];
+			if (patchobjects->at(patchx).at(patchz).size()) {
+				for (unsigned int k = 0; k < patchobjects->at(patchx).at(patchz).size(); k++) {
+					unsigned int l = patchobjects->at(patchx).at(patchz).at(k);
 					calculateObjectShadows(l, terrainpoint, shadowed, lightloc);
 				}
 				callback();
@@ -1536,8 +1536,7 @@ Terrain::Terrain()
 	vArray_storage.reset(new GLfloat[(max_patch_elements)*subdivision * subdivision]());
 	vArray = vArray_storage.get();
 
-	patchobjects_storage.reset(new std::vector<unsigned int>[subdivision * subdivision]());
-	patchobjects = reinterpret_cast<std::vector<unsigned int> (*)[subdivision]>(patchobjects_storage.get());
+    patchobjects = std::make_unique<std::array<std::array<std::vector<unsigned int>, subdivision>, subdivision>>();
 
     // Value-initialised, as the original new float[...]() did: every tile starts
     // at zero rather than holding whatever the allocator handed back. Each of

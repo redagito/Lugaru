@@ -177,8 +177,8 @@ void Weapon::doStuff(int i, bool tutorialActive, bool inDialog, AwardCallback aw
 		whichpatchx = position.x / (assets.terrain->size / subdivision * assets.terrain->scale);
 		whichpatchz = position.z / (assets.terrain->size / subdivision * assets.terrain->scale);
 		if (whichpatchx > 0 && whichpatchz > 0 && whichpatchx < subdivision && whichpatchz < subdivision) {
-			for (unsigned int j = 0; j < assets.terrain->patchobjects[whichpatchx][whichpatchz].size(); j++) { // check for collision
-				unsigned int k = assets.terrain->patchobjects[whichpatchx][whichpatchz][j];
+			for (unsigned int j = 0; j < assets.terrain->patchobjects->at(whichpatchx).at(whichpatchz).size(); j++) { // check for collision
+				unsigned int k = assets.terrain->patchobjects->at(whichpatchx).at(whichpatchz).at(j);
 				start = oldtippoint;
 				end = tippoint;
 				whichhit = Object::objects[k]->model.LineCheck(&start, &end, &colpoint, &Object::objects[k]->position, &Object::objects[k]->yaw);
@@ -448,8 +448,8 @@ Vector3 temppoint1, temppoint2;
 			whichpatchx = (position.x) / (assets.terrain->size / subdivision * assets.terrain->scale);
 			whichpatchz = (position.z) / (assets.terrain->size / subdivision * assets.terrain->scale);
 			if (whichpatchx > 0 && whichpatchz > 0 && whichpatchx < subdivision && whichpatchz < subdivision) {
-				for (unsigned int j = 0; j < assets.terrain->patchobjects[whichpatchx][whichpatchz].size(); j++) {
-					unsigned int k = assets.terrain->patchobjects[whichpatchx][whichpatchz][j];
+				for (unsigned int j = 0; j < assets.terrain->patchobjects->at(whichpatchx).at(whichpatchz).size(); j++) {
+					unsigned int k = assets.terrain->patchobjects->at(whichpatchx).at(whichpatchz).at(j);
 
 					if (firstfree) {
 						if (type == staff) {

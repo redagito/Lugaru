@@ -1881,8 +1881,8 @@ void Person::RagDoll(bool checkcollision, Terrain& terrainref, bool tutorialActi
 
 			whichpatchx = terrainref.patchFor(coords.x);
 			whichpatchz = terrainref.patchFor(coords.z);
-			for (unsigned int l = 0; l < terrainref.patchobjects[whichpatchx][whichpatchz].size(); l++) {
-				i = terrainref.patchobjects[whichpatchx][whichpatchz][l];
+			for (unsigned int l = 0; l < terrainref.patchobjects->at(whichpatchx).at(whichpatchz).size(); l++) {
+				i = terrainref.patchobjects->at(whichpatchx).at(whichpatchz).at(l);
 				lowpoint = coords;
 				lowpoint.y += 1;
 				if (SphereCheck(&lowpoint, 3, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model, terrainref, tutorialActive, inDialog, timemultiplier, jointstartarray, gamestate, assets) != -1) {
@@ -5129,8 +5129,8 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 		headpoint = coords;
 		if (gamestate.bloodtoggle && !bled) {
 			terrainref.MakeDecal(blooddecalslow, headpoint, .8, .5, 0, gamestate.environment);
-			for (unsigned int l = 0; l < terrainref.patchobjects[whichpatchx][whichpatchz].size(); l++) {
-				unsigned int j = terrainref.patchobjects[whichpatchx][whichpatchz][l];
+			for (unsigned int l = 0; l < terrainref.patchobjects->at(whichpatchx).at(whichpatchz).size(); l++) {
+				unsigned int j = terrainref.patchobjects->at(whichpatchx).at(whichpatchz).at(l);
 				Vector3 point = DoRotation(headpoint - Object::objects[j]->position, 0, -Object::objects[j]->yaw, 0);
 				float size = .8;
 				float opacity = .6;
@@ -5351,8 +5351,8 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 					DoBlood(1, 255, tutorialActive, gamestate, assets);
 					if (gamestate.bloodtoggle && !bled) {
 						terrainref.MakeDecal(blooddecal, headpoint, .2 * 1.2, .5, 0, gamestate.environment);
-						for (unsigned int l = 0; l < terrainref.patchobjects[whichpatchx][whichpatchz].size(); l++) {
-							unsigned int j = terrainref.patchobjects[whichpatchx][whichpatchz][l];
+						for (unsigned int l = 0; l < terrainref.patchobjects->at(whichpatchx).at(whichpatchz).size(); l++) {
+							unsigned int j = terrainref.patchobjects->at(whichpatchx).at(whichpatchz).at(l);
 							Vector3 point = DoRotation(headpoint - Object::objects[j]->position, 0, -Object::objects[j]->yaw, 0);
 							float size = .2 * 1.2;
 							float opacity = .6;
@@ -5370,8 +5370,8 @@ void Person::DoStuff(Terrain& terrainref, bool tutorialActive, bool inDialog, fl
 					}
 					if (gamestate.bloodtoggle && !bled) {
 						terrainref.MakeDecal(blooddecalslow, headpoint, .8, .5, 0, gamestate.environment);
-						for (unsigned int l = 0; l < terrainref.patchobjects[whichpatchx][whichpatchz].size(); l++) {
-							unsigned int j = terrainref.patchobjects[whichpatchx][whichpatchz][l];
+						for (unsigned int l = 0; l < terrainref.patchobjects->at(whichpatchx).at(whichpatchz).size(); l++) {
+							unsigned int j = terrainref.patchobjects->at(whichpatchx).at(whichpatchz).at(l);
 							Vector3 point = DoRotation(headpoint - Object::objects[j]->position, 0, -Object::objects[j]->yaw, 0);
 							float size = .8;
 							float opacity = .6;

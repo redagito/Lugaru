@@ -502,7 +502,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial, GameState& gamestat
 
 		for (int i = 0; i < subdivision; i++) {
 			for (int j = 0; j < subdivision; j++) {
-				assets.terrain->patchobjects[i][j].clear();
+				assets.terrain->patchobjects->at(i).at(j).clear();
 			}
 		}
 		Game::LoadingScreen(gamestate, assets);
@@ -901,7 +901,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial, GameState& game
 
 		for (int i = 0; i < subdivision; i++) {
 			for (int j = 0; j < subdivision; j++) {
-				assets.terrain->patchobjects[i][j].clear();
+				assets.terrain->patchobjects->at(i).at(j).clear();
 			}
 		}
 		Game::LoadingScreen(gamestate, assets);
@@ -1154,9 +1154,14 @@ void Game::ProcessInput(GameState& gamestate, GameAssets& assets, KeyCapture& ke
 	}
 
 	/* Screenshot */
-	if (Input::isKeyPressed(SDL_SCANCODE_F1)) {
-		Screenshot();
-	}
+if (Input::isKeyPressed(SDL_SCANCODE_F1)) {
+    Screenshot();
+}
+
+/* In-game control reference overlay */
+if (Input::isKeyPressed(SDL_SCANCODE_F2)) {
+    gamestate.showControlsHelp = !gamestate.showControlsHelp;
+}
 
 	/* Stereo video mode hotkeys */
 	if (Input::isKeyPressed(SDL_SCANCODE_F6)) {
@@ -1968,8 +1973,8 @@ void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 			//clip to terrain
 			Person::players[k]->coords.y = max(Person::players[k]->coords.y, assets.terrain->getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z));
 
-			for (unsigned int l = 0; l < assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
-				unsigned int i = assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
+			for (unsigned int l = 0; l < assets.terrain->patchobjects->at(Person::players[k]->whichpatchx).at(Person::players[k]->whichpatchz).size(); l++) {
+				unsigned int i = assets.terrain->patchobjects->at(Person::players[k]->whichpatchx).at(Person::players[k]->whichpatchz).at(l);
 				if (Object::objects[i]->type != rocktype ||
 					Object::objects[i]->scale > .5 && Person::players[k]->isPlayerControlled() ||
 					Object::objects[i]->position.y > Person::players[k]->coords.y) {
@@ -2139,8 +2144,8 @@ void doAerialAcrobatics(GameState& gamestate, GameAssets& assets)
 			}
 
 			if (tempcollide) {
-				for (unsigned int l = 0; l < assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
-					int i = assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
+				for (unsigned int l = 0; l < assets.terrain->patchobjects->at(Person::players[k]->whichpatchx).at(Person::players[k]->whichpatchz).size(); l++) {
+					int i = assets.terrain->patchobjects->at(Person::players[k]->whichpatchx).at(Person::players[k]->whichpatchz).at(l);
 					lowpoint = Person::players[k]->coords;
 					lowpoint.y += 1.35;
 					if (Object::objects[i]->type != rocktype) {
@@ -5075,16 +5080,16 @@ void Game::TickOnceAfter(GameState& gamestate, GameAssets& assets, Console& cons
 			colviewer = gamestate.viewer;
 			coltarget = cameraloc;
 			Object::SphereCheckPossible(&colviewer, findDistance(&colviewer, &coltarget), *assets.terrain);
-			for (unsigned int j = 0; j < assets.terrain->patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz].size(); j++) {
-				unsigned int i = assets.terrain->patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz][j];
+			for (unsigned int j = 0; j < assets.terrain->patchobjects->at(Person::players[0]->whichpatchx).at(Person::players[0]->whichpatchz).size(); j++) {
+				unsigned int i = assets.terrain->patchobjects->at(Person::players[0]->whichpatchx).at(Person::players[0]->whichpatchz).at(j);
 				colviewer = gamestate.viewer;
 				coltarget = cameraloc;
 				if (Object::objects[i]->model.LineCheckPossible(&colviewer, &coltarget, &col, &Object::objects[i]->position, &Object::objects[i]->yaw) != -1) {
 					gamestate.viewer = col;
 				}
 			}
-			for (unsigned int j = 0; j < assets.terrain->patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz].size(); j++) {
-				unsigned int i = assets.terrain->patchobjects[Person::players[0]->whichpatchx][Person::players[0]->whichpatchz][j];
+			for (unsigned int j = 0; j < assets.terrain->patchobjects->at(Person::players[0]->whichpatchx).at(Person::players[0]->whichpatchz).size(); j++) {
+				unsigned int i = assets.terrain->patchobjects->at(Person::players[0]->whichpatchx).at(Person::players[0]->whichpatchz).at(j);
 				colviewer = gamestate.viewer;
 				if (Object::objects[i]->model.SphereCheck(&colviewer, .15, &col, &Object::objects[i]->position, &Object::objects[i]->yaw) != -1) {
 					gamestate.viewer = colviewer;

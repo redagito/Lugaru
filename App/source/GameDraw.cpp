@@ -287,8 +287,8 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 								opacity = .2 + .2 * sin(gamestate.smoketex * 6 + i) - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - assets.terrain->getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
 							}
 							assets.terrain->MakeDecal(shadowdecal, point, size, opacity, rotation, gamestate.environment);
-							for (unsigned int l = 0; l < assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
-								unsigned int j = assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
+							for (unsigned int l = 0; l < assets.terrain->patchobjects->at(Person::players[k]->whichpatchx).at(Person::players[k]->whichpatchz).size(); l++) {
+								unsigned int j = assets.terrain->patchobjects->at(Person::players[k]->whichpatchx).at(Person::players[k]->whichpatchz).at(l);
 								if (Object::objects[j]->position.y < Person::players[k]->coords.y || Object::objects[j]->type == tunneltype || Object::objects[j]->type == weirdtype) {
 									point = DoRotation(DoRotation(Person::players[k]->skeleton.joints[i].position, 0, Person::players[k]->yaw, 0) * Person::players[k]->scale + Person::players[k]->coords - Object::objects[j]->position, 0, -Object::objects[j]->yaw, 0);
 									size = .4f;
@@ -319,8 +319,8 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 								opacity = .2 + .2 * sin(gamestate.smoketex * 6 + i) - Person::players[k]->skeleton.joints[i].position.y * Person::players[k]->scale / 5 - (Person::players[k]->coords.y - assets.terrain->getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 10;
 							}
 							assets.terrain->MakeDecal(shadowdecal, point, size, opacity * .7, rotation, gamestate.environment);
-							for (unsigned int l = 0; l < assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
-								unsigned int j = assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
+							for (unsigned int l = 0; l < assets.terrain->patchobjects->at(Person::players[k]->whichpatchx).at(Person::players[k]->whichpatchz).size(); l++) {
+								unsigned int j = assets.terrain->patchobjects->at(Person::players[k]->whichpatchx).at(Person::players[k]->whichpatchz).at(l);
 								if (Object::objects[j]->position.y < Person::players[k]->coords.y || Object::objects[j]->type == tunneltype || Object::objects[j]->type == weirdtype) {
 									if (Person::players[k]->skeleton.free) {
 										point = DoRotation(Person::players[k]->skeleton.joints[i].position * Person::players[k]->scale + Person::players[k]->coords - Object::objects[j]->position, 0, -Object::objects[j]->yaw, 0);
@@ -347,8 +347,8 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 					size = .7;
 					opacity = .4 - (Person::players[k]->coords.y - assets.terrain->getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 5;
 					assets.terrain->MakeDecal(shadowdecal, point, size, opacity * .7, rotation, gamestate.environment);
-					for (unsigned int l = 0; l < assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
-						unsigned int j = assets.terrain->patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
+					for (unsigned int l = 0; l < assets.terrain->patchobjects->at(Person::players[k]->whichpatchx).at(Person::players[k]->whichpatchz).size(); l++) {
+						unsigned int j = assets.terrain->patchobjects->at(Person::players[k]->whichpatchx).at(Person::players[k]->whichpatchz).at(l);
 						point = DoRotation(Person::players[k]->coords - Object::objects[j]->position, 0, -Object::objects[j]->yaw, 0);
 						size = .7;
 						opacity = .4f;
@@ -1599,6 +1599,87 @@ int Game::DrawGLScene(StereoSide side, GameState& gamestate, GameAssets& assets,
 	if (gamestate.freeze || gamestate.winfreeze || (gamestate.mainmenu && gamestate.gameon) || (!gamestate.gameon && gamestate.gamestarted)) {
 		tempmult = gamestate.multiplier;
 		gamestate.multiplier = 0;
+	}
+
+	if ((gamestate.showControlsHelp) && !gamestate.mainmenu && side == stereoCenter) {
+		glColor4f(0, 0, 0, 0.82f);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
+		glDepthMask(0);
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		glOrtho(0, gamestate.screenwidth, 0, gamestate.screenheight, -100, 100);
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		const float x0 = 30.f, y0 = 30.f;
+		const float x1 = x0 + 480.f, y1 = y0 + 500.f;
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glBegin(GL_QUADS);
+		glVertex3f(x0, y0, 0.f);
+		glVertex3f(x1, y0, 0.f);
+		glVertex3f(x1, y1, 0.f);
+		glVertex3f(x0, y1, 0.f);
+		glEnd();
+		const float col1x = x0 + 14;
+		const float col2x = x0 + 254;
+		float y = y0 + 22;
+		const float stride = 22;
+		auto line = [&](float x, const std::string& s) {
+			assets.text.glPrint(x, y, s, 1, 1.05f, gamestate.screenwidth, gamestate.screenheight);
+			y += stride;
+		};
+		auto heading = [&](float x, const std::string& s) {
+			glColor4f(1, 1, 1, 1);
+			assets.text.glPrint(x, y, s, 1, 1.15f, gamestate.screenwidth, gamestate.screenheight);
+			y += stride + 2;
+			glColor4f(0.85f, 0.85f, 0.85f, 1);
+		};
+		glColor4f(1, 1, 1, 1);
+		assets.text.glPrintOutlined(1, 1, 1, 1, col1x, y, "CONTROLS  (F2 hides)", 1, 1.25f, gamestate.screenwidth, gamestate.screenheight);
+		y += stride + 6;
+		glColor4f(0.9f, 0.9f, 0.9f, 1);
+		heading(col1x, "Move");
+		line(col1x, std::string(Input::keyToChar(gamestate.forwardkey)) + "  forward  " + std::string(Input::keyToChar(gamestate.backkey)) + "  back");
+		line(col1x, std::string(Input::keyToChar(gamestate.leftkey)) + "  strafe left  " + std::string(Input::keyToChar(gamestate.rightkey)));
+		line(col1x, std::string(Input::keyToChar(gamestate.jumpkey)) + "  jump");
+		line(col1x, std::string(Input::keyToChar(gamestate.crouchkey)) + "  crouch / creep");
+		heading(col1x, "Combat");
+		line(col1x, "LMB   attack");
+		line(col1x, std::string(Input::keyToChar(gamestate.drawkey)) + "     draw / sheathe weapon");
+		line(col1x, std::string(Input::keyToChar(gamestate.throwkey)) + "     throw weapon or item");
+		line(col1x, "LMB   during a swing = reverse / parry");
+		line(col1x, "move + attack = kick / jumpkick etc.");
+		// second column
+		y = y0 + 30;
+		glColor4f(0.9f, 0.9f, 0.9f, 1);
+		heading(col2x, "Camera");
+		line(col2x, "mouse look   camera");
+		heading(col2x, "Utility");
+		line(col2x, "TAB   skip tutorial stage");
+		line(col2x, "ESC   pause / quit request");
+		line(col2x, "GRAVE console (if devtools)");
+		line(col2x, "F2    toggle this help");
+		heading(col2x, "Hotkeys");
+		line(col2x, "F1    screenshot");
+		line(col2x, "F6    stereo reverse");
+		line(col2x, "F7    less stereo separation");
+		line(col2x, "F8    more stereo separation");
+		line(col2x, "LAlt  devtools / editor");
+		// restore
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
+		glDepthMask(1);
+		glEnable(GL_TEXTURE_2D);
 	}
 
 	if (side == stereoRight || side == stereoCenter) {

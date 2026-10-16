@@ -50,7 +50,7 @@ int totalPatchEntries(const Terrain& terrain)
 	int total = 0;
 	for (int i = 0; i < subdivision; i++) {
 		for (int j = 0; j < subdivision; j++) {
-			total += static_cast<int>(terrain.patchobjects[i][j].size());
+			total += static_cast<int>(terrain.patchobjects->at(i).at(j).size());
 		}
 	}
 	return total;
@@ -101,8 +101,8 @@ TEST_CASE("a loaded level's objects are placed on the terrain", "[levelload][col
 		const int patchz = assets.terrain->patchFor(position.z);
 		INFO("object " << i << " at " << position.x << "," << position.z << " patch " << patchx << "," << patchz);
 		bool registered = false;
-		for (unsigned k = 0; k < assets.terrain->patchobjects[patchx][patchz].size(); k++) {
-			if (assets.terrain->patchobjects[patchx][patchz][k] == i) {
+		for (unsigned k = 0; k < assets.terrain->patchobjects->at(patchx).at(patchz).size(); k++) {
+			if (assets.terrain->patchobjects->at(patchx).at(patchz).at(k) == i) {
 				registered = true;
 			}
 		}
@@ -115,7 +115,7 @@ TEST_CASE("a loaded level's objects are placed on the terrain", "[levelload][col
 	INFO("player spawn " << spawn.x << "," << spawn.z);
 	const int playerPatchX = assets.terrain->patchFor(spawn.x);
 	const int playerPatchZ = assets.terrain->patchFor(spawn.z);
-	REQUIRE(assets.terrain->patchobjects[playerPatchX][playerPatchZ].size() > 0);
+	REQUIRE(assets.terrain->patchobjects->at(playerPatchX).at(playerPatchZ).size() > 0);
 
 	// And the query the collision code performs must be able to find something.
 	// Queried from the player's spawn it may legitimately find nothing - the

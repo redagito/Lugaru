@@ -216,8 +216,8 @@ void Object::doShadows(Vector3 lightloc, const Terrain& terrain)
 		patchz = terrainpoint.z / (terrain.size / subdivision * terrain.scale);
 
 		if (patchx >= 0 && patchz >= 0 && patchx < subdivision && patchz < subdivision) {
-			for (unsigned int k = 0; k < terrain.patchobjects[patchx][patchz].size(); k++) {
-				unsigned int l = terrain.patchobjects[patchx][patchz][k];
+			for (unsigned int k = 0; k < terrain.patchobjects->at(patchx).at(patchz).size(); k++) {
+				unsigned int l = terrain.patchobjects->at(patchx).at(patchz).at(k);
 				if (objects[l]->type != treetrunktype) {
 					testpoint = terrainpoint;
 					testpoint2 = terrainpoint + lightloc * 50 * (1 - shadowed);
@@ -657,10 +657,10 @@ void Object::SphereCheckPossible(Vector3* p1, float checkradius, const Terrain& 
 	if (whichpatchx >= subdivision) return;
 	if (whichpatchz < 0) return;
 	if (whichpatchz >= subdivision) return;
-	if (terrain.patchobjects[whichpatchx][whichpatchz].size() >= 500) return;
+	if (terrain.patchobjects->at(whichpatchx).at(whichpatchz).size() >= 500) return;
 
-	for (unsigned int j = 0; j < terrain.patchobjects[whichpatchx][whichpatchz].size(); j++) {
-		unsigned int i = terrain.patchobjects[whichpatchx][whichpatchz][j];
+	for (unsigned int j = 0; j < terrain.patchobjects->at(whichpatchx).at(whichpatchz).size(); j++) {
+		unsigned int i = terrain.patchobjects->at(whichpatchx).at(whichpatchz).at(j);
 		objects[i]->possible = false;
 
 		if (objects[i]->model.SphereCheckPossible(p1, checkradius, &objects[i]->position, &objects[i]->yaw) != -1) {

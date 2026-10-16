@@ -73,8 +73,15 @@ public:
     std::unique_ptr<GLfloat[]> vArray_storage;
     GLfloat* vArray = nullptr;
 
-    std::unique_ptr<std::vector<unsigned int>[]> patchobjects_storage;
-    std::vector<unsigned int> (*patchobjects)[subdivision] = nullptr;
+    // Which objects are in each patch, so a query only tests the objects that can
+    // possibly be near. std::array with checked access rather than a pointer into a
+    // flat block: this is the table that was indexed by an unclamped coordinate and
+    // produced an index of any magnitude, and the entries are ids read from the
+    // level file.
+    //
+    // Note the capacity limit of 300 per patch, enforced in AddObject and matched
+    // by nothing else.
+    std::unique_ptr<std::array<std::array<std::vector<unsigned int>, subdivision>, subdivision>> patchobjects;
 
     // A tile grid of heights, one row and column larger than the terrain itself
     // because the patch code deliberately reads one past the last tile. Kept as
